@@ -7,8 +7,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import android.util.Log
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 sealed class DownloadState {
@@ -33,7 +36,8 @@ data class ModelInfo(
     val expectedSizeBytes: Long,
     val description: String,
     val ramRequired: String,
-    val minDeviceMemoryGb: Float = 0f
+    val minDeviceMemoryGb: Float = 0f,
+    val sha256: String = "" // empty = skip verification
 )
 
 class ModelManager(private val context: Context) {
@@ -213,6 +217,20 @@ class ModelManager(private val context: Context) {
                 return@flow
             }
 
+            // Verify SHA256 integrity if checksum is provided
+            if (modelInfo.sha256.isNotEmpty()) {
+                val actualHash = sha256(tempFile)
+                if (!actualHash.equals(modelInfo.sha256, ignoreCase = true)) {
+                    tempFile.delete()
+                    emit(DownloadState.Error(
+                        "Integrity check failed. Expected SHA256: ${modelInfo.sha256.take(12)}... " +
+                        "Got: ${actualHash.take(12)}... The file may be corrupted."
+                    ))
+                    return@flow
+                }
+                Log.i("ModelManager", "SHA256 verified: ${actualHash.take(16)}...")
+            }
+
             tempFile.renameTo(finalFile)
             emit(DownloadState.Completed)
 
@@ -223,4 +241,18 @@ class ModelManager(private val context: Context) {
 
     // Legacy: download default model
     fun downloadModel(): Flow<DownloadState> = downloadModel(AVAILABLE_MODELS[0])
+
+    companion object SHA256Helper {
+        private fun sha256(file: File): String {
+            val digest = MessageDigest.getInstance("SHA-256")
+            FileInputStream(file).use { fis ->
+                val buffer = ByteArray(8192)
+                var read: Int
+                while (fis.read(buffer).also { read = it } != -1) {
+                    digest.update(buffer, 0, read)
+                }
+            }
+            return digest.digest().joinToString("") { "%02x".format(it) }
+        }
+    }
 }

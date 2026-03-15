@@ -82,6 +82,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // Security
+    implementation(libs.security.crypto)
+
     // Network (model download)
     implementation(libs.okhttp)
     implementation(libs.work.runtime.ktx)

@@ -2,12 +2,31 @@ package com.sylvester.rustsensei.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.sylvester.rustsensei.llm.InferenceConfig
 
 class PreferencesManager(context: Context) {
 
-    private val prefs: SharedPreferences =
+    private val prefs: SharedPreferences = try {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        EncryptedSharedPreferences.create(
+            context,
+            "rustsensei_secure_prefs",
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        // Fallback to plain SharedPreferences if encryption fails
+        // (e.g., rooted device with broken KeyStore)
+        Log.w("PreferencesManager", "Encrypted prefs failed, falling back to plain", e)
         context.getSharedPreferences("rustsensei_prefs", Context.MODE_PRIVATE)
+    }
 
     fun saveInferenceConfig(config: InferenceConfig) {
         prefs.edit()
