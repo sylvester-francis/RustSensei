@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">RustSensei</string>
+    <string name="model_download_title">Download Rust Mentor Model</string>
+    <string name="model_download_desc">RustSensei needs to download a ~2.5GB language model to work offline. This is a one-time download.</string>
+    <string name="download_button">Download Model</string>
+    <string name="downloading">Downloading…</string>
+    <string name="loading_model">Loading model…</string>
+    <string name="model_ready">Model ready</string>
+    <string name="ask_about_rust">Ask about Rust…</string>
+    <string name="stop_generation">Stop</string>
+    <string name="new_conversation">New Conversation</string>
+    <string name="settings">Settings</string>
+    <string name="conversations">Conversations</string>
+    <string name="temperature">Temperature</string>
+    <string name="max_tokens">Max Tokens</string>
+    <string name="context_length">Context Length</string>
+    <string name="model_info">Model Info</string>
+    <string name="clear_conversations">Clear All Conversations</string>
+    <string name="delete_model">Delete Model</string>
+    <string name="offline_badge">Offline Mode — No data leaves your device</string>
+    <string name="copy_code">Copy</string>
+    <string name="copied">Copied!</string>
+    <string name="notification_channel_name">Model Service</string>
+    <string name="notification_model_loaded">RustSensei is ready</string>
+    <string name="storage_warning">This will use approximately 2.5 GB of storage.</string>
+</resources>
