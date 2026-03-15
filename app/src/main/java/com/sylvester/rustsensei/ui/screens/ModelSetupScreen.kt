@@ -14,6 +14,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,15 +22,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 
 @Composable
 fun ModelSetupScreen(
-    viewModel: ModelViewModel,
-    onModelReady: () -> Unit
+    modelViewModel: ModelViewModel,
+    llamaEngine: LlamaEngine,
+    onNavigateToChat: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by modelViewModel.uiState.collectAsState()
+
+    // Collect one-shot navigation events from the ViewModel
+    LaunchedEffect(Unit) {
+        modelViewModel.navigateToChat.collect {
+            onNavigateToChat()
+        }
+    }
+
+    // Auto-trigger model load when downloaded (fires in ViewModel scope, not composition)
+    LaunchedEffect(uiState.modelState) {
+        if (uiState.modelState == ModelState.DOWNLOADED) {
+            modelViewModel.loadModel(llamaEngine)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -38,7 +55,6 @@ fun ModelSetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Ferris emoji
         Text(
             text = "\uD83E\uDD80",
             fontSize = 80.sp
@@ -79,7 +95,7 @@ fun ModelSetupScreen(
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
-                    onClick = { viewModel.startDownload() },
+                    onClick = { modelViewModel.startDownload() },
                     modifier = Modifier.fillMaxWidth(0.7f)
                 ) {
                     Text("Download Model")
@@ -109,19 +125,7 @@ fun ModelSetupScreen(
                 )
             }
 
-            ModelState.DOWNLOADED -> {
-                Text(
-                    text = "Model downloaded! Loading...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            ModelState.LOADING -> {
+            ModelState.DOWNLOADED, ModelState.LOADING -> {
                 Text(
                     text = "Loading model into memory...",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -146,7 +150,7 @@ fun ModelSetupScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onModelReady) {
+                Button(onClick = onNavigateToChat) {
                     Text("Start Chatting")
                 }
             }
@@ -166,10 +170,19 @@ fun ModelSetupScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { viewModel.startDownload() },
+                    onClick = {
+                        if (modelViewModel.modelManager.isModelDownloaded()) {
+                            modelViewModel.loadModel(llamaEngine)
+                        } else {
+                            modelViewModel.startDownload()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(0.7f)
                 ) {
-                    Text("Retry Download")
+                    Text(
+                        if (modelViewModel.modelManager.isModelDownloaded()) "Retry Load"
+                        else "Retry Download"
+                    )
                 }
             }
         }

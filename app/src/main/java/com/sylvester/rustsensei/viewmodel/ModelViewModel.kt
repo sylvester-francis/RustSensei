@@ -4,9 +4,13 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.llm.DownloadState
+import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.llm.ModelManager
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -34,6 +38,10 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(ModelUiState())
     val uiState: StateFlow<ModelUiState> = _uiState.asStateFlow()
+
+    // One-shot event for navigation (survives composition changes)
+    private val _navigateToChat = MutableSharedFlow<Unit>()
+    val navigateToChat: SharedFlow<Unit> = _navigateToChat.asSharedFlow()
 
     init {
         checkModelStatus()
@@ -86,19 +94,34 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun setModelLoading() {
-        _uiState.value = _uiState.value.copy(modelState = ModelState.LOADING)
-    }
+    /**
+     * Loads the model using viewModelScope — safe from composition lifecycle.
+     * Emits a navigation event on success.
+     */
+    fun loadModel(llamaEngine: LlamaEngine) {
+        if (_uiState.value.modelState == ModelState.LOADING) return // already loading
 
-    fun setModelReady() {
-        _uiState.value = _uiState.value.copy(modelState = ModelState.READY)
-    }
-
-    fun setModelError(message: String) {
-        _uiState.value = _uiState.value.copy(
-            modelState = ModelState.ERROR,
-            errorMessage = message
-        )
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(modelState = ModelState.LOADING)
+            try {
+                val modelPath = modelManager.modelFile.absolutePath
+                val success = llamaEngine.loadModel(modelPath)
+                if (success) {
+                    _uiState.value = _uiState.value.copy(modelState = ModelState.READY)
+                    _navigateToChat.emit(Unit)
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        modelState = ModelState.ERROR,
+                        errorMessage = "Failed to load model. The file may be corrupted — try deleting and re-downloading."
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    modelState = ModelState.ERROR,
+                    errorMessage = "Load error: ${e.message}"
+                )
+            }
+        }
     }
 
     fun deleteModel() {

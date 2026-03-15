@@ -30,7 +30,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: ChatRepository =
         (application as RustSenseiApplication).repository
 
-    private val llamaEngine = LlamaEngine()
+    val llamaEngine = LlamaEngine()
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -40,17 +40,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private var generationJob: Job? = null
     private var messagesJob: Job? = null
-
-    val isModelLoaded: Boolean
-        get() = llamaEngine.isModelLoaded()
-
-    suspend fun loadModel(modelPath: String, contextSize: Int = 2048): Boolean {
-        return llamaEngine.loadModel(modelPath, contextSize)
-    }
-
-    suspend fun unloadModel() {
-        llamaEngine.unloadModel()
-    }
 
     fun updateConfig(config: InferenceConfig) {
         _config.value = config
