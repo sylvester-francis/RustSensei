@@ -41,10 +41,13 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 engine?.close()
                 conversation?.close()
 
-                // Exact Google Gallery pattern: GPU backend with cacheDir
+                // Tensor G3 (Mali-G715) doesn't have OpenCL — the GPU sampler
+                // requires it and crashes at decode time. Use CPU backend which
+                // uses XNNPack. GPU works on Snapdragon devices with Adreno GPU.
+                // TODO: detect GPU capability and auto-select backend
                 val config = EngineConfig(
                     modelPath = modelPath,
-                    backend = Backend.GPU(),
+                    backend = Backend.CPU(),
                     cacheDir = context.cacheDir.absolutePath
                 )
 
