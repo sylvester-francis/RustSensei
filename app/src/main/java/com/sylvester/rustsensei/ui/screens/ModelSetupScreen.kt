@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -61,9 +62,9 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 @Composable
 fun ModelSetupScreen(
     modelViewModel: ModelViewModel,
-
     liteRtEngine: LiteRtEngine,
-    onNavigateToChat: () -> Unit
+    onNavigateToChat: () -> Unit,
+    onSkip: () -> Unit = {}
 ) {
     val uiState by modelViewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -194,6 +195,16 @@ fun ModelSetupScreen(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace
+                    )
+                }
+
+                // Skip button — allows using the app without AI
+                Spacer(modifier = Modifier.height(12.dp))
+                TextButton(onClick = onSkip) {
+                    Text(
+                        "Skip for now — browse content without AI",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

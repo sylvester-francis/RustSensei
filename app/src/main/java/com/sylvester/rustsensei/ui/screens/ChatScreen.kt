@@ -54,8 +54,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToSetup: () -> Unit = {}
 ) {
+    val modelLoaded = viewModel.isAnyModelLoaded()
+
     val uiState by viewModel.uiState.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -135,7 +138,12 @@ fun ChatScreen(
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                if (uiState.messages.isEmpty() && !uiState.isGenerating) {
+                if (!modelLoaded) {
+                    // No model — show download prompt
+                    item {
+                        NoModelState(onDownload = onNavigateToSetup)
+                    }
+                } else if (uiState.messages.isEmpty() && !uiState.isGenerating) {
                     item {
                         EmptyState(onPromptSelected = { prompt ->
                             inputText = prompt
@@ -198,19 +206,21 @@ fun ChatScreen(
                 }
             }
 
-            // Input bar
-            InputBar(
-                value = inputText,
-                onValueChange = { inputText = it },
-                onSend = {
-                    if (inputText.isNotBlank()) {
-                        viewModel.sendMessage(inputText)
-                        inputText = ""
-                    }
-                },
-                onStop = { viewModel.stopGeneration() },
-                isGenerating = uiState.isGenerating
-            )
+            // Input bar — only show when model is loaded
+            if (modelLoaded) {
+                InputBar(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    onSend = {
+                        if (inputText.isNotBlank()) {
+                            viewModel.sendMessage(inputText)
+                            inputText = ""
+                        }
+                    },
+                    onStop = { viewModel.stopGeneration() },
+                    isGenerating = uiState.isGenerating
+                )
+            }
         }
     }
 }
@@ -265,6 +275,45 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun NoModelState(onDownload: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "\uD83E\uDD80", fontSize = 80.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "No model loaded",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Download a model to chat with your Rust tutor.\nAll other features work without it.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        OutlinedButton(
+            onClick = onDownload,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+        ) {
+            Text(
+                "Download Model",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

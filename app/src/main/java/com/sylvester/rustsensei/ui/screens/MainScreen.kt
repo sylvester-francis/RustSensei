@@ -63,7 +63,8 @@ fun MainScreen(
     exerciseViewModel: ExerciseViewModel,
     progressViewModel: ProgressViewModel,
     referenceViewModel: ReferenceViewModel,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToSetup: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -198,8 +199,8 @@ fun MainScreen(
             composable(Tab.Chat.route) {
                 ChatScreen(
                     viewModel = chatViewModel,
-                    // Fix #2b: ChatScreen no longer needs onNavigateToSettings
-                    onNavigateToSettings = onNavigateToSettings
+                    onNavigateToSettings = onNavigateToSettings,
+                    onNavigateToSetup = onNavigateToSetup
                 )
             }
             composable(Tab.Progress.route) {

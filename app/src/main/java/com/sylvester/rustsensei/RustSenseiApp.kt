@@ -1,9 +1,6 @@
 package com.sylvester.rustsensei
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,7 +11,6 @@ import com.sylvester.rustsensei.ui.screens.SettingsScreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
-import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
@@ -35,34 +31,22 @@ fun RustSenseiApp() {
     val progressViewModel: ProgressViewModel = viewModel()
     val referenceViewModel: ReferenceViewModel = viewModel()
 
-    // P0 Fix #1: Process death guard — if we're on Main but model isn't loaded,
-    // redirect back to Setup. This handles the case where Android kills the process
-    // and NavController restores to Screen.Main but native model state is gone.
-    val modelState by modelViewModel.uiState.collectAsState()
-    LaunchedEffect(modelState.modelState) {
-        val currentRoute = navController.currentBackStackEntry?.destination?.route
-        if (currentRoute == Screen.Main.route &&
-            modelState.modelState != ModelState.READY &&
-            !chatViewModel.isAnyModelLoaded()
-        ) {
-            // Model was lost (process death). Redirect to setup to reload.
-            modelViewModel.checkModelStatus()
-            navController.navigate(Screen.Setup.route) {
-                popUpTo(Screen.Main.route) { inclusive = true }
-            }
-        }
-    }
-
+    // Start directly at Main — all non-AI features work without a model.
+    // The Chat tab gracefully handles missing model with a download prompt.
     NavHost(
         navController = navController,
-        startDestination = Screen.Setup.route
+        startDestination = Screen.Main.route
     ) {
         composable(Screen.Setup.route) {
             ModelSetupScreen(
                 modelViewModel = modelViewModel,
-                
                 liteRtEngine = chatViewModel.liteRtEngine,
                 onNavigateToChat = {
+                    navController.navigate(Screen.Main.route) {
+                        popUpTo(Screen.Setup.route) { inclusive = true }
+                    }
+                },
+                onSkip = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Setup.route) { inclusive = true }
                     }
@@ -71,17 +55,8 @@ fun RustSenseiApp() {
         }
 
         composable(Screen.Main.route) {
-            // P0 Fix #1: double-check model is loaded before showing main screen
-            if (!chatViewModel.isAnyModelLoaded()) {
-                LaunchedEffect(Unit) {
-                    modelViewModel.checkModelStatus()
-                    navController.navigate(Screen.Setup.route) {
-                        popUpTo(Screen.Main.route) { inclusive = true }
-                    }
-                }
-                return@composable
-            }
-
+            // No model gate — MainScreen always renders.
+            // AI features check model state themselves.
             MainScreen(
                 chatViewModel = chatViewModel,
                 bookViewModel = bookViewModel,
@@ -90,6 +65,9 @@ fun RustSenseiApp() {
                 referenceViewModel = referenceViewModel,
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
+                },
+                onNavigateToSetup = {
+                    navController.navigate(Screen.Setup.route)
                 }
             )
         }
