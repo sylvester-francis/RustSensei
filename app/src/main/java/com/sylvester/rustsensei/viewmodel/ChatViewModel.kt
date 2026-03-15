@@ -29,7 +29,10 @@ data class ChatUiState(
     val isGenerating: Boolean = false,
     val streamingText: String = "",
     val currentConversationId: Long? = null,
-    val inferenceTimeMs: Long = 0
+    val inferenceTimeMs: Long = 0,
+    val lastPrefillTokPerSec: Float = 0f,
+    val lastDecodeTokPerSec: Float = 0f,
+    val lastTimeToFirstTokenMs: Long = 0
 )
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
@@ -150,14 +153,27 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.value = _uiState.value.copy(
                 isGenerating = true,
                 streamingText = "",
-                inferenceTimeMs = 0
+                inferenceTimeMs = 0,
+                lastPrefillTokPerSec = 0f,
+                lastDecodeTokPerSec = 0f,
+                lastTimeToFirstTokenMs = 0
             )
 
             val startTime = System.currentTimeMillis()
             val tokenBuffer = StringBuilder()
 
             generationJob = viewModelScope.launch {
-                llamaEngine.generate(prompt, _config.value)
+                llamaEngine.generate(
+                    prompt,
+                    _config.value,
+                    onStats = { prefillTokPerSec, decodeTokPerSec, prefillMs ->
+                        _uiState.value = _uiState.value.copy(
+                            lastPrefillTokPerSec = prefillTokPerSec,
+                            lastDecodeTokPerSec = decodeTokPerSec,
+                            lastTimeToFirstTokenMs = prefillMs.toLong()
+                        )
+                    }
+                )
                     .catch { e ->
                         _uiState.value = _uiState.value.copy(
                             isGenerating = false,

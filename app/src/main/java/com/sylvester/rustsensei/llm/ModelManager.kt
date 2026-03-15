@@ -13,7 +13,13 @@ import java.util.concurrent.TimeUnit
 
 sealed class DownloadState {
     data object Idle : DownloadState()
-    data class Downloading(val progress: Float, val downloadedMB: Long, val totalMB: Long) : DownloadState()
+    data class Downloading(
+        val progress: Float,
+        val downloadedMB: Long,
+        val totalMB: Long,
+        val speedMBps: Float = 0f,
+        val estimatedSecondsLeft: Long = 0
+    ) : DownloadState()
     data object Completed : DownloadState()
     data class Error(val message: String) : DownloadState()
 }
@@ -26,7 +32,8 @@ data class ModelInfo(
     val downloadUrl: String,
     val expectedSizeBytes: Long,
     val description: String,
-    val ramRequired: String
+    val ramRequired: String,
+    val minDeviceMemoryGb: Float = 0f
 )
 
 class ModelManager(private val context: Context) {
@@ -43,7 +50,8 @@ class ModelManager(private val context: Context) {
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-GGUF/resolve/main/qwen3-0.6b.Q4_K_M.gguf",
                 expectedSizeBytes = 530_000_000L,
                 description = "Ultra-fast, instant responses. Great for quick hints and code checks.",
-                ramRequired = "~1 GB RAM"
+                ramRequired = "~1 GB RAM",
+                minDeviceMemoryGb = 2f
             ),
             ModelInfo(
                 id = "qwen3-1.7b",
@@ -53,7 +61,8 @@ class ModelManager(private val context: Context) {
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-GGUF/resolve/main/qwen3-1.7b.Q4_K_M.gguf",
                 expectedSizeBytes = 1_130_000_000L,
                 description = "Fast and lightweight. Best balance for most phones.",
-                ramRequired = "~2 GB RAM"
+                ramRequired = "~2 GB RAM",
+                minDeviceMemoryGb = 3f
             ),
             ModelInfo(
                 id = "qwen3-4b",
@@ -63,7 +72,8 @@ class ModelManager(private val context: Context) {
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-4b-GGUF/resolve/main/qwen3-4b.Q4_K_M.gguf",
                 expectedSizeBytes = 2_497_280_832L,
                 description = "Detailed explanations. Needs a flagship phone.",
-                ramRequired = "~4 GB RAM"
+                ramRequired = "~4 GB RAM",
+                minDeviceMemoryGb = 6f
             ),
             ModelInfo(
                 id = "qwen3-8b",
@@ -73,7 +83,8 @@ class ModelManager(private val context: Context) {
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-8b-GGUF/resolve/main/qwen3-8b.Q4_K_M.gguf",
                 expectedSizeBytes = 5_030_000_000L,
                 description = "Most capable. Needs 12+ GB RAM device.",
-                ramRequired = "~8 GB RAM"
+                ramRequired = "~8 GB RAM",
+                minDeviceMemoryGb = 10f
             )
         )
 
@@ -162,10 +173,13 @@ class ModelManager(private val context: Context) {
             }
             val totalMB = contentLength / (1024 * 1024)
 
+            val downloadStartTime = System.currentTimeMillis()
+
             body.byteStream().use { input ->
                 FileOutputStream(tempFile, isResuming).use { output ->
                     val buffer = ByteArray(32768)
                     var bytesRead = existingBytes
+                    val bytesAtStart = existingBytes
                     var lastEmitTime = 0L
 
                     while (true) {
@@ -178,7 +192,16 @@ class ModelManager(private val context: Context) {
                         if (now - lastEmitTime > 500) {
                             val progress = bytesRead.toFloat() / contentLength
                             val downloadedMB = bytesRead / (1024 * 1024)
-                            emit(DownloadState.Downloading(progress, downloadedMB, totalMB))
+
+                            // Calculate speed and ETA
+                            val elapsedMs = now - downloadStartTime
+                            val bytesDownloadedThisSession = bytesRead - bytesAtStart
+                            val speedBps = if (elapsedMs > 0) (bytesDownloadedThisSession * 1000.0 / elapsedMs) else 0.0
+                            val speedMBps = (speedBps / (1024 * 1024)).toFloat()
+                            val remainingBytes = contentLength - bytesRead
+                            val estimatedSecondsLeft = if (speedBps > 0) (remainingBytes / speedBps).toLong() else 0
+
+                            emit(DownloadState.Downloading(progress, downloadedMB, totalMB, speedMBps, estimatedSecondsLeft))
                             lastEmitTime = now
                         }
                     }

@@ -22,6 +22,7 @@ class LlamaEngine {
     private var tokenCallback: ((String) -> Unit)? = null
     private var completeCallback: (() -> Unit)? = null
     private var errorCallback: ((String) -> Unit)? = null
+    private var statsCallback: ((Float, Float, Float) -> Unit)? = null
 
     // P1 Fix #6: @Keep prevents R8 from renaming JNI callback methods
     @Keep
@@ -42,6 +43,12 @@ class LlamaEngine {
         errorCallback?.invoke(error)
     }
 
+    @Keep
+    @Suppress("unused")
+    fun onNativeStats(prefillTokPerSec: Float, decodeTokPerSec: Float, prefillMs: Float) {
+        statsCallback?.invoke(prefillTokPerSec, decodeTokPerSec, prefillMs)
+    }
+
     suspend fun loadModel(modelPath: String, contextSize: Int = 2048): Boolean {
         return withContext(Dispatchers.IO) {
             loadModelNative(modelPath, contextSize)
@@ -50,7 +57,8 @@ class LlamaEngine {
 
     fun generate(
         prompt: String,
-        config: InferenceConfig = InferenceConfig()
+        config: InferenceConfig = InferenceConfig(),
+        onStats: ((prefillTokPerSec: Float, decodeTokPerSec: Float, prefillMs: Float) -> Unit)? = null
     ): Flow<String> = callbackFlow {
         tokenCallback = { token ->
             // P2 Fix #12: trySend can drop tokens if buffer is full.
@@ -67,6 +75,7 @@ class LlamaEngine {
         errorCallback = { error ->
             close(RuntimeException(error))
         }
+        statsCallback = onStats
 
         val thread = Thread {
             generateNative(prompt, config.maxTokens, config.temperature, config.topP)
@@ -78,6 +87,7 @@ class LlamaEngine {
             tokenCallback = null
             completeCallback = null
             errorCallback = null
+            statsCallback = null
         }
     }.buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND) // P2 Fix #12: buffer tokens
 

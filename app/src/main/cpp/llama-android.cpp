@@ -283,6 +283,12 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_generateNative(
     LOG_I("Generation: %d tokens in %lld ms (%.1f tok/s)", n_generated, gen_ms, gen_speed);
     LOG_I("Total: prefill %.1f tok/s + generation %.1f tok/s", prefill_speed, gen_speed);
 
+    // Report inference stats back to Java
+    jmethodID onStats = env->GetMethodID(cls, "onNativeStats", "(FFF)V");
+    if (onStats) {
+        env->CallVoidMethod(thiz, onStats, prefill_speed, gen_speed, (float)prefill_ms);
+    }
+
     // Update cache for next reuse
     cached_tokens = tokens;
     cached_tokens.insert(cached_tokens.end(), generated_tokens.begin(), generated_tokens.end());

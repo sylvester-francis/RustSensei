@@ -35,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,11 +46,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
+import com.sylvester.rustsensei.ui.components.MemoryWarningDialog
+import com.sylvester.rustsensei.ui.components.isMemoryLow
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 
@@ -58,6 +64,22 @@ fun ModelSetupScreen(
     onNavigateToChat: () -> Unit
 ) {
     val uiState by modelViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    var showMemoryWarning by remember { mutableStateOf(false) }
+
+    if (showMemoryWarning) {
+        val selectedModel = modelViewModel.getSelectedModelInfo()
+        MemoryWarningDialog(
+            model = selectedModel,
+            onProceed = {
+                showMemoryWarning = false
+                modelViewModel.startDownload()
+            },
+            onDismiss = {
+                showMemoryWarning = false
+            }
+        )
+    }
 
     LaunchedEffect(Unit) {
         modelViewModel.navigateToChat.collect {
@@ -143,7 +165,14 @@ fun ModelSetupScreen(
 
                     // Full-width prominent download button
                     Button(
-                        onClick = { modelViewModel.startDownload() },
+                        onClick = {
+                            val selectedModel = modelViewModel.getSelectedModelInfo()
+                            if (isMemoryLow(context, selectedModel)) {
+                                showMemoryWarning = true
+                            } else {
+                                modelViewModel.startDownload()
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -213,6 +242,30 @@ fun ModelSetupScreen(
                                     color = MaterialTheme.colorScheme.primary,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                            if (uiState.downloadSpeedMBps > 0f) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = "%.1f MB/s".format(uiState.downloadSpeedMBps),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                    )
+                                    if (uiState.estimatedSecondsLeft > 0) {
+                                        val minutes = uiState.estimatedSecondsLeft / 60
+                                        val seconds = uiState.estimatedSecondsLeft % 60
+                                        val etaText = if (minutes > 0) "${minutes}m ${seconds}s left"
+                                            else "${seconds}s left"
+                                        Text(
+                                            text = etaText,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

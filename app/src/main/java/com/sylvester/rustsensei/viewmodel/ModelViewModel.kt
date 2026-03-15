@@ -33,6 +33,8 @@ data class ModelUiState(
     val downloadProgress: Float = 0f,
     val downloadedMB: Long = 0,
     val totalMB: Long = 0,
+    val downloadSpeedMBps: Float = 0f,
+    val estimatedSecondsLeft: Long = 0,
     val errorMessage: String? = null,
     val modelSizeMB: Long = 0,
     val availableModels: List<ModelInfo> = ModelManager.AVAILABLE_MODELS,
@@ -107,7 +109,9 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                             modelState = ModelState.DOWNLOADING,
                             downloadProgress = state.progress,
                             downloadedMB = state.downloadedMB,
-                            totalMB = state.totalMB
+                            totalMB = state.totalMB,
+                            downloadSpeedMBps = state.speedMBps,
+                            estimatedSecondsLeft = state.estimatedSecondsLeft
                         )
                     }
                     is DownloadState.Completed -> {

@@ -239,11 +239,20 @@ fun ChatScreen(
                     }
                 }
 
-                // Inference time
+                // Inference stats
                 if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
                     item {
+                        val statsText = buildString {
+                            append("Generated in %.1fs".format(uiState.inferenceTimeMs / 1000.0))
+                            if (uiState.lastPrefillTokPerSec > 0f) {
+                                append(" | Prefill: %.0f tok/s".format(uiState.lastPrefillTokPerSec))
+                            }
+                            if (uiState.lastDecodeTokPerSec > 0f) {
+                                append(" | Decode: %.0f tok/s".format(uiState.lastDecodeTokPerSec))
+                            }
+                        }
                         Text(
-                            text = "Generated in ${uiState.inferenceTimeMs / 1000.0}s",
+                            text = statsText,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                             modifier = Modifier.padding(start = 40.dp, top = 2.dp)
