@@ -226,20 +226,12 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
         validationJob?.cancel()
 
-        val prompt = buildString {
-            append("<|im_start|>system\n")
-            append("You are a Rust code reviewer. Evaluate if the student's code correctly solves the exercise. ")
-            append("Reply with CORRECT or INCORRECT on the first line, then explain why in 2-3 sentences.")
-            append("<|im_end|>\n")
-            append("<|im_start|>user\n")
-            append("Exercise: ${exercise.description}\n")
-            append("Instructions: ${exercise.instructions}\n")
-            append("Expected solution:\n```rust\n${exercise.solution}\n```\n")
-            append("Student's code:\n```rust\n$userCode\n```\n")
-            append("Is the student's code correct?\n")
-            append("<|im_end|>\n")
-            append("<|im_start|>assistant\n")
-        }
+        val prompt = ChatTemplateFormatter.formatExerciseValidation(
+            exerciseDescription = exercise.description,
+            exerciseInstructions = exercise.instructions,
+            expectedSolution = exercise.solution,
+            studentCode = userCode
+        )
 
         _uiState.value = _uiState.value.copy(
             isValidating = true,
