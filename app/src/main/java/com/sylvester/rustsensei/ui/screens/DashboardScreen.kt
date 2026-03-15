@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sylvester.rustsensei.ui.components.ActivityChart
@@ -52,13 +54,14 @@ fun DashboardScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
+            // headlineMedium (monospace via theme)
             Text(
                 text = "Progress",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
-            // Motivational message based on streak
+            // Motivational message — keep subtle
             val streakMessage = when {
                 uiState.studyStreak >= 30 -> "Incredible! A whole month of consistency!"
                 uiState.studyStreak >= 14 -> "Two weeks strong! You're unstoppable."
@@ -80,7 +83,7 @@ fun DashboardScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -110,7 +113,7 @@ fun DashboardScreen(
             }
         }
 
-        // Stat cards - 2x2 grid
+        // Stat cards - 2x2 grid — monospace values
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -167,13 +170,21 @@ fun DashboardScreen(
             }
         }
 
-        // Weekly activity chart
+        // Weekly activity chart — thin neon border at top
         item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
+                // Neon accent border at top of section
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = "This Week",
                     style = MaterialTheme.typography.titleMedium,
@@ -212,7 +223,7 @@ fun DashboardScreen(
             }
         }
 
-        // Recent activity
+        // Recent activity — monospace dates
         if (uiState.weeklyStats.isNotEmpty()) {
             item {
                 Text(
@@ -232,11 +243,14 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Monospace date on left
                         Text(
                             text = stat.date,
                             style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        // Data on right
                         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                             if (stat.sectionsRead > 0) {
                                 Text(
@@ -256,14 +270,16 @@ fun DashboardScreen(
                                 Text(
                                     text = formatStudyTime(stat.studyTimeSeconds),
                                     style = MaterialTheme.typography.labelMedium,
+                                    fontFamily = FontFamily.Monospace,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
+                    // Neon-tinted divider
                     HorizontalDivider(
                         thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     )
                 }
             }
@@ -283,7 +299,7 @@ private fun StatCard(
 ) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(8.dp))
             .padding(16.dp)
     ) {
         Icon(
@@ -296,10 +312,12 @@ private fun StatCard(
         Row(
             verticalAlignment = Alignment.Bottom
         ) {
+            // Monospace headlineSmall for stat values — precise/technical look
             Text(
                 text = value,
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -316,6 +334,7 @@ private fun StatCard(
         )
         if (progress != null) {
             Spacer(modifier = Modifier.height(10.dp))
+            // Sharp progress bar — 4dp height, 2dp corners
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier
@@ -324,7 +343,7 @@ private fun StatCard(
                     .clip(RoundedCornerShape(2.dp)),
                 color = accentColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                strokeCap = StrokeCap.Round
+                strokeCap = StrokeCap.Butt
             )
         }
     }

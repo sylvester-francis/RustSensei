@@ -107,6 +107,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
         contentPadding = PaddingValues(16.dp)
     ) {
         item {
+            // headlineMedium (monospace via theme)
             Text(
                 text = "Reference",
                 style = MaterialTheme.typography.headlineMedium,
@@ -155,9 +156,10 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                     modifier = Modifier.size(20.dp)
                 )
             }
+            // Neon-tinted divider at 8% alpha
             HorizontalDivider(
                 thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                 modifier = Modifier.padding(start = 54.dp)
             )
         }
@@ -212,9 +214,10 @@ private fun SectionListView(viewModel: ReferenceViewModel) {
                         modifier = Modifier.size(20.dp)
                     )
                 }
+                // Neon-tinted divider
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }

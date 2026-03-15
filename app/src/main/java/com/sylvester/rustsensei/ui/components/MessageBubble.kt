@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.SpanStyle
@@ -36,9 +37,10 @@ fun MessageBubble(
     modifier: Modifier = Modifier
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val primary = MaterialTheme.colorScheme.primary
 
     if (isUser) {
-        // User message: right-aligned pill, solid primary, generous padding
+        // User message: right-aligned pill with neon glow shadow
         Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -46,8 +48,14 @@ fun MessageBubble(
             Box(
                 modifier = Modifier
                     .widthIn(max = screenWidth * 0.88f)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(20.dp),
+                        spotColor = primary.copy(alpha = 0.3f),
+                        ambientColor = primary.copy(alpha = 0.15f)
+                    )
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = primary,
                         shape = RoundedCornerShape(20.dp)
                     )
                     .padding(horizontal = 14.dp, vertical = 14.dp)
@@ -61,8 +69,8 @@ fun MessageBubble(
             }
         }
     } else {
-        // Assistant message: full-width, no background card, clean text on surface
-        val accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        // Assistant message: full-width, no background, neon accent line on left
+        val accentColor = primary.copy(alpha = 0.25f)
         val showBorder = isFirstInGroup
 
         Column(
@@ -75,7 +83,7 @@ fun MessageBubble(
                                 color = accentColor,
                                 topLeft = Offset.Zero,
                                 size = androidx.compose.ui.geometry.Size(
-                                    width = 2.dp.toPx(),
+                                    width = 3.dp.toPx(),
                                     height = size.height
                                 )
                             )
@@ -195,14 +203,14 @@ fun parseInlineMarkdown(text: String): androidx.compose.ui.text.AnnotatedString 
                         i++
                     }
                 }
-                // Inline code `text`
+                // Inline code `text` — neon terminal style
                 str[i] == '`' -> {
                     val end = str.indexOf('`', i + 1)
                     if (end != -1) {
                         withStyle(SpanStyle(
                             fontFamily = FontFamily.Monospace,
-                            background = Color(0xFF21262D),
-                            color = Color(0xFFF0883E),
+                            background = Color(0xFF141820),
+                            color = Color(0xFFCE412B),
                             fontSize = 14.sp
                         )) {
                             append(" ${str.substring(i + 1, end)} ")

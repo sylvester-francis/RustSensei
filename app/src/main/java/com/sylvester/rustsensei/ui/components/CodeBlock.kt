@@ -45,20 +45,22 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Rust syntax highlighting colors
+// ── Neon Terminal code block colors ──────────────────────────────────
+
+// Rust syntax highlighting — tuned for dark neon background
 private val KeywordColor = Color(0xFFCC7832)      // orange - keywords
 private val StringColor = Color(0xFF6A8759)        // green - strings
-private val CommentColor = Color(0xFF808080)       // gray - comments
-private val TypeColor = Color(0xFF4EC9B0)          // teal - types
+private val CommentColor = Color(0xFF5C6370)       // muted gray - comments
+private val TypeColor = Color(0xFF4DEEEA)          // neon cyan - types
 private val NumberColor = Color(0xFFB5CEA8)        // light green - numbers
 private val MacroColor = Color(0xFFD4D4AA)         // yellow - macros
 private val FunctionColor = Color(0xFFDCDCAA)      // light yellow - functions
 private val DefaultCodeColor = Color(0xFFD4D4D4)   // light gray - default
 
-private val CodeBgColor = Color(0xFF0D1117)
-private val CodeHeaderColor = Color(0xFF161B22)
-private val LineNumberColor = Color(0xFF484F58)
-private val LineNumberDividerColor = Color(0xFF21262D)
+// Code block structure colors — embedded terminal feel
+private val CodeBgColor = Color(0xFF06080C)        // same as app background
+private val CodeHeaderColor = Color(0xFF0C1018)    // dark navy header
+private val NeonAccent = Color(0xFFCE412B)         // primary orange for accents
 
 private val rustKeywords = setOf(
     "fn", "let", "mut", "pub", "struct", "enum", "impl", "trait", "use", "mod",
@@ -84,69 +86,79 @@ fun CodeBlock(
     val scope = rememberCoroutineScope()
     var showCopied by remember { mutableStateOf(false) }
     val lines = code.lines()
+    val primary = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(CodeBgColor)
-            // P3 Fix #13: accessibility — provide code content to screen readers
             .semantics { contentDescription = "$language code block: $code" }
     ) {
-        // Header with language pill and copy button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(CodeHeaderColor)
-                .padding(horizontal = 14.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Language pill badge
-            Box(
+        // Header with neon bottom border
+        Column {
+            Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xFF21262D))
-                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .fillMaxWidth()
+                    .background(CodeHeaderColor)
+                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = language,
-                    color = Color(0xFF8B949E),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = FontFamily.Monospace
-                )
-            }
-
-            Box(modifier = Modifier.weight(1f))
-
-            // Subtle copy button
-            IconButton(
-                onClick = {
-                    clipboardManager.setText(AnnotatedString(code))
-                    showCopied = true
-                    scope.launch {
-                        delay(2000)
-                        showCopied = false
-                    }
-                },
-                modifier = Modifier.size(32.dp)
-            ) {
-                if (showCopied) {
+                // Language pill — primary at 15% alpha bg, primary text, monospace
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(primary.copy(alpha = 0.15f))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                ) {
                     Text(
-                        "Copied!",
-                        color = Color(0xFF4EC9B0),
+                        text = language,
+                        color = primary,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        contentDescription = "Copy code",
-                        tint = Color(0xFF484F58),
-                        modifier = Modifier.size(16.dp)
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
+
+                Box(modifier = Modifier.weight(1f))
+
+                // Copy button with neon glow on "Copied!" state
+                IconButton(
+                    onClick = {
+                        clipboardManager.setText(AnnotatedString(code))
+                        showCopied = true
+                        scope.launch {
+                            delay(2000)
+                            showCopied = false
+                        }
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    if (showCopied) {
+                        Text(
+                            "Copied!",
+                            color = primary,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = "Copy code",
+                            tint = primary.copy(alpha = 0.4f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
+
+            // Thin 1dp neon accent line under header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(primary.copy(alpha = 0.20f))
+            )
         }
 
         // Code content with line numbers
@@ -155,7 +167,7 @@ fun CodeBlock(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
         ) {
-            // Line numbers column
+            // Line numbers column — orange-tinted
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
@@ -166,7 +178,7 @@ fun CodeBlock(
                 lines.forEachIndexed { index, _ ->
                     Text(
                         text = "${index + 1}",
-                        color = LineNumberColor,
+                        color = primary.copy(alpha = 0.30f),
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         lineHeight = 20.sp,
@@ -175,12 +187,12 @@ fun CodeBlock(
                 }
             }
 
-            // Thin vertical divider
+            // Neon divider between line numbers and code
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
                     .width(1.dp)
-                    .background(LineNumberDividerColor)
+                    .background(primary.copy(alpha = 0.10f))
             )
 
             // Code content
@@ -244,7 +256,7 @@ private fun highlightRustSyntax(code: String): AnnotatedString {
                         append(text.substring(start, i))
                     }
                 }
-                // Macros (word followed by !)
+                // Identifiers, keywords, macros
                 text[i].isLetter() || text[i] == '_' -> {
                     val start = i
                     while (i < text.length && (text[i].isLetterOrDigit() || text[i] == '_')) {

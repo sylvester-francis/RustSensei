@@ -40,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,7 +82,7 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Model Selection
+            // Model Selection — section header: labelLarge, primary, monospace
             SectionHeader("Model")
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -116,7 +117,8 @@ fun SettingsScreen(
                                     text = "Active",
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace
                                 )
                             }
                         }
@@ -152,7 +154,7 @@ fun SettingsScreen(
                 }
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                 )
             }
 
@@ -185,6 +187,7 @@ fun SettingsScreen(
             Text(
                 text = "Context Length: ${config.contextLength} tokens",
                 fontSize = 14.sp,
+                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -204,6 +207,7 @@ fun SettingsScreen(
                 Text(
                     text = "Size on disk: ${modelViewModel.modelManager.getModelSizeMB(activeModel)} MB",
                     fontSize = 14.sp,
+                    fontFamily = FontFamily.Monospace,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
@@ -216,19 +220,20 @@ fun SettingsScreen(
             Text(
                 text = "Quantization: Q4_K_M  |  Format: GGUF",
                 fontSize = 14.sp,
+                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Data Management (Danger Zone)
+            // Data Management (Danger Zone) — sharp 8dp corners, error-outlined
             SectionHeader("Danger Zone")
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = { showClearDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
@@ -242,7 +247,7 @@ fun SettingsScreen(
             OutlinedButton(
                 onClick = { showDeleteModelDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.error
@@ -297,10 +302,12 @@ fun SettingsScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
+    // labelLarge, primary color, monospace font
     Text(
         text = title,
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
+        fontFamily = FontFamily.Monospace,
         modifier = Modifier.padding(top = 24.dp)
     )
 }
@@ -327,6 +334,7 @@ private fun SettingSlider(
             Text(
                 text = valueLabel,
                 fontSize = 15.sp,
+                fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.primary
             )
         }

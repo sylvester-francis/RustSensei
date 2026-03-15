@@ -39,6 +39,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,7 +105,7 @@ fun ChatScreen(
                 .fillMaxSize()
                 .imePadding()
         ) {
-            // Clean top row: hamburger + new conversation only
+            // Clean top row: hamburger + new conversation — onSurfaceVariant icons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,7 +178,7 @@ fun ChatScreen(
                     }
                 }
 
-                // Inference stats — subtle single line
+                // Inference stats — monospace, primary at 40% alpha
                 if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
                     item {
                         val statsText = buildString {
@@ -189,7 +190,8 @@ fun ChatScreen(
                         Text(
                             text = statsText,
                             fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
                             modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                         )
                     }
@@ -221,7 +223,7 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
             .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Large crab emoji, clean and centered
+        // Large 80sp crab emoji
         Text(
             text = "\uD83E\uDD80",
             fontSize = 80.sp
@@ -229,16 +231,17 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // headlineSmall (monospace via theme)
         Text(
             text = "Ask me anything about Rust",
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Suggestion buttons — simple, vertical, no icons
+        // Suggestion buttons — sharp 8dp corners, thin primary border at 20% alpha
         val suggestions = listOf(
             "I'm new to Rust. Where do I start?",
             "Explain ownership like I'm a Go developer",
@@ -250,10 +253,10 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
                 )
             ) {
                 Text(
@@ -281,7 +284,7 @@ private fun ConversationDrawer(
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp)
         )
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
         NavigationDrawerItem(
             label = { Text("New Conversation", style = MaterialTheme.typography.bodyLarge) },
             selected = false,
@@ -291,7 +294,7 @@ private fun ConversationDrawer(
         )
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 4.dp),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
         )
 
         conversations.forEach { conversation ->
@@ -306,7 +309,7 @@ private fun ConversationDrawer(
                 selected = conversation.id == currentConversationId,
                 onClick = { onConversationSelected(conversation.id) },
                 modifier = Modifier.padding(horizontal = 12.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             )
         }
     }

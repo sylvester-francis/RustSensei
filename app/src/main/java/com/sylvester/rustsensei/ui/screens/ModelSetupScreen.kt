@@ -1,7 +1,15 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +27,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
@@ -95,9 +103,11 @@ fun ModelSetupScreen(
     ) {
         Spacer(modifier = Modifier.height(64.dp))
 
-        // Logo area
-        Text(text = "\uD83E\uDD80", fontSize = 72.sp)
+        // Logo area — dramatic 80sp crab
+        Text(text = "\uD83E\uDD80", fontSize = 80.sp)
         Spacer(modifier = Modifier.height(16.dp))
+
+        // Title in headlineLarge (monospace via theme)
         Text(
             text = "RustSensei",
             style = MaterialTheme.typography.headlineLarge,
@@ -105,13 +115,26 @@ fun ModelSetupScreen(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
+
+        // Subtitle
         Text(
             text = "Your Offline Rust Tutor",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Thin neon horizontal line
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp)
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.30f))
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         when (uiState.modelState) {
             ModelState.NOT_DOWNLOADED -> {
@@ -125,7 +148,7 @@ fun ModelSetupScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Model selection rows
+                // Model selection cards — sharp 8dp corners, neon borders
                 ModelManager.AVAILABLE_MODELS.forEach { model ->
                     val isSelected = uiState.selectedModelId == model.id
                     val isDownloaded = model.id in uiState.downloadedModelIds
@@ -141,7 +164,7 @@ fun ModelSetupScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Download button
+                // Download button — sharp 8dp corners, primary fill, bold monospace text
                 Button(
                     onClick = {
                         val selectedModel = modelViewModel.getSelectedModelInfo()
@@ -154,7 +177,7 @@ fun ModelSetupScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
                     )
@@ -168,7 +191,8 @@ fun ModelSetupScreen(
                     Text(
                         "Download ${modelViewModel.getSelectedModelInfo().displayName}",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
             }
@@ -189,13 +213,14 @@ fun ModelSetupScreen(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Sharp progress bar — 6dp height, 3dp corners, primary color
                     LinearProgressIndicator(
                         progress = { uiState.downloadProgress },
                         modifier = Modifier
                             .weight(1f)
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
-                        strokeCap = StrokeCap.Round,
+                        strokeCap = StrokeCap.Butt,
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
@@ -204,7 +229,8 @@ fun ModelSetupScreen(
                         text = "${(uiState.downloadProgress * 100).toInt()}%",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
 
@@ -217,7 +243,8 @@ fun ModelSetupScreen(
                     Text(
                         text = "${uiState.downloadedMB} MB / ${uiState.totalMB} MB",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
 
@@ -230,7 +257,8 @@ fun ModelSetupScreen(
                         Text(
                             text = "%.1f MB/s".format(uiState.downloadSpeedMBps),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            fontFamily = FontFamily.Monospace
                         )
                         if (uiState.estimatedSecondsLeft > 0) {
                             val minutes = uiState.estimatedSecondsLeft / 60
@@ -240,7 +268,8 @@ fun ModelSetupScreen(
                             Text(
                                 text = etaText,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                fontFamily = FontFamily.Monospace
                             )
                         }
                     }
@@ -248,17 +277,14 @@ fun ModelSetupScreen(
             }
 
             ModelState.DOWNLOADED, ModelState.LOADING -> {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    strokeWidth = 4.dp,
-                    strokeCap = StrokeCap.Round
-                )
+                // Pulsing horizontal neon line instead of CircularProgressIndicator
+                NeonPulsingLine()
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Loading model...",
+                    text = "Initializing model...",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = FontFamily.Monospace
                 )
             }
 
@@ -282,12 +308,13 @@ fun ModelSetupScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(28.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         "Start Learning",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
             }
@@ -311,13 +338,14 @@ fun ModelSetupScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
-                    shape = RoundedCornerShape(28.dp)
+                    shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         if (modelViewModel.isModelDownloaded()) "Retry Load"
                         else "Retry Download",
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
                     )
                 }
             }
@@ -325,6 +353,30 @@ fun ModelSetupScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
     }
+}
+
+/**
+ * Horizontal pulsing neon line — replaces CircularProgressIndicator for loading state.
+ */
+@Composable
+private fun NeonPulsingLine() {
+    val transition = rememberInfiniteTransition(label = "neon-pulse")
+    val alpha by transition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse-alpha"
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(0.5f)
+            .height(3.dp)
+            .clip(RoundedCornerShape(1.5.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
+    )
 }
 
 @Composable
@@ -337,14 +389,17 @@ private fun ModelCard(
     OutlinedCard(
         onClick = onSelect,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(8.dp),
         border = BorderStroke(
-            width = if (isSelected) 2.dp else 0.dp,
+            width = 1.dp,
             color = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.surface
+            else MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         ),
         colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+            else
+                MaterialTheme.colorScheme.surface
         )
     ) {
         Row(
@@ -375,7 +430,8 @@ private fun ModelCard(
                 Text(
                     text = "${model.expectedSizeBytes / (1024 * 1024)} MB  \u2022  ${model.ramRequired}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontFamily = FontFamily.Monospace
                 )
             }
         }

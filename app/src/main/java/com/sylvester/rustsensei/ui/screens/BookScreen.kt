@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -96,6 +97,7 @@ private fun BookIndexView(viewModel: BookViewModel) {
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
     ) {
         item {
+            // headlineMedium (monospace via theme)
             Text(
                 text = "The Rust Programming Language",
                 style = MaterialTheme.typography.headlineMedium,
@@ -104,13 +106,13 @@ private fun BookIndexView(viewModel: BookViewModel) {
             )
         }
 
-        // Continue Reading row
+        // Continue Reading — terminal-style with ">" prefix
         if (uiState.lastReadChapterId != null && uiState.lastReadSectionId != null) {
             item {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .clickable {
                             viewModel.openChapter(uiState.lastReadChapterId!!)
                             viewModel.openSection(
@@ -121,26 +123,20 @@ private fun BookIndexView(viewModel: BookViewModel) {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                    Text(
+                        text = ">",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Continue Reading",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = uiState.lastReadSectionId!!.replace("-", " "),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
-                        )
-                    }
+                    Text(
+                        text = "Continue: ${uiState.lastReadSectionId!!.replace("-", " ")}",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -154,19 +150,23 @@ private fun BookIndexView(viewModel: BookViewModel) {
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Chapter number in primary, monospace, labelLarge
                 Text(
                     text = "${index + 1}",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.width(32.dp)
                 )
                 Column(modifier = Modifier.weight(1f)) {
+                    // Title in titleSmall
                     Text(
                         text = chapter.title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium
                     )
+                    // Section count in labelSmall
                     Text(
                         text = "${chapter.sectionIds.size} sections",
                         style = MaterialTheme.typography.labelSmall,
@@ -180,9 +180,10 @@ private fun BookIndexView(viewModel: BookViewModel) {
                     modifier = Modifier.size(20.dp)
                 )
             }
+            // Orange-tinted neon dividers at 8% alpha
             HorizontalDivider(
                 thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                 modifier = Modifier.padding(start = 48.dp)
             )
         }
@@ -246,6 +247,7 @@ private fun ChapterView(viewModel: BookViewModel) {
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
+                        // Section title in bodyLarge
                         Text(
                             text = section.title,
                             style = MaterialTheme.typography.bodyLarge,
@@ -266,9 +268,10 @@ private fun ChapterView(viewModel: BookViewModel) {
                         }
                     }
                 }
+                // Orange-tinted neon dividers
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                     modifier = Modifier.padding(start = 50.dp)
                 )
             }
@@ -338,7 +341,7 @@ private fun SectionView(
             }
         }
 
-        // Content
+        // Content — bodyLarge at 26sp line height
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -366,10 +369,10 @@ private fun SectionView(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Bottom navigation
+        // Bottom navigation — neon divider
         HorizontalDivider(
             thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
         )
         Row(
             modifier = Modifier
