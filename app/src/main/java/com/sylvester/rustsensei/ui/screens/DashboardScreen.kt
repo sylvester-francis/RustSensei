@@ -1,6 +1,8 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Code
@@ -29,8 +32,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.ActivityChart
@@ -47,14 +54,27 @@ fun DashboardScreen(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Text(
                 text = "Your Progress",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 4.dp)
+            )
+            // Motivational message based on streak
+            val streakMessage = when {
+                uiState.studyStreak >= 30 -> "Incredible! A whole month of consistency!"
+                uiState.studyStreak >= 14 -> "Two weeks strong! You're unstoppable."
+                uiState.studyStreak >= 7 -> "One week streak! Keep the momentum going."
+                uiState.studyStreak >= 3 -> "Great start! Keep showing up daily."
+                uiState.studyStreak >= 1 -> "Nice! You're building a habit."
+                else -> "Start learning today to build your streak."
+            }
+            Text(
+                text = streakMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -63,6 +83,7 @@ fun DashboardScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -90,7 +111,7 @@ fun DashboardScreen(
                             Text(
                                 text = if (target.type == "section") "Resume reading: ${target.id.replace("-", " ")}"
                                        else "Resume exercise: ${target.id}",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                                 maxLines = 1
                             )
@@ -114,7 +135,8 @@ fun DashboardScreen(
                     subtitle = "of ${uiState.totalSections}",
                     progress = if (uiState.totalSections > 0)
                         uiState.completedSections.toFloat() / uiState.totalSections
-                    else 0f
+                    else 0f,
+                    accentColor = MaterialTheme.colorScheme.primary
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
@@ -124,7 +146,8 @@ fun DashboardScreen(
                     subtitle = "of ${uiState.totalExercises}",
                     progress = if (uiState.totalExercises > 0)
                         uiState.completedExercises.toFloat() / uiState.totalExercises
-                    else 0f
+                    else 0f,
+                    accentColor = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
@@ -140,7 +163,8 @@ fun DashboardScreen(
                     title = "Streak",
                     value = "${uiState.studyStreak}",
                     subtitle = "days",
-                    progress = null
+                    progress = null,
+                    accentColor = MaterialTheme.colorScheme.secondary
                 )
                 StatCard(
                     modifier = Modifier.weight(1f),
@@ -148,7 +172,8 @@ fun DashboardScreen(
                     title = "Study Time",
                     value = formatStudyTime(uiState.totalStudyTimeSeconds),
                     subtitle = "total",
-                    progress = null
+                    progress = null,
+                    accentColor = MaterialTheme.colorScheme.tertiary
                 )
             }
         }
@@ -157,21 +182,49 @@ fun DashboardScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = "This Week",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
-                    ActivityChart(
-                        stats = uiState.weeklyStats,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                    )
+                    if (uiState.weeklyStats.isEmpty()) {
+                        // Better empty state
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "No activity yet this week",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Start reading or solving exercises!",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                )
+                            }
+                        }
+                    } else {
+                        ActivityChart(
+                            stats = uiState.weeklyStats,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                        )
+                    }
                 }
             }
         }
@@ -181,8 +234,8 @@ fun DashboardScreen(
             item {
                 Text(
                     text = "Recent Activity",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -191,42 +244,43 @@ fun DashboardScreen(
                 item(key = stat.date) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                         )
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(14.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
                                 text = stat.date,
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 if (stat.sectionsRead > 0) {
                                     Text(
                                         text = "${stat.sectionsRead} read",
-                                        fontSize = 13.sp,
+                                        style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 if (stat.exercisesCompleted > 0) {
                                     Text(
                                         text = "${stat.exercisesCompleted} solved",
-                                        fontSize = 13.sp,
+                                        style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.tertiary
                                     )
                                 }
                                 if (stat.studyTimeSeconds > 60) {
                                     Text(
                                         text = formatStudyTime(stat.studyTimeSeconds),
-                                        fontSize = 13.sp,
+                                        style = MaterialTheme.typography.labelMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
@@ -246,51 +300,84 @@ private fun StatCard(
     title: String,
     value: String,
     subtitle: String,
-    progress: Float?
+    progress: Float?,
+    accentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
 ) {
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = title,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = subtitle,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
-            if (progress != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier.fillMaxWidth(),
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+        Box {
+            // Subtle gradient background overlay
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                accentColor.copy(alpha = 0.08f),
+                                accentColor.copy(alpha = 0.02f)
+                            )
+                        )
+                    )
+            )
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(accentColor.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            icon,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = accentColor
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Text(
+                        text = value,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+                if (progress != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = accentColor,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        strokeCap = StrokeCap.Round
+                    )
+                }
             }
         }
     }
