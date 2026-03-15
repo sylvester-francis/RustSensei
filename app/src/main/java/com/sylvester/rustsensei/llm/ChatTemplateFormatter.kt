@@ -12,7 +12,20 @@ Your teaching style:
 - When reviewing code, explain what the borrow checker is doing and why
 - Keep explanations concise with code snippets
 - Guide them to write the code themselves rather than giving full solutions
-- Keep responses focused and under 300 words unless a longer explanation is needed"""
+- Keep responses focused and under 300 words unless a longer explanation is needed
+- Respond directly without internal reasoning. Do not use <think> tags."""
+
+    // Qwen3 models emit <think>...</think> reasoning blocks — strip them from output
+    private val THINK_BLOCK_REGEX = Regex("<think>[\\s\\S]*?</think>\\s*", RegexOption.IGNORE_CASE)
+    private val UNCLOSED_THINK_REGEX = Regex("<think>[\\s\\S]*$", RegexOption.IGNORE_CASE)
+
+    fun stripThinkTags(text: String): String {
+        // Strip completed <think>...</think> blocks
+        var result = THINK_BLOCK_REGEX.replace(text, "")
+        // Strip unclosed <think> (still streaming)
+        result = UNCLOSED_THINK_REGEX.replace(result, "")
+        return result.trimStart()
+    }
 
     private const val MAX_RAG_CONTEXT_CHARS = 2400
     // PERF: limit conversation history to avoid massive prompts

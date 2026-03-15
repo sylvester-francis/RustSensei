@@ -167,7 +167,9 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     .onCompletion {
                         val elapsed = System.currentTimeMillis() - startTime
-                        val finalText = tokenBuffer.toString().trim()
+                        val finalText = ChatTemplateFormatter.stripThinkTags(
+                            tokenBuffer.toString()
+                        ).trim()
                         if (finalText.isNotEmpty()) {
                             repository.addMessage(convId, "assistant", finalText)
                         }
@@ -179,8 +181,11 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     }
                     .collect { token ->
                         tokenBuffer.append(token)
+                        val displayText = ChatTemplateFormatter.stripThinkTags(
+                            tokenBuffer.toString()
+                        )
                         _uiState.value = _uiState.value.copy(
-                            streamingText = tokenBuffer.toString()
+                            streamingText = displayText
                         )
                     }
             }

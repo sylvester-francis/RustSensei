@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.content.ExerciseCategory
+import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
 import com.sylvester.rustsensei.llm.InferenceConfig
@@ -263,12 +264,13 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                     )
                 }
                 .onCompletion {
-                    val finalText = tokenBuffer.toString().trim()
+                    val finalText = ChatTemplateFormatter.stripThinkTags(
+                        tokenBuffer.toString()
+                    ).trim()
                     _uiState.value = _uiState.value.copy(
                         isValidating = false,
                         llmValidationResult = finalText
                     )
-                    // Auto-mark correct if LLM says CORRECT
                     if (finalText.uppercase().startsWith("CORRECT")) {
                         _uiState.value = _uiState.value.copy(checkResult = "correct")
                         progressRepo.markExerciseComplete(exercise.id, exercise.category)
@@ -277,8 +279,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 }
                 .collect { token ->
                     tokenBuffer.append(token)
+                    val displayText = ChatTemplateFormatter.stripThinkTags(
+                        tokenBuffer.toString()
+                    )
                     _uiState.value = _uiState.value.copy(
-                        llmValidationResult = tokenBuffer.toString()
+                        llmValidationResult = displayText
                     )
                 }
         }
