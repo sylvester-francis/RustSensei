@@ -42,7 +42,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as RustSenseiApplication
     private val repository: ChatRepository = app.repository
 
-    val llamaEngine = app.llamaEngine
     val liteRtEngine = app.liteRtEngine
 
     private fun getActiveEngine(): InferenceEngine {
@@ -52,7 +51,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun isAnyModelLoaded(): Boolean {
-        return llamaEngine.isModelLoaded() || liteRtEngine.isModelLoaded()
+        return liteRtEngine.isModelLoaded()
     }
 
     private val _uiState = MutableStateFlow(ChatUiState())

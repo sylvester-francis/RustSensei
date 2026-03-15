@@ -9,7 +9,7 @@ import com.sylvester.rustsensei.llm.DownloadState
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
-import com.sylvester.rustsensei.llm.LlamaEngine
+
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
@@ -136,7 +136,7 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadModel(llamaEngine: LlamaEngine, liteRtEngine: LiteRtEngine) {
+    fun loadModel(liteRtEngine: LiteRtEngine) {
         if (_uiState.value.modelState == ModelState.LOADING) return
 
         val modelInfo = getSelectedModelInfo()
@@ -151,7 +151,7 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                     if (true) { // LiteRT only
                         liteRtEngine.unloadModel()
                     } else {
-                        llamaEngine.unloadModel()
+                        // no-op: only LiteRT now
                     }
                 }
 
@@ -181,11 +181,11 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun switchModel(modelId: String, llamaEngine: LlamaEngine, liteRtEngine: LiteRtEngine) {
+    fun switchModel(modelId: String, liteRtEngine: LiteRtEngine) {
         selectModel(modelId)
         val modelInfo = getSelectedModelInfo()
         if (modelManager.isModelDownloaded(modelInfo)) {
-            loadModel(llamaEngine, liteRtEngine)
+            loadModel(liteRtEngine)
         }
         // If not downloaded, the UI will show the download button
     }

@@ -95,7 +95,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .clickable {
                             if (isDownloaded && !isLoaded) {
-                                modelViewModel.switchModel(model.id, chatViewModel.llamaEngine, chatViewModel.liteRtEngine)
+                                modelViewModel.switchModel(model.id, chatViewModel.liteRtEngine)
                             } else if (!isDownloaded) {
                                 modelViewModel.selectModel(model.id)
                                 modelViewModel.startDownload()

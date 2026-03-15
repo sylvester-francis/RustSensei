@@ -47,7 +47,6 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private val app = application as RustSenseiApplication
     private val contentRepo = app.contentRepository
     private val progressRepo = app.progressRepository
-    private val llamaEngine = app.llamaEngine
     private val liteRtEngine = app.liteRtEngine
 
     private fun getActiveEngine(): InferenceEngine {

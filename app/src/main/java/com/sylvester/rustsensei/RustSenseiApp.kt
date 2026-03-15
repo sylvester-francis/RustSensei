@@ -60,7 +60,7 @@ fun RustSenseiApp() {
         composable(Screen.Setup.route) {
             ModelSetupScreen(
                 modelViewModel = modelViewModel,
-                llamaEngine = chatViewModel.llamaEngine,
+                
                 liteRtEngine = chatViewModel.liteRtEngine,
                 onNavigateToChat = {
                     navController.navigate(Screen.Main.route) {
