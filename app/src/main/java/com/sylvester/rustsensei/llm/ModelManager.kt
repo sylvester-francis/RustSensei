@@ -37,27 +37,27 @@ class ModelManager(private val context: Context) {
         val AVAILABLE_MODELS = listOf(
             ModelInfo(
                 id = "qwen3-0.6b",
-                displayName = "Qwen3 0.6B",
+                displayName = "Rust Mentor 0.6B",
                 parameterSize = "0.6B",
                 filename = "qwen3-0.6b.Q4_K_M.gguf",
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-GGUF/resolve/main/qwen3-0.6b.Q4_K_M.gguf",
-                expectedSizeBytes = 490_000_000L,
+                expectedSizeBytes = 530_000_000L,
                 description = "Ultra-fast, instant responses. Great for quick hints and code checks.",
                 ramRequired = "~1 GB RAM"
             ),
             ModelInfo(
-                id = "qwen3-1b",
-                displayName = "Qwen3 1B",
-                parameterSize = "1B",
-                filename = "qwen3-1b.Q4_K_M.gguf",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1b-GGUF/resolve/main/qwen3-1b.Q4_K_M.gguf",
-                expectedSizeBytes = 750_000_000L,
-                description = "Fast and lightweight. Good balance for most phones.",
+                id = "qwen3-1.7b",
+                displayName = "Rust Mentor 1.7B",
+                parameterSize = "1.7B",
+                filename = "qwen3-1.7b.Q4_K_M.gguf",
+                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-GGUF/resolve/main/qwen3-1.7b.Q4_K_M.gguf",
+                expectedSizeBytes = 1_130_000_000L,
+                description = "Fast and lightweight. Best balance for most phones.",
                 ramRequired = "~2 GB RAM"
             ),
             ModelInfo(
                 id = "qwen3-4b",
-                displayName = "Qwen3 4B",
+                displayName = "Rust Mentor 4B",
                 parameterSize = "4B",
                 filename = "qwen3-4b.Q4_K_M.gguf",
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-4b-GGUF/resolve/main/qwen3-4b.Q4_K_M.gguf",
@@ -67,7 +67,7 @@ class ModelManager(private val context: Context) {
             ),
             ModelInfo(
                 id = "qwen3-8b",
-                displayName = "Qwen3 8B",
+                displayName = "Rust Mentor 8B",
                 parameterSize = "8B",
                 filename = "qwen3-8b.Q4_K_M.gguf",
                 downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-8b-GGUF/resolve/main/qwen3-8b.Q4_K_M.gguf",

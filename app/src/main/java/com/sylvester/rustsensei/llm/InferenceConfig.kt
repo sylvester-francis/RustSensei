@@ -13,9 +13,9 @@ data class InferenceConfig(
                     maxTokens = 256,
                     contextLength = 2048   // tiny model: keep context small
                 )
-                "qwen3-1b" -> InferenceConfig(
+                "qwen3-1.7b" -> InferenceConfig(
                     maxTokens = 384,
-                    contextLength = 2048   // small model: moderate context
+                    contextLength = 2048
                 )
                 "qwen3-4b" -> InferenceConfig(
                     maxTokens = 384,
