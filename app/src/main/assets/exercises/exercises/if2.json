@@ -1,0 +1,17 @@
+{
+  "id": "if2",
+  "title": "If 2",
+  "category": "if",
+  "difficulty": "beginner",
+  "description": "You can chain multiple conditions with `else if` in Rust.",
+  "instructions": "Complete the function to return the correct string for the given number using multiple conditions.",
+  "starterCode": "pub fn foo_if_fizz(fizzish: &str) -> &str {\n    if fizzish == \"fizz\" {\n        \"foo\"\n    } else {\n        1\n    }\n}\n\nfn main() {\n    println!(\"{}\", foo_if_fizz(\"fizz\"));\n    println!(\"{}\", foo_if_fizz(\"fuzz\"));\n    println!(\"{}\", foo_if_fizz(\"other\"));\n}",
+  "hints": [
+    "Both branches of an if/else must return the same type.",
+    "The function returns &str, but the else branch returns an integer.",
+    "Add an `else if` for \"fuzz\" and fix the return values to be string slices."
+  ],
+  "solution": "pub fn foo_if_fizz(fizzish: &str) -> &str {\n    if fizzish == \"fizz\" {\n        \"foo\"\n    } else if fizzish == \"fuzz\" {\n        \"bar\"\n    } else {\n        \"baz\"\n    }\n}\n\nfn main() {\n    println!(\"{}\", foo_if_fizz(\"fizz\"));\n    println!(\"{}\", foo_if_fizz(\"fuzz\"));\n    println!(\"{}\", foo_if_fizz(\"other\"));\n}",
+  "explanation": "All branches of an if/else expression must return the same type. Rust's type system enforces this at compile time. You can chain conditions with `else if` to handle multiple cases. Each branch must evaluate to a value of the declared return type.",
+  "relatedBookSection": "ch03-05-control-flow"
+}

@@ -3,6 +3,7 @@ package com.sylvester.rustsensei.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +16,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,10 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -48,6 +45,7 @@ import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
 import com.sylvester.rustsensei.ui.components.QuickPromptChips
 import com.sylvester.rustsensei.ui.components.StreamingIndicator
+import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import kotlinx.coroutines.launch
 
@@ -58,6 +56,7 @@ fun ChatScreen(
     onNavigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -100,124 +99,135 @@ fun ChatScreen(
             )
         }
     ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("RustSensei") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Conversations")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { viewModel.startNewConversation() }) {
-                            Icon(Icons.Default.Add, contentDescription = "New conversation")
-                        }
-                        IconButton(onClick = onNavigateToSettings) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                )
-            }
-        ) { padding ->
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+        ) {
+            // Conversation controls row
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .imePadding()
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Offline badge
-                Text(
-                    text = "Offline Mode \u2014 No data leaves your device",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp),
-                    textAlign = TextAlign.Center,
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
+                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                    Icon(Icons.Default.Menu, contentDescription = "Conversations")
+                }
+                Spacer(modifier = Modifier.weight(1f))
 
-                // Messages list
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    state = listState,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    if (uiState.messages.isEmpty() && !uiState.isGenerating) {
-                        item {
-                            EmptyState(onPromptSelected = { prompt ->
-                                inputText = prompt
-                            })
-                        }
+                // Context indicator
+                when (chatContext) {
+                    is ChatContext.BookSection -> {
+                        Text(
+                            text = "Book context active",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
+                    is ChatContext.Exercise -> {
+                        Text(
+                            text = "Exercise context active",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                    else -> {}
+                }
 
-                    items(uiState.messages, key = { it.id }) { message ->
+                IconButton(onClick = { viewModel.startNewConversation() }) {
+                    Icon(Icons.Default.Add, contentDescription = "New conversation")
+                }
+            }
+
+            // Offline badge
+            Text(
+                text = "Offline Mode \u2014 No data leaves your device",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                textAlign = TextAlign.Center,
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+
+            // Messages list
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                state = listState,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                if (uiState.messages.isEmpty() && !uiState.isGenerating) {
+                    item {
+                        EmptyState(onPromptSelected = { prompt ->
+                            inputText = prompt
+                        })
+                    }
+                }
+
+                items(uiState.messages, key = { it.id }) { message ->
+                    MessageBubble(
+                        content = message.content,
+                        isUser = message.role == "user",
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
+
+                // Streaming response
+                if (uiState.streamingText.isNotEmpty()) {
+                    item {
                         MessageBubble(
-                            content = message.content,
-                            isUser = message.role == "user",
+                            content = uiState.streamingText,
+                            isUser = false,
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
+                }
 
-                    // Streaming response
-                    if (uiState.streamingText.isNotEmpty()) {
-                        item {
-                            MessageBubble(
-                                content = uiState.streamingText,
-                                isUser = false,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    // Typing indicator
-                    if (uiState.isGenerating && uiState.streamingText.isEmpty()) {
-                        item {
-                            StreamingIndicator(
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    // Inference time
-                    if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
-                        item {
-                            Text(
-                                text = "Generated in ${uiState.inferenceTimeMs / 1000.0}s",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-                            )
-                        }
+                // Typing indicator
+                if (uiState.isGenerating && uiState.streamingText.isEmpty()) {
+                    item {
+                        StreamingIndicator(
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
                     }
                 }
 
-                // Quick prompts (show when no messages)
-                if (uiState.messages.isEmpty() && !uiState.isGenerating) {
-                    QuickPromptChips(
-                        onPromptSelected = { prompt ->
-                            inputText = prompt
-                        }
-                    )
+                // Inference time
+                if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
+                    item {
+                        Text(
+                            text = "Generated in ${uiState.inferenceTimeMs / 1000.0}s",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                        )
+                    }
                 }
+            }
 
-                // Input bar
-                InputBar(
-                    value = inputText,
-                    onValueChange = { inputText = it },
-                    onSend = {
-                        if (inputText.isNotBlank()) {
-                            viewModel.sendMessage(inputText)
-                            inputText = ""
-                        }
-                    },
-                    onStop = { viewModel.stopGeneration() },
-                    isGenerating = uiState.isGenerating
+            // Quick prompts (show when no messages)
+            if (uiState.messages.isEmpty() && !uiState.isGenerating) {
+                QuickPromptChips(
+                    onPromptSelected = { prompt ->
+                        inputText = prompt
+                    }
                 )
             }
+
+            // Input bar
+            InputBar(
+                value = inputText,
+                onValueChange = { inputText = it },
+                onSend = {
+                    if (inputText.isNotBlank()) {
+                        viewModel.sendMessage(inputText)
+                        inputText = ""
+                    }
+                },
+                onStop = { viewModel.stopGeneration() },
+                isGenerating = uiState.isGenerating
+            )
         }
     }
 }

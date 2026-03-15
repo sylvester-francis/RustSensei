@@ -1,0 +1,17 @@
+{
+  "id": "traits5",
+  "title": "Traits 5",
+  "category": "traits",
+  "difficulty": "advanced",
+  "description": "Trait objects (`dyn Trait`) allow working with different concrete types through a single interface at runtime.",
+  "instructions": "Use trait objects to store different types in a single collection.",
+  "starterCode": "trait Draw {\n    fn draw(&self) -> String;\n}\n\nstruct Circle {\n    radius: f64,\n}\n\nstruct Square {\n    side: f64,\n}\n\nimpl Draw for Circle {\n    fn draw(&self) -> String {\n        format!(\"Circle with radius {}\", self.radius)\n    }\n}\n\nimpl Draw for Square {\n    fn draw(&self) -> String {\n        format!(\"Square with side {}\", self.side)\n    }\n}\n\nfn main() {\n    // TODO: Create a Vec that can hold both Circle and Square\n    let shapes: Vec<???> = vec![\n        Box::new(Circle { radius: 1.0 }),\n        Box::new(Square { side: 2.0 }),\n    ];\n\n    for shape in &shapes {\n        println!(\"{}\", shape.draw());\n    }\n}",
+  "hints": [
+    "Use `Box<dyn Trait>` to create trait objects that can hold different concrete types.",
+    "The Vec type should be `Vec<Box<dyn Draw>>`.",
+    "Each element is boxed to put it on the heap with a known size."
+  ],
+  "solution": "trait Draw {\n    fn draw(&self) -> String;\n}\n\nstruct Circle {\n    radius: f64,\n}\n\nstruct Square {\n    side: f64,\n}\n\nimpl Draw for Circle {\n    fn draw(&self) -> String {\n        format!(\"Circle with radius {}\", self.radius)\n    }\n}\n\nimpl Draw for Square {\n    fn draw(&self) -> String {\n        format!(\"Square with side {}\", self.side)\n    }\n}\n\nfn main() {\n    let shapes: Vec<Box<dyn Draw>> = vec![\n        Box::new(Circle { radius: 1.0 }),\n        Box::new(Square { side: 2.0 }),\n    ];\n\n    for shape in &shapes {\n        println!(\"{}\", shape.draw());\n    }\n}",
+  "explanation": "Trait objects (`dyn Trait`) enable dynamic dispatch - the method to call is determined at runtime. `Box<dyn Draw>` is a pointer to any type implementing Draw, with a vtable for method lookup. This is Rust's approach to polymorphism. Unlike generics (static dispatch), trait objects have a small runtime cost but allow heterogeneous collections.",
+  "relatedBookSection": "ch17-02-trait-objects"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types2",
+  "title": "Primitive Types 2",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "The `char` type in Rust represents a Unicode Scalar Value, which means it can represent more than just ASCII.",
+  "instructions": "Fix the code by creating the missing char variables.",
+  "starterCode": "fn main() {\n    let my_first_initial = 'C';\n    if my_first_initial != 'C' {\n        println!(\"Not C!\");\n    } else {\n        println!(\"It's C!\");\n    }\n\n    let // Finish this line like the example\n    if your_character != 'C' {\n        println!(\"Your character is not C!\");\n    } else {\n        println!(\"Your character is C!\");\n    }\n}",
+  "hints": [
+    "You need to declare a `char` variable called `your_character`.",
+    "Char literals in Rust use single quotes, like 'A'.",
+    "Try: let your_character = 'R';"
+  ],
+  "solution": "fn main() {\n    let my_first_initial = 'C';\n    if my_first_initial != 'C' {\n        println!(\"Not C!\");\n    } else {\n        println!(\"It's C!\");\n    }\n\n    let your_character = 'R';\n    if your_character != 'C' {\n        println!(\"Your character is not C!\");\n    } else {\n        println!(\"Your character is C!\");\n    }\n}",
+  "explanation": "The `char` type in Rust is four bytes in size and represents a Unicode Scalar Value. This means it can represent much more than just ASCII - including Chinese characters, emoji, and zero-width spaces. Char literals are specified with single quotes, while string literals use double quotes.",
+  "relatedBookSection": "ch03-02-data-types"
+}

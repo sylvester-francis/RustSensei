@@ -1,0 +1,17 @@
+{
+  "id": "threads2",
+  "title": "Threads 2",
+  "category": "threads",
+  "difficulty": "advanced",
+  "description": "Sharing mutable data between threads requires synchronization. Mutex provides mutual exclusion.",
+  "instructions": "Use Arc and Mutex to safely share and modify data across threads.",
+  "starterCode": "use std::sync::{Arc, Mutex};\nuse std::thread;\n\nfn main() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec![];\n\n    for _ in 0..10 {\n        let counter = Arc::clone(&counter);\n        let handle = thread::spawn(move || {\n            // TODO: Lock the mutex and increment the counter\n            let mut num = counter.lock();\n            *num += 1;\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n\n    println!(\"Result: {}\", *counter.lock().unwrap());\n    assert_eq!(*counter.lock().unwrap(), 10);\n}",
+  "hints": [
+    "Mutex::lock() returns a Result wrapping a MutexGuard.",
+    "You need to unwrap the Result: counter.lock().unwrap()",
+    "The MutexGuard auto-unlocks when dropped (end of scope)."
+  ],
+  "solution": "use std::sync::{Arc, Mutex};\nuse std::thread;\n\nfn main() {\n    let counter = Arc::new(Mutex::new(0));\n    let mut handles = vec![];\n\n    for _ in 0..10 {\n        let counter = Arc::clone(&counter);\n        let handle = thread::spawn(move || {\n            let mut num = counter.lock().unwrap();\n            *num += 1;\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n\n    println!(\"Result: {}\", *counter.lock().unwrap());\n    assert_eq!(*counter.lock().unwrap(), 10);\n}",
+  "explanation": "To share mutable data between threads, combine `Arc<Mutex<T>>`. Arc provides thread-safe shared ownership, while Mutex ensures only one thread can access the data at a time. `lock()` blocks until the lock is acquired, returning a `MutexGuard` that auto-releases the lock when dropped. This pattern prevents data races at compile time.",
+  "relatedBookSection": "ch16-03-shared-state"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "variables1",
+  "title": "Variables 1",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "In Rust, variables are created with the `let` keyword. This exercise asks you to fix a variable binding.",
+  "instructions": "Make the code compile by fixing the variable declaration.",
+  "starterCode": "fn main() {\n    x = 5;\n    println!(\"x has the value {x}\");\n}",
+  "hints": [
+    "In Rust, you need the `let` keyword to create a variable binding.",
+    "The syntax is: let variable_name = value;"
+  ],
+  "solution": "fn main() {\n    let x = 5;\n    println!(\"x has the value {x}\");\n}",
+  "explanation": "In Rust, variable bindings are created with the `let` keyword. Unlike some languages, you must explicitly declare variables before use. This helps prevent typos and makes code more readable.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

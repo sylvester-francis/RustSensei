@@ -1,0 +1,17 @@
+{
+  "id": "iterators3",
+  "title": "Iterators 3",
+  "category": "iterators",
+  "difficulty": "intermediate",
+  "description": "The `map()` adapter transforms each element of an iterator using a closure.",
+  "instructions": "Use the map iterator adapter to transform a collection.",
+  "starterCode": "fn main() {\n    let numbers = vec![1, 2, 3, 4, 5];\n\n    // TODO: Use map to create a new vector with each number doubled\n    let doubled: Vec<i32> = numbers\n        .iter()\n        // Add map here\n        .collect();\n\n    assert_eq!(doubled, vec![2, 4, 6, 8, 10]);\n\n    // TODO: Use map to convert numbers to strings\n    let string_numbers: Vec<String> = numbers\n        .iter()\n        // Add map here\n        .collect();\n\n    assert_eq!(string_numbers, vec![\"1\", \"2\", \"3\", \"4\", \"5\"]);\n    println!(\"All tests passed!\");\n}",
+  "hints": [
+    "The map method takes a closure: .map(|x| x * 2)",
+    "Since iter() gives references, you may need to dereference: .map(|&x| x * 2)",
+    "To convert to String: .map(|x| x.to_string())"
+  ],
+  "solution": "fn main() {\n    let numbers = vec![1, 2, 3, 4, 5];\n\n    let doubled: Vec<i32> = numbers\n        .iter()\n        .map(|&x| x * 2)\n        .collect();\n\n    assert_eq!(doubled, vec![2, 4, 6, 8, 10]);\n\n    let string_numbers: Vec<String> = numbers\n        .iter()\n        .map(|x| x.to_string())\n        .collect();\n\n    assert_eq!(string_numbers, vec![\"1\", \"2\", \"3\", \"4\", \"5\"]);\n    println!(\"All tests passed!\");\n}",
+  "explanation": "The `map()` method creates a new iterator that transforms each element using the provided closure. It is lazy - it doesn't do anything until consumed (e.g., by `collect()`). You can destructure the reference in the closure parameter (`|&x|`) or dereference inside the closure (`|x| *x * 2`). Chaining map with collect is a very common Rust pattern.",
+  "relatedBookSection": "ch13-02-iterators"
+}

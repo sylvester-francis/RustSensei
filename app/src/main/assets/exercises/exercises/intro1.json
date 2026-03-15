@@ -1,0 +1,17 @@
+{
+  "id": "intro1",
+  "title": "Intro 1",
+  "category": "intro",
+  "difficulty": "beginner",
+  "description": "Welcome to Rustlings! This first exercise is a simple introduction to get you started. Your task is to make the program print a greeting.",
+  "instructions": "Remove the `I AM NOT DONE` comment and make the code compile by completing the println! macro call.",
+  "starterCode": "// I AM NOT DONE\n\nfn main() {\n    println!(\"Hello {}!\", );\n}",
+  "hints": [
+    "The println! macro uses `{}` as a placeholder for values you pass as arguments.",
+    "You need to provide a string or value after the comma inside println! to fill the `{}` placeholder.",
+    "Try adding a string literal like \"world\" as the second argument to println!"
+  ],
+  "solution": "fn main() {\n    println!(\"Hello {}!\", \"world\");\n}",
+  "explanation": "The println! macro in Rust is used for printing to the console. The `{}` syntax is a placeholder that gets replaced by the value of the argument that follows the format string. This is similar to format strings in other languages.",
+  "relatedBookSection": "ch01-02-hello-world"
+}

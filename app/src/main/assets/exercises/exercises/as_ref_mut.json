@@ -1,0 +1,17 @@
+{
+  "id": "as_ref_mut",
+  "title": "AsRef and AsMut",
+  "category": "conversions",
+  "difficulty": "intermediate",
+  "description": "The `AsRef` and `AsMut` traits allow cheap reference-to-reference conversions.",
+  "instructions": "Implement the function using AsRef to accept both String and &str.",
+  "starterCode": "// TODO: Add the correct trait bound\nfn byte_counter<T>(arg: T) -> usize {\n    arg.as_ref().as_bytes().len()\n}\n\n// TODO: Add the correct trait bound\nfn char_counter<T>(arg: T) -> usize {\n    arg.as_ref().chars().count()\n}\n\nfn main() {\n    let s = String::from(\"Cafe au lait\");\n    println!(\"{}\", char_counter(s.clone()));\n    println!(\"{}\", char_counter(\"Cafe au lait\"));\n    println!(\"{}\", byte_counter(s.clone()));\n    println!(\"{}\", byte_counter(\"Cafe au lait\"));\n}",
+  "hints": [
+    "AsRef<str> lets a type provide a reference to str cheaply.",
+    "Both String and &str implement AsRef<str>.",
+    "Add the bound: fn byte_counter<T: AsRef<str>>(arg: T)"
+  ],
+  "solution": "fn byte_counter<T: AsRef<str>>(arg: T) -> usize {\n    arg.as_ref().as_bytes().len()\n}\n\nfn char_counter<T: AsRef<str>>(arg: T) -> usize {\n    arg.as_ref().chars().count()\n}\n\nfn main() {\n    let s = String::from(\"Cafe au lait\");\n    println!(\"{}\", char_counter(s.clone()));\n    println!(\"{}\", char_counter(\"Cafe au lait\"));\n    println!(\"{}\", byte_counter(s.clone()));\n    println!(\"{}\", byte_counter(\"Cafe au lait\"));\n}",
+  "explanation": "The `AsRef<T>` trait provides a cheap reference-to-reference conversion. By using `T: AsRef<str>`, the function accepts any type that can be viewed as a `&str`, including `String`, `&str`, and `&String`. This is a common pattern in APIs to make them flexible. `AsMut` is the mutable equivalent.",
+  "relatedBookSection": "ch13-01-closures"
+}

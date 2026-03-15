@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics4",
+  "title": "Move Semantics 4",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "Rust allows only one mutable reference or any number of immutable references at a time. This prevents data races.",
+  "instructions": "Refactor the code so the vector is created inside the function instead of being passed in.",
+  "starterCode": "fn main() {\n    let vec1 = fill_vec();\n\n    println!(\"{} has length {}, with contents: {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec() -> Vec<i32> {\n    let vec = sort(vec![22, 44, 66, 11]);\n\n    vec\n}\n\nfn sort(vec: Vec<i32>) -> Vec<i32> {\n    let mut vec = vec;\n    vec.sort();\n    vec\n}",
+  "hints": [
+    "This code should work as-is. Review it to understand the ownership flow.",
+    "The sort function takes ownership of the vec, sorts it, and returns it.",
+    "fill_vec creates a vector, passes ownership to sort, gets it back, and returns it."
+  ],
+  "solution": "fn main() {\n    let vec1 = fill_vec();\n\n    println!(\"{} has length {}, with contents: {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec() -> Vec<i32> {\n    let mut vec = vec![22, 44, 66, 11];\n    vec.sort();\n    vec\n}",
+  "explanation": "When a function creates a value and returns it, ownership is transferred to the caller. There's no need to pass values through multiple functions if you can create and modify them in one place. This simplification reduces unnecessary ownership transfers and makes code clearer.",
+  "relatedBookSection": "ch04-02-references-and-borrowing"
+}

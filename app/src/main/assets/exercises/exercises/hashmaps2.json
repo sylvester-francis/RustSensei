@@ -1,0 +1,17 @@
+{
+  "id": "hashmaps2",
+  "title": "Hashmaps 2",
+  "category": "hashmaps",
+  "difficulty": "beginner",
+  "description": "HashMaps can accumulate values for the same key. This exercise practices counting occurrences.",
+  "instructions": "Complete the function to count how many of each fruit type are in the basket.",
+  "starterCode": "use std::collections::HashMap;\n\nfn fruit_basket(basket: &mut HashMap<String, u32>, fruit_list: Vec<&str>) {\n    for fruit in fruit_list {\n        // TODO: If the fruit exists, increment its count.\n        // If it doesn't exist, add it with a count of 1.\n    }\n}\n\nfn main() {\n    let mut basket = HashMap::new();\n    basket.insert(String::from(\"banana\"), 2);\n\n    let fruit_list = vec![\"apple\", \"banana\", \"mango\", \"apple\", \"banana\"];\n    fruit_basket(&mut basket, fruit_list);\n\n    println!(\"Basket: {:?}\", basket);\n    assert_eq!(*basket.get(\"banana\").unwrap(), 4);\n    assert_eq!(*basket.get(\"apple\").unwrap(), 2);\n    assert_eq!(*basket.get(\"mango\").unwrap(), 1);\n}",
+  "hints": [
+    "You can use `.entry()` and `.or_insert()` to handle existing vs new keys.",
+    "The entry API returns a mutable reference to the value.",
+    "Try: *basket.entry(fruit.to_string()).or_insert(0) += 1;"
+  ],
+  "solution": "use std::collections::HashMap;\n\nfn fruit_basket(basket: &mut HashMap<String, u32>, fruit_list: Vec<&str>) {\n    for fruit in fruit_list {\n        let count = basket.entry(fruit.to_string()).or_insert(0);\n        *count += 1;\n    }\n}\n\nfn main() {\n    let mut basket = HashMap::new();\n    basket.insert(String::from(\"banana\"), 2);\n\n    let fruit_list = vec![\"apple\", \"banana\", \"mango\", \"apple\", \"banana\"];\n    fruit_basket(&mut basket, fruit_list);\n\n    println!(\"Basket: {:?}\", basket);\n    assert_eq!(*basket.get(\"banana\").unwrap(), 4);\n    assert_eq!(*basket.get(\"apple\").unwrap(), 2);\n    assert_eq!(*basket.get(\"mango\").unwrap(), 1);\n}",
+  "explanation": "The `.entry()` method returns an `Entry` enum that represents a value that might or might not exist. `.or_insert(default)` inserts the default value if the key doesn't exist, and returns a mutable reference to the value in either case. This pattern is perfect for counting occurrences.",
+  "relatedBookSection": "ch08-03-hash-maps"
+}

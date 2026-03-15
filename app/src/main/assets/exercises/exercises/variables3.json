@@ -1,0 +1,17 @@
+{
+  "id": "variables3",
+  "title": "Variables 3",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "This exercise explores uninitialized variables in Rust. The compiler prevents using variables that might not have a value.",
+  "instructions": "Fix the code so that it compiles by ensuring the variable is initialized before use.",
+  "starterCode": "fn main() {\n    let x: i32;\n    println!(\"Number {x}\");\n}",
+  "hints": [
+    "The variable x is declared but never given a value.",
+    "Rust does not allow using uninitialized variables.",
+    "Assign a value to x: let x: i32 = 42;"
+  ],
+  "solution": "fn main() {\n    let x: i32 = 42;\n    println!(\"Number {x}\");\n}",
+  "explanation": "Rust prevents the use of uninitialized variables at compile time. This is a safety feature that eliminates an entire class of bugs common in C and C++. Every variable must have a value before it can be read.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

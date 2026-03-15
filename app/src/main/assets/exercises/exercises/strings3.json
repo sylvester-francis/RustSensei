@@ -1,0 +1,17 @@
+{
+  "id": "strings3",
+  "title": "Strings 3",
+  "category": "strings",
+  "difficulty": "beginner",
+  "description": "Strings can be concatenated using the `+` operator or the `format!` macro.",
+  "instructions": "Fix the string concatenation to make the code compile.",
+  "starterCode": "fn trim_me(input: &str) -> String {\n    // TODO: Remove whitespace from both ends of a string\n}\n\nfn compose_me(input: &str) -> String {\n    // TODO: Add \" world!\" to the string\n}\n\nfn replace_me(input: &str) -> String {\n    // TODO: Replace \"cars\" with \"balloons\"\n}\n\nfn main() {\n    assert_eq!(trim_me(\"Hello!     \"), \"Hello!\");\n    assert_eq!(trim_me(\"  Hello!\"), \"Hello!\");\n    assert_eq!(compose_me(\"Hello\"), \"Hello world!\");\n    assert_eq!(replace_me(\"I think cars are cool\"), \"I think balloons are cool\");\n    println!(\"All tests passed!\");\n}",
+  "hints": [
+    "Use `.trim()` to remove whitespace from both ends of a string.",
+    "Use `format!` macro to concatenate strings, or use `+` operator.",
+    "Use `.replace(old, new)` to replace substrings."
+  ],
+  "solution": "fn trim_me(input: &str) -> String {\n    input.trim().to_string()\n}\n\nfn compose_me(input: &str) -> String {\n    format!(\"{} world!\", input)\n}\n\nfn replace_me(input: &str) -> String {\n    input.replace(\"cars\", \"balloons\")\n}\n\nfn main() {\n    assert_eq!(trim_me(\"Hello!     \"), \"Hello!\");\n    assert_eq!(trim_me(\"  Hello!\"), \"Hello!\");\n    assert_eq!(compose_me(\"Hello\"), \"Hello world!\");\n    assert_eq!(replace_me(\"I think cars are cool\"), \"I think balloons are cool\");\n    println!(\"All tests passed!\");\n}",
+  "explanation": "Rust strings have many built-in methods. `.trim()` removes whitespace from both ends (returning a `&str`). The `format!` macro works like `println!` but returns a `String` instead of printing. `.replace()` creates a new `String` with all occurrences of a pattern replaced.",
+  "relatedBookSection": "ch08-02-strings"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics3",
+  "title": "Move Semantics 3",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "Instead of transferring ownership, you can borrow a value using a reference (&). This lets the original owner keep the value.",
+  "instructions": "Fix the code so that both vec0 and vec1 can be used by using borrowing instead of moving.",
+  "starterCode": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let vec1 = fill_vec(vec0);\n\n    println!(\"{} has length {} with contents {:?}\", \"vec0\", vec0.len(), vec0);\n    println!(\"{} has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec(vec: Vec<i32>) -> Vec<i32> {\n    let mut vec = vec;\n    vec.push(88);\n    vec\n}",
+  "hints": [
+    "The problem is that fill_vec takes ownership of vec0.",
+    "Change fill_vec to take a reference `&Vec<i32>` instead.",
+    "Create a new vector inside fill_vec by cloning the reference, then push to it."
+  ],
+  "solution": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let vec1 = fill_vec(&vec0);\n\n    println!(\"{} has length {} with contents {:?}\", \"vec0\", vec0.len(), vec0);\n    println!(\"{} has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec(vec: &Vec<i32>) -> Vec<i32> {\n    let mut vec = vec.clone();\n    vec.push(88);\n    vec\n}",
+  "explanation": "By taking a reference (`&Vec<i32>`) instead of the value itself, the function borrows the vector without taking ownership. The original `vec0` remains valid after the function call. Inside the function, we clone the borrowed vector to create a new one we can modify.",
+  "relatedBookSection": "ch04-02-references-and-borrowing"
+}

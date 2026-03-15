@@ -1,0 +1,17 @@
+{
+  "id": "quiz3",
+  "title": "Quiz 3",
+  "category": "quiz",
+  "difficulty": "advanced",
+  "description": "This quiz covers generics, traits, lifetimes, iterators, and smart pointers (Chapters 13-18).",
+  "instructions": "Implement a generic report card system using traits and generics.",
+  "starterCode": "use std::fmt::Display;\n\nstruct ReportCard<T> {\n    grade: T,\n    student_name: String,\n    student_age: u8,\n}\n\n// TODO: Implement Display for ReportCard<T>\n// The grade should be printed using its Display implementation\n\nimpl<T: Display> ReportCard<T> {\n    fn print(&self) -> String {\n        format!(\n            \"{} ({}) - achieved a grade of {}\",\n            &self.student_name, &self.student_age, &self.grade\n        )\n    }\n}\n\nfn main() {\n    let report_card_numeric = ReportCard {\n        grade: 3.5f32,\n        student_name: \"Alice\".to_string(),\n        student_age: 20,\n    };\n    assert_eq!(\n        report_card_numeric.print(),\n        \"Alice (20) - achieved a grade of 3.5\"\n    );\n\n    let report_card_letter = ReportCard {\n        grade: \"A+\",\n        student_name: \"Bob\".to_string(),\n        student_age: 22,\n    };\n    assert_eq!(\n        report_card_letter.print(),\n        \"Bob (22) - achieved a grade of A+\"\n    );\n\n    println!(\"Quiz 3 passed!\");\n}",
+  "hints": [
+    "The ReportCard struct is generic over T, which represents the grade type.",
+    "The trait bound `T: Display` ensures the grade can be formatted as a string.",
+    "This code should compile - study how generics with trait bounds work."
+  ],
+  "solution": "use std::fmt::Display;\n\nstruct ReportCard<T> {\n    grade: T,\n    student_name: String,\n    student_age: u8,\n}\n\nimpl<T: Display> ReportCard<T> {\n    fn print(&self) -> String {\n        format!(\n            \"{} ({}) - achieved a grade of {}\",\n            &self.student_name, &self.student_age, &self.grade\n        )\n    }\n}\n\nfn main() {\n    let report_card_numeric = ReportCard {\n        grade: 3.5f32,\n        student_name: \"Alice\".to_string(),\n        student_age: 20,\n    };\n    assert_eq!(\n        report_card_numeric.print(),\n        \"Alice (20) - achieved a grade of 3.5\"\n    );\n\n    let report_card_letter = ReportCard {\n        grade: \"A+\",\n        student_name: \"Bob\".to_string(),\n        student_age: 22,\n    };\n    assert_eq!(\n        report_card_letter.print(),\n        \"Bob (22) - achieved a grade of A+\"\n    );\n\n    println!(\"Quiz 3 passed!\");\n}",
+  "explanation": "This quiz demonstrates generics with trait bounds. `ReportCard<T>` can hold any grade type (f32, &str, etc.) as long as it implements `Display`. The `T: Display` bound on the impl block ensures `format!` can print the grade. The same struct works with numeric grades (3.5) and letter grades (\"A+\") without code duplication.",
+  "relatedBookSection": "ch10-01-syntax"
+}

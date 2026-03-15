@@ -1,0 +1,160 @@
+{
+  "categories": [
+    {
+      "id": "intro",
+      "title": "Introduction",
+      "description": "Welcome to Rustlings! Get started with the basics.",
+      "exercises": ["intro1", "intro2"]
+    },
+    {
+      "id": "variables",
+      "title": "Variables",
+      "description": "Learn about variable bindings and mutability in Rust.",
+      "exercises": ["variables1", "variables2", "variables3", "variables4", "variables5", "variables6"]
+    },
+    {
+      "id": "functions",
+      "title": "Functions",
+      "description": "Learn how to define and use functions in Rust.",
+      "exercises": ["functions1", "functions2", "functions3", "functions4", "functions5"]
+    },
+    {
+      "id": "if",
+      "title": "If",
+      "description": "Learn about conditional expressions in Rust.",
+      "exercises": ["if1", "if2", "if3"]
+    },
+    {
+      "id": "primitive_types",
+      "title": "Primitive Types",
+      "description": "Explore Rust's built-in primitive types.",
+      "exercises": ["primitive_types1", "primitive_types2", "primitive_types3", "primitive_types4", "primitive_types5", "primitive_types6"]
+    },
+    {
+      "id": "vecs",
+      "title": "Vectors",
+      "description": "Learn about Rust's Vec<T> growable array type.",
+      "exercises": ["vecs1", "vecs2"]
+    },
+    {
+      "id": "move_semantics",
+      "title": "Move Semantics",
+      "description": "Understand Rust's ownership and move semantics.",
+      "exercises": ["move_semantics1", "move_semantics2", "move_semantics3", "move_semantics4", "move_semantics5", "move_semantics6"]
+    },
+    {
+      "id": "structs",
+      "title": "Structs",
+      "description": "Learn how to define and use structs in Rust.",
+      "exercises": ["structs1", "structs2", "structs3"]
+    },
+    {
+      "id": "enums",
+      "title": "Enums",
+      "description": "Learn about Rust's powerful enum type.",
+      "exercises": ["enums1", "enums2", "enums3"]
+    },
+    {
+      "id": "strings",
+      "title": "Strings",
+      "description": "Understand String and &str in Rust.",
+      "exercises": ["strings1", "strings2", "strings3", "strings4"]
+    },
+    {
+      "id": "modules",
+      "title": "Modules",
+      "description": "Learn how to organize code with modules.",
+      "exercises": ["modules1", "modules2", "modules3"]
+    },
+    {
+      "id": "hashmaps",
+      "title": "Hashmaps",
+      "description": "Learn about Rust's HashMap collection type.",
+      "exercises": ["hashmaps1", "hashmaps2", "hashmaps3"]
+    },
+    {
+      "id": "options",
+      "title": "Options",
+      "description": "Learn about Rust's Option type for handling absence of values.",
+      "exercises": ["options1", "options2", "options3"]
+    },
+    {
+      "id": "error_handling",
+      "title": "Error Handling",
+      "description": "Learn Rust's approach to error handling with Result and the ? operator.",
+      "exercises": ["errors1", "errors2", "errors3", "errors4", "errors5", "errors6"]
+    },
+    {
+      "id": "generics",
+      "title": "Generics",
+      "description": "Learn about generic types and functions in Rust.",
+      "exercises": ["generics1", "generics2"]
+    },
+    {
+      "id": "traits",
+      "title": "Traits",
+      "description": "Learn about traits, Rust's way of defining shared behavior.",
+      "exercises": ["traits1", "traits2", "traits3", "traits4", "traits5"]
+    },
+    {
+      "id": "lifetimes",
+      "title": "Lifetimes",
+      "description": "Understand lifetime annotations and how Rust ensures reference validity.",
+      "exercises": ["lifetimes1", "lifetimes2", "lifetimes3"]
+    },
+    {
+      "id": "tests",
+      "title": "Tests",
+      "description": "Learn how to write and run tests in Rust.",
+      "exercises": ["tests1", "tests2", "tests3", "tests4"]
+    },
+    {
+      "id": "iterators",
+      "title": "Iterators",
+      "description": "Learn about Rust's powerful iterator trait and methods.",
+      "exercises": ["iterators1", "iterators2", "iterators3", "iterators4", "iterators5"]
+    },
+    {
+      "id": "smart_pointers",
+      "title": "Smart Pointers",
+      "description": "Learn about Box, Rc, Arc, and Cow smart pointer types.",
+      "exercises": ["arc1", "box1", "cow1", "rc1"]
+    },
+    {
+      "id": "threads",
+      "title": "Threads",
+      "description": "Learn about concurrent programming with threads in Rust.",
+      "exercises": ["threads1", "threads2", "threads3"]
+    },
+    {
+      "id": "macros",
+      "title": "Macros",
+      "description": "Learn about Rust's macro system for metaprogramming.",
+      "exercises": ["macros1", "macros2", "macros3", "macros4"]
+    },
+    {
+      "id": "clippy",
+      "title": "Clippy",
+      "description": "Learn to write idiomatic Rust by fixing Clippy lints.",
+      "exercises": ["clippy1", "clippy2", "clippy3"]
+    },
+    {
+      "id": "conversions",
+      "title": "Type Conversions",
+      "description": "Learn about Rust's type conversion traits and casting.",
+      "exercises": ["as_ref_mut", "from_into", "from_str", "try_from_into", "using_as"]
+    },
+    {
+      "id": "algorithms",
+      "title": "Algorithms",
+      "description": "Implement classic algorithms in Rust.",
+      "exercises": ["algorithm1"]
+    },
+    {
+      "id": "quiz",
+      "title": "Quizzes",
+      "description": "Test your knowledge with quizzes covering multiple topics.",
+      "exercises": ["quiz1", "quiz2", "quiz3"]
+    }
+  ]
+}

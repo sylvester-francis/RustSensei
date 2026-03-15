@@ -1,0 +1,17 @@
+{
+  "id": "intro2",
+  "title": "Intro 2",
+  "category": "intro",
+  "difficulty": "beginner",
+  "description": "This exercise introduces you to Rust's string formatting with println! and multiple placeholders.",
+  "instructions": "Fix the println! macro to correctly format the output using the provided variables.",
+  "starterCode": "fn main() {\n    let x = 10;\n    let y = 20;\n    println!(\"x is {} and y is {}\");\n}",
+  "hints": [
+    "The println! macro needs arguments to fill each `{}` placeholder.",
+    "You need to pass x and y as arguments after the format string.",
+    "The correct syntax is: println!(\"x is {} and y is {}\", x, y);"
+  ],
+  "solution": "fn main() {\n    let x = 10;\n    let y = 20;\n    println!(\"x is {} and y is {}\", x, y);\n}",
+  "explanation": "In Rust's println! macro, each `{}` placeholder must have a corresponding argument. The arguments are matched to placeholders in order. You can also use named arguments like `{x}` directly if the variable name matches.",
+  "relatedBookSection": "ch01-02-hello-world"
+}

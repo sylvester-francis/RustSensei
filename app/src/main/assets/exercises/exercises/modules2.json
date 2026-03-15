@@ -1,0 +1,17 @@
+{
+  "id": "modules2",
+  "title": "Modules 2",
+  "category": "modules",
+  "difficulty": "beginner",
+  "description": "The `use` keyword brings paths into scope so you don't have to write the full path each time.",
+  "instructions": "Add the correct `use` statement to bring the function into scope.",
+  "starterCode": "mod delicious_snacks {\n    pub use self::fruits::PEAR as fruit;\n    pub use self::veggies::CUCUMBER as veggie;\n\n    mod fruits {\n        pub const PEAR: &str = \"Pear\";\n        pub const APPLE: &str = \"Apple\";\n    }\n\n    mod veggies {\n        pub const CUCUMBER: &str = \"Cucumber\";\n        pub const CARROT: &str = \"Carrot\";\n    }\n}\n\nfn main() {\n    println!(\n        \"favorite fruit: {} and target veggie: {}\",\n        delicious_snacks::fruit,\n        delicious_snacks::veggie\n    );\n}",
+  "hints": [
+    "The `pub use` statement re-exports items, making them accessible through the parent module.",
+    "This code should compile as-is because `pub use` creates public aliases.",
+    "The `use` keyword with `self::` refers to items in the current module."
+  ],
+  "solution": "mod delicious_snacks {\n    pub use self::fruits::PEAR as fruit;\n    pub use self::veggies::CUCUMBER as veggie;\n\n    mod fruits {\n        pub const PEAR: &str = \"Pear\";\n        pub const APPLE: &str = \"Apple\";\n    }\n\n    mod veggies {\n        pub const CUCUMBER: &str = \"Cucumber\";\n        pub const CARROT: &str = \"Carrot\";\n    }\n}\n\nfn main() {\n    println!(\n        \"favorite fruit: {} and target veggie: {}\",\n        delicious_snacks::fruit,\n        delicious_snacks::veggie\n    );\n}",
+  "explanation": "The `use` keyword creates shortcuts to items in modules. `pub use` re-exports items, making them available to external code through a different path. The `as` keyword creates an alias. `self::` refers to the current module. This pattern is commonly used to create a clean public API from internally organized code.",
+  "relatedBookSection": "ch07-04-bringing-paths-into-scope-with-the-use-keyword"
+}

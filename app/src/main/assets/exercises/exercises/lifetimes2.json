@@ -1,0 +1,17 @@
+{
+  "id": "lifetimes2",
+  "title": "Lifetimes 2",
+  "category": "lifetimes",
+  "difficulty": "intermediate",
+  "description": "Not all parameters need to share the same lifetime. Sometimes only one input determines the output's lifetime.",
+  "instructions": "Fix the lifetime annotations so the function compiles correctly.",
+  "starterCode": "fn longest<'a>(x: &'a str, y: &str) -> &'a str {\n    x\n}\n\nfn main() {\n    let string1 = String::from(\"hello\");\n    let result;\n    {\n        let string2 = String::from(\"world\");\n        result = longest(string1.as_str(), string2.as_str());\n    }\n    println!(\"The longest string is '{result}'\");\n}",
+  "hints": [
+    "Since the function always returns x, only x's lifetime matters for the return.",
+    "The parameter y doesn't need the same lifetime as x and the return value.",
+    "This code should compile because result's lifetime is tied to string1, not string2."
+  ],
+  "solution": "fn longest<'a>(x: &'a str, y: &str) -> &'a str {\n    x\n}\n\nfn main() {\n    let string1 = String::from(\"hello\");\n    let result;\n    {\n        let string2 = String::from(\"world\");\n        result = longest(string1.as_str(), string2.as_str());\n    }\n    println!(\"The longest string is '{result}'\");\n}",
+  "explanation": "When a function always returns a reference from a specific parameter, only that parameter needs to share the return value's lifetime. Here, `y` doesn't need lifetime `'a` because the return value is always `x`. This gives the compiler more flexibility and allows `string2` to be dropped while `result` is still valid.",
+  "relatedBookSection": "ch10-03-lifetime-syntax"
+}

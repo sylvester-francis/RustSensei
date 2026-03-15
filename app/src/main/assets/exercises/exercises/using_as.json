@@ -1,0 +1,17 @@
+{
+  "id": "using_as",
+  "title": "Using As",
+  "category": "conversions",
+  "difficulty": "beginner",
+  "description": "The `as` keyword performs primitive type casting in Rust. It works for numeric types and some pointer conversions.",
+  "instructions": "Use the `as` keyword to convert between numeric types.",
+  "starterCode": "fn average(values: &[f64]) -> f64 {\n    let total = values.iter().sum::<f64>();\n    // TODO: Fix the division - values.len() returns usize, but we need f64\n    total / values.len()\n}\n\nfn main() {\n    let values = [3.5, 0.3, 13.0, 11.7];\n    println!(\"Average: {}\", average(&values));\n}",
+  "hints": [
+    "values.len() returns a usize, but total is f64 - you can't divide f64 by usize.",
+    "Use `as` to cast: values.len() as f64",
+    "The `as` keyword converts between primitive types."
+  ],
+  "solution": "fn average(values: &[f64]) -> f64 {\n    let total = values.iter().sum::<f64>();\n    total / values.len() as f64\n}\n\nfn main() {\n    let values = [3.5, 0.3, 13.0, 11.7];\n    println!(\"Average: {}\", average(&values));\n}",
+  "explanation": "The `as` keyword casts between primitive types. It's the most basic form of type conversion in Rust. `as` works for numeric conversions (i32 to f64, usize to i32, etc.) but can be lossy - for example, casting a large i64 to i32 may truncate. For safer conversions, prefer `From`/`TryFrom` traits when available.",
+  "relatedBookSection": "ch03-02-data-types"
+}

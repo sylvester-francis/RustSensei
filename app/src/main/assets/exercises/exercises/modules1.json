@@ -1,0 +1,17 @@
+{
+  "id": "modules1",
+  "title": "Modules 1",
+  "category": "modules",
+  "difficulty": "beginner",
+  "description": "Modules help organize code and control visibility. Items are private by default in Rust.",
+  "instructions": "Fix the visibility of the function inside the module so it can be called from main.",
+  "starterCode": "mod sausage_factory {\n    fn make_sausage() {\n        println!(\"sausage!\");\n    }\n}\n\nfn main() {\n    sausage_factory::make_sausage();\n}",
+  "hints": [
+    "Items in a module are private by default.",
+    "Use the `pub` keyword to make items accessible outside the module.",
+    "Add `pub` before `fn make_sausage()`."
+  ],
+  "solution": "mod sausage_factory {\n    pub fn make_sausage() {\n        println!(\"sausage!\");\n    }\n}\n\nfn main() {\n    sausage_factory::make_sausage();\n}",
+  "explanation": "By default, everything in a Rust module is private. The `pub` keyword makes items (functions, structs, enums, etc.) accessible from outside the module. This is Rust's way of encapsulation - you explicitly choose what is part of the public API.",
+  "relatedBookSection": "ch07-03-paths-for-referring-to-an-item-in-the-module-tree"
+}

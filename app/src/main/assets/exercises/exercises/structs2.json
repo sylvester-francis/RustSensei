@@ -1,0 +1,17 @@
+{
+  "id": "structs2",
+  "title": "Structs 2",
+  "category": "structs",
+  "difficulty": "beginner",
+  "description": "Rust also has tuple structs (unnamed fields) and unit structs (no fields at all).",
+  "instructions": "Create a tuple struct and a unit struct, then instantiate them.",
+  "starterCode": "struct ColorTupleStruct(/* TODO */);\nstruct UnitStruct;\n\nfn main() {\n    let green = ColorTupleStruct(0, 255, 0);\n\n    assert_eq!(green.0, 0);\n    assert_eq!(green.1, 255);\n    assert_eq!(green.2, 0);\n\n    let unit = UnitStruct;\n    let message = format!(\"{:?}\", unit);\n    println!(\"Tuple struct green.1 = {}\", green.1);\n}",
+  "hints": [
+    "Tuple structs have unnamed fields, defined as: struct Name(Type, Type, ...);",
+    "The fields are accessed by index: .0, .1, .2 etc.",
+    "Add three i32 fields: struct ColorTupleStruct(i32, i32, i32);"
+  ],
+  "solution": "#[derive(Debug)]\nstruct ColorTupleStruct(i32, i32, i32);\n\n#[derive(Debug)]\nstruct UnitStruct;\n\nfn main() {\n    let green = ColorTupleStruct(0, 255, 0);\n\n    assert_eq!(green.0, 0);\n    assert_eq!(green.1, 255);\n    assert_eq!(green.2, 0);\n\n    let unit = UnitStruct;\n    let message = format!(\"{:?}\", unit);\n    println!(\"Tuple struct green.1 = {}\", green.1);\n}",
+  "explanation": "Tuple structs have fields without names, accessed by index. They are useful when you want to give a tuple a name and make it a different type from other tuples. Unit structs have no fields at all and are useful for implementing traits on a type without storing data. The `#[derive(Debug)]` attribute lets you print structs with `{:?}`.",
+  "relatedBookSection": "ch05-01-defining-structs"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "quiz2",
+  "title": "Quiz 2",
+  "category": "quiz",
+  "difficulty": "intermediate",
+  "description": "This quiz covers ownership, structs, enums, modules, collections, and error handling (Chapters 7-12).",
+  "instructions": "Complete the program that models a command system using enums and structs.",
+  "starterCode": "enum Command {\n    Uppercase,\n    Trim,\n    Append(usize),\n}\n\nmod my_module {\n    use super::Command;\n\n    // TODO: Make this function public\n    fn transformer(input: Vec<(String, Command)>) -> Vec<String> {\n        let mut output: Vec<String> = vec![];\n        for (string, command) in input {\n            // TODO: Match on command to transform the string\n            let result = match command {\n                Command::Uppercase => todo!(),\n                Command::Trim => todo!(),\n                Command::Append(n) => todo!(),\n            };\n            output.push(result);\n        }\n        output\n    }\n}\n\nfn main() {\n    let input = vec![\n        (\"hello\".to_string(), Command::Uppercase),\n        (\" all hail Rust!  \".to_string(), Command::Trim),\n        (\"foo\".to_string(), Command::Append(3)),\n    ];\n    let output = my_module::transformer(input);\n    assert_eq!(output[0], \"HELLO\");\n    assert_eq!(output[1], \"all hail Rust!\");\n    assert_eq!(output[2], \"foobarbarbar\");\n    println!(\"Quiz 2 passed!\");\n}",
+  "hints": [
+    "Add `pub` before `fn transformer` to make it public.",
+    "For Uppercase: string.to_uppercase()",
+    "For Trim: string.trim().to_string(), For Append(n): repeat \"bar\" n times"
+  ],
+  "solution": "enum Command {\n    Uppercase,\n    Trim,\n    Append(usize),\n}\n\nmod my_module {\n    use super::Command;\n\n    pub fn transformer(input: Vec<(String, Command)>) -> Vec<String> {\n        let mut output: Vec<String> = vec![];\n        for (string, command) in input {\n            let result = match command {\n                Command::Uppercase => string.to_uppercase(),\n                Command::Trim => string.trim().to_string(),\n                Command::Append(n) => {\n                    let mut s = string;\n                    for _ in 0..n {\n                        s.push_str(\"bar\");\n                    }\n                    s\n                }\n            };\n            output.push(result);\n        }\n        output\n    }\n}\n\nfn main() {\n    let input = vec![\n        (\"hello\".to_string(), Command::Uppercase),\n        (\" all hail Rust!  \".to_string(), Command::Trim),\n        (\"foo\".to_string(), Command::Append(3)),\n    ];\n    let output = my_module::transformer(input);\n    assert_eq!(output[0], \"HELLO\");\n    assert_eq!(output[1], \"all hail Rust!\");\n    assert_eq!(output[2], \"foobarbarbar\");\n    println!(\"Quiz 2 passed!\");\n}",
+  "explanation": "This quiz combines enums with data, pattern matching, modules with visibility, string manipulation, and vectors. The Command enum uses variants with different data types, and pattern matching handles each case. The module system requires `pub` for external access, and `use super::Command` imports from the parent module.",
+  "relatedBookSection": "ch06-02-match"
+}

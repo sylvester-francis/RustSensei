@@ -1,0 +1,17 @@
+{
+  "id": "lifetimes1",
+  "title": "Lifetimes 1",
+  "category": "lifetimes",
+  "difficulty": "intermediate",
+  "description": "Lifetime annotations tell the compiler how the lifetimes of references in function parameters relate to each other.",
+  "instructions": "Add the correct lifetime annotations to make the function compile.",
+  "starterCode": "// TODO: Add lifetime annotations\nfn longest(x: &str, y: &str) -> &str {\n    if x.len() > y.len() {\n        x\n    } else {\n        y\n    }\n}\n\nfn main() {\n    let string1 = String::from(\"long string is long\");\n    let result;\n    {\n        let string2 = String::from(\"xyz\");\n        result = longest(string1.as_str(), string2.as_str());\n        println!(\"The longest string is '{result}'\");\n    }\n}",
+  "hints": [
+    "The compiler can't tell which reference (x or y) will be returned.",
+    "Add a lifetime parameter: fn longest<'a>(x: &'a str, y: &'a str) -> &'a str",
+    "The lifetime 'a means the returned reference lives at least as long as the shorter input."
+  ],
+  "solution": "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() {\n        x\n    } else {\n        y\n    }\n}\n\nfn main() {\n    let string1 = String::from(\"long string is long\");\n    let result;\n    {\n        let string2 = String::from(\"xyz\");\n        result = longest(string1.as_str(), string2.as_str());\n        println!(\"The longest string is '{result}'\");\n    }\n}",
+  "explanation": "Lifetime annotations describe the relationship between the lifetimes of references. `'a` in `fn longest<'a>(x: &'a str, y: &'a str) -> &'a str` tells the compiler that the returned reference will live at least as long as the shorter of the two input lifetimes. The compiler uses this information to prevent dangling references.",
+  "relatedBookSection": "ch10-03-lifetime-syntax"
+}

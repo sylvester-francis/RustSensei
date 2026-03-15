@@ -1,0 +1,17 @@
+{
+  "id": "iterators1",
+  "title": "Iterators 1",
+  "category": "iterators",
+  "difficulty": "intermediate",
+  "description": "Iterators provide a way to process sequences of elements. The `next()` method advances the iterator.",
+  "instructions": "Complete the function using an iterator to produce the expected results.",
+  "starterCode": "fn main() {\n    let my_fav_fruits = vec![\"banana\", \"custard apple\", \"avocado\", \"peach\", \"raspberry\"];\n\n    let mut fruit_iter = my_fav_fruits.iter();\n\n    // TODO: Use the next() method to get each fruit\n    let first = fruit_iter.next();\n    assert_eq!(first, ???);\n\n    let second = fruit_iter.next();\n    assert_eq!(second, ???);\n\n    let third = fruit_iter.next();\n    assert_eq!(third, ???);\n\n    println!(\"Done iterating!\");\n}",
+  "hints": [
+    "The `next()` method returns an `Option<&T>` - Some with the value, or None when done.",
+    "For a Vec<&str>, iter() returns items of type &&str, wrapped in Some.",
+    "The first call returns Some(&\"banana\"), the second Some(&\"custard apple\"), etc."
+  ],
+  "solution": "fn main() {\n    let my_fav_fruits = vec![\"banana\", \"custard apple\", \"avocado\", \"peach\", \"raspberry\"];\n\n    let mut fruit_iter = my_fav_fruits.iter();\n\n    let first = fruit_iter.next();\n    assert_eq!(first, Some(&\"banana\"));\n\n    let second = fruit_iter.next();\n    assert_eq!(second, Some(&\"custard apple\"));\n\n    let third = fruit_iter.next();\n    assert_eq!(third, Some(&\"avocado\"));\n\n    println!(\"Done iterating!\");\n}",
+  "explanation": "Iterators in Rust implement the `Iterator` trait with a `next()` method. Each call to `next()` returns `Some(value)` or `None` when exhausted. The `.iter()` method creates an iterator that borrows each element, so you get references. The iterator must be `mut` because `next()` changes its internal state.",
+  "relatedBookSection": "ch13-02-iterators"
+}

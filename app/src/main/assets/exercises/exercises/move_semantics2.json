@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics2",
+  "title": "Move Semantics 2",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "Instead of moving ownership, you can borrow values using references. Mutable references allow modification.",
+  "instructions": "Fix the code by making vec0 mutable and adjusting how it is used.",
+  "starterCode": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let mut vec1 = fill_vec(vec0);\n\n    println!(\"{} has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n\n    vec1.push(88);\n\n    println!(\"{} now has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n}",
+  "hints": [
+    "The function `fill_vec` takes ownership of vec0 and returns a new vector.",
+    "You need to define the `fill_vec` function.",
+    "Create a function that takes a Vec<i32>, pushes an element, and returns it."
+  ],
+  "solution": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let mut vec1 = fill_vec(vec0);\n\n    println!(\"{} has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n\n    vec1.push(88);\n\n    println!(\"{} now has length {} with contents {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec(mut vec: Vec<i32>) -> Vec<i32> {\n    vec.push(77);\n    vec\n}",
+  "explanation": "When a function parameter is declared with `mut`, it means the function can mutate the owned value. The function takes ownership of the vector, modifies it, and returns it. The caller receives the modified vector back. Note that `mut` on the parameter is about the local binding being mutable, not about the caller's variable.",
+  "relatedBookSection": "ch04-02-references-and-borrowing"
+}

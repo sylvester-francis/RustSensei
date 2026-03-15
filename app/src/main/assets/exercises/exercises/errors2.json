@@ -1,0 +1,17 @@
+{
+  "id": "errors2",
+  "title": "Errors 2",
+  "category": "error_handling",
+  "difficulty": "beginner",
+  "description": "Functions that can fail should return Result. The caller decides how to handle the error.",
+  "instructions": "Change the function to return a Result instead of calling unwrap() directly.",
+  "starterCode": "use std::num::ParseIntError;\n\nfn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {\n    let processing_fee = 1;\n    let cost_per_item = 5;\n    // TODO: Parse the string to i32 and handle the error\n    let qty = item_quantity.parse::<i32>().unwrap();\n\n    Ok(qty * cost_per_item + processing_fee)\n}\n\nfn main() {\n    match total_cost(\"34\") {\n        Ok(cost) => println!(\"Total cost: {cost}\"),\n        Err(e) => println!(\"Error parsing: {e}\"),\n    }\n    match total_cost(\"beep boop\") {\n        Ok(cost) => println!(\"Total cost: {cost}\"),\n        Err(e) => println!(\"Error parsing: {e}\"),\n    }\n}",
+  "hints": [
+    "`.unwrap()` will panic on an error. Use `?` to propagate it instead.",
+    "The `?` operator returns the error to the caller if the Result is Err.",
+    "Replace `.unwrap()` with `?`: item_quantity.parse::<i32>()?"
+  ],
+  "solution": "use std::num::ParseIntError;\n\nfn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {\n    let processing_fee = 1;\n    let cost_per_item = 5;\n    let qty = item_quantity.parse::<i32>()?;\n\n    Ok(qty * cost_per_item + processing_fee)\n}\n\nfn main() {\n    match total_cost(\"34\") {\n        Ok(cost) => println!(\"Total cost: {cost}\"),\n        Err(e) => println!(\"Error parsing: {e}\"),\n    }\n    match total_cost(\"beep boop\") {\n        Ok(cost) => println!(\"Total cost: {cost}\"),\n        Err(e) => println!(\"Error parsing: {e}\"),\n    }\n}",
+  "explanation": "Using `.unwrap()` panics on error, crashing the program. The `?` operator is the idiomatic way to handle errors - it returns the inner value on `Ok`, or returns the error to the caller on `Err`. The function must return a `Result` to use `?`. This creates a clean chain of error propagation.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

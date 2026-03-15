@@ -1,0 +1,17 @@
+{
+  "id": "traits1",
+  "title": "Traits 1",
+  "category": "traits",
+  "difficulty": "intermediate",
+  "description": "Traits define shared behavior. A trait tells the compiler about functionality a type must provide.",
+  "instructions": "Implement the AppendBar trait for the String type.",
+  "starterCode": "trait AppendBar {\n    fn append_bar(self) -> Self;\n}\n\nimpl AppendBar for String {\n    // TODO: Implement append_bar to append \"Bar\" to the string\n}\n\nfn main() {\n    let s = String::from(\"Foo\");\n    let s = s.append_bar();\n    println!(\"s: {s}\");\n    assert_eq!(s, \"FooBar\");\n}",
+  "hints": [
+    "The method takes `self` by value, meaning it takes ownership of the String.",
+    "You can use the `+` operator or `format!` to concatenate strings.",
+    "Try: fn append_bar(self) -> Self { self + \"Bar\" }"
+  ],
+  "solution": "trait AppendBar {\n    fn append_bar(self) -> Self;\n}\n\nimpl AppendBar for String {\n    fn append_bar(self) -> Self {\n        self + \"Bar\"\n    }\n}\n\nfn main() {\n    let s = String::from(\"Foo\");\n    let s = s.append_bar();\n    println!(\"s: {s}\");\n    assert_eq!(s, \"FooBar\");\n}",
+  "explanation": "Traits are like interfaces in other languages. You define the method signatures in the trait, then provide implementations for specific types. The `impl TraitName for Type` syntax implements the trait. Methods that take `self` by value consume the original value and return a new one.",
+  "relatedBookSection": "ch10-02-traits"
+}

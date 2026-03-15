@@ -1,0 +1,17 @@
+{
+  "id": "variables4",
+  "title": "Variables 4",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "Variables in Rust are immutable by default. To change a variable's value after assignment, you must declare it as mutable.",
+  "instructions": "Make the code compile by making the variable mutable.",
+  "starterCode": "fn main() {\n    let x = 3;\n    println!(\"Number {x}\");\n    x = 5;\n    println!(\"Number {x}\");\n}",
+  "hints": [
+    "By default, variables in Rust are immutable - you cannot change their value.",
+    "To make a variable mutable, use the `mut` keyword.",
+    "Change `let x` to `let mut x`."
+  ],
+  "solution": "fn main() {\n    let mut x = 3;\n    println!(\"Number {x}\");\n    x = 5;\n    println!(\"Number {x}\");\n}",
+  "explanation": "Rust variables are immutable by default. Adding `mut` to the declaration allows reassignment. This design choice helps prevent bugs by making mutability an explicit, conscious decision rather than the default behavior.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

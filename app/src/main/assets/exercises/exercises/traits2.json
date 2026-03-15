@@ -1,0 +1,17 @@
+{
+  "id": "traits2",
+  "title": "Traits 2",
+  "category": "traits",
+  "difficulty": "intermediate",
+  "description": "Traits can provide default implementations for methods. Types can override them or use the default.",
+  "instructions": "Implement the AppendBar trait for Vec<String> with a default implementation.",
+  "starterCode": "trait AppendBar {\n    fn append_bar(self) -> Self;\n}\n\n// TODO: Implement AppendBar for Vec<String>\n\nfn main() {\n    let foo = vec![String::from(\"Foo\")].append_bar();\n    assert_eq!(foo, vec![String::from(\"Foo\"), String::from(\"Bar\")]);\n    println!(\"{:?}\", foo);\n}",
+  "hints": [
+    "You need to implement AppendBar for Vec<String>.",
+    "The method should push \"Bar\" onto the vector and return it.",
+    "Since self is taken by value, declare it as `mut self` to modify it."
+  ],
+  "solution": "trait AppendBar {\n    fn append_bar(self) -> Self;\n}\n\nimpl AppendBar for Vec<String> {\n    fn append_bar(mut self) -> Self {\n        self.push(String::from(\"Bar\"));\n        self\n    }\n}\n\nfn main() {\n    let foo = vec![String::from(\"Foo\")].append_bar();\n    assert_eq!(foo, vec![String::from(\"Foo\"), String::from(\"Bar\")]);\n    println!(\"{:?}\", foo);\n}",
+  "explanation": "Traits can be implemented for any type, including standard library types like `Vec<String>`. When a method takes `self` by value, you can add `mut` to make it mutable within the function body: `fn method(mut self) -> Self`. Default implementations in traits let types opt into behavior without writing their own implementation.",
+  "relatedBookSection": "ch10-02-traits"
+}

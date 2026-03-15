@@ -1,0 +1,17 @@
+{
+  "id": "enums1",
+  "title": "Enums 1",
+  "category": "enums",
+  "difficulty": "beginner",
+  "description": "Enums allow you to define a type by enumerating its possible variants.",
+  "instructions": "Complete the enum definition so the code compiles.",
+  "starterCode": "#[derive(Debug)]\nenum Message {\n    // TODO: Define three variants: Quit, Echo, Move, ChangeColor\n}\n\nfn main() {\n    println!(\"{:?}\", Message::Quit);\n    println!(\"{:?}\", Message::Echo);\n    println!(\"{:?}\", Message::Move);\n    println!(\"{:?}\", Message::ChangeColor);\n}",
+  "hints": [
+    "Enum variants are listed inside the enum body, separated by commas.",
+    "Simple variants without data are just names.",
+    "Define them as: Quit, Echo, Move, ChangeColor"
+  ],
+  "solution": "#[derive(Debug)]\nenum Message {\n    Quit,\n    Echo,\n    Move,\n    ChangeColor,\n}\n\nfn main() {\n    println!(\"{:?}\", Message::Quit);\n    println!(\"{:?}\", Message::Echo);\n    println!(\"{:?}\", Message::Move);\n    println!(\"{:?}\", Message::ChangeColor);\n}",
+  "explanation": "Enums in Rust let you define a type that can be one of several variants. Each variant is a distinct value of the enum type. You access variants using `EnumName::Variant` syntax. The `#[derive(Debug)]` attribute lets you print enum values with `{:?}`.",
+  "relatedBookSection": "ch06-01-defining-an-enum"
+}

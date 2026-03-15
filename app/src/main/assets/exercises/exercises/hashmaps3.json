@@ -1,0 +1,17 @@
+{
+  "id": "hashmaps3",
+  "title": "Hashmaps 3",
+  "category": "hashmaps",
+  "difficulty": "intermediate",
+  "description": "The Entry API provides powerful methods for updating HashMap values based on whether a key exists.",
+  "instructions": "Use the entry API to build a scores HashMap from a list of game results.",
+  "starterCode": "use std::collections::HashMap;\n\nstruct Team {\n    goals_scored: u8,\n    goals_conceded: u8,\n}\n\nfn build_scores_table(results: &str) -> HashMap<String, Team> {\n    let mut scores = HashMap::new();\n\n    for line in results.lines() {\n        let mut split = line.split(',');\n        let team_1 = split.next().unwrap().trim();\n        let team_1_score: u8 = split.next().unwrap().trim().parse().unwrap();\n        let team_2 = split.next().unwrap().trim();\n        let team_2_score: u8 = split.next().unwrap().trim().parse().unwrap();\n\n        // TODO: Update scores for team_1 and team_2\n        // Each team needs goals_scored and goals_conceded updated\n    }\n\n    scores\n}\n\nfn main() {\n    let results = \"England,3,France,1\\nFrance,2,Italy,0\\nEngland,1,Italy,2\";\n    let scores = build_scores_table(results);\n    for (team, stats) in &scores {\n        println!(\"{}: scored={} conceded={}\", team, stats.goals_scored, stats.goals_conceded);\n    }\n}",
+  "hints": [
+    "Use `.entry().or_insert_with()` to create a default Team if one doesn't exist.",
+    "For team_1: add team_1_score to goals_scored and team_2_score to goals_conceded.",
+    "The or_insert_with closure: || Team { goals_scored: 0, goals_conceded: 0 }"
+  ],
+  "solution": "use std::collections::HashMap;\n\nstruct Team {\n    goals_scored: u8,\n    goals_conceded: u8,\n}\n\nfn build_scores_table(results: &str) -> HashMap<String, Team> {\n    let mut scores = HashMap::new();\n\n    for line in results.lines() {\n        let mut split = line.split(',');\n        let team_1 = split.next().unwrap().trim();\n        let team_1_score: u8 = split.next().unwrap().trim().parse().unwrap();\n        let team_2 = split.next().unwrap().trim();\n        let team_2_score: u8 = split.next().unwrap().trim().parse().unwrap();\n\n        let entry1 = scores.entry(team_1.to_string()).or_insert_with(|| Team { goals_scored: 0, goals_conceded: 0 });\n        entry1.goals_scored += team_1_score;\n        entry1.goals_conceded += team_2_score;\n\n        let entry2 = scores.entry(team_2.to_string()).or_insert_with(|| Team { goals_scored: 0, goals_conceded: 0 });\n        entry2.goals_scored += team_2_score;\n        entry2.goals_conceded += team_1_score;\n    }\n\n    scores\n}\n\nfn main() {\n    let results = \"England,3,France,1\\nFrance,2,Italy,0\\nEngland,1,Italy,2\";\n    let scores = build_scores_table(results);\n    for (team, stats) in &scores {\n        println!(\"{}: scored={} conceded={}\", team, stats.goals_scored, stats.goals_conceded);\n    }\n}",
+  "explanation": "The Entry API's `.or_insert_with()` takes a closure that creates the default value only when needed (lazy initialization). This is more efficient than `.or_insert()` when the default value is expensive to create. The entry API returns a mutable reference, so you can directly modify the value after insertion.",
+  "relatedBookSection": "ch08-03-hash-maps"
+}

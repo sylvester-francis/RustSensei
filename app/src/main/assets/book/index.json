@@ -1,0 +1,209 @@
+{
+  "title": "The Rust Programming Language",
+  "description": "A comprehensive guide to learning Rust, based on The Rust Programming Language book.",
+  "chapters": [
+    {
+      "id": "ch01-getting-started",
+      "title": "Getting Started",
+      "sections": [
+        { "id": "ch01-01-installation", "title": "Installation", "relatedExercises": [] },
+        { "id": "ch01-02-hello-world", "title": "Hello, World!", "relatedExercises": [] },
+        { "id": "ch01-03-hello-cargo", "title": "Hello, Cargo!", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch02-guessing-game",
+      "title": "Programming a Guessing Game",
+      "sections": [
+        { "id": "ch02-00-guessing-game", "title": "Programming a Guessing Game", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch03-common-concepts",
+      "title": "Common Programming Concepts",
+      "sections": [
+        { "id": "ch03-01-variables-and-mutability", "title": "Variables and Mutability", "relatedExercises": ["variables1", "variables2", "variables3", "variables4", "variables5", "variables6"] },
+        { "id": "ch03-02-data-types", "title": "Data Types", "relatedExercises": ["primitive_types1", "primitive_types2", "primitive_types3", "primitive_types4", "primitive_types5", "primitive_types6"] },
+        { "id": "ch03-03-functions", "title": "Functions", "relatedExercises": ["functions1", "functions2", "functions3", "functions4", "functions5"] },
+        { "id": "ch03-04-comments", "title": "Comments", "relatedExercises": [] },
+        { "id": "ch03-05-control-flow", "title": "Control Flow", "relatedExercises": ["if1", "if2", "if3"] }
+      ]
+    },
+    {
+      "id": "ch04-ownership",
+      "title": "Understanding Ownership",
+      "sections": [
+        { "id": "ch04-01-what-is-ownership", "title": "What is Ownership?", "relatedExercises": ["move_semantics1", "move_semantics2", "move_semantics3", "move_semantics4", "move_semantics5", "move_semantics6"] },
+        { "id": "ch04-02-references-and-borrowing", "title": "References and Borrowing", "relatedExercises": ["move_semantics1", "move_semantics2", "move_semantics3", "move_semantics4", "move_semantics5", "move_semantics6"] },
+        { "id": "ch04-03-slices", "title": "The Slice Type", "relatedExercises": ["primitive_types4", "primitive_types5", "primitive_types6"] }
+      ]
+    },
+    {
+      "id": "ch05-structs",
+      "title": "Using Structs to Structure Related Data",
+      "sections": [
+        { "id": "ch05-01-defining-structs", "title": "Defining and Instantiating Structs", "relatedExercises": ["structs1", "structs2", "structs3"] },
+        { "id": "ch05-02-example-structs", "title": "An Example Program Using Structs", "relatedExercises": ["structs1", "structs2", "structs3"] },
+        { "id": "ch05-03-method-syntax", "title": "Method Syntax", "relatedExercises": ["structs3"] }
+      ]
+    },
+    {
+      "id": "ch06-enums",
+      "title": "Enums and Pattern Matching",
+      "sections": [
+        { "id": "ch06-01-defining-an-enum", "title": "Defining an Enum", "relatedExercises": ["enums1", "enums2", "enums3"] },
+        { "id": "ch06-02-match", "title": "The match Control Flow Construct", "relatedExercises": ["enums1", "enums2", "enums3"] },
+        { "id": "ch06-03-if-let", "title": "Concise Control Flow with if let", "relatedExercises": ["enums3"] }
+      ]
+    },
+    {
+      "id": "ch07-packages-crates-modules",
+      "title": "Managing Growing Projects with Packages, Crates, and Modules",
+      "sections": [
+        { "id": "ch07-01-packages-and-crates", "title": "Packages and Crates", "relatedExercises": ["modules1", "modules2", "modules3"] },
+        { "id": "ch07-02-defining-modules", "title": "Defining Modules to Control Scope and Privacy", "relatedExercises": ["modules1", "modules2", "modules3"] },
+        { "id": "ch07-03-paths", "title": "Paths for Referring to an Item in the Module Tree", "relatedExercises": ["modules1", "modules2", "modules3"] },
+        { "id": "ch07-04-use-keyword", "title": "Bringing Paths into Scope with the use Keyword", "relatedExercises": ["modules1", "modules2", "modules3"] },
+        { "id": "ch07-05-separating-modules", "title": "Separating Modules into Different Files", "relatedExercises": ["modules1", "modules2", "modules3"] }
+      ]
+    },
+    {
+      "id": "ch08-common-collections",
+      "title": "Common Collections",
+      "sections": [
+        { "id": "ch08-01-vectors", "title": "Storing Lists of Values with Vectors", "relatedExercises": ["vecs1", "vecs2"] },
+        { "id": "ch08-02-strings", "title": "Storing UTF-8 Encoded Text with Strings", "relatedExercises": ["strings1", "strings2", "strings3", "strings4"] },
+        { "id": "ch08-03-hash-maps", "title": "Storing Keys with Associated Values in Hash Maps", "relatedExercises": ["hashmaps1", "hashmaps2", "hashmaps3"] }
+      ]
+    },
+    {
+      "id": "ch09-error-handling",
+      "title": "Error Handling",
+      "sections": [
+        { "id": "ch09-01-unrecoverable-errors", "title": "Unrecoverable Errors with panic!", "relatedExercises": ["errors1", "errors2", "errors3", "errors4", "errors5", "errors6"] },
+        { "id": "ch09-02-recoverable-errors", "title": "Recoverable Errors with Result", "relatedExercises": ["errors1", "errors2", "errors3", "errors4", "errors5", "errors6"] },
+        { "id": "ch09-03-to-panic-or-not", "title": "To panic! or Not to panic!", "relatedExercises": ["errors1", "errors2", "errors3", "errors4", "errors5", "errors6"] }
+      ]
+    },
+    {
+      "id": "ch10-generics-traits-lifetimes",
+      "title": "Generic Types, Traits, and Lifetimes",
+      "sections": [
+        { "id": "ch10-01-generics", "title": "Generic Data Types", "relatedExercises": ["generics1", "generics2"] },
+        { "id": "ch10-02-traits", "title": "Traits: Defining Shared Behavior", "relatedExercises": ["traits1", "traits2", "traits3", "traits4", "traits5"] },
+        { "id": "ch10-03-lifetimes", "title": "Validating References with Lifetimes", "relatedExercises": ["lifetimes1", "lifetimes2", "lifetimes3"] }
+      ]
+    },
+    {
+      "id": "ch11-writing-tests",
+      "title": "Writing Automated Tests",
+      "sections": [
+        { "id": "ch11-01-writing-tests", "title": "How to Write Tests", "relatedExercises": ["tests1", "tests2", "tests3", "tests4"] },
+        { "id": "ch11-02-running-tests", "title": "Controlling How Tests Are Run", "relatedExercises": ["tests1", "tests2", "tests3", "tests4"] },
+        { "id": "ch11-03-test-organization", "title": "Test Organization", "relatedExercises": ["tests1", "tests2", "tests3", "tests4"] }
+      ]
+    },
+    {
+      "id": "ch12-io-project",
+      "title": "An I/O Project: Building a Command Line Program",
+      "sections": [
+        { "id": "ch12-01-accepting-args", "title": "Accepting Command Line Arguments", "relatedExercises": [] },
+        { "id": "ch12-02-reading-a-file", "title": "Reading a File", "relatedExercises": [] },
+        { "id": "ch12-03-refactoring", "title": "Refactoring to Improve Modularity and Error Handling", "relatedExercises": [] },
+        { "id": "ch12-04-tdd", "title": "Developing the Library's Functionality with TDD", "relatedExercises": [] },
+        { "id": "ch12-05-env-variables", "title": "Working with Environment Variables", "relatedExercises": [] },
+        { "id": "ch12-06-stderr", "title": "Writing Error Messages to Standard Error", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch13-functional-features",
+      "title": "Functional Language Features: Iterators and Closures",
+      "sections": [
+        { "id": "ch13-01-closures", "title": "Closures: Anonymous Functions that Capture Their Environment", "relatedExercises": ["iterators1", "iterators2", "iterators3", "iterators4", "iterators5"] },
+        { "id": "ch13-02-iterators", "title": "Processing a Series of Items with Iterators", "relatedExercises": ["iterators1", "iterators2", "iterators3", "iterators4", "iterators5"] },
+        { "id": "ch13-03-improving-io", "title": "Improving Our I/O Project", "relatedExercises": [] },
+        { "id": "ch13-04-performance", "title": "Comparing Performance: Loops vs. Iterators", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch14-cargo-crates-io",
+      "title": "More About Cargo and Crates.io",
+      "sections": [
+        { "id": "ch14-01-release-profiles", "title": "Customizing Builds with Release Profiles", "relatedExercises": [] },
+        { "id": "ch14-02-publishing", "title": "Publishing a Crate to Crates.io", "relatedExercises": [] },
+        { "id": "ch14-03-workspaces", "title": "Cargo Workspaces", "relatedExercises": [] },
+        { "id": "ch14-04-installing-binaries", "title": "Installing Binaries with cargo install", "relatedExercises": [] },
+        { "id": "ch14-05-custom-commands", "title": "Extending Cargo with Custom Commands", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch15-smart-pointers",
+      "title": "Smart Pointers",
+      "sections": [
+        { "id": "ch15-01-box", "title": "Using Box<T> to Point to Data on the Heap", "relatedExercises": ["box1"] },
+        { "id": "ch15-02-deref", "title": "Treating Smart Pointers Like Regular References with the Deref Trait", "relatedExercises": [] },
+        { "id": "ch15-03-drop", "title": "Running Code on Cleanup with the Drop Trait", "relatedExercises": [] },
+        { "id": "ch15-04-rc", "title": "Rc<T>, the Reference Counted Smart Pointer", "relatedExercises": ["rc1"] },
+        { "id": "ch15-05-interior-mutability", "title": "RefCell<T> and the Interior Mutability Pattern", "relatedExercises": [] },
+        { "id": "ch15-06-reference-cycles", "title": "Reference Cycles Can Leak Memory", "relatedExercises": ["cow1", "arc1"] }
+      ]
+    },
+    {
+      "id": "ch16-concurrency",
+      "title": "Fearless Concurrency",
+      "sections": [
+        { "id": "ch16-01-threads", "title": "Using Threads to Run Code Simultaneously", "relatedExercises": ["threads1", "threads2", "threads3"] },
+        { "id": "ch16-02-message-passing", "title": "Using Message Passing to Transfer Data Between Threads", "relatedExercises": ["threads1", "threads2", "threads3"] },
+        { "id": "ch16-03-shared-state", "title": "Shared-State Concurrency", "relatedExercises": ["threads1", "threads2", "threads3"] },
+        { "id": "ch16-04-sync-send", "title": "Extensible Concurrency with the Sync and Send Traits", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch17-oop",
+      "title": "Object-Oriented Programming Features of Rust",
+      "sections": [
+        { "id": "ch17-01-oop-characteristics", "title": "Characteristics of Object-Oriented Languages", "relatedExercises": ["traits1", "traits2", "traits3", "traits4", "traits5"] },
+        { "id": "ch17-02-trait-objects", "title": "Using Trait Objects That Allow for Values of Different Types", "relatedExercises": ["traits1", "traits2", "traits3", "traits4", "traits5"] },
+        { "id": "ch17-03-oop-design-pattern", "title": "Implementing an Object-Oriented Design Pattern", "relatedExercises": [] }
+      ]
+    },
+    {
+      "id": "ch18-patterns",
+      "title": "Patterns and Matching",
+      "sections": [
+        { "id": "ch18-01-where-patterns", "title": "All the Places Patterns Can Be Used", "relatedExercises": ["enums1", "enums2", "enums3"] },
+        { "id": "ch18-02-refutability", "title": "Refutability: Whether a Pattern Might Fail to Match", "relatedExercises": [] },
+        { "id": "ch18-03-pattern-syntax", "title": "Pattern Syntax", "relatedExercises": ["enums1", "enums2", "enums3"] }
+      ]
+    },
+    {
+      "id": "ch19-advanced-features",
+      "title": "Advanced Features",
+      "sections": [
+        { "id": "ch19-01-unsafe", "title": "Unsafe Rust", "relatedExercises": [] },
+        { "id": "ch19-02-advanced-traits", "title": "Advanced Traits", "relatedExercises": ["traits4", "traits5"] },
+        { "id": "ch19-03-advanced-types", "title": "Advanced Types", "relatedExercises": [] },
+        { "id": "ch19-04-advanced-functions-closures", "title": "Advanced Functions and Closures", "relatedExercises": [] },
+        { "id": "ch19-05-macros", "title": "Macros", "relatedExercises": ["macros1", "macros2", "macros3", "macros4"] }
+      ]
+    },
+    {
+      "id": "ch20-web-server",
+      "title": "Final Project: Building a Multithreaded Web Server",
+      "sections": [
+        { "id": "ch20-00-web-server", "title": "Building a Multithreaded Web Server", "relatedExercises": ["threads1", "threads2", "threads3"] }
+      ]
+    },
+    {
+      "id": "ch21-appendix",
+      "title": "Appendix",
+      "sections": [
+        { "id": "ch21-01-keywords", "title": "A - Keywords", "relatedExercises": [] },
+        { "id": "ch21-02-operators", "title": "B - Operators and Symbols", "relatedExercises": [] },
+        { "id": "ch21-03-derivable-traits", "title": "C - Derivable Traits", "relatedExercises": [] },
+        { "id": "ch21-04-useful-tools", "title": "D - Useful Development Tools", "relatedExercises": [] },
+        { "id": "ch21-05-editions", "title": "E - Editions", "relatedExercises": [] }
+      ]
+    }
+  ]
+}

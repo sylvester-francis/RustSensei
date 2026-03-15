@@ -1,0 +1,17 @@
+{
+  "id": "macros2",
+  "title": "Macros 2",
+  "category": "macros",
+  "difficulty": "intermediate",
+  "description": "Macros can take arguments using designators like `$name:expr` for expressions.",
+  "instructions": "Fix the macro so it correctly uses arguments.",
+  "starterCode": "// TODO: Fix the macro - it should be defined before use\nfn main() {\n    my_macro!(\"Hello, macro!\");\n}\n\nmacro_rules! my_macro {\n    ($val:expr) => {\n        println!(\"Look at this value: {}\", $val);\n    };\n}",
+  "hints": [
+    "In Rust, macros must be defined before they are used in the source file.",
+    "Move the macro definition before the main function.",
+    "Alternatively, you can use #[macro_use] for modules."
+  ],
+  "solution": "macro_rules! my_macro {\n    ($val:expr) => {\n        println!(\"Look at this value: {}\", $val);\n    };\n}\n\nfn main() {\n    my_macro!(\"Hello, macro!\");\n}",
+  "explanation": "Unlike functions, macros must be defined before they are used in the source file. This is because macro expansion happens during compilation, before the code is fully analyzed. The `$val:expr` pattern matches any Rust expression and binds it to `$val`, which can then be used in the macro body.",
+  "relatedBookSection": "ch19-06-macros"
+}

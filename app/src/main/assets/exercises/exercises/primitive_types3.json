@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types3",
+  "title": "Primitive Types 3",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "Arrays in Rust have a fixed size and contain elements of the same type. The type annotation is [Type; length].",
+  "instructions": "Create an array with the correct syntax.",
+  "starterCode": "fn main() {\n    let a = ???;\n\n    if a.len() >= 3 {\n        println!(\"The array has at least 3 elements.\");\n    } else {\n        println!(\"Not enough elements!\");\n    }\n\n    println!(\"First element: {}\", a[0]);\n}",
+  "hints": [
+    "Arrays are created with square brackets: [element1, element2, ...]",
+    "All elements must be the same type.",
+    "Try: let a = [1, 2, 3, 4, 5];"
+  ],
+  "solution": "fn main() {\n    let a = [1, 2, 3, 4, 5];\n\n    if a.len() >= 3 {\n        println!(\"The array has at least 3 elements.\");\n    } else {\n        println!(\"Not enough elements!\");\n    }\n\n    println!(\"First element: {}\", a[0]);\n}",
+  "explanation": "Arrays in Rust are fixed-size collections of elements of the same type. They are declared with square brackets, and their type is `[T; N]` where T is the element type and N is the length. Arrays are allocated on the stack and have a known size at compile time.",
+  "relatedBookSection": "ch03-02-data-types"
+}

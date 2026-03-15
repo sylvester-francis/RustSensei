@@ -1,0 +1,17 @@
+{
+  "id": "iterators4",
+  "title": "Iterators 4",
+  "category": "iterators",
+  "difficulty": "intermediate",
+  "description": "The `filter()` adapter keeps only elements that match a predicate.",
+  "instructions": "Use filter to select elements from a collection.",
+  "starterCode": "fn main() {\n    let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\n    // TODO: Use filter to keep only even numbers\n    let evens: Vec<&i32> = numbers\n        .iter()\n        // Add filter here\n        .collect();\n\n    assert_eq!(evens, vec![&2, &4, &6, &8, &10]);\n\n    // TODO: Use filter and map together to get squares of odd numbers\n    let odd_squares: Vec<i32> = numbers\n        .iter()\n        // Add filter and map here\n        .collect();\n\n    assert_eq!(odd_squares, vec![1, 9, 25, 49, 81]);\n    println!(\"All tests passed!\");\n}",
+  "hints": [
+    "filter takes a predicate closure that returns bool: .filter(|x| condition)",
+    "With filter on iter(), the closure receives &&i32, so use **x or |&&x|.",
+    "Chain filter and map: .filter(|&&x| x % 2 != 0).map(|&x| x * x)"
+  ],
+  "solution": "fn main() {\n    let numbers = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];\n\n    let evens: Vec<&i32> = numbers\n        .iter()\n        .filter(|&&x| x % 2 == 0)\n        .collect();\n\n    assert_eq!(evens, vec![&2, &4, &6, &8, &10]);\n\n    let odd_squares: Vec<i32> = numbers\n        .iter()\n        .filter(|&&x| x % 2 != 0)\n        .map(|&x| x * x)\n        .collect();\n\n    assert_eq!(odd_squares, vec![1, 9, 25, 49, 81]);\n    println!(\"All tests passed!\");\n}",
+  "explanation": "The `filter()` method creates an iterator that only yields elements for which the predicate returns `true`. Note that filter passes references to the closure (to avoid moving elements), so with `iter()` you get `&&T`. You can destructure with `|&&x|` or dereference with `|x| **x % 2 == 0`. Chaining filter and map is a powerful functional programming pattern.",
+  "relatedBookSection": "ch13-02-iterators"
+}

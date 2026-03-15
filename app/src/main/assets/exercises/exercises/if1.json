@@ -1,0 +1,17 @@
+{
+  "id": "if1",
+  "title": "If 1",
+  "category": "if",
+  "difficulty": "beginner",
+  "description": "Rust uses if/else expressions for conditional logic. The condition must be a boolean.",
+  "instructions": "Complete the function to return the correct string based on the number.",
+  "starterCode": "pub fn bigger(a: i32, b: i32) -> i32 {\n    // Complete this function to return the bigger number.\n    // If both are equal, either is fine.\n}\n\nfn main() {\n    println!(\"{}\", bigger(10, 20));\n}",
+  "hints": [
+    "Use an if/else expression to compare a and b.",
+    "Remember that if/else in Rust is an expression that returns a value.",
+    "You can write: if a > b { a } else { b }"
+  ],
+  "solution": "pub fn bigger(a: i32, b: i32) -> i32 {\n    if a > b {\n        a\n    } else {\n        b\n    }\n}\n\nfn main() {\n    println!(\"{}\", bigger(10, 20));\n}",
+  "explanation": "The `if` expression in Rust evaluates a boolean condition and executes the corresponding block. Unlike many languages, `if` in Rust is an expression, meaning it returns a value. Both branches must return the same type.",
+  "relatedBookSection": "ch03-05-control-flow"
+}

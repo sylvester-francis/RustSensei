@@ -1,0 +1,17 @@
+{
+  "id": "arc1",
+  "title": "Arc 1",
+  "category": "smart_pointers",
+  "difficulty": "advanced",
+  "description": "Arc (Atomically Reference Counted) allows multiple threads to share ownership of data safely.",
+  "instructions": "Use Arc to share data between threads.",
+  "starterCode": "use std::sync::Arc;\nuse std::thread;\n\nfn main() {\n    let numbers = Arc::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);\n    let mut handles = vec![];\n\n    for offset in 0..8 {\n        // TODO: Clone the Arc and move it into the thread\n        let handle = thread::spawn(move || {\n            let sum: i32 = numbers.iter().filter(|&&n| n % 2 == offset % 2).sum();\n            println!(\"Thread {offset}: sum = {sum}\");\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n}",
+  "hints": [
+    "Arc::clone() creates a new reference to the same data.",
+    "Clone the Arc before the move closure: let numbers = Arc::clone(&numbers);",
+    "Each thread gets its own Arc, which increments the reference count atomically."
+  ],
+  "solution": "use std::sync::Arc;\nuse std::thread;\n\nfn main() {\n    let numbers = Arc::new(vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);\n    let mut handles = vec![];\n\n    for offset in 0..8 {\n        let numbers = Arc::clone(&numbers);\n        let handle = thread::spawn(move || {\n            let sum: i32 = numbers.iter().filter(|&&n| n % 2 == offset % 2).sum();\n            println!(\"Thread {offset}: sum = {sum}\");\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n}",
+  "explanation": "Arc<T> (Atomic Reference Counting) enables safe shared ownership across threads. Unlike Rc<T>, Arc uses atomic operations for its reference count, making it thread-safe. Call `Arc::clone(&arc)` to create a new handle - this is cheap (just incrementing a counter, no data copy). When the last Arc is dropped, the data is freed.",
+  "relatedBookSection": "ch16-03-shared-state"
+}

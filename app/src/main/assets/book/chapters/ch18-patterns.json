@@ -1,0 +1,57 @@
+{
+  "id": "ch18-patterns",
+  "title": "Patterns and Matching",
+  "sections": [
+    {
+      "id": "ch18-01-where-patterns",
+      "title": "All the Places Patterns Can Be Used",
+      "content": "Patterns pop up in a number of places in Rust, and you've been using them a lot without realizing it! This section discusses all the places where patterns are valid.\n\n### match Arms\n\nAs discussed in Chapter 6, we use patterns in the arms of `match` expressions. Formally, `match` expressions are defined as the keyword `match`, a value to match on, and one or more match arms that consist of a pattern and an expression to run if the value matches that arm's pattern:\n\n```rust\nmatch VALUE {\n    PATTERN => EXPRESSION,\n    PATTERN => EXPRESSION,\n    PATTERN => EXPRESSION,\n}\n```\n\nOne requirement for `match` expressions is that they need to be *exhaustive* in the sense that all possibilities for the value in the `match` expression must be accounted for.\n\n### Conditional if let Expressions\n\nIn Chapter 6 we discussed how to use `if let` expressions mainly as a shorter way to write the equivalent of a `match` that only matches one case. Optionally, `if let` can have a corresponding `else` containing code to run if the pattern in the `if let` doesn't match.\n\nIt's also possible to mix and match `if let`, `else if`, and `else if let` expressions:\n\n```rust\nfn main() {\n    let favorite_color: Option<&str> = None;\n    let is_tuesday = false;\n    let age: Result<u8, _> = \"34\".parse();\n\n    if let Some(color) = favorite_color {\n        println!(\"Using your favorite color, {color}, as the background\");\n    } else if is_tuesday {\n        println!(\"Tuesday is green day!\");\n    } else if let Ok(age) = age {\n        if age > 30 {\n            println!(\"Using purple as the background color\");\n        } else {\n            println!(\"Using orange as the background color\");\n        }\n    } else {\n        println!(\"Using blue as the background color\");\n    }\n}\n```\n\nThe downside of using `if let` expressions is that the compiler doesn't check for exhaustiveness, whereas with `match` expressions it does.\n\n### while let Conditional Loops\n\nSimilar in construction to `if let`, the `while let` conditional loop allows a `while` loop to run for as long as a pattern continues to match:\n\n```rust\nlet mut stack = Vec::new();\nstack.push(1);\nstack.push(2);\nstack.push(3);\n\nwhile let Some(top) = stack.pop() {\n    println!(\"{top}\");\n}\n```\n\n### for Loops\n\nIn a `for` loop, the value that directly follows the keyword `for` is a pattern. For example, in `for x in y`, the `x` is the pattern:\n\n```rust\nlet v = vec!['a', 'b', 'c'];\n\nfor (index, value) in v.iter().enumerate() {\n    println!(\"{value} is at index {index}\");\n}\n```\n\n### let Statements\n\nEven the `let` statement uses a pattern! More formally, a `let` statement looks like this: `let PATTERN = EXPRESSION;`\n\n```rust\nlet (x, y, z) = (1, 2, 3);\n```\n\n### Function Parameters\n\nFunction parameters can also be patterns:\n\n```rust\nfn print_coordinates(&(x, y): &(i32, i32)) {\n    println!(\"Current location: ({x}, {y})\");\n}\n\nfn main() {\n    let point = (3, 5);\n    print_coordinates(&point);\n}\n```\n\nClosures are similar to functions, so we can use patterns in closure parameter lists in the same way.",
+      "codeExamples": [
+        {
+          "description": "Patterns in different contexts",
+          "code": "// match arms\nmatch value {\n    1 => println!(\"one\"),\n    2 => println!(\"two\"),\n    _ => println!(\"other\"),\n}\n\n// let destructuring\nlet (x, y) = (1, 2);\n\n// for loop pattern\nfor (i, val) in v.iter().enumerate() {\n    println!(\"{i}: {val}\");\n}"
+        },
+        {
+          "description": "Function parameter patterns",
+          "code": "fn print_coordinates(&(x, y): &(i32, i32)) {\n    println!(\"Current location: ({x}, {y})\");\n}"
+        }
+      ],
+      "keyTerms": ["pattern", "match", "if let", "while let", "for", "let", "destructuring"],
+      "relatedExercises": ["enums1", "enums2", "enums3"]
+    },
+    {
+      "id": "ch18-02-refutability",
+      "title": "Refutability: Whether a Pattern Might Fail to Match",
+      "content": "Patterns come in two forms: refutable and irrefutable. Patterns that will match for any possible value passed are *irrefutable*. An example would be `x` in the statement `let x = 5;` because `x` matches anything and therefore cannot fail to match. Patterns that can fail to match for some possible value are *refutable*. An example would be `Some(x)` in the expression `if let Some(x) = a_value` because if the value in the `a_value` variable is `None` rather than `Some`, the `Some(x)` pattern will not match.\n\nFunction parameters, `let` statements, and `for` loops can only accept irrefutable patterns, because the program cannot do anything meaningful when values don't match. The `if let` and `while let` expressions accept refutable and irrefutable patterns, but the compiler warns against irrefutable patterns because by definition they're intended to handle possible failure.\n\nIn general, you shouldn't have to worry about the distinction between refutable and irrefutable patterns; however, you do need to be familiar with the concept of refutability so you can respond when you see it in an error message.\n\nLet's look at what happens when we try to use a refutable pattern where Rust requires an irrefutable pattern and vice versa:\n\n```rust\n// This won't compile: refutable pattern in let statement\nlet Some(x) = some_option_value; // ERROR\n\n// Fix: use if let instead\nif let Some(x) = some_option_value {\n    println!(\"{x}\");\n}\n```\n\nIf we give `if let` an irrefutable pattern (a pattern that will always match), the compiler will give a warning:\n\n```rust\n// Warning: irrefutable pattern in if let\nif let x = 5 {\n    println!(\"{x}\");\n};\n// Better: just use let\nlet x = 5;\n```\n\nFor this reason, match arms must use refutable patterns, except for the last arm, which should match any remaining values with an irrefutable pattern.",
+      "codeExamples": [
+        {
+          "description": "Refutable vs irrefutable patterns",
+          "code": "// Irrefutable: always matches\nlet x = 5;\nlet (a, b) = (1, 2);\n\n// Refutable: might not match\nif let Some(val) = some_option {\n    println!(\"{val}\");\n}\n\n// Error: refutable pattern in let\n// let Some(x) = some_option; // won't compile"
+        }
+      ],
+      "keyTerms": ["refutable", "irrefutable", "pattern matching", "compiler warning"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch18-03-pattern-syntax",
+      "title": "Pattern Syntax",
+      "content": "This section gathers all the syntax valid in patterns and discusses why and when you might want to use each one.\n\n### Matching Literals\n\nYou can match patterns against literals directly:\n\n```rust\nlet x = 1;\nmatch x {\n    1 => println!(\"one\"),\n    2 => println!(\"two\"),\n    3 => println!(\"three\"),\n    _ => println!(\"anything\"),\n}\n```\n\n### Matching Named Variables\n\nNamed variables are irrefutable patterns that match any value. However, there is a complication when you use named variables in `match` expressions because `match` starts a new scope:\n\n```rust\nlet x = Some(5);\nlet y = 10;\n\nmatch x {\n    Some(50) => println!(\"Got 50\"),\n    Some(y) => println!(\"Matched, y = {y}\"), // This y shadows the outer y\n    _ => println!(\"Default case, x = {x:?}\"),\n}\n\nprintln!(\"at the end: x = {x:?}, y = {y}\");\n```\n\n### Multiple Patterns\n\nIn `match` expressions, you can match multiple patterns using the `|` syntax, which is the pattern *or* operator:\n\n```rust\nlet x = 1;\nmatch x {\n    1 | 2 => println!(\"one or two\"),\n    3 => println!(\"three\"),\n    _ => println!(\"anything\"),\n}\n```\n\n### Matching Ranges of Values with ..=\n\nThe `..=` syntax allows us to match to an inclusive range of values:\n\n```rust\nlet x = 5;\nmatch x {\n    1..=5 => println!(\"one through five\"),\n    _ => println!(\"something else\"),\n}\n\nlet x = 'c';\nmatch x {\n    'a'..='j' => println!(\"early ASCII letter\"),\n    'k'..='z' => println!(\"late ASCII letter\"),\n    _ => println!(\"something else\"),\n}\n```\n\n### Destructuring to Break Apart Values\n\nWe can use patterns to destructure structs, enums, and tuples:\n\n```rust\nstruct Point {\n    x: i32,\n    y: i32,\n}\n\nfn main() {\n    let p = Point { x: 0, y: 7 };\n    let Point { x: a, y: b } = p;\n    // Shorthand when variable names match field names:\n    let Point { x, y } = p;\n\n    match p {\n        Point { x, y: 0 } => println!(\"On the x axis at {x}\"),\n        Point { x: 0, y } => println!(\"On the y axis at {y}\"),\n        Point { x, y } => println!(\"On neither axis: ({x}, {y})\"),\n    }\n}\n```\n\n### Ignoring Values in a Pattern\n\nYou can ignore entire values with `_`, parts of a value with a nested `_`, unused variables with a name starting with `_`, or remaining parts with `..`:\n\n```rust\nfn foo(_: i32, y: i32) {\n    println!(\"This code only uses the y parameter: {y}\");\n}\n\nlet numbers = (2, 4, 8, 16, 32);\nmatch numbers {\n    (first, .., last) => println!(\"Some numbers: {first}, {last}\"),\n}\n```\n\n### Extra Conditionals with Match Guards\n\nA *match guard* is an additional `if` condition, specified after the pattern in a `match` arm, that must also match for that arm to be chosen:\n\n```rust\nlet num = Some(4);\nmatch num {\n    Some(x) if x % 2 == 0 => println!(\"{x} is even\"),\n    Some(x) => println!(\"{x} is odd\"),\n    None => (),\n}\n```\n\n### @ Bindings\n\nThe *at* operator `@` lets us create a variable that holds a value at the same time as we're testing that value for a pattern match:\n\n```rust\nenum Message {\n    Hello { id: i32 },\n}\n\nlet msg = Message::Hello { id: 5 };\nmatch msg {\n    Message::Hello { id: id_variable @ 3..=7 } => {\n        println!(\"Found an id in range: {id_variable}\")\n    }\n    Message::Hello { id: 10..=12 } => {\n        println!(\"Found an id in another range\")\n    }\n    Message::Hello { id } => println!(\"Found some other id: {id}\"),\n}\n```\n\nBy specifying `id_variable @` before the range `3..=7`, we're capturing whatever value matched the range while also testing that the value matched the range pattern.",
+      "codeExamples": [
+        {
+          "description": "Multiple patterns and ranges",
+          "code": "let x = 5;\nmatch x {\n    1 | 2 => println!(\"one or two\"),\n    3..=5 => println!(\"three through five\"),\n    _ => println!(\"something else\"),\n}"
+        },
+        {
+          "description": "Destructuring structs",
+          "code": "let Point { x, y } = p;\nmatch p {\n    Point { x, y: 0 } => println!(\"On x axis at {x}\"),\n    Point { x: 0, y } => println!(\"On y axis at {y}\"),\n    Point { x, y } => println!(\"({x}, {y})\"),\n}"
+        },
+        {
+          "description": "Match guards and @ bindings",
+          "code": "match num {\n    Some(x) if x % 2 == 0 => println!(\"{x} is even\"),\n    Some(x) => println!(\"{x} is odd\"),\n    None => (),\n}\n\nmatch msg {\n    Message::Hello { id: id_var @ 3..=7 } => println!(\"In range: {id_var}\"),\n    _ => (),\n}"
+        }
+      ],
+      "keyTerms": ["literal pattern", "multiple patterns", "|", "range pattern", "..=", "destructuring", "_", "..", "match guard", "@ binding"],
+      "relatedExercises": ["enums1", "enums2", "enums3"]
+    }
+  ]
+}

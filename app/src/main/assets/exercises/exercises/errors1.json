@@ -1,0 +1,17 @@
+{
+  "id": "errors1",
+  "title": "Errors 1",
+  "category": "error_handling",
+  "difficulty": "beginner",
+  "description": "Rust uses the `Result` type for recoverable errors. Functions can return `Ok(value)` or `Err(error)`.",
+  "instructions": "Make the function return an error for invalid input instead of panicking.",
+  "starterCode": "pub fn generate_nametag_text(name: String) -> Result<String, String> {\n    if name.is_empty() {\n        // TODO: Return an Err explaining the problem\n        panic!(\"Empty names not allowed!\");\n    } else {\n        // TODO: Return an Ok with the nametag text\n        panic!(\"Not implemented\");\n    }\n}\n\nfn main() {\n    match generate_nametag_text(\"Alice\".to_string()) {\n        Ok(tag) => println!(\"Tag: {tag}\"),\n        Err(e) => println!(\"Error: {e}\"),\n    }\n    match generate_nametag_text(\"\".to_string()) {\n        Ok(tag) => println!(\"Tag: {tag}\"),\n        Err(e) => println!(\"Error: {e}\"),\n    }\n}",
+  "hints": [
+    "Use `Err(String)` to return an error value.",
+    "Use `Ok(String)` to return a success value.",
+    "Return Ok(format!(\"Hi! My name is {name}\")) for the success case."
+  ],
+  "solution": "pub fn generate_nametag_text(name: String) -> Result<String, String> {\n    if name.is_empty() {\n        Err(\"Empty names not allowed!\".to_string())\n    } else {\n        Ok(format!(\"Hi! My name is {name}\"))\n    }\n}\n\nfn main() {\n    match generate_nametag_text(\"Alice\".to_string()) {\n        Ok(tag) => println!(\"Tag: {tag}\"),\n        Err(e) => println!(\"Error: {e}\"),\n    }\n    match generate_nametag_text(\"\".to_string()) {\n        Ok(tag) => println!(\"Tag: {tag}\"),\n        Err(e) => println!(\"Error: {e}\"),\n    }\n}",
+  "explanation": "The `Result<T, E>` type is Rust's way of handling recoverable errors. Instead of panicking (crashing), functions return `Ok(value)` for success or `Err(error)` for failure. The caller must then handle both cases, typically with `match`. This makes error handling explicit and compile-time checked.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

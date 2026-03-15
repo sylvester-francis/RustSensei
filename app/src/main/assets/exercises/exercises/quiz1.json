@@ -1,0 +1,17 @@
+{
+  "id": "quiz1",
+  "title": "Quiz 1",
+  "category": "quiz",
+  "difficulty": "beginner",
+  "description": "This quiz tests your knowledge of variables, functions, if expressions, and primitive types (Chapters 1-6).",
+  "instructions": "Fix all the issues in this program that combines concepts from the first several chapters.",
+  "starterCode": "// Quiz 1: Test your understanding of basic Rust concepts\n\nfn calculate_price_of_apples(quantity: i32) -> i32 {\n    if quantity > 40 {\n        quantity\n    }\n    // Something is missing for quantities <= 40\n}\n\nfn main() {\n    let price1 = calculate_price_of_apples(35);\n    println!(\"35 apples cost {} cents\", price1);\n    assert_eq!(price1, 70);\n\n    let price2 = calculate_price_of_apples(65);\n    println!(\"65 apples cost {} cents\", price2);\n    assert_eq!(price2, 65);\n}",
+  "hints": [
+    "The function is missing an `else` branch for quantities <= 40.",
+    "When quantity > 40, price is quantity (1 cent each). When <= 40, price is quantity * 2.",
+    "Add an `else` branch: else { quantity * 2 }"
+  ],
+  "solution": "fn calculate_price_of_apples(quantity: i32) -> i32 {\n    if quantity > 40 {\n        quantity\n    } else {\n        quantity * 2\n    }\n}\n\nfn main() {\n    let price1 = calculate_price_of_apples(35);\n    println!(\"35 apples cost {} cents\", price1);\n    assert_eq!(price1, 70);\n\n    let price2 = calculate_price_of_apples(65);\n    println!(\"65 apples cost {} cents\", price2);\n    assert_eq!(price2, 65);\n}",
+  "explanation": "This quiz combines functions, if/else expressions, and return values. When an `if` is used as an expression (for the return value), all branches must return the same type, and you must handle all cases. The function uses bulk pricing: more than 40 apples cost 1 cent each, otherwise 2 cents each.",
+  "relatedBookSection": "ch03-05-control-flow"
+}

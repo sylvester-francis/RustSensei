@@ -1,0 +1,17 @@
+{
+  "id": "hashmaps1",
+  "title": "Hashmaps 1",
+  "category": "hashmaps",
+  "difficulty": "beginner",
+  "description": "HashMap stores key-value pairs. You need to import it from std::collections.",
+  "instructions": "Complete the function to create a HashMap of fruit baskets.",
+  "starterCode": "use std::collections::HashMap;\n\nfn fruit_basket() -> HashMap<String, u32> {\n    let mut basket = // TODO: Create a new HashMap\n\n    // Two bananas are already given\n    basket.insert(String::from(\"banana\"), 2);\n\n    // TODO: Add more fruits to the basket\n    // At least \"apple\" and \"mango\" with quantities > 0\n\n    basket\n}\n\nfn main() {\n    let basket = fruit_basket();\n    assert!(basket.len() >= 3);\n    assert!(basket.values().all(|v| *v > 0));\n    println!(\"Fruit basket: {:?}\", basket);\n}",
+  "hints": [
+    "Create a HashMap with `HashMap::new()`.",
+    "Use `.insert(key, value)` to add entries.",
+    "Add entries like: basket.insert(String::from(\"apple\"), 3);"
+  ],
+  "solution": "use std::collections::HashMap;\n\nfn fruit_basket() -> HashMap<String, u32> {\n    let mut basket = HashMap::new();\n\n    basket.insert(String::from(\"banana\"), 2);\n    basket.insert(String::from(\"apple\"), 3);\n    basket.insert(String::from(\"mango\"), 1);\n\n    basket\n}\n\nfn main() {\n    let basket = fruit_basket();\n    assert!(basket.len() >= 3);\n    assert!(basket.values().all(|v| *v > 0));\n    println!(\"Fruit basket: {:?}\", basket);\n}",
+  "explanation": "HashMap<K, V> stores a mapping of keys to values. It must be imported from `std::collections`. Create one with `HashMap::new()` and add entries with `.insert(key, value)`. If you insert a key that already exists, the old value is replaced.",
+  "relatedBookSection": "ch08-03-hash-maps"
+}

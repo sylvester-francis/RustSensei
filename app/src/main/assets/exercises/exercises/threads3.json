@@ -1,0 +1,17 @@
+{
+  "id": "threads3",
+  "title": "Threads 3",
+  "category": "threads",
+  "difficulty": "advanced",
+  "description": "Channels provide message passing between threads, following Rust's motto: 'Do not communicate by sharing memory; instead, share memory by communicating.'",
+  "instructions": "Use channels to send messages between threads.",
+  "starterCode": "use std::sync::mpsc;\nuse std::thread;\nuse std::time::Duration;\n\nfn main() {\n    let (tx, rx) = mpsc::channel();\n\n    let mut handles = vec![];\n\n    for i in 0..5 {\n        // TODO: Clone tx for each thread and send a message\n        let handle = thread::spawn(move || {\n            let msg = format!(\"Message from thread {i}\");\n            // Send the message\n        });\n        handles.push(handle);\n    }\n\n    // TODO: Receive all messages\n    for msg in rx {\n        println!(\"Received: {msg}\");\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n}",
+  "hints": [
+    "Clone the transmitter for each thread: let tx = tx.clone();",
+    "Use tx.send(msg).unwrap() to send a message.",
+    "Drop the original tx so the channel closes when all threads finish."
+  ],
+  "solution": "use std::sync::mpsc;\nuse std::thread;\nuse std::time::Duration;\n\nfn main() {\n    let (tx, rx) = mpsc::channel();\n\n    let mut handles = vec![];\n\n    for i in 0..5 {\n        let tx = tx.clone();\n        let handle = thread::spawn(move || {\n            let msg = format!(\"Message from thread {i}\");\n            tx.send(msg).unwrap();\n        });\n        handles.push(handle);\n    }\n\n    drop(tx);\n\n    for msg in rx {\n        println!(\"Received: {msg}\");\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n}",
+  "explanation": "Channels (`mpsc::channel`) implement message passing between threads. `mpsc` stands for Multiple Producer, Single Consumer. Each thread gets a cloned transmitter (`tx`) and sends messages to the single receiver (`rx`). Iterating over `rx` blocks waiting for messages and ends when all transmitters are dropped. You must drop the original `tx` so only the thread clones remain.",
+  "relatedBookSection": "ch16-02-message-passing"
+}

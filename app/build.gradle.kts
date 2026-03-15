@@ -26,7 +26,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // P1 Fix #6: enable R8 for production (proguard-rules.pro has @Keep rules)
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

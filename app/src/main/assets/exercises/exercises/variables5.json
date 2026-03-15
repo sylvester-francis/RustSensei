@@ -1,0 +1,17 @@
+{
+  "id": "variables5",
+  "title": "Variables 5",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "Rust allows shadowing, where you declare a new variable with the same name. This is different from mutation.",
+  "instructions": "Fix the code using shadowing to change the type of the variable.",
+  "starterCode": "fn main() {\n    let number = \"T-H-R-E-E\";\n    println!(\"Spell a number: {}\", number);\n    number = 3;\n    println!(\"Number plus two is: {}\", number + 2);\n}",
+  "hints": [
+    "Shadowing allows you to reuse a variable name with a new `let` binding.",
+    "Unlike `mut`, shadowing lets you change the type of the variable.",
+    "Add `let` before the second assignment to shadow the variable."
+  ],
+  "solution": "fn main() {\n    let number = \"T-H-R-E-E\";\n    println!(\"Spell a number: {}\", number);\n    let number = 3;\n    println!(\"Number plus two is: {}\", number + 2);\n}",
+  "explanation": "Shadowing in Rust creates a new variable that happens to have the same name. It is different from `mut` because you can change the variable's type. The original variable is effectively hidden by the new one in the same or inner scope.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

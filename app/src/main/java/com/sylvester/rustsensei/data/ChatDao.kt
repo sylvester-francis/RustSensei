@@ -23,6 +23,9 @@ interface ChatDao {
     @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY timestamp ASC")
     suspend fun getMessagesForConversationOnce(conversationId: Long): List<ChatMessage>
 
+    @Query("SELECT * FROM conversations WHERE id = :conversationId")
+    suspend fun getConversation(conversationId: Long): Conversation?
+
     @Query("SELECT * FROM conversations ORDER BY updatedAt DESC")
     fun getAllConversations(): Flow<List<Conversation>>
 

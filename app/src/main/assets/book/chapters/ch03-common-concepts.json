@@ -1,0 +1,111 @@
+{
+  "id": "ch03-common-concepts",
+  "title": "Common Programming Concepts",
+  "sections": [
+    {
+      "id": "ch03-01-variables-and-mutability",
+      "title": "Variables and Mutability",
+      "content": "By default, variables in Rust are immutable. This is one of many nudges Rust gives you to write your code in a way that takes advantage of the safety and easy concurrency that Rust offers. However, you still have the option to make your variables mutable. Let's explore how and why Rust encourages you to favor immutability and why sometimes you might want to opt out.\n\nWhen a variable is immutable, once a value is bound to a name, you can't change that value. To illustrate this, generate a new project called *variables* in your projects directory by using `cargo new variables`.\n\nIf you try to reassign an immutable variable, the Rust compiler will give you an error:\n\n```rust\nfn main() {\n    let x = 5;\n    println!(\"The value of x is: {x}\");\n    x = 6; // ERROR: cannot assign twice to immutable variable\n    println!(\"The value of x is: {x}\");\n}\n```\n\nThis example shows how the compiler helps you find errors in your programs. Compiler errors can be frustrating, but really they only mean your program isn't safely doing what you want it to do yet.\n\nYou can make variables mutable by adding `mut` in front of the variable name:\n\n```rust\nfn main() {\n    let mut x = 5;\n    println!(\"The value of x is: {x}\");\n    x = 6;\n    println!(\"The value of x is: {x}\");\n}\n```\n\n### Constants\n\nLike immutable variables, *constants* are values that are bound to a name and are not allowed to change, but there are a few differences between constants and variables. First, you aren't allowed to use `mut` with constants. Constants aren't just immutable by default -- they're always immutable. You declare constants using the `const` keyword instead of the `let` keyword, and the type of the value *must* be annotated:\n\n```rust\nconst THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;\n```\n\nConstants can be declared in any scope, including the global scope, which makes them useful for values that many parts of code need to know about. The last difference is that constants may be set only to a constant expression, not the result of a value that could only be computed at runtime.\n\n### Shadowing\n\nYou can declare a new variable with the same name as a previous variable. Rustaceans say that the first variable is *shadowed* by the second, which means that the second variable is what the compiler will see when you use the name of the variable. In effect, the second variable overshadows the first:\n\n```rust\nfn main() {\n    let x = 5;\n    let x = x + 1;\n    {\n        let x = x * 2;\n        println!(\"The value of x in the inner scope is: {x}\"); // 12\n    }\n    println!(\"The value of x is: {x}\"); // 6\n}\n```\n\nShadowing is different from marking a variable as `mut` because we'll get a compile-time error if we accidentally try to reassign to this variable without using the `let` keyword. By using `let`, we can perform a few transformations on a value but have the variable be immutable after those transformations have been completed.\n\nThe other difference between `mut` and shadowing is that because we're effectively creating a new variable when we use the `let` keyword again, we can change the type of the value but reuse the same name. For example, say our program asks a user to show how many spaces they want between some text by inputting space characters, and then we want to store that input as a number:\n\n```rust\nlet spaces = \"   \";\nlet spaces = spaces.len();\n```\n\nThe first `spaces` variable is a string type and the second `spaces` variable is a number type. Shadowing thus spares us from having to come up with different names.",
+      "codeExamples": [
+        {
+          "description": "Immutable variable error",
+          "code": "fn main() {\n    let x = 5;\n    println!(\"The value of x is: {x}\");\n    x = 6; // ERROR!\n}"
+        },
+        {
+          "description": "Mutable variable",
+          "code": "fn main() {\n    let mut x = 5;\n    println!(\"The value of x is: {x}\");\n    x = 6;\n    println!(\"The value of x is: {x}\");\n}"
+        },
+        {
+          "description": "Constants",
+          "code": "const THREE_HOURS_IN_SECONDS: u32 = 60 * 60 * 3;"
+        },
+        {
+          "description": "Shadowing",
+          "code": "fn main() {\n    let x = 5;\n    let x = x + 1;\n    {\n        let x = x * 2;\n        println!(\"The value of x in the inner scope is: {x}\");\n    }\n    println!(\"The value of x is: {x}\");\n}"
+        }
+      ],
+      "keyTerms": ["immutable", "mutable", "mut", "const", "shadowing", "let"],
+      "relatedExercises": ["variables1", "variables2", "variables3", "variables4", "variables5", "variables6"]
+    },
+    {
+      "id": "ch03-02-data-types",
+      "title": "Data Types",
+      "content": "Every value in Rust is of a certain *data type*, which tells Rust what kind of data is being specified so it knows how to work with that data. We'll look at two data type subsets: scalar and compound.\n\nKeep in mind that Rust is a *statically typed* language, which means that it must know the types of all variables at compile time. The compiler can usually infer what type we want to use based on the value and how we use it. In cases when many types are possible, we must add a type annotation:\n\n```rust\nlet guess: u32 = \"42\".parse().expect(\"Not a number!\");\n```\n\n### Scalar Types\n\nA *scalar* type represents a single value. Rust has four primary scalar types: integers, floating-point numbers, Booleans, and characters.\n\n**Integer Types**: An integer is a number without a fractional component. Rust's integer types are: `i8`, `i16`, `i32`, `i64`, `i128`, `isize` for signed integers, and `u8`, `u16`, `u32`, `u64`, `u128`, `usize` for unsigned integers. Each signed variant can store numbers from -(2^(n-1)) to 2^(n-1) - 1 inclusive. Unsigned variants can store numbers from 0 to 2^n - 1. The `isize` and `usize` types depend on the architecture of the computer your program is running on: 64 bits on a 64-bit architecture and 32 bits on a 32-bit architecture.\n\nYou can write integer literals in any of the forms: decimal (`98_222`), hex (`0xff`), octal (`0o77`), binary (`0b1111_0000`), and byte (`b'A'`, for `u8` only). Number literals that can be multiple numeric types allow a type suffix, such as `57u8`, to designate the type. Number literals can also use `_` as a visual separator to make the number easier to read, such as `1_000`.\n\n**Floating-Point Types**: Rust has two primitive types for floating-point numbers: `f32` and `f64`. The default type is `f64` because on modern CPUs, it's roughly the same speed as `f32` but is capable of more precision. All floating-point types are signed.\n\n```rust\nfn main() {\n    let x = 2.0; // f64\n    let y: f32 = 3.0; // f32\n}\n```\n\n**The Boolean Type**: A Boolean type in Rust has two possible values: `true` and `false`. Booleans are one byte in size. The Boolean type in Rust is specified using `bool`.\n\n**The Character Type**: Rust's `char` type is the language's most primitive alphabetic type. Note that we specify `char` literals with single quotes, as opposed to string literals, which use double quotes. Rust's `char` type is four bytes in size and represents a Unicode Scalar Value, which means it can represent a lot more than just ASCII.\n\n### Compound Types\n\n*Compound types* can group multiple values into one type. Rust has two primitive compound types: tuples and arrays.\n\n**The Tuple Type**: A *tuple* is a general way of grouping together a number of values with a variety of types into one compound type. Tuples have a fixed length: once declared, they cannot grow or shrink in size.\n\n```rust\nfn main() {\n    let tup: (i32, f64, u8) = (500, 6.4, 1);\n    let (x, y, z) = tup;\n    println!(\"The value of y is: {y}\");\n    let five_hundred = tup.0;\n    let six_point_four = tup.1;\n    let one = tup.2;\n}\n```\n\n**The Array Type**: Another way to have a collection of multiple values is with an *array*. Unlike a tuple, every element of an array must have the same type. Unlike arrays in some other languages, arrays in Rust have a fixed length.\n\n```rust\nfn main() {\n    let a = [1, 2, 3, 4, 5];\n    let a: [i32; 5] = [1, 2, 3, 4, 5];\n    let a = [3; 5]; // same as [3, 3, 3, 3, 3]\n    let first = a[0];\n    let second = a[1];\n}\n```\n\nArrays are useful when you want your data allocated on the stack rather than the heap, or when you want to ensure you always have a fixed number of elements. A vector is a similar collection type provided by the standard library that is allowed to grow or shrink in size.",
+      "codeExamples": [
+        {
+          "description": "Integer and floating-point types",
+          "code": "fn main() {\n    let x = 2.0; // f64\n    let y: f32 = 3.0; // f32\n    let a: u8 = 255;\n    let b: i32 = -100;\n}"
+        },
+        {
+          "description": "Tuples",
+          "code": "fn main() {\n    let tup: (i32, f64, u8) = (500, 6.4, 1);\n    let (x, y, z) = tup;\n    println!(\"The value of y is: {y}\");\n}"
+        },
+        {
+          "description": "Arrays",
+          "code": "fn main() {\n    let a = [1, 2, 3, 4, 5];\n    let first = a[0];\n    let second = a[1];\n}"
+        }
+      ],
+      "keyTerms": ["scalar", "compound", "integer", "floating-point", "bool", "char", "tuple", "array", "type annotation", "isize", "usize"],
+      "relatedExercises": ["primitive_types1", "primitive_types2", "primitive_types3", "primitive_types4", "primitive_types5", "primitive_types6"]
+    },
+    {
+      "id": "ch03-03-functions",
+      "title": "Functions",
+      "content": "Functions are prevalent in Rust code. You've already seen one of the most important functions in the language: the `main` function, which is the entry point of many programs. You've also seen the `fn` keyword, which allows you to declare new functions.\n\nRust code uses *snake case* as the conventional style for function and variable names, in which all letters are lowercase and underscores separate words. Here's a program that contains an example function definition:\n\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n    another_function();\n}\n\nfn another_function() {\n    println!(\"Another function.\");\n}\n```\n\nWe define a function in Rust by entering `fn` followed by a function name and a set of parentheses. The curly brackets tell the compiler where the function body begins and ends. We can call any function we've defined by entering its name followed by a set of parentheses. Note that we defined `another_function` after the `main` function in the source code; we could have defined it before as well. Rust doesn't care where you define your functions, only that they're defined somewhere in a scope that can be seen by the caller.\n\n### Parameters\n\nWe can define functions to have *parameters*, which are special variables that are part of a function's signature. When a function has parameters, you can provide it with concrete values for those parameters. Technically, the concrete values are called *arguments*, but in casual conversation, people tend to use the words parameter and argument interchangeably.\n\n```rust\nfn main() {\n    another_function(5);\n}\n\nfn another_function(x: i32) {\n    println!(\"The value of x is: {x}\");\n}\n```\n\nIn function signatures, you *must* declare the type of each parameter. This is a deliberate decision in Rust's design: requiring type annotations in function definitions means the compiler almost never needs you to use them elsewhere in the code to figure out what type you mean.\n\n### Statements and Expressions\n\nFunction bodies are made up of a series of statements optionally ending in an expression. So far, the functions we've covered haven't included an ending expression, but you have seen an expression as part of a statement. Because Rust is an expression-based language, this is an important distinction to understand.\n\n*Statements* are instructions that perform some action and do not return a value. *Expressions* evaluate to a resultant value. Creating a variable and assigning a value to it with the `let` keyword is a statement. Function definitions are also statements.\n\nStatements do not return values. Therefore, you can't assign a `let` statement to another variable. Expressions evaluate to a value. A math operation, such as `5 + 6`, is an expression that evaluates to the value `11`. Calling a function is an expression. Calling a macro is an expression. A new scope block created with curly brackets is an expression:\n\n```rust\nfn main() {\n    let y = {\n        let x = 3;\n        x + 1\n    };\n    println!(\"The value of y is: {y}\"); // 4\n}\n```\n\nNote that the `x + 1` line doesn't have a semicolon at the end. Expressions do not include ending semicolons. If you add a semicolon to the end of an expression, you turn it into a statement, and it will then not return a value.\n\n### Functions with Return Values\n\nFunctions can return values to the code that calls them. We don't name return values, but we must declare their type after an arrow (`->`). In Rust, the return value of the function is synonymous with the value of the final expression in the block of the body of a function. You can return early from a function by using the `return` keyword, but most functions return the last expression implicitly:\n\n```rust\nfn five() -> i32 {\n    5\n}\n\nfn plus_one(x: i32) -> i32 {\n    x + 1\n}\n\nfn main() {\n    let x = five();\n    let y = plus_one(5);\n    println!(\"The value of x is: {x}\");\n    println!(\"The value of y is: {y}\");\n}\n```",
+      "codeExamples": [
+        {
+          "description": "Function with parameters",
+          "code": "fn main() {\n    print_labeled_measurement(5, 'h');\n}\n\nfn print_labeled_measurement(value: i32, unit_label: char) {\n    println!(\"The measurement is: {value}{unit_label}\");\n}"
+        },
+        {
+          "description": "Expressions in blocks",
+          "code": "fn main() {\n    let y = {\n        let x = 3;\n        x + 1\n    };\n    println!(\"The value of y is: {y}\");\n}"
+        },
+        {
+          "description": "Functions with return values",
+          "code": "fn five() -> i32 {\n    5\n}\n\nfn plus_one(x: i32) -> i32 {\n    x + 1\n}"
+        }
+      ],
+      "keyTerms": ["fn", "parameters", "arguments", "statement", "expression", "return value", "snake case"],
+      "relatedExercises": ["functions1", "functions2", "functions3", "functions4", "functions5"]
+    },
+    {
+      "id": "ch03-04-comments",
+      "title": "Comments",
+      "content": "All programmers strive to make their code easy to understand, but sometimes extra explanation is warranted. In these cases, programmers leave *comments* in their source code that the compiler will ignore but people reading the source code may find useful.\n\nIn Rust, the idiomatic comment style starts a comment with two slashes, and the comment continues until the end of the line. For comments that extend beyond a single line, you'll need to include `//` on each line:\n\n```rust\n// hello, world\n```\n\n```rust\n// So we're doing something complicated here, long enough that we need\n// multiple lines of comments to do it! Whew! Hopefully, this comment will\n// explain what's going on.\n```\n\nComments can also be placed at the end of lines containing code:\n\n```rust\nfn main() {\n    let lucky_number = 7; // I'm feeling lucky today\n}\n```\n\nBut you'll more often see them used in this format, with the comment on a separate line above the code it's annotating:\n\n```rust\nfn main() {\n    // I'm feeling lucky today\n    let lucky_number = 7;\n}\n```\n\nRust also has another kind of comment, documentation comments, which we'll discuss in Chapter 14. Documentation comments use `///` and support Markdown notation for formatting the text. They're placed just before the item they document:\n\n```rust\n/// Adds one to the number given.\n///\n/// # Examples\n///\n/// ```\n/// let arg = 5;\n/// let answer = my_crate::add_one(arg);\n/// assert_eq!(6, answer);\n/// ```\npub fn add_one(x: i32) -> i32 {\n    x + 1\n}\n```\n\nThere's also `//!` which adds documentation to the item that contains the comments, rather than to the items following the comments. This is typically used inside the crate root file (usually src/lib.rs) or inside a module to document the crate or the module as a whole.",
+      "codeExamples": [
+        {
+          "description": "Line comments",
+          "code": "// This is a comment\nfn main() {\n    let x = 5; // this is also a comment\n}"
+        },
+        {
+          "description": "Documentation comments",
+          "code": "/// Adds one to the number given.\n///\n/// # Examples\n///\n/// ```\n/// let answer = add_one(5);\n/// assert_eq!(6, answer);\n/// ```\npub fn add_one(x: i32) -> i32 {\n    x + 1\n}"
+        }
+      ],
+      "keyTerms": ["comments", "line comments", "documentation comments", "///", "//!"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch03-05-control-flow",
+      "title": "Control Flow",
+      "content": "The ability to run some code depending on whether a condition is `true` and to run some code repeatedly while a condition is `true` are basic building blocks in most programming languages. The most common constructs that let you control the flow of execution of Rust code are `if` expressions and loops.\n\n### if Expressions\n\nAn `if` expression allows you to branch your code depending on conditions. You provide a condition and then state, \"If this condition is met, run this block of code. If the condition is not met, do not run this block of code.\"\n\n```rust\nfn main() {\n    let number = 3;\n\n    if number < 5 {\n        println!(\"condition was true\");\n    } else {\n        println!(\"condition was false\");\n    }\n}\n```\n\nIt's also worth noting that the condition in this code *must* be a `bool`. If the condition isn't a `bool`, we'll get an error. Unlike languages such as Ruby and JavaScript, Rust will not automatically try to convert non-Boolean types to a Boolean.\n\nYou can use multiple conditions by combining `if` and `else` in an `else if` expression:\n\n```rust\nfn main() {\n    let number = 6;\n\n    if number % 4 == 0 {\n        println!(\"number is divisible by 4\");\n    } else if number % 3 == 0 {\n        println!(\"number is divisible by 3\");\n    } else if number % 2 == 0 {\n        println!(\"number is divisible by 2\");\n    } else {\n        println!(\"number is not divisible by 4, 3, or 2\");\n    }\n}\n```\n\nBecause `if` is an expression, we can use it on the right side of a `let` statement to assign the outcome to a variable:\n\n```rust\nfn main() {\n    let condition = true;\n    let number = if condition { 5 } else { 6 };\n    println!(\"The value of number is: {number}\");\n}\n```\n\nThe values that have the potential to be results from each arm of the `if` must be the same type.\n\n### Repetition with Loops\n\nRust has three kinds of loops: `loop`, `while`, and `for`. Let's try each one.\n\nThe `loop` keyword tells Rust to execute a block of code over and over again forever or until you explicitly tell it to stop. You can use `break` to stop the loop and `continue` to skip the rest of the current iteration:\n\n```rust\nfn main() {\n    let mut counter = 0;\n    let result = loop {\n        counter += 1;\n        if counter == 10 {\n            break counter * 2;\n        }\n    };\n    println!(\"The result is {result}\"); // 20\n}\n```\n\nYou can also return values from loops by adding the value you want returned after the `break` expression.\n\nIf you have loops within loops, `break` and `continue` apply to the innermost loop at that point. You can optionally specify a *loop label* on a loop that you can then use with `break` or `continue` to specify that those keywords apply to the labeled loop:\n\n```rust\nfn main() {\n    let mut count = 0;\n    'counting_up: loop {\n        let mut remaining = 10;\n        loop {\n            if remaining == 9 {\n                break;\n            }\n            if count == 2 {\n                break 'counting_up;\n            }\n            remaining -= 1;\n        }\n        count += 1;\n    }\n    println!(\"End count = {count}\");\n}\n```\n\nA `while` loop runs while a condition is true:\n\n```rust\nfn main() {\n    let mut number = 3;\n    while number != 0 {\n        println!(\"{number}!\");\n        number -= 1;\n    }\n    println!(\"LIFTOFF!!!\");\n}\n```\n\nThe `for` loop is the most commonly used loop construct in Rust. It lets you execute code for each item in a collection:\n\n```rust\nfn main() {\n    let a = [10, 20, 30, 40, 50];\n    for element in a {\n        println!(\"the value is: {element}\");\n    }\n}\n```\n\nYou can also use a `Range`, provided by the standard library, to generate a sequence of numbers:\n\n```rust\nfn main() {\n    for number in (1..4).rev() {\n        println!(\"{number}!\");\n    }\n    println!(\"LIFTOFF!!!\");\n}\n```",
+      "codeExamples": [
+        {
+          "description": "if expressions",
+          "code": "fn main() {\n    let number = 6;\n    if number % 4 == 0 {\n        println!(\"divisible by 4\");\n    } else if number % 3 == 0 {\n        println!(\"divisible by 3\");\n    } else {\n        println!(\"not divisible by 4 or 3\");\n    }\n}"
+        },
+        {
+          "description": "loop with break returning a value",
+          "code": "fn main() {\n    let mut counter = 0;\n    let result = loop {\n        counter += 1;\n        if counter == 10 {\n            break counter * 2;\n        }\n    };\n    println!(\"The result is {result}\");\n}"
+        },
+        {
+          "description": "for loop with range",
+          "code": "fn main() {\n    for number in (1..4).rev() {\n        println!(\"{number}!\");\n    }\n    println!(\"LIFTOFF!!!\");\n}"
+        }
+      ],
+      "keyTerms": ["if", "else", "else if", "loop", "while", "for", "break", "continue", "loop label", "Range"],
+      "relatedExercises": ["if1", "if2", "if3"]
+    }
+  ]
+}

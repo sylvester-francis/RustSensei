@@ -1,0 +1,17 @@
+{
+  "id": "options1",
+  "title": "Options 1",
+  "category": "options",
+  "difficulty": "beginner",
+  "description": "The `Option` type represents a value that might be absent. It is either `Some(value)` or `None`.",
+  "instructions": "Fix the code to handle the Option return type properly.",
+  "starterCode": "fn maybe_icecream(time_of_day: u16) -> Option<u16> {\n    // We sell ice cream from 10am (hour 10) to 10pm (hour 22)\n    // Return Some(scoops) or None\n    if time_of_day > 23 {\n        // TODO: Return None for invalid hours\n    } else if time_of_day < 10 {\n        // TODO: Return Some(0) - no scoops before 10am\n    } else {\n        // TODO: Return Some(5) - 5 scoops during open hours\n    }\n}\n\nfn main() {\n    assert_eq!(maybe_icecream(9), Some(0));\n    assert_eq!(maybe_icecream(10), Some(5));\n    assert_eq!(maybe_icecream(23), Some(5));\n    assert_eq!(maybe_icecream(25), None);\n    println!(\"All tests passed!\");\n}",
+  "hints": [
+    "Option is an enum with two variants: Some(T) and None.",
+    "Return Some(value) when a valid value exists, None when it doesn't.",
+    "Fill in: None, Some(0), and Some(5) for each branch."
+  ],
+  "solution": "fn maybe_icecream(time_of_day: u16) -> Option<u16> {\n    if time_of_day > 23 {\n        None\n    } else if time_of_day < 10 {\n        Some(0)\n    } else {\n        Some(5)\n    }\n}\n\nfn main() {\n    assert_eq!(maybe_icecream(9), Some(0));\n    assert_eq!(maybe_icecream(10), Some(5));\n    assert_eq!(maybe_icecream(23), Some(5));\n    assert_eq!(maybe_icecream(25), None);\n    println!(\"All tests passed!\");\n}",
+  "explanation": "The `Option<T>` type is Rust's replacement for null values found in other languages. It forces you to explicitly handle the case where a value might not exist. `Some(value)` wraps a present value, while `None` represents absence. The compiler ensures you handle both cases before using the value.",
+  "relatedBookSection": "ch06-01-defining-an-enum"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "tests4",
+  "title": "Tests 4",
+  "category": "tests",
+  "difficulty": "beginner",
+  "description": "The `#[should_panic]` attribute marks a test that is expected to panic. The test passes if the code panics.",
+  "instructions": "Add the should_panic attribute to the test that expects a panic.",
+  "starterCode": "struct Rectangle {\n    width: i32,\n    height: i32,\n}\n\nimpl Rectangle {\n    fn new(width: i32, height: i32) -> Rectangle {\n        if width <= 0 || height <= 0 {\n            panic!(\"Rectangle dimensions must be positive! Got ({width}, {height})\");\n        }\n        Rectangle { width, height }\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn correct_dimensions() {\n        let rect = Rectangle::new(10, 20);\n        assert_eq!(rect.width, 10);\n        assert_eq!(rect.height, 20);\n    }\n\n    #[test]\n    // TODO: Add the should_panic attribute\n    fn negative_width() {\n        let _rect = Rectangle::new(-10, 20);\n    }\n}\n\nfn main() {\n    let rect = Rectangle::new(5, 10);\n    println!(\"Rectangle: {}x{}\", rect.width, rect.height);\n}",
+  "hints": [
+    "Use `#[should_panic]` to mark a test that should panic.",
+    "You can add an expected message: #[should_panic(expected = \"...\")]",
+    "Place the attribute right above the test function."
+  ],
+  "solution": "struct Rectangle {\n    width: i32,\n    height: i32,\n}\n\nimpl Rectangle {\n    fn new(width: i32, height: i32) -> Rectangle {\n        if width <= 0 || height <= 0 {\n            panic!(\"Rectangle dimensions must be positive! Got ({width}, {height})\");\n        }\n        Rectangle { width, height }\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn correct_dimensions() {\n        let rect = Rectangle::new(10, 20);\n        assert_eq!(rect.width, 10);\n        assert_eq!(rect.height, 20);\n    }\n\n    #[test]\n    #[should_panic(expected = \"Rectangle dimensions must be positive\")]\n    fn negative_width() {\n        let _rect = Rectangle::new(-10, 20);\n    }\n}\n\nfn main() {\n    let rect = Rectangle::new(5, 10);\n    println!(\"Rectangle: {}x{}\", rect.width, rect.height);\n}",
+  "explanation": "The `#[should_panic]` attribute indicates that a test is expected to panic. If the function doesn't panic, the test fails. You can optionally specify `expected = \"substring\"` to check that the panic message contains a specific string. This is useful for testing error conditions and input validation.",
+  "relatedBookSection": "ch11-01-writing-tests"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "enums3",
+  "title": "Enums 3",
+  "category": "enums",
+  "difficulty": "beginner",
+  "description": "The `match` expression lets you compare a value against patterns and execute code based on which pattern matches.",
+  "instructions": "Implement the State enum's process method using match.",
+  "starterCode": "#[derive(Debug)]\nenum Message {\n    ChangeColor(u8, u8, u8),\n    Echo(String),\n    Move(Point),\n    Quit,\n}\n\n#[derive(Debug)]\nstruct Point {\n    x: u8,\n    y: u8,\n}\n\n#[derive(Debug)]\nstruct State {\n    color: (u8, u8, u8),\n    position: Point,\n    quit: bool,\n    message: String,\n}\n\nimpl State {\n    fn process(&mut self, message: Message) {\n        // TODO: Use match on message to update state\n        // ChangeColor -> update self.color\n        // Echo -> update self.message\n        // Move -> update self.position\n        // Quit -> set self.quit to true\n    }\n}\n\nfn main() {\n    let mut state = State {\n        quit: false,\n        position: Point { x: 0, y: 0 },\n        color: (0, 0, 0),\n        message: String::from(\"\"),\n    };\n    state.process(Message::ChangeColor(255, 0, 255));\n    state.process(Message::Echo(String::from(\"Hello!\")));\n    state.process(Message::Move(Point { x: 10, y: 15 }));\n    state.process(Message::Quit);\n\n    println!(\"State: {:?}\", state);\n}",
+  "hints": [
+    "Use `match message { ... }` to handle each variant.",
+    "For ChangeColor(r, g, b), set self.color = (r, g, b).",
+    "For each variant, destructure the data and update the corresponding state field."
+  ],
+  "solution": "#[derive(Debug)]\nenum Message {\n    ChangeColor(u8, u8, u8),\n    Echo(String),\n    Move(Point),\n    Quit,\n}\n\n#[derive(Debug)]\nstruct Point {\n    x: u8,\n    y: u8,\n}\n\n#[derive(Debug)]\nstruct State {\n    color: (u8, u8, u8),\n    position: Point,\n    quit: bool,\n    message: String,\n}\n\nimpl State {\n    fn process(&mut self, message: Message) {\n        match message {\n            Message::ChangeColor(r, g, b) => self.color = (r, g, b),\n            Message::Echo(s) => self.message = s,\n            Message::Move(p) => self.position = p,\n            Message::Quit => self.quit = true,\n        }\n    }\n}\n\nfn main() {\n    let mut state = State {\n        quit: false,\n        position: Point { x: 0, y: 0 },\n        color: (0, 0, 0),\n        message: String::from(\"\"),\n    };\n    state.process(Message::ChangeColor(255, 0, 255));\n    state.process(Message::Echo(String::from(\"Hello!\")));\n    state.process(Message::Move(Point { x: 10, y: 15 }));\n    state.process(Message::Quit);\n\n    println!(\"State: {:?}\", state);\n}",
+  "explanation": "The `match` expression is one of Rust's most powerful features. It must be exhaustive - you must handle every possible variant of an enum. Each arm destructures the variant's data and binds it to variables you can use in the arm's expression. This makes working with enums very ergonomic and safe.",
+  "relatedBookSection": "ch06-02-match"
+}

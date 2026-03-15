@@ -1,0 +1,17 @@
+{
+  "id": "errors5",
+  "title": "Errors 5",
+  "category": "error_handling",
+  "difficulty": "intermediate",
+  "description": "Custom error types can implement the `std::fmt::Display` and `std::error::Error` traits for better error reporting.",
+  "instructions": "Implement the From trait to enable automatic error conversion with the ? operator.",
+  "starterCode": "use std::fmt;\nuse std::num::ParseIntError;\n\n#[derive(Debug)]\nenum AppError {\n    ParseError(ParseIntError),\n    ValidationError(String),\n}\n\nimpl fmt::Display for AppError {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        match self {\n            AppError::ParseError(e) => write!(f, \"Parse error: {e}\"),\n            AppError::ValidationError(s) => write!(f, \"Validation error: {s}\"),\n        }\n    }\n}\n\n// TODO: Implement From<ParseIntError> for AppError\n\nfn parse_and_validate(s: &str) -> Result<i32, AppError> {\n    let n: i32 = s.parse()?; // This needs From<ParseIntError>\n    if n < 0 {\n        Err(AppError::ValidationError(\"Number must be non-negative\".to_string()))\n    } else {\n        Ok(n)\n    }\n}\n\nfn main() {\n    println!(\"{:?}\", parse_and_validate(\"42\"));\n    println!(\"{:?}\", parse_and_validate(\"abc\"));\n    println!(\"{:?}\", parse_and_validate(\"-5\"));\n}",
+  "hints": [
+    "The `?` operator uses `From` to convert between error types automatically.",
+    "Implement: impl From<ParseIntError> for AppError { ... }",
+    "In the from method, wrap the error: AppError::ParseError(e)"
+  ],
+  "solution": "use std::fmt;\nuse std::num::ParseIntError;\n\n#[derive(Debug)]\nenum AppError {\n    ParseError(ParseIntError),\n    ValidationError(String),\n}\n\nimpl fmt::Display for AppError {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        match self {\n            AppError::ParseError(e) => write!(f, \"Parse error: {e}\"),\n            AppError::ValidationError(s) => write!(f, \"Validation error: {s}\"),\n        }\n    }\n}\n\nimpl From<ParseIntError> for AppError {\n    fn from(e: ParseIntError) -> Self {\n        AppError::ParseError(e)\n    }\n}\n\nfn parse_and_validate(s: &str) -> Result<i32, AppError> {\n    let n: i32 = s.parse()?;\n    if n < 0 {\n        Err(AppError::ValidationError(\"Number must be non-negative\".to_string()))\n    } else {\n        Ok(n)\n    }\n}\n\nfn main() {\n    println!(\"{:?}\", parse_and_validate(\"42\"));\n    println!(\"{:?}\", parse_and_validate(\"abc\"));\n    println!(\"{:?}\", parse_and_validate(\"-5\"));\n}",
+  "explanation": "When you use the `?` operator, Rust calls `From::from()` to convert the error type. By implementing `From<ParseIntError> for AppError`, the `?` operator can automatically convert ParseIntError into AppError. This pattern allows composing functions with different error types cleanly.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

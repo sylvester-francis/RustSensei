@@ -1,0 +1,17 @@
+{
+  "id": "iterators5",
+  "title": "Iterators 5",
+  "category": "iterators",
+  "difficulty": "intermediate",
+  "description": "Iterator adapters can be chained to create complex data transformations in a readable way.",
+  "instructions": "Use chained iterator methods to compute a result from a collection.",
+  "starterCode": "use std::collections::HashMap;\n\nfn count_words(sentence: &str) -> HashMap<&str, usize> {\n    // TODO: Split the sentence into words and count each occurrence\n    // Use iterator methods: split, fold or for_each, etc.\n    let mut map = HashMap::new();\n    // Fill in the implementation\n    map\n}\n\nfn main() {\n    let sentence = \"the quick brown fox jumps over the lazy dog the fox\";\n    let word_count = count_words(sentence);\n    assert_eq!(word_count[\"the\"], 3);\n    assert_eq!(word_count[\"fox\"], 2);\n    assert_eq!(word_count[\"quick\"], 1);\n    println!(\"Word counts: {:?}\", word_count);\n}",
+  "hints": [
+    "Use `.split_whitespace()` or `.split(' ')` to get words.",
+    "Use `.for_each()` to process each word, or a fold pattern.",
+    "For each word, use the entry API: *map.entry(word).or_insert(0) += 1;"
+  ],
+  "solution": "use std::collections::HashMap;\n\nfn count_words(sentence: &str) -> HashMap<&str, usize> {\n    let mut map = HashMap::new();\n    sentence.split_whitespace().for_each(|word| {\n        *map.entry(word).or_insert(0) += 1;\n    });\n    map\n}\n\nfn main() {\n    let sentence = \"the quick brown fox jumps over the lazy dog the fox\";\n    let word_count = count_words(sentence);\n    assert_eq!(word_count[\"the\"], 3);\n    assert_eq!(word_count[\"fox\"], 2);\n    assert_eq!(word_count[\"quick\"], 1);\n    println!(\"Word counts: {:?}\", word_count);\n}",
+  "explanation": "Chaining iterator methods creates a pipeline that transforms data step by step. `split_whitespace()` creates an iterator over words, and `for_each()` executes a closure for each element. Combined with HashMap's entry API, this creates a concise word counter. The `fold()` method is another option that accumulates a result across all elements.",
+  "relatedBookSection": "ch13-02-iterators"
+}

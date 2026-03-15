@@ -1,0 +1,17 @@
+{
+  "id": "tests3",
+  "title": "Tests 3",
+  "category": "tests",
+  "difficulty": "beginner",
+  "description": "Tests can include custom failure messages to provide more context when a test fails.",
+  "instructions": "Add custom messages to the assert macros for better test output.",
+  "starterCode": "fn is_valid_email(email: &str) -> bool {\n    email.contains('@') && email.contains('.')\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn valid_email() {\n        let email = \"user@example.com\";\n        assert!(\n            is_valid_email(email),\n            // TODO: Add a custom failure message\n        );\n    }\n\n    #[test]\n    fn invalid_email_no_at() {\n        let email = \"userexample.com\";\n        assert!(\n            !is_valid_email(email),\n            // TODO: Add a custom failure message\n        );\n    }\n}\n\nfn main() {\n    println!(\"Valid: {}\", is_valid_email(\"user@example.com\"));\n}",
+  "hints": [
+    "Assert macros accept an optional message after the condition.",
+    "The message uses format string syntax: \"Expected {} to be valid\", email",
+    "Custom messages help understand test failures quickly."
+  ],
+  "solution": "fn is_valid_email(email: &str) -> bool {\n    email.contains('@') && email.contains('.')\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn valid_email() {\n        let email = \"user@example.com\";\n        assert!(\n            is_valid_email(email),\n            \"'{}' should be a valid email\",\n            email\n        );\n    }\n\n    #[test]\n    fn invalid_email_no_at() {\n        let email = \"userexample.com\";\n        assert!(\n            !is_valid_email(email),\n            \"'{}' should not be a valid email\",\n            email\n        );\n    }\n}\n\nfn main() {\n    println!(\"Valid: {}\", is_valid_email(\"user@example.com\"));\n}",
+  "explanation": "All assert macros (`assert!`, `assert_eq!`, `assert_ne!`) support custom failure messages. After the required arguments, you can add a format string and values, just like `println!`. Good test messages explain what was expected, making it easier to diagnose failures without reading the test code.",
+  "relatedBookSection": "ch11-01-writing-tests"
+}

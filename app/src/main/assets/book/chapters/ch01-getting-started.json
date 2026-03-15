@@ -1,0 +1,73 @@
+{
+  "id": "ch01-getting-started",
+  "title": "Getting Started",
+  "sections": [
+    {
+      "id": "ch01-01-installation",
+      "title": "Installation",
+      "content": "The first step to using Rust is to install it. You'll need an internet connection to download Rust, as we'll be fetching it from the internet.\n\nThe primary way to install Rust is through a tool called **rustup**, which is a command line tool for managing Rust versions and associated tools. You can think of rustup as the Rust toolchain manager.\n\nOn Linux or macOS, you can install rustup by running the following command in your terminal:\n\n```\n$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh\n```\n\nThis command downloads a script and starts the installation of the rustup tool, which installs the latest stable version of Rust. You might be prompted for your password. If the install is successful, the following line will appear:\n\n```\nRust is installed now. Great!\n```\n\nYou will also need a *linker*, which is a program that Rust uses to join its compiled outputs into one file. It is likely you already have one. If you get linker errors, you should install a C compiler, which will typically include a linker. A C compiler is also useful because some common Rust packages depend on C code and will need a C compiler.\n\nOn macOS, you can get a C compiler by running `xcode-select --install`. On Linux, you should generally install GCC or Clang according to your distribution's documentation. On Windows, you'll need the MSVC build tools from Visual Studio.\n\nTo verify that you have Rust installed correctly, open a shell and enter this line:\n\n```\n$ rustc --version\n```\n\nYou should see the version number, commit hash, and commit date for the latest stable version that has been released. If you see this information, you have installed Rust successfully! If you don't, check that Rust is in your system PATH.",
+      "codeExamples": [
+        {
+          "description": "Install Rust using rustup",
+          "code": "$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh"
+        },
+        {
+          "description": "Check Rust installation",
+          "code": "$ rustc --version\nrustc x.y.z (abcabcabc yyyy-mm-dd)"
+        },
+        {
+          "description": "Update Rust to latest version",
+          "code": "$ rustup update"
+        },
+        {
+          "description": "Uninstall Rust and rustup",
+          "code": "$ rustup self uninstall"
+        }
+      ],
+      "keyTerms": ["rustup", "rustc", "cargo", "toolchain", "linker"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch01-02-hello-world",
+      "title": "Hello, World!",
+      "content": "Now that you've installed Rust, it's time to write your first Rust program. It's traditional when learning a new language to write a little program that prints the text `Hello, world!` to the screen, so we'll do the same here!\n\nStart by creating a directory to store your Rust code. Rust doesn't care where your code lives, but for the exercises and projects in this book, we suggest making a *projects* directory in your home directory and keeping all your projects there.\n\nOpen a terminal and enter the following commands to make a projects directory and a directory for the \"Hello, world!\" project within the projects directory:\n\n```\n$ mkdir ~/projects\n$ cd ~/projects\n$ mkdir hello_world\n$ cd hello_world\n```\n\nNext, make a new source file and call it *main.rs*. Rust files always end with the *.rs* extension. If you're using more than one word in your filename, the convention is to use an underscore to separate them. For example, use *hello_world.rs* rather than *helloworld.rs*.\n\nNow open the *main.rs* file you just created and enter the following code:\n\n```rust\nfn main() {\n    println!(\"Hello, world!\");\n}\n```\n\nSave the file and go back to your terminal window. On Linux or macOS, enter the following commands to compile and run the file:\n\n```\n$ rustc main.rs\n$ ./main\nHello, world!\n```\n\nLet's review this program in detail. Here's the first piece of the puzzle:\n\n```rust\nfn main() {\n}\n```\n\nThese lines define a function named `main`. The `main` function is special: it is always the first code that runs in every executable Rust program. Here, the first line declares a function named `main` that has no parameters and returns nothing. If there were parameters, they would go inside the parentheses `()`.\n\nThe function body is wrapped in `{}`. Rust requires curly brackets around all function bodies. It's good style to place the opening curly bracket on the same line as the function declaration, adding one space in between.\n\nInside the `main` function is the following code:\n\n```rust\n    println!(\"Hello, world!\");\n```\n\nThis line does all the work in this little program: it prints text to the screen. There are four important details to notice here. First, Rust style is to indent with four spaces, not a tab. Second, `println!` calls a Rust macro. If it had called a function instead, it would be entered as `println` (without the `!`). We'll discuss Rust macros in more detail later. For now, you just need to know that using a `!` means that you're calling a macro instead of a normal function. Third, you see the `\"Hello, world!\"` string. We pass this string as an argument to `println!`, and the string is printed to the screen. Fourth, we end the line with a semicolon (`;`), which indicates that this expression is over and the next one is ready to begin. Most lines of Rust code end with a semicolon.",
+      "codeExamples": [
+        {
+          "description": "The classic Hello World program",
+          "code": "fn main() {\n    println!(\"Hello, world!\");\n}"
+        },
+        {
+          "description": "Compile and run a Rust program",
+          "code": "$ rustc main.rs\n$ ./main\nHello, world!"
+        }
+      ],
+      "keyTerms": ["main function", "println!", "macro", "semicolon", "compiler"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch01-03-hello-cargo",
+      "title": "Hello, Cargo!",
+      "content": "Cargo is Rust's build system and package manager. Most Rustaceans use this tool to manage their Rust projects because Cargo handles a lot of tasks for you, such as building your code, downloading the libraries your code depends on, and building those libraries. (We call the libraries that your code needs *dependencies*.)\n\nThe simplest Rust programs, like the one we've written so far, don't have any dependencies. If we had built the \"Hello, world!\" project with Cargo, it would only use the part of Cargo that handles building your code. As you write more complex Rust programs, you'll add dependencies, and if you start a project using Cargo, adding dependencies will be much easier to do.\n\nLet's convert our Hello World program to use Cargo. To create a new project with Cargo, navigate to your projects directory and run:\n\n```\n$ cargo new hello_cargo\n$ cd hello_cargo\n```\n\nThe first command creates a new directory and project called *hello_cargo*. We've named our project *hello_cargo*, and Cargo creates its files in a directory of the same name.\n\nGo into the *hello_cargo* directory and list the files. You'll see that Cargo has generated two files and one directory for us: a *Cargo.toml* file and a *src* directory with a *main.rs* file inside. It has also initialized a new Git repository along with a *.gitignore* file.\n\nOpen *Cargo.toml* in your text editor. It should look similar to this:\n\n```toml\n[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n```\n\nThis file is in the TOML (Tom's Obvious, Minimal Language) format, which is Cargo's configuration format. The first line, `[package]`, is a section heading that indicates that the following statements are configuring a package. The `[dependencies]` section is where you list any of your project's dependencies.\n\nNow let's look at what's different when we build and run the Hello World program with Cargo. From your *hello_cargo* directory, build your project by entering the following command:\n\n```\n$ cargo build\n   Compiling hello_cargo v0.1.0 (file:///projects/hello_cargo)\n    Finished dev [unoptimized + debuginfo] target(s) in 2.85 secs\n```\n\nThis command creates an executable file in *target/debug/hello_cargo*. Because the default build is a debug build, Cargo puts the binary in a directory named *debug*.\n\nWe can also use `cargo run` to compile the code and then run the resultant executable all in one command:\n\n```\n$ cargo run\n    Finished dev [unoptimized + debuginfo] target(s) in 0.0 secs\n     Running `target/debug/hello_cargo`\nHello, world!\n```\n\nCargo also provides a command called `cargo check`. This command quickly checks your code to make sure it compiles but doesn't produce an executable. Why would you not want an executable? Often, `cargo check` is much faster than `cargo build` because it skips the step of producing an executable. If you're continually checking your work while writing the code, using `cargo check` will speed up the process!\n\nWhen your project is finally ready for release, you can use `cargo build --release` to compile it with optimizations. This command will create an executable in *target/release* instead of *target/debug*. The optimizations make your Rust code run faster, but turning them on lengthens the time it takes for your program to compile.",
+      "codeExamples": [
+        {
+          "description": "Create a new Cargo project",
+          "code": "$ cargo new hello_cargo\n$ cd hello_cargo"
+        },
+        {
+          "description": "Cargo.toml configuration file",
+          "code": "[package]\nname = \"hello_cargo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]"
+        },
+        {
+          "description": "Build and run with Cargo",
+          "code": "$ cargo build\n$ cargo run\n$ cargo check"
+        },
+        {
+          "description": "Build for release",
+          "code": "$ cargo build --release"
+        }
+      ],
+      "keyTerms": ["Cargo", "Cargo.toml", "dependencies", "cargo build", "cargo run", "cargo check", "crate", "TOML"],
+      "relatedExercises": []
+    }
+  ]
+}

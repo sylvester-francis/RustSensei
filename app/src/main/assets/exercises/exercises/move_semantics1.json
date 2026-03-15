@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics1",
+  "title": "Move Semantics 1",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "In Rust, when you assign a value to another variable or pass it to a function, ownership is moved. The original variable can no longer be used.",
+  "instructions": "Fix the code so it compiles by understanding how ownership moves work.",
+  "starterCode": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let vec1 = fill_vec(vec0);\n\n    println!(\"{} has length {}, with contents: {:?}\", \"vec0\", vec0.len(), vec0);\n    println!(\"{} has length {}, with contents: {:?}\", \"vec1\", vec1.len(), vec1);\n}",
+  "hints": [
+    "After `vec0` is passed to `fill_vec`, ownership is moved and `vec0` can no longer be used.",
+    "You can either clone vec0 before passing it, or remove the line that uses vec0 after the move.",
+    "Try: let vec1 = fill_vec(vec0.clone()); to keep vec0 usable."
+  ],
+  "solution": "fn main() {\n    let vec0 = vec![22, 44, 66];\n\n    let vec1 = fill_vec(vec0.clone());\n\n    println!(\"{} has length {}, with contents: {:?}\", \"vec0\", vec0.len(), vec0);\n    println!(\"{} has length {}, with contents: {:?}\", \"vec1\", vec1.len(), vec1);\n}\n\nfn fill_vec(mut vec: Vec<i32>) -> Vec<i32> {\n    vec.push(88);\n    vec\n}",
+  "explanation": "When a value that doesn't implement the Copy trait (like Vec) is passed to a function, ownership is transferred (moved). The original variable becomes invalid. To keep both variables valid, you can clone the value with `.clone()`, which creates a deep copy. This is a fundamental concept in Rust's ownership system.",
+  "relatedBookSection": "ch04-01-what-is-ownership"
+}

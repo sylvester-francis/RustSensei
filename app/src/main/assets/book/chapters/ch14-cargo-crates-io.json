@@ -1,0 +1,87 @@
+{
+  "id": "ch14-cargo-crates-io",
+  "title": "More About Cargo and Crates.io",
+  "sections": [
+    {
+      "id": "ch14-01-release-profiles",
+      "title": "Customizing Builds with Release Profiles",
+      "content": "In Rust, *release profiles* are predefined and customizable profiles with different configurations that allow a programmer to have more control over various options for compiling code. Each profile is configured independently of the others.\n\nCargo has two main profiles: the `dev` profile Cargo uses when you run `cargo build` and the `release` profile Cargo uses when you run `cargo build --release`. The `dev` profile is defined with good defaults for development, and the `release` profile has good defaults for release builds.\n\nCargo has default settings for each of the profiles that apply when you haven't explicitly added any `[profile.*]` sections in the project's *Cargo.toml* file. By adding `[profile.*]` sections for any profile you want to customize, you override any subset of the default settings:\n\n```toml\n[profile.dev]\nopt-level = 0\n\n[profile.release]\nopt-level = 3\n```\n\nThe `opt-level` setting controls the number of optimizations Rust will apply to your code, with a range of 0 to 3. Applying more optimizations extends compiling time, so if you're in development and compiling your code often, you'll want fewer optimizations to compile faster even if the resulting code runs slower. The default `opt-level` for `dev` is therefore `0`. When you're ready to release your code, it's best to spend more time compiling. You'll only compile in release mode once, but you'll run the compiled program many times, so release mode trades longer compile time for code that runs faster.\n\nYou can override a default setting by adding a different value for it in *Cargo.toml*. For example, if we want to use optimization level 1 in the development profile:\n\n```toml\n[profile.dev]\nopt-level = 1\n```\n\nFor the full list of configuration options and defaults for each profile, see Cargo's documentation.",
+      "codeExamples": [
+        {
+          "description": "Custom release profiles in Cargo.toml",
+          "code": "[profile.dev]\nopt-level = 0\n\n[profile.release]\nopt-level = 3"
+        }
+      ],
+      "keyTerms": ["release profile", "opt-level", "dev profile", "release build", "cargo build --release"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch14-02-publishing",
+      "title": "Publishing a Crate to Crates.io",
+      "content": "We've used packages from crates.io as dependencies of our project, but you can also share your code with other people by publishing your own packages. The crate registry at crates.io distributes the source code of your packages, so it primarily hosts code that is open source.\n\n### Making Useful Documentation Comments\n\nRust has a particular kind of comment for documentation, known conveniently as a *documentation comment*, that will generate HTML documentation. Documentation comments use three slashes, `///`, instead of two and support Markdown notation:\n\n```rust\n/// Adds one to the number given.\n///\n/// # Examples\n///\n/// ```\n/// let arg = 5;\n/// let answer = my_crate::add_one(arg);\n///\n/// assert_eq!(6, answer);\n/// ```\npub fn add_one(x: i32) -> i32 {\n    x + 1\n}\n```\n\nWe can generate the HTML documentation from this documentation comment by running `cargo doc`. This command runs the `rustdoc` tool distributed with Rust and puts the generated HTML documentation in the *target/doc* directory. For convenience, running `cargo doc --open` will build the HTML for your current crate's documentation and open the result in a web browser.\n\nCommonly used sections in documentation comments include: **Examples**, **Panics** (scenarios in which the function could panic), **Errors** (if the function returns a `Result`, describing the kinds of errors), and **Safety** (if the function is `unsafe` to call).\n\n### Documentation Comments as Tests\n\nAdding example code blocks in your documentation comments can help demonstrate how to use your library, and doing so has an additional bonus: running `cargo test` will run the code examples in your documentation as tests! Documentation with examples is a win-win.\n\n### Exporting a Convenient Public API with pub use\n\nThe structure of your public API is a major consideration when publishing a crate. If the structure that's useful for you while developing isn't convenient for your users, you can re-export items to make a different public structure using `pub use`:\n\n```rust\n//! # My Crate\n//!\n//! `my_crate` is a collection of utilities.\n\npub use self::kinds::PrimaryColor;\npub use self::kinds::SecondaryColor;\npub use self::utils::mix;\n```\n\n### Setting Up a Crates.io Account and Publishing\n\nBefore you can publish any crates, you need to create an account on crates.io and get an API token. Then run `cargo login` with your API key:\n\n```\n$ cargo login abcdefghijklmnopqrstuvwxyz012345\n```\n\nBefore publishing, you'll need to add some metadata in the `[package]` section of your crate's *Cargo.toml*:\n\n```toml\n[package]\nname = \"guessing_game\"\nversion = \"0.1.0\"\nedition = \"2021\"\ndescription = \"A fun game where you guess what number the computer has chosen.\"\nlicense = \"MIT OR Apache-2.0\"\n```\n\nThen publish with `cargo publish`. Be careful: publishing is permanent. The version can never be overwritten, and the code cannot be deleted.",
+      "codeExamples": [
+        {
+          "description": "Documentation comments",
+          "code": "/// Adds one to the number given.\n///\n/// # Examples\n///\n/// ```\n/// let answer = my_crate::add_one(5);\n/// assert_eq!(6, answer);\n/// ```\npub fn add_one(x: i32) -> i32 {\n    x + 1\n}"
+        },
+        {
+          "description": "Re-exporting with pub use",
+          "code": "pub use self::kinds::PrimaryColor;\npub use self::kinds::SecondaryColor;\npub use self::utils::mix;"
+        }
+      ],
+      "keyTerms": ["crates.io", "documentation comments", "///", "cargo doc", "pub use", "cargo publish", "cargo login"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch14-03-workspaces",
+      "title": "Cargo Workspaces",
+      "content": "As your project develops, you might find that the library crate continues to get bigger and you want to split your package further into multiple library crates. Cargo offers a feature called *workspaces* that can help manage multiple related packages that are developed in tandem.\n\nA *workspace* is a set of packages that share the same *Cargo.lock* and output directory. Let's make a project using a workspace -- we'll use trivial code so we can concentrate on the structure of the workspace.\n\nWe'll have a workspace containing a binary and two libraries. The binary will provide the main functionality. Create a new directory and a *Cargo.toml* file that configures the entire workspace:\n\n```toml\n[workspace]\nmembers = [\n    \"adder\",\n    \"add_one\",\n]\n```\n\nThen create the binary crate:\n\n```\n$ cargo new adder\n```\n\nAnd the library crate:\n\n```\n$ cargo new add_one --lib\n```\n\nNow let's make the `adder` crate depend on `add_one`:\n\n```toml\n# adder/Cargo.toml\n[dependencies]\nadd_one = { path = \"../add_one\" }\n```\n\nTo run the binary crate from the workspace directory, we need to specify which package to run:\n\n```\n$ cargo run -p adder\n```\n\nNotice that the workspace has only one *Cargo.lock* file at the top level, rather than having a *Cargo.lock* in each crate's directory. This ensures that all crates are using the same version of all dependencies. All crates in the workspace share one *target* directory as well.\n\nFor external crate dependencies, each crate in the workspace must individually list the dependency in its own *Cargo.toml*. You can also add a `[workspace.dependencies]` section to the workspace's top-level *Cargo.toml* to share dependency versions across workspace members.",
+      "codeExamples": [
+        {
+          "description": "Workspace Cargo.toml",
+          "code": "[workspace]\nmembers = [\n    \"adder\",\n    \"add_one\",\n]"
+        },
+        {
+          "description": "Path dependency",
+          "code": "[dependencies]\nadd_one = { path = \"../add_one\" }"
+        },
+        {
+          "description": "Running a specific workspace member",
+          "code": "$ cargo run -p adder"
+        }
+      ],
+      "keyTerms": ["workspace", "members", "Cargo.lock", "path dependency", "cargo run -p"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch14-04-installing-binaries",
+      "title": "Installing Binaries with cargo install",
+      "content": "The `cargo install` command allows you to install and use binary crates locally. This isn't intended to replace system packages; it's meant to be a convenient way for Rust developers to install tools that others have shared on crates.io. Note that you can only install packages that have binary targets. A *binary target* is the runnable program that is created if the crate has a *src/main.rs* file or another file specified as a binary, as opposed to a library target that isn't runnable on its own but is suitable for including within other programs.\n\nAll binaries installed with `cargo install` are stored in the installation root's *bin* folder. If you installed Rust using *rustup* and don't have any custom configurations, this directory will be `$HOME/.cargo/bin`. Ensure that directory is in your `$PATH` to be able to run programs you've installed with `cargo install`.\n\nFor example, to install a Rust implementation of the `grep` tool called `ripgrep`:\n\n```\n$ cargo install ripgrep\n    Updating crates.io index\n  Downloaded ripgrep v13.0.0\n  ...\n   Compiling ripgrep v13.0.0\n    Finished release [optimized + debuginfo] target(s)\n  Installing ~/.cargo/bin/rg\n```\n\nThe installed binary can then be run from anywhere on your system (if `~/.cargo/bin` is in your PATH).",
+      "codeExamples": [
+        {
+          "description": "Installing a binary crate",
+          "code": "$ cargo install ripgrep"
+        }
+      ],
+      "keyTerms": ["cargo install", "binary target", "~/.cargo/bin"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch14-05-custom-commands",
+      "title": "Extending Cargo with Custom Commands",
+      "content": "Cargo is designed so you can extend it with new subcommands without having to modify Cargo. If a binary in your `$PATH` is named `cargo-something`, you can run it as if it was a Cargo subcommand by running `cargo something`. Custom commands like this are also listed when you run `cargo --list`.\n\nBeing able to use `cargo install` to install extensions and then run them just like the built-in Cargo tools is a super convenient benefit of Cargo's design! Some popular Cargo extensions include:\n\n- `cargo-edit`: Adds `cargo add`, `cargo rm`, and `cargo upgrade` commands to easily manage dependencies.\n- `cargo-watch`: Watches your project's source for changes, then runs Cargo commands.\n- `cargo-expand`: Shows the result of macro expansion and `#[derive]` expansion.\n- `cargo-audit`: Audits `Cargo.lock` for crates with known security vulnerabilities.\n- `cargo-clippy`: A collection of lints to catch common mistakes and improve your Rust code.\n- `cargo-fmt`: Formats your code according to the Rust style guide.\n\nYou can find more community-built Cargo extensions by searching crates.io for the `cargo-` prefix.",
+      "codeExamples": [
+        {
+          "description": "Listing all available cargo commands",
+          "code": "$ cargo --list"
+        },
+        {
+          "description": "Running a custom cargo subcommand",
+          "code": "$ cargo something"
+        }
+      ],
+      "keyTerms": ["custom commands", "cargo subcommand", "cargo-something", "cargo --list"],
+      "relatedExercises": []
+    }
+  ]
+}

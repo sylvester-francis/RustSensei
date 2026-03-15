@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics6",
+  "title": "Move Semantics 6",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "This exercise combines concepts of ownership, borrowing, and references with function parameters.",
+  "instructions": "Fix the code by using the correct reference types for each function parameter.",
+  "starterCode": "fn main() {\n    let data = \"Rust is great!\".to_string();\n\n    get_char(data);\n\n    string_uppercase(&data);\n}\n\nfn get_char(data: String) -> char {\n    data.chars().last().unwrap()\n}\n\nfn string_uppercase(mut data: &String) {\n    data = &data.to_uppercase();\n\n    println!(\"{data}\");\n}",
+  "hints": [
+    "get_char takes ownership of data, so data can't be used afterwards.",
+    "get_char only needs to read the data - change it to take a reference `&String`.",
+    "string_uppercase should take ownership (String) and use it directly."
+  ],
+  "solution": "fn main() {\n    let data = \"Rust is great!\".to_string();\n\n    get_char(&data);\n\n    string_uppercase(data);\n}\n\nfn get_char(data: &String) -> char {\n    data.chars().last().unwrap()\n}\n\nfn string_uppercase(mut data: String) {\n    data = data.to_uppercase();\n\n    println!(\"{data}\");\n}",
+  "explanation": "Choosing between ownership and borrowing depends on what the function needs to do. `get_char` only reads the data, so a reference (`&String`) is sufficient and avoids moving ownership. `string_uppercase` needs to own and transform the data, so taking `String` by value makes sense. This pattern of choosing the right parameter type is central to writing idiomatic Rust.",
+  "relatedBookSection": "ch04-02-references-and-borrowing"
+}

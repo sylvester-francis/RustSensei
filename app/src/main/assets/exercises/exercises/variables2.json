@@ -1,0 +1,17 @@
+{
+  "id": "variables2",
+  "title": "Variables 2",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "Rust requires that variables have a value when they are used. This exercise explores type annotations.",
+  "instructions": "Make the code compile by giving the variable a type annotation or a value.",
+  "starterCode": "fn main() {\n    let x;\n    if x == 10 {\n        println!(\"x is ten!\");\n    } else {\n        println!(\"x is not ten!\");\n    }\n}",
+  "hints": [
+    "Variables in Rust must be initialized before they are used.",
+    "You need to assign a value to x when declaring it.",
+    "Try: let x = 10; or let x: i32 = 10;"
+  ],
+  "solution": "fn main() {\n    let x: i32 = 10;\n    if x == 10 {\n        println!(\"x is ten!\");\n    } else {\n        println!(\"x is not ten!\");\n    }\n}",
+  "explanation": "In Rust, you can optionally annotate variables with a type using the syntax `let x: Type = value`. When you don't annotate the type, Rust infers it from the assigned value. However, a variable must always be initialized before use.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

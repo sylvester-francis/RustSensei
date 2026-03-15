@@ -1,0 +1,17 @@
+{
+  "id": "macros4",
+  "title": "Macros 4",
+  "category": "macros",
+  "difficulty": "intermediate",
+  "description": "The `#[macro_export]` attribute makes macros available to other crates and puts them at the crate root.",
+  "instructions": "Fix the macro definition to handle multiple arms correctly.",
+  "starterCode": "macro_rules! my_macro {\n    () => {\n        println!(\"Check out my macro!\");\n    }\n    ($val:expr) => {\n        println!(\"Look at this other macro: {}\", $val);\n    }\n}\n\nfn main() {\n    my_macro!();\n    my_macro!(7777);\n}",
+  "hints": [
+    "Multiple arms in a macro need to be separated by semicolons.",
+    "Add a semicolon after the first arm's closing brace.",
+    "Each arm follows the pattern: (pattern) => { body };"
+  ],
+  "solution": "macro_rules! my_macro {\n    () => {\n        println!(\"Check out my macro!\");\n    };\n    ($val:expr) => {\n        println!(\"Look at this other macro: {}\", $val);\n    };\n}\n\nfn main() {\n    my_macro!();\n    my_macro!(7777);\n}",
+  "explanation": "Macros with multiple arms need semicolons between each arm (and after the last one). The macro matcher tries each arm in order and uses the first one that matches. This is similar to how `match` works for values, but macros match on syntax patterns. The `#[macro_export]` attribute makes a macro accessible from other modules and crates.",
+  "relatedBookSection": "ch19-06-macros"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "clippy3",
+  "title": "Clippy 3",
+  "category": "clippy",
+  "difficulty": "beginner",
+  "description": "Clippy also catches potential arithmetic issues and suggests safer alternatives.",
+  "instructions": "Fix the arithmetic-related Clippy warnings.",
+  "starterCode": "fn main() {\n    // Clippy: this panics on overflow in debug mode\n    let _arr = [0u8; 512];\n\n    // Clippy: using `.len() == 0` instead of `.is_empty()`\n    let my_vec: Vec<i32> = vec![];\n    if my_vec.len() == 0 {\n        println!(\"Vec is empty!\");\n    }\n\n    // Clippy: manual swap\n    let mut a = 10;\n    let mut b = 20;\n    let temp = a;\n    a = b;\n    b = temp;\n\n    println!(\"a: {a}, b: {b}\");\n}",
+  "hints": [
+    "Use `.is_empty()` instead of `.len() == 0` for clarity.",
+    "Use `std::mem::swap(&mut a, &mut b)` or tuple swap instead of manual swap.",
+    "Clippy prefers idiomatic patterns that are more readable."
+  ],
+  "solution": "fn main() {\n    let _arr = [0u8; 512];\n\n    let my_vec: Vec<i32> = vec![];\n    if my_vec.is_empty() {\n        println!(\"Vec is empty!\");\n    }\n\n    let mut a = 10;\n    let mut b = 20;\n    std::mem::swap(&mut a, &mut b);\n\n    println!(\"a: {a}, b: {b}\");\n}",
+  "explanation": "Clippy encourages using `.is_empty()` over `.len() == 0` because it's more expressive and potentially more efficient. For swapping values, `std::mem::swap()` is the idiomatic approach and avoids the need for a temporary variable. Clippy knows hundreds of such patterns and helps you write better Rust.",
+  "relatedBookSection": "ch01-03-hello-cargo"
+}

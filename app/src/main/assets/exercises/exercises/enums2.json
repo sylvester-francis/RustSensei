@@ -1,0 +1,17 @@
+{
+  "id": "enums2",
+  "title": "Enums 2",
+  "category": "enums",
+  "difficulty": "beginner",
+  "description": "Enum variants can hold data of different types. Each variant can have its own structure.",
+  "instructions": "Define enum variants that hold different types of data.",
+  "starterCode": "#[derive(Debug)]\nenum Message {\n    // TODO: Define variants with data:\n    // Move { x: i32, y: i32 }\n    // Echo(String)\n    // ChangeColor(i32, i32, i32)\n    // Quit (no data)\n}\n\nimpl Message {\n    fn call(&self) {\n        println!(\"{:?}\", self);\n    }\n}\n\nfn main() {\n    let messages = [\n        Message::Move { x: 10, y: 30 },\n        Message::Echo(String::from(\"hello world\")),\n        Message::ChangeColor(200, 255, 255),\n        Message::Quit,\n    ];\n\n    for message in &messages {\n        message.call();\n    }\n}",
+  "hints": [
+    "Each variant can hold different data: struct-like fields, tuple-like fields, or no data.",
+    "Move uses named fields: Move { x: i32, y: i32 }",
+    "Echo uses a single String: Echo(String), ChangeColor uses a tuple: ChangeColor(i32, i32, i32)"
+  ],
+  "solution": "#[derive(Debug)]\nenum Message {\n    Move { x: i32, y: i32 },\n    Echo(String),\n    ChangeColor(i32, i32, i32),\n    Quit,\n}\n\nimpl Message {\n    fn call(&self) {\n        println!(\"{:?}\", self);\n    }\n}\n\nfn main() {\n    let messages = [\n        Message::Move { x: 10, y: 30 },\n        Message::Echo(String::from(\"hello world\")),\n        Message::ChangeColor(200, 255, 255),\n        Message::Quit,\n    ];\n\n    for message in &messages {\n        message.call();\n    }\n}",
+  "explanation": "Rust enums are very powerful - each variant can hold different types and amounts of data. A variant can have named fields (like a struct), unnamed fields (like a tuple), or no fields at all. This makes Rust enums similar to 'tagged unions' or 'algebraic data types' in other languages. You can also implement methods on enums just like structs.",
+  "relatedBookSection": "ch06-01-defining-an-enum"
+}

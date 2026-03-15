@@ -1,0 +1,17 @@
+{
+  "id": "functions1",
+  "title": "Functions 1",
+  "category": "functions",
+  "difficulty": "beginner",
+  "description": "Functions are defined with the `fn` keyword in Rust. This exercise asks you to create a missing function.",
+  "instructions": "Add the missing function `call_me` so the code compiles.",
+  "starterCode": "fn main() {\n    call_me();\n}\n",
+  "hints": [
+    "You need to define a function called `call_me`.",
+    "Functions are defined with the `fn` keyword.",
+    "The simplest function: fn call_me() { println!(\"Called!\"); }"
+  ],
+  "solution": "fn main() {\n    call_me();\n}\n\nfn call_me() {\n    println!(\"Called!\");\n}",
+  "explanation": "Functions in Rust are declared with `fn` followed by the function name, parentheses for parameters, and a block body. Rust doesn't care where you define functions - they can be before or after the code that calls them.",
+  "relatedBookSection": "ch03-03-how-functions-work"
+}

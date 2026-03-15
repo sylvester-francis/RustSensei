@@ -1,0 +1,69 @@
+{
+  "id": "ch06-enums",
+  "title": "Enums and Pattern Matching",
+  "sections": [
+    {
+      "id": "ch06-01-defining-an-enum",
+      "title": "Defining an Enum",
+      "content": "Enums allow you to define a type by enumerating its possible *variants*. Where structs give you a way of grouping together related fields and data, like a `Rectangle` with its `width` and `height`, enums give you a way of saying a value is one of a possible set of values. For example, we may want to say that `Rectangle` is one of a set of possible shapes that also includes `Circle` and `Triangle`.\n\nLet's look at a situation we might want to express in code and see why enums are useful and more appropriate than structs in this case. Say we need to work with IP addresses. Currently, two major standards are used for IP addresses: version four and version six. Because these are the only possibilities for an IP address that our program will come across, we can *enumerate* all possible variants:\n\n```rust\nenum IpAddrKind {\n    V4,\n    V6,\n}\n```\n\n`IpAddrKind` is now a custom data type that we can use elsewhere in our code. We can create instances of each of the two variants like this:\n\n```rust\nlet four = IpAddrKind::V4;\nlet six = IpAddrKind::V6;\n```\n\nNote that the variants of the enum are namespaced under its identifier, and we use a double colon to separate the two. Both values `IpAddrKind::V4` and `IpAddrKind::V6` are of the same type: `IpAddrKind`.\n\nWe can put data directly into each enum variant. Each variant can have different types and amounts of associated data:\n\n```rust\nenum IpAddr {\n    V4(u8, u8, u8, u8),\n    V6(String),\n}\n\nlet home = IpAddr::V4(127, 0, 0, 1);\nlet loopback = IpAddr::V6(String::from(\"::1\"));\n```\n\nYou can put any kind of data inside an enum variant: strings, numeric types, structs, or even another enum. Let's look at another example:\n\n```rust\nenum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n    ChangeColor(i32, i32, i32),\n}\n```\n\nThis enum has four variants with different types: `Quit` has no data associated with it at all, `Move` has named fields like a struct, `Write` includes a single `String`, and `ChangeColor` includes three `i32` values.\n\nWe're also able to define methods on enums using `impl`, just as we're able to define methods on structs:\n\n```rust\nimpl Message {\n    fn call(&self) {\n        // method body defined here\n    }\n}\n\nlet m = Message::Write(String::from(\"hello\"));\nm.call();\n```\n\n### The Option Enum\n\nThe `Option` type encodes the very common scenario in which a value could be something or it could be nothing. Rust doesn't have the null feature that many other languages have. Instead, Rust has the `Option<T>` enum:\n\n```rust\nenum Option<T> {\n    None,\n    Some(T),\n}\n```\n\nThe `Option<T>` enum is so useful that it's even included in the prelude; you don't need to bring it into scope explicitly. Its variants are also included in the prelude: you can use `Some` and `None` directly without the `Option::` prefix:\n\n```rust\nlet some_number = Some(5);\nlet some_char = Some('e');\nlet absent_number: Option<i32> = None;\n```\n\nThe type of `some_number` is `Option<i32>`. When we have a `Some` value, we know that a value is present and the value is held within the `Some`. When we have a `None` value, in some sense it means the same thing as null: we don't have a valid value. So why is having `Option<T>` any better than having null?\n\nIn short, because `Option<T>` and `T` are different types, the compiler won't let us use an `Option<T>` value as if it were definitely a valid value. You have to convert an `Option<T>` to a `T` before you can perform `T` operations with it. Generally, this helps catch one of the most common issues with null: assuming that something isn't null when it actually is.",
+      "codeExamples": [
+        {
+          "description": "Defining an enum",
+          "code": "enum IpAddr {\n    V4(u8, u8, u8, u8),\n    V6(String),\n}\n\nlet home = IpAddr::V4(127, 0, 0, 1);\nlet loopback = IpAddr::V6(String::from(\"::1\"));"
+        },
+        {
+          "description": "Enum with different variant types",
+          "code": "enum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n    ChangeColor(i32, i32, i32),\n}"
+        },
+        {
+          "description": "The Option enum",
+          "code": "let some_number = Some(5);\nlet some_char = Some('e');\nlet absent_number: Option<i32> = None;"
+        }
+      ],
+      "keyTerms": ["enum", "variant", "Option", "Some", "None", "null safety"],
+      "relatedExercises": ["enums1", "enums2", "enums3"]
+    },
+    {
+      "id": "ch06-02-match",
+      "title": "The match Control Flow Construct",
+      "content": "Rust has an extremely powerful control flow construct called `match` that allows you to compare a value against a series of patterns and then execute code based on which pattern matches. Patterns can be made up of literal values, variable names, wildcards, and many other things. The power of `match` comes from the expressiveness of the patterns and the fact that the compiler confirms that all possible cases are handled.\n\nThink of a `match` expression as being like a coin-sorting machine: coins slide down a track with variously sized holes along it, and each coin falls through the first hole it encounters that it fits into. In the same way, values go through each pattern in a `match`, and at the first pattern the value \"fits,\" the value falls into the associated code block to be used during execution.\n\n```rust\nenum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter,\n}\n\nfn value_in_cents(coin: Coin) -> u8 {\n    match coin {\n        Coin::Penny => {\n            println!(\"Lucky penny!\");\n            1\n        }\n        Coin::Nickel => 5,\n        Coin::Dime => 10,\n        Coin::Quarter => 25,\n    }\n}\n```\n\nWhen the `match` expression executes, it compares the resultant value against the pattern of each arm, in order. If a pattern matches the value, the code associated with that pattern is executed. If that pattern doesn't match the value, execution continues to the next arm.\n\nThe code associated with each arm is an expression, and the resultant value of the expression in the matching arm is the value that gets returned for the entire `match` expression.\n\n### Patterns That Bind to Values\n\nAnother useful feature of match arms is that they can bind to the parts of the values that match the pattern. This is how we can extract values out of enum variants:\n\n```rust\n#[derive(Debug)]\nenum UsState {\n    Alabama,\n    Alaska,\n    // etc.\n}\n\nenum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter(UsState),\n}\n\nfn value_in_cents(coin: Coin) -> u8 {\n    match coin {\n        Coin::Penny => 1,\n        Coin::Nickel => 5,\n        Coin::Dime => 10,\n        Coin::Quarter(state) => {\n            println!(\"State quarter from {state:?}!\");\n            25\n        }\n    }\n}\n```\n\n### Matching with Option<T>\n\nWe can also handle `Option<T>` using `match`, just as we did with the `Coin` enum. Instead of comparing coins, we'll compare the variants of `Option<T>`, but the way the `match` expression works remains the same:\n\n```rust\nfn plus_one(x: Option<i32>) -> Option<i32> {\n    match x {\n        None => None,\n        Some(i) => Some(i + 1),\n    }\n}\n\nlet five = Some(5);\nlet six = plus_one(five);\nlet none = plus_one(None);\n```\n\n### Matches Are Exhaustive\n\nThere's one other aspect of `match` we need to discuss: the arms' patterns must cover all possibilities. Rust knows that we didn't cover every possible case, and even knows which pattern we forgot! Matches in Rust are *exhaustive*: we must exhaust every last possibility in order for the code to be valid.\n\n### Catch-all Patterns and the _ Placeholder\n\nUsing enums, we can also take special actions for a few particular values, but for all other values take one default action. The `_` pattern will match any value and does not bind to that value:\n\n```rust\nlet dice_roll = 9;\nmatch dice_roll {\n    3 => add_fancy_hat(),\n    7 => remove_fancy_hat(),\n    _ => reroll(),\n}\n```\n\nIf we use a named variable instead of `_`, the variable will bind to the value. If we use `_`, we're telling Rust we aren't going to use the value, so Rust won't warn us about an unused variable.",
+      "codeExamples": [
+        {
+          "description": "Basic match expression",
+          "code": "fn value_in_cents(coin: Coin) -> u8 {\n    match coin {\n        Coin::Penny => 1,\n        Coin::Nickel => 5,\n        Coin::Dime => 10,\n        Coin::Quarter => 25,\n    }\n}"
+        },
+        {
+          "description": "Matching with Option<T>",
+          "code": "fn plus_one(x: Option<i32>) -> Option<i32> {\n    match x {\n        None => None,\n        Some(i) => Some(i + 1),\n    }\n}"
+        },
+        {
+          "description": "Catch-all pattern",
+          "code": "let dice_roll = 9;\nmatch dice_roll {\n    3 => add_fancy_hat(),\n    7 => remove_fancy_hat(),\n    _ => reroll(),\n}"
+        }
+      ],
+      "keyTerms": ["match", "arm", "pattern", "exhaustive", "catch-all", "wildcard", "_"],
+      "relatedExercises": ["enums1", "enums2", "enums3"]
+    },
+    {
+      "id": "ch06-03-if-let",
+      "title": "Concise Control Flow with if let",
+      "content": "The `if let` syntax lets you combine `if` and `let` into a less verbose way to handle values that match one pattern while ignoring the rest. Consider a program that matches on an `Option<u8>` value in the `config_max` variable but only wants to execute code if the value is the `Some` variant:\n\n```rust\nlet config_max = Some(3u8);\nmatch config_max {\n    Some(max) => println!(\"The maximum is configured to be {max}\"),\n    _ => (),\n}\n```\n\nIf the value is `Some`, we print out the value in the `Some` variant by binding the value to the variable `max` in the pattern. We don't want to do anything with the `None` value. To satisfy the `match` expression, we have to add `_ => ()` after processing just one variant, which is annoying boilerplate code to add.\n\nInstead, we could write this in a shorter way using `if let`:\n\n```rust\nlet config_max = Some(3u8);\nif let Some(max) = config_max {\n    println!(\"The maximum is configured to be {max}\");\n}\n```\n\nThe syntax `if let` takes a pattern and an expression separated by an equal sign. It works the same way as a `match`, where the expression is given to the `match` and the pattern is its first arm. In this case, the pattern is `Some(max)`, and the `max` binds to the value inside the `Some`. We can then use `max` in the body of the `if let` block in the same way we used `max` in the corresponding `match` arm.\n\nUsing `if let` means less typing, less indentation, and less boilerplate code. However, you lose the exhaustive checking that `match` enforces. Choosing between `match` and `if let` depends on what you're doing in your particular situation and whether gaining conciseness is an appropriate trade-off for losing exhaustive checking.\n\nYou can also include an `else` with an `if let`. The block of code that goes with the `else` is the same as the block of code that would go with the `_` case in the `match` expression:\n\n```rust\nlet mut count = 0;\nif let Coin::Quarter(state) = coin {\n    println!(\"State quarter from {state:?}!\");\n} else {\n    count += 1;\n}\n```\n\nThis is equivalent to:\n\n```rust\nlet mut count = 0;\nmatch coin {\n    Coin::Quarter(state) => println!(\"State quarter from {state:?}!\"),\n    _ => count += 1,\n}\n```\n\nIf you have a situation in which your program has logic that is too verbose to express using a `match`, remember that `if let` is in your Rust toolbox as well. The `if let` pattern is particularly useful when you only care about one variant and want to ignore all others.\n\nThere is also `while let`, which works similarly but continues looping as long as the pattern matches:\n\n```rust\nlet mut stack = Vec::new();\nstack.push(1);\nstack.push(2);\nstack.push(3);\n\nwhile let Some(top) = stack.pop() {\n    println!(\"{top}\");\n}\n```",
+      "codeExamples": [
+        {
+          "description": "if let syntax",
+          "code": "let config_max = Some(3u8);\nif let Some(max) = config_max {\n    println!(\"The maximum is configured to be {max}\");\n}"
+        },
+        {
+          "description": "if let with else",
+          "code": "let mut count = 0;\nif let Coin::Quarter(state) = coin {\n    println!(\"State quarter from {state:?}!\");\n} else {\n    count += 1;\n}"
+        },
+        {
+          "description": "while let",
+          "code": "let mut stack = Vec::new();\nstack.push(1);\nstack.push(2);\nstack.push(3);\n\nwhile let Some(top) = stack.pop() {\n    println!(\"{top}\");\n}"
+        }
+      ],
+      "keyTerms": ["if let", "while let", "pattern matching", "concise control flow"],
+      "relatedExercises": ["enums3"]
+    }
+  ]
+}

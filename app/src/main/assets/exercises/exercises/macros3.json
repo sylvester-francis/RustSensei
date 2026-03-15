@@ -1,0 +1,17 @@
+{
+  "id": "macros3",
+  "title": "Macros 3",
+  "category": "macros",
+  "difficulty": "intermediate",
+  "description": "Macros can use repetition patterns with `$(...)*` to accept variable numbers of arguments.",
+  "instructions": "Fix the macro that uses repetition patterns.",
+  "starterCode": "macro_rules! my_macro {\n    ($($val:expr),*) => {\n        // TODO: Fix the repetition to print each value\n        $(\n            println!(\"Value: {}\", $val);\n        )\n    };\n}\n\nfn main() {\n    my_macro!(1, 2, 3);\n}",
+  "hints": [
+    "The repetition in the output must match the repetition in the pattern.",
+    "The pattern uses `*` for zero or more repetitions.",
+    "Add `*` after the closing parenthesis in the body: $( println!(...); )*"
+  ],
+  "solution": "macro_rules! my_macro {\n    ($($val:expr),*) => {\n        $(\n            println!(\"Value: {}\", $val);\n        )*\n    };\n}\n\nfn main() {\n    my_macro!(1, 2, 3);\n}",
+  "explanation": "Macro repetition patterns use `$(...)*` for zero or more, `$(...)+` for one or more, and `$(...)?` for zero or one. In the pattern `$($val:expr),*`, the comma is a separator between matches. In the expansion `$( println!(...); )*`, the code inside is repeated for each match. This is how macros like `vec!` work internally.",
+  "relatedBookSection": "ch19-06-macros"
+}

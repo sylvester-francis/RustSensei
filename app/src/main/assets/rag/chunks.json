@@ -1,0 +1,634 @@
+{
+  "chunks": [
+    {
+      "id": "chunk-ownership-1",
+      "text": "Ownership is Rust's most unique feature and has deep implications for the rest of the language. It enables Rust to make memory safety guarantees without needing a garbage collector. Each value in Rust has an owner. There can only be one owner at a time. When the owner goes out of scope, the value will be dropped. This is fundamentally different from languages like Go or Python where a garbage collector handles memory cleanup.",
+      "keywords": ["ownership", "memory", "safety", "garbage", "collector", "owner", "scope", "drop"],
+      "sourceId": "ch04-01-what-is-ownership",
+      "sourceTitle": "Ch 4.1: What is Ownership?"
+    },
+    {
+      "id": "chunk-ownership-2",
+      "text": "The String type is a good example to illustrate ownership. When you assign a String from one variable to another, the first variable is invalidated - this is called a 'move'. If you want to deeply copy the heap data, you can use the clone method. Stack-only data like integers implement the Copy trait and are duplicated rather than moved.",
+      "keywords": ["string", "move", "clone", "copy", "heap", "stack", "assign", "variable"],
+      "sourceId": "ch04-01-what-is-ownership",
+      "sourceTitle": "Ch 4.1: What is Ownership?"
+    },
+    {
+      "id": "chunk-borrowing-1",
+      "text": "References allow you to refer to a value without taking ownership of it. Creating a reference is called borrowing. At any given time, you can have either one mutable reference or any number of immutable references. References must always be valid - the compiler ensures no dangling references exist.",
+      "keywords": ["reference", "borrow", "borrowing", "mutable", "immutable", "dangling", "valid"],
+      "sourceId": "ch04-02-references-and-borrowing",
+      "sourceTitle": "Ch 4.2: References and Borrowing"
+    },
+    {
+      "id": "chunk-borrowing-2",
+      "text": "The borrow checker is Rust's compile-time system that enforces the rules of ownership and borrowing. It prevents data races at compile time by ensuring that references follow two rules: you can have either one mutable reference OR any number of immutable references to a particular piece of data in a particular scope.",
+      "keywords": ["borrow", "checker", "compile", "data", "race", "mutable", "immutable", "reference", "scope"],
+      "sourceId": "ch04-02-references-and-borrowing",
+      "sourceTitle": "Ch 4.2: References and Borrowing"
+    },
+    {
+      "id": "chunk-lifetimes-1",
+      "text": "Lifetimes are Rust's way of ensuring that references are valid for as long as they need to be. Most of the time, lifetimes are implicit and inferred. We only need to annotate lifetimes when the lifetimes of references could be related in different ways. The main aim of lifetimes is to prevent dangling references.",
+      "keywords": ["lifetime", "lifetimes", "reference", "valid", "annotate", "dangling", "implicit", "inferred"],
+      "sourceId": "ch10-03-lifetime-syntax",
+      "sourceTitle": "Ch 10.3: Validating References with Lifetimes"
+    },
+    {
+      "id": "chunk-lifetimes-2",
+      "text": "Lifetime annotations describe the relationships of the lifetimes of multiple references to each other. They don't change how long any references live. The syntax is an apostrophe followed by a short lowercase name: 'a. Lifetime elision rules handle common patterns automatically so you don't need to annotate every function.",
+      "keywords": ["lifetime", "annotation", "syntax", "elision", "function", "apostrophe", "reference"],
+      "sourceId": "ch10-03-lifetime-syntax",
+      "sourceTitle": "Ch 10.3: Validating References with Lifetimes"
+    },
+    {
+      "id": "chunk-structs-1",
+      "text": "Structs in Rust are similar to structs in Go or classes in other languages. They let you group related data together. You define a struct with the struct keyword, give it a name, and list its fields with their types. You can define methods on structs using impl blocks.",
+      "keywords": ["struct", "structs", "field", "type", "impl", "method", "group", "data"],
+      "sourceId": "ch05-01-defining-structs",
+      "sourceTitle": "Ch 5.1: Defining and Instantiating Structs"
+    },
+    {
+      "id": "chunk-enums-1",
+      "text": "Enums in Rust are much more powerful than in most languages. Each variant can hold different types and amounts of data. Combined with pattern matching via match, enums become one of Rust's most powerful features. The Option enum replaces null - it forces you to handle the case where a value might be absent.",
+      "keywords": ["enum", "enums", "variant", "match", "pattern", "option", "null", "absent"],
+      "sourceId": "ch06-01-defining-an-enum",
+      "sourceTitle": "Ch 6.1: Defining an Enum"
+    },
+    {
+      "id": "chunk-error-handling-1",
+      "text": "Rust groups errors into two categories: recoverable and unrecoverable. For recoverable errors, Rust has the Result<T, E> type. For unrecoverable errors, Rust has the panic! macro that stops execution. The ? operator provides a convenient way to propagate errors - it returns the error from the current function if the Result is Err.",
+      "keywords": ["error", "handling", "result", "panic", "recoverable", "unrecoverable", "question", "operator", "propagate"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Recoverable Errors with Result"
+    },
+    {
+      "id": "chunk-traits-1",
+      "text": "Traits define shared behavior in Rust, similar to interfaces in Go or TypeScript. A trait tells the compiler about functionality a type must provide. You can implement traits for any type, and you can use trait bounds to constrain generic types. Default implementations allow providing fallback behavior.",
+      "keywords": ["trait", "traits", "interface", "behavior", "implement", "generic", "bound", "default"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: Traits: Defining Shared Behavior"
+    },
+    {
+      "id": "chunk-generics-1",
+      "text": "Generics in Rust are similar to generics in TypeScript or Go. They allow you to write code that works with multiple types. Rust's generics are zero-cost abstractions - the compiler generates specialized code for each concrete type used (monomorphization), so there's no runtime overhead.",
+      "keywords": ["generic", "generics", "type", "monomorphization", "zero", "cost", "abstract", "concrete"],
+      "sourceId": "ch10-01-syntax",
+      "sourceTitle": "Ch 10.1: Generic Data Types"
+    },
+    {
+      "id": "chunk-closures-1",
+      "text": "Closures in Rust are anonymous functions that can capture their environment. They're similar to lambdas in Python or arrow functions in TypeScript. Closures can capture values by borrowing immutably, borrowing mutably, or taking ownership. The Fn, FnMut, and FnOnce traits correspond to these three capture modes.",
+      "keywords": ["closure", "closures", "anonymous", "function", "capture", "environment", "fn", "fnmut", "fnonce", "lambda"],
+      "sourceId": "ch13-01-closures",
+      "sourceTitle": "Ch 13.1: Closures"
+    },
+    {
+      "id": "chunk-iterators-1",
+      "text": "Iterators in Rust are lazy - they don't do anything until you consume them. The Iterator trait requires implementing the next() method. Iterator adaptors like map, filter, and collect allow functional-style data processing. Rust iterators are zero-cost abstractions and compile to the same code as hand-written loops.",
+      "keywords": ["iterator", "iterators", "lazy", "next", "map", "filter", "collect", "functional", "adaptor"],
+      "sourceId": "ch13-02-iterators",
+      "sourceTitle": "Ch 13.2: Iterators"
+    },
+    {
+      "id": "chunk-smart-pointers-1",
+      "text": "Smart pointers in Rust are data structures that act like pointers but have additional metadata and capabilities. Box<T> allocates data on the heap. Rc<T> enables multiple ownership through reference counting. RefCell<T> enforces borrowing rules at runtime instead of compile time. These are similar to shared_ptr and unique_ptr in C++.",
+      "keywords": ["smart", "pointer", "box", "rc", "refcell", "heap", "reference", "counting", "runtime"],
+      "sourceId": "ch15-00-smart-pointers",
+      "sourceTitle": "Ch 15: Smart Pointers"
+    },
+    {
+      "id": "chunk-concurrency-1",
+      "text": "Rust's ownership and type system make concurrent programming safer. The std::thread module allows spawning threads. Channels (mpsc) enable message passing between threads. Mutex<T> and Arc<T> enable shared-state concurrency. The Send and Sync traits mark types as safe to transfer between or share across threads.",
+      "keywords": ["thread", "threads", "concurrency", "concurrent", "channel", "mutex", "arc", "send", "sync", "message", "passing"],
+      "sourceId": "ch16-00-concurrency",
+      "sourceTitle": "Ch 16: Fearless Concurrency"
+    },
+    {
+      "id": "chunk-variables-1",
+      "text": "Variables in Rust are immutable by default. To make a variable mutable, add the mut keyword. Constants are always immutable and must have their type annotated. Shadowing allows you to declare a new variable with the same name, which can even change the type.",
+      "keywords": ["variable", "variables", "immutable", "mutable", "mut", "constant", "shadow", "shadowing", "type"],
+      "sourceId": "ch03-01-variables-and-mutability",
+      "sourceTitle": "Ch 3.1: Variables and Mutability"
+    },
+    {
+      "id": "chunk-strings-1",
+      "text": "Rust has two main string types: String and &str. String is a growable, heap-allocated string. &str is a string slice - a reference to some UTF-8 encoded string data. String literals are &str. To convert &str to String, use .to_string() or String::from(). This distinction often confuses newcomers from languages with a single string type.",
+      "keywords": ["string", "str", "slice", "utf8", "heap", "literal", "to_string", "from"],
+      "sourceId": "ch08-02-strings",
+      "sourceTitle": "Ch 8.2: Storing UTF-8 Encoded Text with Strings"
+    },
+    {
+      "id": "chunk-vectors-1",
+      "text": "Vec<T> is Rust's growable array type, similar to slices in Go or arrays in Python/TypeScript. You create vectors with Vec::new() or the vec! macro. Vectors can only store values of the same type. You access elements by indexing or using the get method which returns an Option.",
+      "keywords": ["vec", "vector", "array", "growable", "push", "index", "get", "option", "macro"],
+      "sourceId": "ch08-01-vectors",
+      "sourceTitle": "Ch 8.1: Storing Lists of Values with Vectors"
+    },
+    {
+      "id": "chunk-hashmap-1",
+      "text": "HashMap<K, V> stores key-value pairs, similar to maps in Go or objects/Maps in TypeScript. You create one with HashMap::new() and insert with insert(). The entry API provides an elegant way to insert or update values. For types implementing Copy, values are copied; otherwise, owned values are moved into the hash map.",
+      "keywords": ["hashmap", "hash", "map", "key", "value", "insert", "entry", "copy", "move"],
+      "sourceId": "ch08-03-hash-maps",
+      "sourceTitle": "Ch 8.3: Storing Keys with Associated Values in Hash Maps"
+    },
+    {
+      "id": "chunk-modules-1",
+      "text": "Rust's module system includes packages, crates, modules, and paths. A package contains one or more crates. Modules let you organize code within a crate and control privacy. Items in a module are private by default - use pub to make them public. The use keyword brings paths into scope.",
+      "keywords": ["module", "modules", "package", "crate", "path", "privacy", "pub", "public", "use", "scope"],
+      "sourceId": "ch07-02-defining-modules",
+      "sourceTitle": "Ch 7.2: Defining Modules to Control Scope and Privacy"
+    },
+    {
+      "id": "chunk-pattern-matching-1",
+      "text": "Pattern matching with match in Rust is exhaustive - you must handle every possible case. You can match on literals, variables, wildcards (_), enums, tuples, structs, and more. if let is syntactic sugar for a match with one pattern. Patterns can include guards for additional conditions.",
+      "keywords": ["match", "pattern", "matching", "exhaustive", "wildcard", "if let", "guard", "destructure"],
+      "sourceId": "ch06-02-match",
+      "sourceTitle": "Ch 6.2: The match Control Flow Construct"
+    },
+    {
+      "id": "chunk-testing-1",
+      "text": "Rust has built-in support for testing. Test functions are annotated with #[test]. Use assert!, assert_eq!, and assert_ne! macros to check conditions. Tests run with cargo test. You can organize tests into unit tests (in the same file) and integration tests (in a tests/ directory). The #[should_panic] attribute tests for expected panics.",
+      "keywords": ["test", "testing", "assert", "cargo", "unit", "integration", "panic", "should_panic"],
+      "sourceId": "ch11-01-writing-tests",
+      "sourceTitle": "Ch 11.1: How to Write Tests"
+    },
+    {
+      "id": "chunk-cargo-1",
+      "text": "Cargo is Rust's build system and package manager. cargo new creates a new project. cargo build compiles your project. cargo run compiles and runs. cargo test runs tests. cargo doc generates documentation. The Cargo.toml file manages dependencies and project configuration.",
+      "keywords": ["cargo", "build", "run", "test", "doc", "toml", "dependency", "package", "manager"],
+      "sourceId": "ch01-03-hello-cargo",
+      "sourceTitle": "Ch 1.3: Hello, Cargo!"
+    },
+    {
+      "id": "chunk-macros-1",
+      "text": "Macros in Rust are a way of writing code that writes other code (metaprogramming). Declarative macros (macro_rules!) match against patterns. Procedural macros operate on token streams. Common macros include println!, vec!, format!, and derive macros like #[derive(Debug)].",
+      "keywords": ["macro", "macros", "metaprogramming", "macro_rules", "procedural", "derive", "println", "vec", "format"],
+      "sourceId": "ch19-06-macros",
+      "sourceTitle": "Ch 19.6: Macros"
+    },
+    {
+      "id": "chunk-unsafe-1",
+      "text": "Unsafe Rust lets you opt out of some of Rust's safety guarantees. You can dereference raw pointers, call unsafe functions, access mutable static variables, and implement unsafe traits. Unsafe doesn't disable the borrow checker - it just gives you access to these five additional capabilities within an unsafe block.",
+      "keywords": ["unsafe", "raw", "pointer", "static", "mutable", "dereference", "block", "safety"],
+      "sourceId": "ch19-01-unsafe-rust",
+      "sourceTitle": "Ch 19.1: Unsafe Rust"
+    },
+    {
+      "id": "chunk-slices-1",
+      "text": "Slices let you reference a contiguous sequence of elements rather than the whole collection. A string slice (&str) references part of a String. Array slices (&[T]) reference part of an array or vector. Slices are a kind of reference, so they don't have ownership. They are similar to slices in Go.",
+      "keywords": ["slice", "slices", "reference", "contiguous", "string", "array", "ownership"],
+      "sourceId": "ch04-03-slices",
+      "sourceTitle": "Ch 4.3: The Slice Type"
+    },
+    {
+      "id": "chunk-convert-hashmap-vec",
+      "text": "To convert a HashMap to a Vec, you can collect its entries. Use hashmap.into_iter().collect::<Vec<(K, V)>>() to get a Vec of key-value tuples. You can also collect just keys with hashmap.keys().cloned().collect::<Vec<K>>() or just values with hashmap.values().cloned().collect::<Vec<V>>(). Going the other direction, a Vec of tuples can be collected into a HashMap with vec.into_iter().collect::<HashMap<K, V>>().",
+      "keywords": ["convert", "hashmap", "vec", "collect", "into_iter", "keys", "values", "tuple"],
+      "sourceId": "ch08-03-hash-maps",
+      "sourceTitle": "Ch 8.3: Converting Between HashMap and Vec"
+    },
+    {
+      "id": "chunk-convert-string-str",
+      "text": "Converting between String and &str is one of the most common operations in Rust. To go from &str to String, use .to_string(), String::from(), or .to_owned(). To go from String to &str, simply take a reference with &my_string or call .as_str(). Deref coercion means a &String automatically works where a &str is expected, so you can pass &my_string to functions that accept &str.",
+      "keywords": ["convert", "string", "str", "to_string", "from", "to_owned", "as_str", "deref", "coercion"],
+      "sourceId": "ch08-02-strings",
+      "sourceTitle": "Ch 8.2: Converting Between String and &str"
+    },
+    {
+      "id": "chunk-convert-types-general",
+      "text": "Rust provides several traits for type conversions. From and Into are for infallible conversions: if you implement From<T> for U, you get Into<U> for T for free. TryFrom and TryInto are for conversions that might fail, returning Result. The as keyword handles primitive type casting like i32 as f64. ToString is automatically implemented for any type that implements Display.",
+      "keywords": ["convert", "from", "into", "tryfrom", "tryinto", "as", "cast", "type", "conversion"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Type Conversions in Rust"
+    },
+    {
+      "id": "chunk-iterate-collections",
+      "text": "You can iterate over Rust collections in several ways. For a Vec, use for item in &vec for immutable references, for item in &mut vec for mutable references, or for item in vec to consume it. For a HashMap, for (key, value) in &map iterates over pairs. For a String, use .chars() for characters or .bytes() for raw bytes. All collections support .iter(), .iter_mut(), and .into_iter().",
+      "keywords": ["iterate", "for", "loop", "vec", "hashmap", "string", "iter", "iter_mut", "into_iter", "chars", "bytes"],
+      "sourceId": "ch08-01-vectors",
+      "sourceTitle": "Ch 8.1: Iterating Over Collections"
+    },
+    {
+      "id": "chunk-error-unwrap-expect",
+      "text": "The unwrap() method on Result and Option extracts the inner value but panics if called on Err or None. The expect() method does the same but lets you provide a custom panic message. Use unwrap/expect only in prototyping, tests, or when you are certain the value is present. In production code, prefer pattern matching, the ? operator, or methods like unwrap_or(), unwrap_or_else(), and unwrap_or_default().",
+      "keywords": ["unwrap", "expect", "panic", "result", "option", "unwrap_or", "unwrap_or_else", "unwrap_or_default", "error"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: unwrap, expect, and Alternatives"
+    },
+    {
+      "id": "chunk-error-question-operator",
+      "text": "The ? operator is the idiomatic way to propagate errors in Rust. When applied to a Result, it returns the Ok value if present, or returns early from the function with the Err. It also performs automatic conversion using the From trait, so different error types can be unified. The ? operator also works on Option, returning None early. It can only be used in functions that return Result or Option.",
+      "keywords": ["question", "operator", "propagate", "error", "result", "option", "from", "early", "return"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: The ? Operator for Error Propagation"
+    },
+    {
+      "id": "chunk-error-map-err",
+      "text": "The map_err() method on Result transforms the error variant while leaving the success value unchanged. This is useful for converting between error types: file.read_to_string(&mut s).map_err(|e| MyError::Io(e))?. Similarly, map() transforms the Ok value. You can chain these: result.map(|v| v + 1).map_err(|e| format!(\"{}\", e)). The and_then() method is used for chaining operations that themselves return Result.",
+      "keywords": ["map_err", "map", "result", "error", "transform", "chain", "and_then", "convert"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Transforming Errors with map_err"
+    },
+    {
+      "id": "chunk-error-custom",
+      "text": "Custom error types in Rust typically implement the std::error::Error trait, Display, and Debug. A common pattern is an enum with variants for each error kind: enum MyError { Io(io::Error), Parse(ParseIntError), NotFound }. Implement From<OtherError> for your error type to enable the ? operator to convert automatically. The thiserror crate simplifies this with derive macros, and anyhow provides a flexible boxed error type.",
+      "keywords": ["custom", "error", "enum", "display", "debug", "thiserror", "anyhow", "from", "trait"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Custom Error Types"
+    },
+    {
+      "id": "chunk-trait-display-debug",
+      "text": "The Display and Debug traits control how types are formatted as strings. Debug is typically derived with #[derive(Debug)] and is used with {:?} format specifier for developer-facing output. Display must be implemented manually and is used with {} for user-facing output. Implementing Display also gives you ToString for free. The {:#?} specifier pretty-prints Debug output with indentation.",
+      "keywords": ["display", "debug", "derive", "format", "trait", "to_string", "pretty", "print", "implement"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: Display and Debug Traits"
+    },
+    {
+      "id": "chunk-trait-clone-partialeq",
+      "text": "Clone provides a way to explicitly duplicate a value with .clone(). Copy is a marker trait for types that can be bitwise-copied (like integers and bools). PartialEq enables == and != comparisons and can be derived. Eq is a marker trait indicating total equality (no NaN-like values). PartialOrd and Ord enable ordering comparisons. Hash allows a type to be used as a HashMap key. Most of these can be derived with #[derive(...)].",
+      "keywords": ["clone", "copy", "partialeq", "eq", "partialord", "ord", "hash", "derive", "trait", "compare"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: Common Derivable Traits"
+    },
+    {
+      "id": "chunk-trait-from-into",
+      "text": "The From trait defines how to create a type from another type: impl From<String> for MyType. The Into trait is the reciprocal and is automatically provided when you implement From. Use Into in function parameters for flexibility: fn do_something(s: impl Into<String>). From/Into are infallible; for fallible conversions, use TryFrom/TryInto which return Result. The standard library provides many From implementations, like String::from(&str).",
+      "keywords": ["from", "into", "tryfrom", "tryinto", "convert", "trait", "infallible", "fallible", "result", "implement"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: From and Into Conversions"
+    },
+    {
+      "id": "chunk-method-chaining-iterator",
+      "text": "Iterator chains are a powerful pattern in Rust. You can chain multiple adaptors like .filter().map().collect() to transform data in a pipeline. Each adaptor is lazy and only executes when a consuming method like collect(), sum(), count(), or for_each() is called. Common chains include .iter().enumerate() for index-value pairs, .iter().filter(|x| condition).collect() for filtering, and .iter().map(|x| transform).collect() for transforming.",
+      "keywords": ["iterator", "chain", "filter", "map", "collect", "lazy", "adaptor", "enumerate", "sum", "pipeline"],
+      "sourceId": "ch13-02-iterators",
+      "sourceTitle": "Ch 13.2: Iterator Method Chaining"
+    },
+    {
+      "id": "chunk-method-chaining-result",
+      "text": "Result and Option support method chaining for concise error handling. For Result: result.map(transform_ok).map_err(transform_err).and_then(next_operation).unwrap_or(default). For Option: option.map(transform).filter(condition).unwrap_or_default(). The or_else() method provides a fallback if the value is Err/None. These chains avoid deeply nested match expressions and make the happy path clear.",
+      "keywords": ["result", "option", "chain", "map", "map_err", "and_then", "or_else", "unwrap_or", "method"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Chaining Result and Option Methods"
+    },
+    {
+      "id": "chunk-stack-heap",
+      "text": "Stack allocation is fast because it just moves the stack pointer; data must have a known fixed size at compile time. Heap allocation uses an allocator and returns a pointer; it is slower but supports dynamically sized data. In Rust, primitive types (integers, floats, bools, chars, tuples of primitives) live on the stack. Types like String, Vec, and HashMap store their data on the heap with a stack-allocated pointer/length/capacity struct. Box<T> explicitly puts any value on the heap.",
+      "keywords": ["stack", "heap", "allocation", "memory", "pointer", "size", "box", "dynamic", "fixed", "compile"],
+      "sourceId": "ch04-01-what-is-ownership",
+      "sourceTitle": "Ch 4.1: Stack vs Heap Allocation"
+    },
+    {
+      "id": "chunk-string-methods",
+      "text": "String manipulation methods include: push_str() to append a string slice, push() to append a single char, + operator or format!() macro for concatenation. Searching: contains() checks for a substring, find() returns the byte index, starts_with()/ends_with() check prefixes/suffixes. Transforming: replace() substitutes substrings, to_uppercase()/to_lowercase() change case, trim() removes whitespace. Splitting: split() and split_whitespace() return iterators over substrings.",
+      "keywords": ["string", "push_str", "push", "contains", "replace", "split", "trim", "format", "concatenate", "find", "starts_with", "ends_with", "uppercase", "lowercase"],
+      "sourceId": "ch08-02-strings",
+      "sourceTitle": "Ch 8.2: String Manipulation Methods"
+    },
+    {
+      "id": "chunk-vec-methods",
+      "text": "Vec<T> provides many useful methods. Adding: push() adds to the end, extend() appends from an iterator, insert() places at an index. Removing: pop() removes the last element (returns Option<T>), remove() removes at an index, retain() keeps only elements matching a predicate, drain() removes a range and returns the removed items as an iterator. Inspecting: len(), is_empty(), contains(). Transforming: sort(), dedup() removes consecutive duplicates, iter() returns an iterator.",
+      "keywords": ["vec", "push", "pop", "extend", "insert", "remove", "retain", "drain", "sort", "dedup", "len", "contains", "iter"],
+      "sourceId": "ch08-01-vectors",
+      "sourceTitle": "Ch 8.1: Vec Methods in Detail"
+    },
+    {
+      "id": "chunk-hashmap-methods",
+      "text": "HashMap<K, V> provides key-value operations. Lookup: get() returns Option<&V>, contains_key() checks existence, get_mut() returns a mutable reference. Removal: remove() deletes a key and returns Option<V>. Iteration: iter() yields (&K, &V) pairs, keys() and values() iterate over just keys or values. The entry() API is especially powerful: map.entry(key).or_insert(default) inserts only if the key is missing, and or_insert_with() lazily computes the default.",
+      "keywords": ["hashmap", "get", "contains_key", "remove", "iter", "keys", "values", "entry", "or_insert", "get_mut"],
+      "sourceId": "ch08-03-hash-maps",
+      "sourceTitle": "Ch 8.3: HashMap Methods in Detail"
+    },
+    {
+      "id": "chunk-pattern-matching-advanced",
+      "text": "Advanced pattern matching includes nested destructuring like match (a, Some(b)) { ... }, the @ binding to bind a name while testing a pattern: match x { n @ 1..=5 => ..., }, and match guards with if: match x { n if n > 0 => ... }. You can also match on multiple patterns with |: match x { 1 | 2 | 3 => ... }. The .. syntax ignores remaining fields in structs or tuples. Patterns work in let, if let, while let, for, and function parameters.",
+      "keywords": ["pattern", "matching", "nested", "binding", "guard", "destructure", "range", "multiple", "let", "while_let", "if_let"],
+      "sourceId": "ch18-03-pattern-syntax",
+      "sourceTitle": "Ch 18.3: Advanced Pattern Syntax"
+    },
+    {
+      "id": "chunk-lifetime-elision",
+      "text": "Rust has three lifetime elision rules that allow omitting lifetime annotations in common cases. Rule 1: each reference parameter gets its own lifetime. Rule 2: if there is exactly one input lifetime, it is assigned to all output lifetimes. Rule 3: if one parameter is &self or &mut self, its lifetime is assigned to all output lifetimes. When these rules fully determine output lifetimes, no annotation is needed. Otherwise, you must annotate explicitly.",
+      "keywords": ["lifetime", "elision", "rule", "annotation", "self", "reference", "parameter", "output", "input", "omit"],
+      "sourceId": "ch10-03-lifetime-syntax",
+      "sourceTitle": "Ch 10.3: Lifetime Elision Rules"
+    },
+    {
+      "id": "chunk-closure-move",
+      "text": "The move keyword before a closure forces it to take ownership of all captured variables. This is essential when the closure outlives the scope where it was created, such as when spawning a thread: thread::spawn(move || { println!(\"{}\", data); }). Without move, the closure borrows the variables, which fails if the closure needs to live longer than the borrowing scope. Move closures still implement Fn or FnMut if they only read or mutate the captured data.",
+      "keywords": ["closure", "move", "capture", "ownership", "thread", "spawn", "fn", "fnmut", "scope", "borrow"],
+      "sourceId": "ch13-01-closures",
+      "sourceTitle": "Ch 13.1: Move Closures and Ownership"
+    },
+    {
+      "id": "chunk-iterator-adaptors",
+      "text": "Iterator adaptors transform iterators without consuming them. zip() pairs two iterators element-wise. enumerate() adds an index to each element. take(n) limits to the first n items. skip(n) skips the first n items. chain() concatenates two iterators. flat_map() maps and flattens nested iterators. peekable() allows peeking at the next element without consuming it. inspect() runs a closure on each element for debugging. All adaptors are lazy and composable.",
+      "keywords": ["iterator", "adaptor", "zip", "enumerate", "take", "skip", "chain", "flat_map", "peekable", "inspect", "lazy"],
+      "sourceId": "ch13-02-iterators",
+      "sourceTitle": "Ch 13.2: Iterator Adaptors"
+    },
+    {
+      "id": "chunk-trait-objects-vs-generics",
+      "text": "Generics with trait bounds (impl Trait or <T: Trait>) use static dispatch: the compiler generates specialized code for each type (monomorphization). Trait objects (dyn Trait) use dynamic dispatch: a vtable lookup at runtime determines which method to call. Use generics when you know the concrete types at compile time for better performance. Use dyn Trait when you need heterogeneous collections or the concrete type is determined at runtime, like Box<dyn Error>.",
+      "keywords": ["trait", "object", "dyn", "impl", "generic", "static", "dynamic", "dispatch", "vtable", "monomorphization", "box"],
+      "sourceId": "ch17-02-trait-objects",
+      "sourceTitle": "Ch 17.2: Trait Objects vs Generics"
+    },
+    {
+      "id": "chunk-arc-vs-rc",
+      "text": "Rc<T> (Reference Counted) enables shared ownership within a single thread. Multiple Rc pointers to the same data are created with Rc::clone(), which increments the reference count. Arc<T> (Atomically Reference Counted) is the thread-safe version of Rc, using atomic operations for the count. Use Rc for single-threaded shared ownership and Arc when sharing data across threads. Arc has slightly more overhead due to atomic operations. Neither allows mutation; pair with RefCell (Rc) or Mutex (Arc) for mutability.",
+      "keywords": ["arc", "rc", "reference", "counting", "thread", "atomic", "clone", "shared", "ownership", "refcell", "mutex"],
+      "sourceId": "ch15-04-rc",
+      "sourceTitle": "Ch 15.4: Rc vs Arc"
+    },
+    {
+      "id": "chunk-mutex-patterns",
+      "text": "Mutex<T> provides mutual exclusion, allowing only one thread to access the data at a time. Call .lock() to acquire the lock, which returns a MutexGuard that auto-releases when dropped. Common pattern: wrap in Arc for shared ownership across threads: let data = Arc::new(Mutex::new(vec![])); To avoid deadlocks: always acquire locks in a consistent order, hold locks for the shortest time possible, and prefer smaller critical sections. RwLock<T> allows multiple readers or one writer.",
+      "keywords": ["mutex", "lock", "thread", "arc", "deadlock", "guard", "rwlock", "mutual", "exclusion", "concurrency"],
+      "sourceId": "ch16-03-shared-state",
+      "sourceTitle": "Ch 16.3: Mutex Patterns and Deadlock Avoidance"
+    },
+    {
+      "id": "chunk-channel-patterns",
+      "text": "Rust's std::sync::mpsc provides multi-producer, single-consumer channels. Create with mpsc::channel() for unbounded or mpsc::sync_channel(n) for bounded channels. The sender has send() and the receiver has recv() (blocking) or try_recv() (non-blocking). Bounded channels provide backpressure: send blocks when the buffer is full. Clone the sender for multiple producers. Dropping all senders closes the channel; recv() then returns Err. The receiver implements Iterator for easy looping.",
+      "keywords": ["channel", "mpsc", "send", "recv", "bounded", "unbounded", "sender", "receiver", "producer", "consumer", "backpressure"],
+      "sourceId": "ch16-02-message-passing",
+      "sourceTitle": "Ch 16.2: Channel Patterns"
+    },
+    {
+      "id": "chunk-type-alias-newtype",
+      "text": "Type aliases create a new name for an existing type: type Kilometers = i32. They don't create a new type, just a synonym, so Kilometers and i32 are interchangeable. The newtype pattern wraps a type in a single-field tuple struct: struct Meters(f64). Unlike aliases, newtypes are distinct types that prevent mixing up semantically different values. Newtypes also let you implement external traits on external types, bypassing the orphan rule. They have zero runtime cost.",
+      "keywords": ["type", "alias", "newtype", "wrapper", "tuple", "struct", "orphan", "rule", "zero", "cost"],
+      "sourceId": "ch19-04-advanced-types",
+      "sourceTitle": "Ch 19.4: Type Aliases and the Newtype Pattern"
+    },
+    {
+      "id": "chunk-derive-macros",
+      "text": "Derive macros automatically generate trait implementations. Common derives: #[derive(Debug)] for debug printing, #[derive(Clone, Copy)] for duplication, #[derive(PartialEq, Eq)] for equality comparisons, #[derive(Hash)] for use as HashMap keys, #[derive(Default)] for a default value, and #[derive(Serialize, Deserialize)] from serde for JSON/data serialization. You can combine multiple derives in one attribute. Custom derive macros can be created as procedural macros.",
+      "keywords": ["derive", "macro", "debug", "clone", "copy", "partialeq", "eq", "hash", "default", "serialize", "deserialize", "serde"],
+      "sourceId": "ch19-06-macros",
+      "sourceTitle": "Ch 19.6: Derive Macros in Practice"
+    },
+    {
+      "id": "chunk-cargo-toml",
+      "text": "Cargo.toml is the manifest file for Rust projects. The [dependencies] section lists crates with version requirements: serde = \"1.0\" means >=1.0.0, <2.0.0. Use features to enable optional functionality: serde = { version = \"1.0\", features = [\"derive\"] }. The [dev-dependencies] section is for test-only dependencies. [workspace] manages multi-crate projects. Cargo.lock pins exact versions for reproducible builds. Use cargo add <crate> to add dependencies from the command line.",
+      "keywords": ["cargo", "toml", "dependency", "dependencies", "version", "features", "workspace", "lock", "crate", "dev"],
+      "sourceId": "ch14-03-cargo-workspaces",
+      "sourceTitle": "Ch 14.3: Cargo.toml and Dependencies"
+    },
+    {
+      "id": "chunk-compiler-error-e0382",
+      "text": "Error E0382: 'use of moved value' occurs when you try to use a variable after its ownership has been transferred (moved) to another variable or function. Fix by: cloning the value before the move with .clone(), passing a reference instead of moving with &, or restructuring code so the original variable isn't used after the move. This error is fundamental to Rust's ownership model and prevents use-after-free bugs.",
+      "keywords": ["error", "e0382", "move", "moved", "value", "ownership", "clone", "reference", "use", "compiler"],
+      "sourceId": "ch04-01-what-is-ownership",
+      "sourceTitle": "Ch 4.1: Compiler Error E0382 - Use of Moved Value"
+    },
+    {
+      "id": "chunk-compiler-error-e0505",
+      "text": "Error E0505: 'cannot move out of value because it is borrowed' occurs when you try to move a value that is still being referenced. The borrow checker ensures references remain valid, so you cannot move data out from under an existing reference. Fix by: ensuring the borrow ends before the move (use scoping with { }), cloning the data, or restructuring to avoid the conflicting borrow and move.",
+      "keywords": ["error", "e0505", "move", "borrow", "borrowed", "reference", "compiler", "scope", "conflict"],
+      "sourceId": "ch04-02-references-and-borrowing",
+      "sourceTitle": "Ch 4.2: Compiler Error E0505 - Move While Borrowed"
+    },
+    {
+      "id": "chunk-compiler-error-e0106",
+      "text": "Error E0106: 'missing lifetime specifier' occurs when the compiler cannot infer the lifetime of a reference in a function signature or struct definition. This typically happens when a function returns a reference and has multiple reference parameters, or when a struct holds a reference. Fix by adding explicit lifetime annotations: fn foo<'a>(x: &'a str, y: &'a str) -> &'a str. For structs: struct Foo<'a> { field: &'a str }.",
+      "keywords": ["error", "e0106", "lifetime", "specifier", "missing", "annotation", "reference", "compiler", "struct", "function"],
+      "sourceId": "ch10-03-lifetime-syntax",
+      "sourceTitle": "Ch 10.3: Compiler Error E0106 - Missing Lifetime"
+    },
+    {
+      "id": "chunk-deref-coercion",
+      "text": "Deref coercion automatically converts a reference to a type that implements the Deref trait into a reference to another type. For example, &String coerces to &str because String implements Deref<Target = str>. Similarly, &Vec<T> coerces to &[T], and &Box<T> coerces to &T. This is why you can pass &String to functions expecting &str. Deref coercion happens at compile time with zero runtime cost and works through multiple levels (e.g., &Box<String> to &str).",
+      "keywords": ["deref", "coercion", "string", "str", "vec", "slice", "box", "reference", "automatic", "convert", "trait"],
+      "sourceId": "ch15-02-deref",
+      "sourceTitle": "Ch 15.2: Deref Coercion"
+    },
+    {
+      "id": "chunk-asref-borrow",
+      "text": "The AsRef<T> trait converts a reference to one type into a reference to another: impl AsRef<str> for String. Use it in function signatures for flexibility: fn print_it(s: impl AsRef<str>) accepts both &str and &String. The Borrow<T> trait is similar but stricter: it guarantees that the borrowed form has equivalent Hash, Eq, and Ord behavior. Use AsRef for simple reference conversions and Borrow when the borrowed form must behave identically (e.g., HashMap key lookup).",
+      "keywords": ["asref", "borrow", "trait", "reference", "convert", "string", "str", "hashmap", "key", "flexibility"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: AsRef and Borrow Traits"
+    },
+    {
+      "id": "chunk-from-into-detail",
+      "text": "From<T> is the most common conversion trait. Implement it to define how to create your type from another: impl From<i32> for MyNum { fn from(n: i32) -> Self { MyNum(n) } }. This automatically provides Into<MyNum> for i32. Calling let x: MyNum = 42.into() or let x = MyNum::from(42) both work. The standard library uses From extensively: String::from(\"hello\"), PathBuf::from(\"/tmp\"), Vec::from([1, 2, 3]). Always implement From rather than Into because From gives you Into for free.",
+      "keywords": ["from", "into", "convert", "implement", "trait", "string", "pathbuf", "standard", "library"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: From and Into in Detail"
+    },
+    {
+      "id": "chunk-tryfrom-tryinto",
+      "text": "TryFrom and TryInto are for conversions that may fail. They return Result<T, Self::Error> instead of the value directly. Example: impl TryFrom<i64> for MySmallInt { type Error = &'static str; fn try_from(value: i64) -> Result<Self, Self::Error> { ... } }. The standard library provides TryFrom for narrowing integer conversions: let x: u8 = 256i32.try_into() returns Err because 256 does not fit in u8. Use these when the conversion has preconditions that may not be met.",
+      "keywords": ["tryfrom", "tryinto", "convert", "result", "error", "fail", "integer", "narrowing", "precondition"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: TryFrom and TryInto"
+    },
+    {
+      "id": "chunk-turbofish",
+      "text": "The turbofish syntax ::<> specifies concrete types for generic functions or methods when the compiler cannot infer them. Example: \"42\".parse::<i32>() tells parse to return an i32. Without turbofish: let n: i32 = \"42\".parse().unwrap() uses type annotation instead. Turbofish is needed with collect: iter.collect::<Vec<_>>() because the compiler cannot always infer the target collection type. The name comes from the resemblance to a fish: ::<>.",
+      "keywords": ["turbofish", "generic", "type", "parse", "collect", "infer", "syntax", "annotation", "concrete"],
+      "sourceId": "ch10-01-syntax",
+      "sourceTitle": "Ch 10.1: The Turbofish Syntax"
+    },
+    {
+      "id": "chunk-method-resolution",
+      "text": "When you call a method on a value, Rust uses auto-deref to find the method. It first tries the type itself, then &T, then &mut T, then dereferences (using Deref trait) and repeats. This is why you can call str methods on String, or [T] methods on Vec<T>. If two traits in scope define the same method name, you get an ambiguity error. Use fully qualified syntax to disambiguate: <Type as Trait>::method(&value). Inherent methods (defined in impl blocks) take priority over trait methods.",
+      "keywords": ["method", "resolution", "auto", "deref", "trait", "ambiguity", "qualified", "syntax", "inherent", "impl"],
+      "sourceId": "ch19-03-advanced-traits",
+      "sourceTitle": "Ch 19.3: Method Resolution and Disambiguation"
+    },
+    {
+      "id": "chunk-associated-types",
+      "text": "Associated types are a way to define a placeholder type within a trait: trait Iterator { type Item; fn next(&mut self) -> Option<Self::Item>; }. Unlike generic type parameters, associated types ensure each implementation specifies exactly one concrete type. Use associated types when a trait should have only one implementation per type (Iterator). Use generic parameters when multiple implementations make sense (From<T> can be implemented for many T). Associated types make trait bounds simpler to read.",
+      "keywords": ["associated", "type", "trait", "iterator", "generic", "parameter", "placeholder", "implement", "bound"],
+      "sourceId": "ch19-03-advanced-traits",
+      "sourceTitle": "Ch 19.3: Associated Types vs Generic Type Parameters"
+    },
+    {
+      "id": "chunk-where-clauses",
+      "text": "Where clauses provide an alternative syntax for specifying trait bounds that is cleaner for complex constraints. Instead of fn foo<T: Clone + Debug, U: Clone + Display>(t: T, u: U), write fn foo<T, U>(t: T, u: U) where T: Clone + Debug, U: Clone + Display. Where clauses can also express bounds that generics syntax cannot, like requiring a method's return type to implement a trait. They are especially useful with multiple generic parameters or long bound lists.",
+      "keywords": ["where", "clause", "trait", "bound", "generic", "constraint", "syntax", "parameter", "function"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: Where Clauses"
+    },
+    {
+      "id": "chunk-phantomdata",
+      "text": "PhantomData<T> is a zero-sized type that tells the compiler your struct logically owns or is associated with T, even though it has no field of that type. Common uses: marking lifetime relationships (PhantomData<&'a T>), indicating ownership for drop check (PhantomData<T>), and marking variance. Example: struct Iter<'a, T> { ptr: *const T, _marker: PhantomData<&'a T> } tells the compiler the iterator borrows data with lifetime 'a. Import from std::marker::PhantomData.",
+      "keywords": ["phantomdata", "phantom", "zero", "sized", "marker", "lifetime", "variance", "ownership", "compiler"],
+      "sourceId": "ch19-04-advanced-types",
+      "sourceTitle": "Ch 19.4: PhantomData"
+    },
+    {
+      "id": "chunk-zero-sized-types",
+      "text": "Zero-sized types (ZSTs) occupy no memory and are a compile-time-only concept. Examples include () (unit type), PhantomData<T>, and structs with no fields. ZSTs are useful as markers and for type-level programming. HashMap<K, ()> effectively becomes a HashSet. fn callbacks can be stored as zero-sized function pointers when their types are known. The compiler optimizes away all ZST storage and operations, making them truly free at runtime.",
+      "keywords": ["zero", "sized", "type", "zst", "unit", "phantomdata", "marker", "compile", "memory", "optimize"],
+      "sourceId": "ch19-04-advanced-types",
+      "sourceTitle": "Ch 19.4: Zero-Sized Types"
+    },
+    {
+      "id": "chunk-builder-pattern",
+      "text": "The builder pattern constructs complex objects step by step. In Rust, a builder struct has methods that set fields and return &mut Self or Self for chaining: let server = ServerBuilder::new().port(8080).threads(4).build(). The build() method typically returns the final type, possibly wrapped in Result if validation is needed. Builders solve the problem of many optional parameters and provide a clear API. The derive_builder crate can auto-generate builders from struct definitions.",
+      "keywords": ["builder", "pattern", "struct", "chain", "method", "construct", "optional", "parameter", "build", "design"],
+      "sourceId": "ch17-03-design-patterns",
+      "sourceTitle": "Ch 17.3: The Builder Pattern"
+    },
+    {
+      "id": "chunk-raii-pattern",
+      "text": "RAII (Resource Acquisition Is Initialization) means resources are tied to object lifetimes. When a value goes out of scope, its Drop trait implementation runs automatically, releasing resources like files, network connections, or locks. In Rust, MutexGuard releases the lock on drop, File closes the handle, and custom types can implement Drop for cleanup. This eliminates resource leaks without try/finally blocks. RAII combined with ownership makes Rust's resource management deterministic and safe.",
+      "keywords": ["raii", "resource", "drop", "scope", "cleanup", "file", "lock", "deterministic", "lifetime", "pattern"],
+      "sourceId": "ch15-03-drop",
+      "sourceTitle": "Ch 15.3: RAII and the Drop Trait"
+    },
+    {
+      "id": "chunk-interior-mutability",
+      "text": "Interior mutability allows mutating data even through an immutable reference, checked at runtime. Cell<T> provides get/set for Copy types with zero overhead. RefCell<T> allows borrowing mutably at runtime, panicking if borrowing rules are violated. Use RefCell when you know the code follows borrowing rules but the compiler cannot verify it statically. A common pattern is Rc<RefCell<T>> for shared mutable data in single-threaded contexts. For multi-threaded code, use Arc<Mutex<T>> instead.",
+      "keywords": ["interior", "mutability", "cell", "refcell", "runtime", "borrow", "mutable", "immutable", "rc", "mutex"],
+      "sourceId": "ch15-05-interior-mutability",
+      "sourceTitle": "Ch 15.5: Interior Mutability with Cell and RefCell"
+    },
+    {
+      "id": "chunk-cow",
+      "text": "Cow<T> (Clone on Write) is a smart pointer that can hold either borrowed or owned data. It implements Deref so you can read it like a reference. When mutation is needed, to_mut() clones the data only if it is currently borrowed, avoiding unnecessary allocations. Common uses: Cow<str> in functions that sometimes need to modify a string and sometimes don't: fn process(input: &str) -> Cow<str>. This avoids allocating a new String when the input can be returned unchanged.",
+      "keywords": ["cow", "clone", "write", "borrow", "owned", "deref", "string", "allocation", "smart", "pointer", "efficient"],
+      "sourceId": "ch15-00-smart-pointers",
+      "sourceTitle": "Ch 15: Cow - Clone on Write"
+    },
+    {
+      "id": "chunk-pin-unpin",
+      "text": "Pin<P> ensures that the value pointed to by P cannot be moved in memory. This is critical for self-referential types like async futures, where internal pointers would be invalidated by a move. Most types implement Unpin, meaning they can be moved even when pinned (Pin has no effect on them). Types that contain self-references are !Unpin. In async Rust, futures returned by async fn are !Unpin, so they must be pinned before polling. Box::pin() and pin! macro create pinned values.",
+      "keywords": ["pin", "unpin", "move", "memory", "self", "referential", "async", "future", "poll", "box"],
+      "sourceId": "ch19-04-advanced-types",
+      "sourceTitle": "Ch 19.4: Pin and Unpin Basics"
+    },
+    {
+      "id": "chunk-for-loops",
+      "text": "The for loop in Rust works with anything that implements the IntoIterator trait. for x in vec iterates by value (consuming the vec), for x in &vec iterates by immutable reference, and for x in &mut vec iterates by mutable reference. You can also use ranges: for i in 0..10 or for i in 0..=10 (inclusive). Combine with enumerate() for index: for (i, val) in vec.iter().enumerate(). The loop desugars to calling .into_iter() and repeatedly calling .next().",
+      "keywords": ["for", "loop", "iterate", "into_iter", "range", "enumerate", "vec", "reference", "consume"],
+      "sourceId": "ch03-05-control-flow",
+      "sourceTitle": "Ch 3.5: For Loops and Iteration"
+    },
+    {
+      "id": "chunk-option-methods",
+      "text": "Option<T> has many methods beyond simple unwrap. is_some()/is_none() check the variant. map() transforms the inner value. and_then() (flatmap) chains operations returning Option. unwrap_or(default) provides a fallback, unwrap_or_else(|| compute()) lazily computes one. filter() returns None if the predicate fails. zip() combines two Options into an Option of a tuple. The ? operator returns None early from functions returning Option. Option also implements Iterator, yielding 0 or 1 elements.",
+      "keywords": ["option", "map", "and_then", "unwrap_or", "filter", "zip", "is_some", "is_none", "none", "some", "question", "operator"],
+      "sourceId": "ch06-01-defining-an-enum",
+      "sourceTitle": "Ch 6.1: Option Methods"
+    },
+    {
+      "id": "chunk-compiler-error-e0277",
+      "text": "Error E0277: 'the trait bound is not satisfied' occurs when a type does not implement a required trait. Common cases: trying to print a type without Debug (#[derive(Debug)] fixes it), using a type as a HashMap key without Hash + Eq, or passing a type to a generic function it does not satisfy. The error message shows which trait is missing and where. Fix by deriving or manually implementing the required trait, or by changing the type to one that satisfies the bound.",
+      "keywords": ["error", "e0277", "trait", "bound", "satisfied", "derive", "debug", "hash", "compiler", "implement"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: Compiler Error E0277 - Trait Not Satisfied"
+    },
+    {
+      "id": "chunk-compiler-error-e0308",
+      "text": "Error E0308: 'mismatched types' is one of the most common Rust errors. It occurs when the expected and found types differ, such as returning String where &str is expected, or passing i32 where u32 is needed. Fix by converting types: use .as_str() or &s for String to &str, use as for numeric casts, use .into() or From for other conversions. Read the error carefully: it shows the expected type and the found type, usually with a suggestion for how to fix it.",
+      "keywords": ["error", "e0308", "mismatched", "type", "expected", "found", "convert", "cast", "compiler", "string", "integer"],
+      "sourceId": "ch03-02-data-types",
+      "sourceTitle": "Ch 3.2: Compiler Error E0308 - Mismatched Types"
+    },
+    {
+      "id": "chunk-iterator-consuming",
+      "text": "Consuming adaptors call next() and exhaust the iterator. collect() gathers results into a collection (Vec, HashMap, String, etc.). sum() and product() aggregate numeric iterators. count() returns the number of elements. any() and all() test predicates. find() returns the first matching element as Option. position() returns the index of the first match. fold() accumulates a value: vec.iter().fold(0, |acc, x| acc + x). for_each() runs a closure on each element, similar to a for loop.",
+      "keywords": ["iterator", "collect", "sum", "product", "count", "any", "all", "find", "position", "fold", "for_each", "consume"],
+      "sourceId": "ch13-02-iterators",
+      "sourceTitle": "Ch 13.2: Consuming Iterator Adaptors"
+    },
+    {
+      "id": "chunk-string-formatting",
+      "text": "Rust's format!() macro and its variants (println!, write!, eprintln!) use {} for Display and {:?} for Debug formatting. Positional args: format!(\"{0} is {1}\", a, b). Named args: format!(\"{name} is {age}\"). Padding: {:>10} right-aligns, {:<10} left-aligns, {:^10} centers. Numbers: {:.2} for 2 decimal places, {:x} for hex, {:b} for binary, {:e} for scientific. Fill: {:0>5} pads with zeros. These work identically in format!, println!, write!, and panic!.",
+      "keywords": ["format", "println", "write", "display", "debug", "padding", "hex", "binary", "decimal", "string"],
+      "sourceId": "ch08-02-strings",
+      "sourceTitle": "Ch 8.2: String Formatting"
+    },
+    {
+      "id": "chunk-slice-patterns",
+      "text": "Slice patterns allow matching on the structure of slices and arrays. Match on length: match slice { [a] => ..., [a, b] => ..., _ => ... }. Use .. to match remaining elements: [first, ..] matches the first element, [.., last] matches the last, [first, rest @ ..] binds the rest. This works in match, if let, and let bindings. Slice patterns are useful for parsing commands, processing argument lists, and implementing recursive algorithms on sequences.",
+      "keywords": ["slice", "pattern", "match", "array", "first", "last", "rest", "binding", "destructure"],
+      "sourceId": "ch18-03-pattern-syntax",
+      "sourceTitle": "Ch 18.3: Slice Patterns"
+    },
+    {
+      "id": "chunk-result-combinators",
+      "text": "Result<T, E> combinators allow expressive error handling without match blocks. is_ok()/is_err() check the variant. ok() converts to Option<T>, discarding the error. map()/map_err() transform the success or error value. and_then() chains fallible operations. or_else() provides fallback on error. unwrap_or(), unwrap_or_else(), unwrap_or_default() extract with fallbacks. transpose() converts Option<Result<T, E>> to Result<Option<T>, E>. These combinators compose well with the ? operator for clean error-handling pipelines.",
+      "keywords": ["result", "combinator", "map", "map_err", "and_then", "or_else", "ok", "transpose", "error", "option", "unwrap_or"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Result Combinators"
+    },
+    {
+      "id": "chunk-trait-default",
+      "text": "The Default trait provides a type with a default value via Default::default() or Type::default(). It can be derived with #[derive(Default)] for structs where all fields implement Default. This is commonly used with the struct update syntax: Config { port: 8080, ..Default::default() } to set only the fields you care about. Default is required by unwrap_or_default() on Option and Result. The standard library defaults: 0 for numbers, false for bool, empty for String/Vec/HashMap.",
+      "keywords": ["default", "trait", "derive", "struct", "update", "syntax", "unwrap_or_default", "empty", "zero", "fallback"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: The Default Trait"
+    },
+    {
+      "id": "chunk-impl-trait",
+      "text": "impl Trait can appear in two positions. In argument position, fn foo(x: impl Display) is shorthand for fn foo<T: Display>(x: T) and accepts any type implementing Display. In return position, fn bar() -> impl Display means the function returns some type implementing Display without naming it. Return-position impl Trait is essential for returning closures and iterators: fn make_adder() -> impl Fn(i32) -> i32. Note: return-position impl Trait returns a single concrete type, not dynamic dispatch.",
+      "keywords": ["impl", "trait", "return", "argument", "closure", "iterator", "generic", "display", "syntax", "concrete"],
+      "sourceId": "ch10-02-traits",
+      "sourceTitle": "Ch 10.2: impl Trait in Argument and Return Position"
+    },
+    {
+      "id": "chunk-vec-string-convert",
+      "text": "Converting between Vec and String is common. Vec<u8> to String: String::from_utf8(vec) returns Result (validates UTF-8), or unsafe String::from_utf8_unchecked(vec). String to Vec<u8>: s.into_bytes() or s.as_bytes().to_vec(). Vec<char> to String: chars.into_iter().collect::<String>(). String to Vec<char>: s.chars().collect::<Vec<char>>(). Vec<&str> to String: vec.join(\", \") joins with a separator. Splitting a String: s.split(',').collect::<Vec<&str>>().",
+      "keywords": ["vec", "string", "convert", "bytes", "utf8", "chars", "collect", "join", "split", "from_utf8"],
+      "sourceId": "ch08-02-strings",
+      "sourceTitle": "Ch 8.2: Converting Between Vec and String"
+    },
+    {
+      "id": "chunk-closures-as-args",
+      "text": "Functions can accept closures as parameters using trait bounds: Fn for closures that only read captures, FnMut for closures that mutate captures, and FnOnce for closures that consume captures. Use impl Fn(Args) -> Return for simple cases or generics with where clauses for complex ones. Higher-order functions like map, filter, and for_each accept closures. Standard library functions often accept impl FnOnce() or impl Fn() -> T. FnOnce is the most general bound since all closures implement it.",
+      "keywords": ["closure", "fn", "fnmut", "fnonce", "parameter", "argument", "higher", "order", "function", "trait", "bound"],
+      "sourceId": "ch13-01-closures",
+      "sourceTitle": "Ch 13.1: Closures as Function Parameters"
+    },
+    {
+      "id": "chunk-enum-methods",
+      "text": "Enums can have methods defined in impl blocks, just like structs. You can define methods on an enum and use match or if let inside them: impl Message { fn call(&self) { match self { Message::Quit => ..., Message::Write(text) => ... } } }. Enums can also implement traits. A common pattern is implementing Display for an enum to define how each variant is printed. Enums with methods are a powerful way to model state machines and command patterns.",
+      "keywords": ["enum", "method", "impl", "match", "variant", "display", "trait", "state", "machine", "pattern"],
+      "sourceId": "ch06-01-defining-an-enum",
+      "sourceTitle": "Ch 6.1: Enum Methods"
+    },
+    {
+      "id": "chunk-async-basics",
+      "text": "Async Rust allows non-blocking concurrent programming. An async fn returns a Future that does nothing until awaited with .await. The async runtime (like tokio or async-std) polls futures to completion. async/await is syntactic sugar over the Future trait. Key differences from threads: async tasks are lighter (no OS thread per task), but they must not block the thread (use tokio::spawn_blocking for blocking work). Async functions can be composed with join! for concurrent execution or select! for racing.",
+      "keywords": ["async", "await", "future", "tokio", "runtime", "concurrent", "non_blocking", "poll", "join", "select", "spawn"],
+      "sourceId": "ch17-01-futures",
+      "sourceTitle": "Ch 17.1: Async/Await Basics"
+    },
+    {
+      "id": "chunk-hashmap-custom-key",
+      "text": "To use a custom type as a HashMap key, it must implement Hash and Eq. Derive both with #[derive(Hash, PartialEq, Eq)]. The key invariant: if a == b, then hash(a) == hash(b). Floating-point types (f32, f64) do not implement Eq (due to NaN) and cannot be used as HashMap keys directly. For composite keys, consider using tuples: HashMap<(String, u32), Value>. If you need a key with a borrowed form for lookups, implement Borrow so you can look up with &str in a HashMap<String, V>.",
+      "keywords": ["hashmap", "key", "hash", "eq", "derive", "custom", "type", "borrow", "tuple", "lookup"],
+      "sourceId": "ch08-03-hash-maps",
+      "sourceTitle": "Ch 8.3: Custom HashMap Keys"
+    },
+    {
+      "id": "chunk-error-boxing",
+      "text": "For functions that can return multiple error types, use Box<dyn Error> or a type alias: type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>. This boxes any error on the heap, trading some performance for flexibility. The anyhow crate provides anyhow::Result which is ergonomic for applications. The thiserror crate is better for libraries, generating From implementations for each variant. Choose: Box<dyn Error> for quick prototyping, thiserror for libraries, anyhow for applications.",
+      "keywords": ["error", "box", "dyn", "anyhow", "thiserror", "result", "type", "alias", "library", "application"],
+      "sourceId": "ch09-02-recoverable-errors",
+      "sourceTitle": "Ch 9.2: Boxing Errors"
+    },
+    {
+      "id": "chunk-iter-from-fn",
+      "text": "You can create custom iterators by implementing the Iterator trait on a struct, which requires only the next() method and an associated Item type. For simpler cases, std::iter::from_fn(|| { ... }) creates an iterator from a closure. std::iter::once(value) creates a single-element iterator, and std::iter::empty() creates an empty one. std::iter::repeat(value) creates an infinite iterator. These building blocks compose with all the standard iterator adaptors.",
+      "keywords": ["iterator", "custom", "next", "from_fn", "once", "empty", "repeat", "implement", "trait", "item"],
+      "sourceId": "ch13-02-iterators",
+      "sourceTitle": "Ch 13.2: Creating Custom Iterators"
+    },
+    {
+      "id": "chunk-send-sync-traits",
+      "text": "Send marks types that can be transferred between threads. Sync marks types whose references can be shared between threads (&T is Send if T is Sync). Most types are Send + Sync automatically. Rc<T> is neither Send nor Sync (use Arc<T> instead). Raw pointers are not Send or Sync. Cell and RefCell are Send but not Sync (use Mutex for thread-safe interior mutability). These are auto-traits: the compiler implements them unless a field prevents it. Unsafe impl can override this for custom types.",
+      "keywords": ["send", "sync", "trait", "thread", "safety", "rc", "arc", "cell", "refcell", "mutex", "auto"],
+      "sourceId": "ch16-04-extensible-concurrency",
+      "sourceTitle": "Ch 16.4: Send and Sync Traits"
+    }
+  ]
+}

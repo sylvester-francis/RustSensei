@@ -1,0 +1,17 @@
+{
+  "id": "tests1",
+  "title": "Tests 1",
+  "category": "tests",
+  "difficulty": "beginner",
+  "description": "Tests in Rust are functions annotated with `#[test]`. They use assert macros to verify conditions.",
+  "instructions": "Write a test that verifies the function works correctly.",
+  "starterCode": "fn is_even(num: i32) -> bool {\n    num % 2 == 0\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn is_true_when_even() {\n        // TODO: Write an assertion that is_even(4) returns true\n    }\n\n    #[test]\n    fn is_false_when_odd() {\n        // TODO: Write an assertion that is_even(5) returns false\n    }\n}\n\nfn main() {\n    println!(\"4 is even: {}\", is_even(4));\n}",
+  "hints": [
+    "Use `assert!()` to check that a boolean expression is true.",
+    "For the first test: assert!(is_even(4));",
+    "For the second test: assert!(!is_even(5)); - note the `!` to negate."
+  ],
+  "solution": "fn is_even(num: i32) -> bool {\n    num % 2 == 0\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn is_true_when_even() {\n        assert!(is_even(4));\n    }\n\n    #[test]\n    fn is_false_when_odd() {\n        assert!(!is_even(5));\n    }\n}\n\nfn main() {\n    println!(\"4 is even: {}\", is_even(4));\n}",
+  "explanation": "Tests in Rust are functions marked with `#[test]` inside a module with `#[cfg(test)]`. The `assert!` macro panics if its argument is false, causing the test to fail. The `#[cfg(test)]` attribute ensures test code is only compiled when running tests, not in production builds.",
+  "relatedBookSection": "ch11-01-writing-tests"
+}

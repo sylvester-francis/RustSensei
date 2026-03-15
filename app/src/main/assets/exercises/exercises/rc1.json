@@ -1,0 +1,17 @@
+{
+  "id": "rc1",
+  "title": "Rc 1",
+  "category": "smart_pointers",
+  "difficulty": "intermediate",
+  "description": "Rc<T> (Reference Counting) enables multiple ownership of the same data in single-threaded scenarios.",
+  "instructions": "Use Rc to share data between multiple owners.",
+  "starterCode": "use std::rc::Rc;\n\nfn main() {\n    let sun = Rc::new(\"Sun\".to_string());\n\n    println!(\"Reference count after creating sun: {}\", Rc::strong_count(&sun));\n\n    {\n        let _planet1 = // TODO: Create a new Rc pointing to the same data\n        println!(\"Reference count after creating planet1: {}\", Rc::strong_count(&sun));\n\n        let _planet2 = // TODO: Create another Rc pointing to the same data\n        println!(\"Reference count after creating planet2: {}\", Rc::strong_count(&sun));\n    }\n\n    println!(\"Reference count after inner scope: {}\", Rc::strong_count(&sun));\n    assert_eq!(Rc::strong_count(&sun), 1);\n}",
+  "hints": [
+    "Use Rc::clone(&rc) to create a new reference to the same data.",
+    "Rc::clone doesn't deep-copy the data - it increments the reference count.",
+    "When an Rc is dropped, the count decreases. Data is freed when count reaches 0."
+  ],
+  "solution": "use std::rc::Rc;\n\nfn main() {\n    let sun = Rc::new(\"Sun\".to_string());\n\n    println!(\"Reference count after creating sun: {}\", Rc::strong_count(&sun));\n\n    {\n        let _planet1 = Rc::clone(&sun);\n        println!(\"Reference count after creating planet1: {}\", Rc::strong_count(&sun));\n\n        let _planet2 = Rc::clone(&sun);\n        println!(\"Reference count after creating planet2: {}\", Rc::strong_count(&sun));\n    }\n\n    println!(\"Reference count after inner scope: {}\", Rc::strong_count(&sun));\n    assert_eq!(Rc::strong_count(&sun), 1);\n}",
+  "explanation": "Rc<T> (Reference Counting) allows multiple parts of your program to read the same data. `Rc::clone()` is cheap - it just increments a counter. When each Rc is dropped, the counter decrements. When the last Rc is dropped (count reaches 0), the data is cleaned up. Rc is for single-threaded use only; for multi-threaded code, use Arc instead.",
+  "relatedBookSection": "ch15-04-rc"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "box1",
+  "title": "Box 1",
+  "category": "smart_pointers",
+  "difficulty": "intermediate",
+  "description": "Box<T> allocates data on the heap. It's useful for recursive types and large data that you don't want on the stack.",
+  "instructions": "Use Box to create a recursive data structure.",
+  "starterCode": "// TODO: Fix the List enum to use Box for the recursive case\n#[derive(Debug)]\nenum List {\n    Cons(i32, List),\n    Nil,\n}\n\nfn main() {\n    let list = List::Cons(1, List::Cons(2, List::Cons(3, List::Nil)));\n    println!(\"{:?}\", list);\n}",
+  "hints": [
+    "Rust needs to know the size of every type at compile time.",
+    "A recursive type has infinite size unless you add indirection.",
+    "Wrap the recursive field in a Box: Cons(i32, Box<List>)"
+  ],
+  "solution": "#[derive(Debug)]\nenum List {\n    Cons(i32, Box<List>),\n    Nil,\n}\n\nfn main() {\n    let list = List::Cons(1, Box::new(List::Cons(2, Box::new(List::Cons(3, Box::new(List::Nil))))));\n    println!(\"{:?}\", list);\n}",
+  "explanation": "Box<T> is the simplest smart pointer - it allocates data on the heap and owns it. For recursive types like a linked list, the compiler can't determine the type's size because it's self-referential. Box provides a pointer of known size (one pointer width), breaking the infinite recursion. Box::new() allocates on the heap and returns the box.",
+  "relatedBookSection": "ch15-01-box"
+}

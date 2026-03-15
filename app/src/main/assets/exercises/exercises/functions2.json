@@ -1,0 +1,17 @@
+{
+  "id": "functions2",
+  "title": "Functions 2",
+  "category": "functions",
+  "difficulty": "beginner",
+  "description": "Functions can take parameters. In Rust, you must declare the type of each parameter.",
+  "instructions": "Fix the function signature by adding the correct parameter type.",
+  "starterCode": "fn main() {\n    call_me(3);\n}\n\nfn call_me(num:) {\n    for i in 0..num {\n        println!(\"Ring! Call number {}\", i + 1);\n    }\n}",
+  "hints": [
+    "Function parameters in Rust must have a type annotation.",
+    "The parameter is used in a range (0..num), so it should be an integer type.",
+    "Try using `i32` or `u32` as the type for the parameter."
+  ],
+  "solution": "fn main() {\n    call_me(3);\n}\n\nfn call_me(num: u32) {\n    for i in 0..num {\n        println!(\"Ring! Call number {}\", i + 1);\n    }\n}",
+  "explanation": "In Rust function signatures, you must declare the type of each parameter. The syntax is `name: Type`. This is a deliberate design choice - the compiler can almost always infer types within function bodies, but requiring type annotations on function boundaries makes code more readable and provides clear documentation.",
+  "relatedBookSection": "ch03-03-how-functions-work"
+}

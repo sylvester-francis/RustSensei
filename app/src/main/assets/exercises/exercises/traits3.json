@@ -1,0 +1,17 @@
+{
+  "id": "traits3",
+  "title": "Traits 3",
+  "category": "traits",
+  "difficulty": "intermediate",
+  "description": "Trait bounds constrain generic types to only accept types that implement certain traits.",
+  "instructions": "Add the correct trait bound to make the function work with any type that implements Display.",
+  "starterCode": "use std::fmt::Display;\n\npub trait Licensed {\n    fn licensing_info(&self) -> String {\n        \"Default license\".to_string()\n    }\n}\n\nstruct SomeSoftware;\nstruct OtherSoftware;\n\nimpl Licensed for SomeSoftware {}\nimpl Licensed for OtherSoftware {\n    fn licensing_info(&self) -> String {\n        \"OtherSoftware License v2\".to_string()\n    }\n}\n\n// TODO: Fix the function signature with a trait bound\nfn compare_license_types(software: ???, software2: ???) -> bool {\n    software.licensing_info() == software2.licensing_info()\n}\n\nfn main() {\n    let s1 = SomeSoftware;\n    let s2 = OtherSoftware;\n    println!(\"Same license? {}\", compare_license_types(&s1, &s2));\n}",
+  "hints": [
+    "Use trait bounds to accept any type implementing Licensed.",
+    "The syntax is: fn func(param: &impl TraitName) or fn func<T: TraitName>(param: &T)",
+    "Both parameters need to implement Licensed but can be different types."
+  ],
+  "solution": "use std::fmt::Display;\n\npub trait Licensed {\n    fn licensing_info(&self) -> String {\n        \"Default license\".to_string()\n    }\n}\n\nstruct SomeSoftware;\nstruct OtherSoftware;\n\nimpl Licensed for SomeSoftware {}\nimpl Licensed for OtherSoftware {\n    fn licensing_info(&self) -> String {\n        \"OtherSoftware License v2\".to_string()\n    }\n}\n\nfn compare_license_types(software: &impl Licensed, software2: &impl Licensed) -> bool {\n    software.licensing_info() == software2.licensing_info()\n}\n\nfn main() {\n    let s1 = SomeSoftware;\n    let s2 = OtherSoftware;\n    println!(\"Same license? {}\", compare_license_types(&s1, &s2));\n}",
+  "explanation": "Trait bounds specify that a generic type must implement a particular trait. The `impl Trait` syntax is shorthand for a full generic declaration: `fn func(param: &impl Licensed)` is equivalent to `fn func<T: Licensed>(param: &T)`. This lets the function accept any type that implements Licensed.",
+  "relatedBookSection": "ch10-02-traits"
+}

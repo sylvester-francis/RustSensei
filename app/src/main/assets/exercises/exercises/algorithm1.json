@@ -1,0 +1,17 @@
+{
+  "id": "algorithm1",
+  "title": "Algorithm 1 - Merge Sort",
+  "category": "algorithms",
+  "difficulty": "advanced",
+  "description": "Implement the merge sort algorithm in Rust. Merge sort divides the list, recursively sorts each half, then merges them.",
+  "instructions": "Complete the merge sort implementation.",
+  "starterCode": "fn merge_sort(arr: Vec<i32>) -> Vec<i32> {\n    if arr.len() <= 1 {\n        return arr;\n    }\n\n    let mid = arr.len() / 2;\n    let left = merge_sort(arr[..mid].to_vec());\n    let right = merge_sort(arr[mid..].to_vec());\n\n    // TODO: Implement the merge function\n    merge(left, right)\n}\n\nfn merge(left: Vec<i32>, right: Vec<i32>) -> Vec<i32> {\n    // TODO: Merge two sorted vectors into one sorted vector\n    vec![]\n}\n\nfn main() {\n    let arr = vec![38, 27, 43, 3, 9, 82, 10];\n    println!(\"Unsorted: {:?}\", arr);\n    let sorted = merge_sort(arr);\n    println!(\"Sorted: {:?}\", sorted);\n    assert_eq!(sorted, vec![3, 9, 10, 27, 38, 43, 82]);\n}",
+  "hints": [
+    "Use two indices (i for left, j for right) and compare elements.",
+    "Push the smaller element to the result and advance that index.",
+    "After one array is exhausted, append the remaining elements from the other."
+  ],
+  "solution": "fn merge_sort(arr: Vec<i32>) -> Vec<i32> {\n    if arr.len() <= 1 {\n        return arr;\n    }\n\n    let mid = arr.len() / 2;\n    let left = merge_sort(arr[..mid].to_vec());\n    let right = merge_sort(arr[mid..].to_vec());\n\n    merge(left, right)\n}\n\nfn merge(left: Vec<i32>, right: Vec<i32>) -> Vec<i32> {\n    let mut result = Vec::with_capacity(left.len() + right.len());\n    let mut i = 0;\n    let mut j = 0;\n\n    while i < left.len() && j < right.len() {\n        if left[i] <= right[j] {\n            result.push(left[i]);\n            i += 1;\n        } else {\n            result.push(right[j]);\n            j += 1;\n        }\n    }\n\n    while i < left.len() {\n        result.push(left[i]);\n        i += 1;\n    }\n\n    while j < right.len() {\n        result.push(right[j]);\n        j += 1;\n    }\n\n    result\n}\n\nfn main() {\n    let arr = vec![38, 27, 43, 3, 9, 82, 10];\n    println!(\"Unsorted: {:?}\", arr);\n    let sorted = merge_sort(arr);\n    println!(\"Sorted: {:?}\", sorted);\n    assert_eq!(sorted, vec![3, 9, 10, 27, 38, 43, 82]);\n}",
+  "explanation": "Merge sort is a divide-and-conquer algorithm with O(n log n) time complexity. In Rust, it demonstrates recursion, vector slicing, and ownership. The merge function uses two indices to walk through both sorted halves, always picking the smaller element. `Vec::with_capacity` pre-allocates memory for efficiency.",
+  "relatedBookSection": "ch13-02-iterators"
+}

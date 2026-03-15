@@ -1,0 +1,17 @@
+{
+  "id": "strings4",
+  "title": "Strings 4",
+  "category": "strings",
+  "difficulty": "beginner",
+  "description": "Understanding the difference between `String` and `&str` is essential. This exercise tests that understanding.",
+  "instructions": "Fix each function call to pass the correct string type.",
+  "starterCode": "fn string_slice(arg: &str) {\n    println!(\"{arg}\");\n}\n\nfn string(arg: String) {\n    println!(\"{arg}\");\n}\n\nfn main() {\n    string_slice(\"blue\");\n    string(\"red\".to_string());\n    string(String::from(\"hi\"));\n    string(\"rust is fun!\".to_owned());\n    string_slice(\"nice weather\".into());\n    string(format!(\"Interpolation {}\", \"Station\"));\n    // TODO: Fix the following line\n    string_slice(\"abc\".to_uppercase());\n}",
+  "hints": [
+    "`.to_uppercase()` returns a `String`, but `string_slice` expects `&str`.",
+    "You can convert a String to &str by taking a reference with `&`.",
+    "Change to: string_slice(&\"abc\".to_uppercase()); or use the `string` function instead."
+  ],
+  "solution": "fn string_slice(arg: &str) {\n    println!(\"{arg}\");\n}\n\nfn string(arg: String) {\n    println!(\"{arg}\");\n}\n\nfn main() {\n    string_slice(\"blue\");\n    string(\"red\".to_string());\n    string(String::from(\"hi\"));\n    string(\"rust is fun!\".to_owned());\n    string_slice(\"nice weather\".into());\n    string(format!(\"Interpolation {}\", \"Station\"));\n    string(\"abc\".to_uppercase());\n}",
+  "explanation": "Understanding when you have a `String` vs `&str` is crucial in Rust. String literals are `&str`. Methods like `.to_string()`, `String::from()`, `.to_owned()`, and `format!()` all produce `String`. Methods like `.to_uppercase()` also return `String`. You can pass a `&String` where `&str` is expected thanks to Deref coercion.",
+  "relatedBookSection": "ch08-02-strings"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "from_str",
+  "title": "FromStr",
+  "category": "conversions",
+  "difficulty": "intermediate",
+  "description": "The `FromStr` trait allows parsing a type from a string. It's what powers the `.parse()` method.",
+  "instructions": "Implement FromStr for a custom type to enable parsing with .parse().",
+  "starterCode": "use std::num::ParseIntError;\nuse std::str::FromStr;\n\n#[derive(Debug, PartialEq)]\nstruct Color {\n    red: u8,\n    green: u8,\n    blue: u8,\n}\n\nimpl FromStr for Color {\n    type Err = String;\n\n    fn from_str(s: &str) -> Result<Self, Self::Err> {\n        // TODO: Parse strings like \"(255,0,128)\"\n        // Remove parentheses, split by comma, parse each number\n        Err(\"Not implemented\".to_string())\n    }\n}\n\nfn main() {\n    let c: Color = \"(255,128,0)\".parse().unwrap();\n    println!(\"{:?}\", c);\n    assert_eq!(c, Color { red: 255, green: 128, blue: 0 });\n}",
+  "hints": [
+    "Strip the parentheses first with trim_start_matches and trim_end_matches.",
+    "Split by ',' and parse each part as u8.",
+    "Return an error if there aren't exactly 3 components or parsing fails."
+  ],
+  "solution": "use std::num::ParseIntError;\nuse std::str::FromStr;\n\n#[derive(Debug, PartialEq)]\nstruct Color {\n    red: u8,\n    green: u8,\n    blue: u8,\n}\n\nimpl FromStr for Color {\n    type Err = String;\n\n    fn from_str(s: &str) -> Result<Self, Self::Err> {\n        let s = s.trim_start_matches('(').trim_end_matches(')');\n        let parts: Vec<&str> = s.split(',').collect();\n        if parts.len() != 3 {\n            return Err(format!(\"Expected 3 color components, got {}\", parts.len()));\n        }\n        let red = parts[0].parse::<u8>().map_err(|e| e.to_string())?;\n        let green = parts[1].parse::<u8>().map_err(|e| e.to_string())?;\n        let blue = parts[2].parse::<u8>().map_err(|e| e.to_string())?;\n        Ok(Color { red, green, blue })\n    }\n}\n\nfn main() {\n    let c: Color = \"(255,128,0)\".parse().unwrap();\n    println!(\"{:?}\", c);\n    assert_eq!(c, Color { red: 255, green: 128, blue: 0 });\n}",
+  "explanation": "Implementing `FromStr` lets your type work with the `.parse()` method on strings. The trait has an associated `Err` type for parse failures. The `?` operator with `map_err` converts the inner parse errors to your error type. This pattern is common for creating types that need to be deserialized from text.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

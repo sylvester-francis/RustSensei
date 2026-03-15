@@ -1,0 +1,17 @@
+{
+  "id": "options2",
+  "title": "Options 2",
+  "category": "options",
+  "difficulty": "beginner",
+  "description": "The `if let` syntax is a convenient way to match on Option when you only care about the `Some` case.",
+  "instructions": "Use `if let` to handle Option values concisely.",
+  "starterCode": "fn main() {\n    let optional_target = Some(\"world\");\n\n    // TODO: Use if let to print \"Hello, world!\" if optional_target is Some\n    if optional_target.is_some() {\n        println!(\"Hello, {}!\", optional_target.unwrap());\n    }\n\n    let optional_number: Option<i32> = None;\n\n    // TODO: Use if let with else to handle both cases\n    // Print the number if Some, or \"No number\" if None\n    if optional_number.is_some() {\n        println!(\"Number: {}\", optional_number.unwrap());\n    }\n}",
+  "hints": [
+    "`if let Some(value) = option { ... }` extracts the value when it's Some.",
+    "You can add an `else` block to handle the None case.",
+    "Replace the is_some()/unwrap() pattern with if let."
+  ],
+  "solution": "fn main() {\n    let optional_target = Some(\"world\");\n\n    if let Some(target) = optional_target {\n        println!(\"Hello, {}!\", target);\n    }\n\n    let optional_number: Option<i32> = None;\n\n    if let Some(number) = optional_number {\n        println!(\"Number: {}\", number);\n    } else {\n        println!(\"No number\");\n    }\n}",
+  "explanation": "`if let` is syntactic sugar for a `match` that only handles one variant. It's more concise when you only care about the `Some` case. Using `if let Some(value) = option` is preferred over calling `.is_some()` followed by `.unwrap()` because it's safer (no risk of panicking) and more idiomatic.",
+  "relatedBookSection": "ch06-03-if-let"
+}

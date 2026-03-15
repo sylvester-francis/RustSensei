@@ -1,0 +1,17 @@
+{
+  "id": "clippy1",
+  "title": "Clippy 1",
+  "category": "clippy",
+  "difficulty": "beginner",
+  "description": "Clippy is Rust's linter that catches common mistakes and suggests more idiomatic code.",
+  "instructions": "Fix the code to address Clippy's warnings about common mistakes.",
+  "starterCode": "use std::f32;\n\nfn main() {\n    let pi = 3.14f32;\n    let radius = 5.00f32;\n\n    let area = pi * f32::powi(radius, 2);\n    println!(\"The area of a circle with radius {radius:.2} is {area:.5}!\");\n\n    let mut res = 42;\n    let option = Some(12);\n    // Clippy warns: this could be done with `if let`\n    for x in option {\n        res += x;\n    }\n    println!(\"Result: {res}\");\n}",
+  "hints": [
+    "Use `std::f32::consts::PI` instead of defining pi manually.",
+    "Iterating over an Option with `for` is not idiomatic - use `if let` instead.",
+    "Replace `for x in option` with `if let Some(x) = option`."
+  ],
+  "solution": "use std::f32;\n\nfn main() {\n    let pi = std::f32::consts::PI;\n    let radius = 5.00f32;\n\n    let area = pi * f32::powi(radius, 2);\n    println!(\"The area of a circle with radius {radius:.2} is {area:.5}!\");\n\n    let mut res = 42;\n    let option = Some(12);\n    if let Some(x) = option {\n        res += x;\n    }\n    println!(\"Result: {res}\");\n}",
+  "explanation": "Clippy catches subtle issues: using approximate values for mathematical constants (use `std::f32::consts::PI` instead), and using `for` on an Option (which works but is confusing - use `if let` instead). Clippy helps you write more idiomatic and correct Rust code.",
+  "relatedBookSection": "ch01-03-hello-cargo"
+}

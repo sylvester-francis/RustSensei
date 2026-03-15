@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Monochrome Ferris crab silhouette for Android 13+ themed icons -->
+    <!-- Only the outline — no internal details (eyes, mouth, headband) -->
+
+    <!-- Left claw -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M37,50 C33,42 27,36 29,31 C31,26 37,28 39,34 C41,28 45,26 47,31 C49,36 43,42 41,50 Z" />
+
+    <!-- Right claw -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M71,50 C75,42 81,36 79,31 C77,26 71,28 69,34 C67,28 63,26 61,31 C59,36 65,42 67,50 Z" />
+
+    <!-- Body -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M33,58 C33,48 42,41 54,41 C66,41 75,48 75,58 L75,66 C75,72 66,77 54,77 C42,77 33,72 33,66 Z" />
+
+    <!-- Left legs -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M35,58 L26,54"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M34,63 L24,63"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M35,68 L26,72"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+
+    <!-- Right legs -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M73,58 L82,54"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M74,63 L84,63"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M73,68 L82,72"
+        android:strokeWidth="2.5"
+        android:strokeColor="#000000"
+        android:strokeLineCap="round" />
+
+</vector>

@@ -1,0 +1,17 @@
+{
+  "id": "tests2",
+  "title": "Tests 2",
+  "category": "tests",
+  "difficulty": "beginner",
+  "description": "The `assert_eq!` and `assert_ne!` macros compare two values and provide better error messages than `assert!`.",
+  "instructions": "Use assert_eq! to test the function output.",
+  "starterCode": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn add_works() {\n        // TODO: Use assert_eq! to check that add(2, 3) returns 5\n    }\n\n    #[test]\n    fn add_negative() {\n        // TODO: Use assert_eq! to check that add(-2, 3) returns 1\n    }\n}\n\nfn main() {\n    println!(\"2 + 3 = {}\", add(2, 3));\n}",
+  "hints": [
+    "assert_eq! takes two arguments and checks they are equal.",
+    "The syntax is: assert_eq!(expected, actual);",
+    "Try: assert_eq!(5, add(2, 3));"
+  ],
+  "solution": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn add_works() {\n        assert_eq!(5, add(2, 3));\n    }\n\n    #[test]\n    fn add_negative() {\n        assert_eq!(1, add(-2, 3));\n    }\n}\n\nfn main() {\n    println!(\"2 + 3 = {}\", add(2, 3));\n}",
+  "explanation": "`assert_eq!(left, right)` checks that two values are equal and panics with a message showing both values if they differ. `assert_ne!` checks that values are NOT equal. Both macros require the values to implement the `PartialEq` and `Debug` traits (most standard types do). The order of arguments doesn't matter, but convention is (expected, actual).",
+  "relatedBookSection": "ch11-01-writing-tests"
+}

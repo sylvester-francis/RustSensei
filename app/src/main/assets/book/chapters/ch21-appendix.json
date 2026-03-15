@@ -1,0 +1,79 @@
+{
+  "id": "ch21-appendix",
+  "title": "Appendix",
+  "sections": [
+    {
+      "id": "ch21-01-keywords",
+      "title": "A - Keywords",
+      "content": "The following list contains keywords that are currently in use by the Rust language. Keywords are reserved identifiers that cannot be used as names of functions, variables, parameters, struct fields, modules, crates, constants, macros, static values, attributes, types, traits, or lifetimes.\n\n### Keywords Currently in Use\n\n- `as` - perform primitive casting, disambiguate the specific trait containing an item, or rename items in `use` statements\n- `async` - return a `Future` instead of blocking the current thread\n- `await` - suspend execution until the result of a `Future` is ready\n- `break` - exit a loop immediately\n- `const` - define constant items or constant raw pointers\n- `continue` - continue to the next loop iteration\n- `crate` - in a module path, refers to the crate root\n- `dyn` - dynamic dispatch to a trait object\n- `else` - fallback for `if` and `if let` control flow constructs\n- `enum` - define an enumeration\n- `extern` - link an external function or variable\n- `false` - Boolean false literal\n- `fn` - define a function or the function pointer type\n- `for` - loop over items from an iterator, implement a trait, or specify a higher-ranked lifetime\n- `if` - branch based on the result of a conditional expression\n- `impl` - implement inherent or trait functionality\n- `in` - part of `for` loop syntax\n- `let` - bind a variable\n- `loop` - loop unconditionally\n- `match` - match a value to patterns\n- `mod` - define a module\n- `move` - make a closure take ownership of all its captures\n- `mut` - denote mutability in references, raw pointers, or pattern bindings\n- `pub` - denote public visibility in struct fields, `impl` blocks, or modules\n- `ref` - bind by reference\n- `return` - return from function\n- `Self` - a type alias for the type we are defining or implementing\n- `self` - method subject or current module\n- `static` - global variable or lifetime lasting the entire program execution\n- `struct` - define a structure\n- `super` - parent module of the current module\n- `trait` - define a trait\n- `true` - Boolean true literal\n- `type` - define a type alias or associated type\n- `union` - define a union (only a keyword when used in a union declaration)\n- `unsafe` - denote unsafe code, functions, traits, or implementations\n- `use` - bring symbols into scope\n- `where` - denote clauses that constrain a type\n- `while` - loop conditionally based on the result of an expression\n\n### Keywords Reserved for Future Use\n\nThe following keywords do not yet have any functionality but are reserved by Rust for potential future use: `abstract`, `become`, `box`, `do`, `final`, `macro`, `override`, `priv`, `try`, `typeof`, `unsized`, `virtual`, `yield`.",
+      "codeExamples": [
+        {
+          "description": "Common keyword usage examples",
+          "code": "let mut x = 5;           // let, mut\nconst PI: f64 = 3.14159; // const\nfn add(a: i32, b: i32) -> i32 { a + b } // fn\nstruct Point { x: f64, y: f64 }         // struct\nenum Color { Red, Green, Blue }          // enum\ntrait Drawable { fn draw(&self); }       // trait\nimpl Drawable for Point { fn draw(&self) {} } // impl"
+        }
+      ],
+      "keyTerms": ["keywords", "reserved words", "identifiers"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch21-02-operators",
+      "title": "B - Operators and Symbols",
+      "content": "This appendix contains a glossary of Rust's operators and symbols, including operators and other symbols that appear by themselves or in the context of paths, generics, trait bounds, macros, attributes, comments, tuples, and brackets.\n\n### Operators\n\n**Arithmetic Operators:**\n- `+` - addition (also used for trait bounds)\n- `-` - subtraction or negation\n- `*` - multiplication or dereference\n- `/` - division\n- `%` - remainder (modulo)\n\n**Comparison Operators:**\n- `==` - equal to\n- `!=` - not equal to\n- `<` - less than\n- `>` - greater than\n- `<=` - less than or equal to\n- `>=` - greater than or equal to\n\n**Logical Operators:**\n- `&&` - logical AND\n- `||` - logical OR\n- `!` - logical NOT (also used for macro invocation)\n\n**Bitwise Operators:**\n- `&` - bitwise AND (also used for borrowing)\n- `|` - bitwise OR (also used for patterns)\n- `^` - bitwise XOR\n- `<<` - left shift\n- `>>` - right shift\n\n**Assignment Operators:**\n- `=` - assignment\n- `+=`, `-=`, `*=`, `/=`, `%=` - compound assignment\n- `&=`, `|=`, `^=`, `<<=`, `>>=` - compound bitwise assignment\n\n**Special Operators and Symbols:**\n- `..` - exclusive range, struct update syntax\n- `..=` - inclusive range\n- `...` - deprecated inclusive range pattern (use `..=` instead)\n- `=>` - match arm syntax\n- `->` - function return type, closure return type\n- `::` - path separator\n- `:` - type annotation, trait bound\n- `;` - statement terminator, array fixed size\n- `,` - various separators\n- `.` - member access, method call\n- `?` - error propagation, \"try\" operator\n- `@` - pattern binding\n- `_` - wildcard pattern, unused variable\n- `#` - attribute\n- `$` - macro substitution\n- `'` - lifetime annotation, char literal\n\n### Type-related Symbols:\n- `<>` - generic type parameters\n- `&T` - immutable reference\n- `&mut T` - mutable reference\n- `*const T` - raw immutable pointer\n- `*mut T` - raw mutable pointer\n- `dyn Trait` - trait object\n- `impl Trait` - opaque return type\n- `'a` - lifetime annotation\n- `'static` - lifetime lasting the entire program",
+      "codeExamples": [
+        {
+          "description": "Common operators in context",
+          "code": "// Arithmetic\nlet sum = 5 + 10;\nlet product = 4 * 3;\n\n// Comparison\nif x >= 10 { /* ... */ }\n\n// Ranges\nfor i in 0..5 { } // exclusive: 0,1,2,3,4\nfor i in 0..=5 { } // inclusive: 0,1,2,3,4,5\n\n// Error propagation\nlet val = some_function()?;\n\n// References\nlet r = &x;       // immutable reference\nlet r = &mut x;    // mutable reference"
+        }
+      ],
+      "keyTerms": ["operators", "symbols", "arithmetic", "comparison", "logical", "bitwise", "range", "path separator"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch21-03-derivable-traits",
+      "title": "C - Derivable Traits",
+      "content": "In various places in the book, we've discussed the `derive` attribute, which you can apply to a struct or enum definition. The `derive` attribute generates code that will implement a trait with its own default implementation on the type you've annotated with the `derive` syntax.\n\nHere is a summary of all the traits in the standard library that can be implemented with `derive`:\n\n### Debug\n\nThe `Debug` trait enables debug formatting in format strings, which you indicate by adding `:?` within `{}` placeholders.\n\n```rust\n#[derive(Debug)]\nstruct Point { x: i32, y: i32 }\n\nlet p = Point { x: 1, y: 2 };\nprintln!(\"{p:?}\"); // Point { x: 1, y: 2 }\nprintln!(\"{p:#?}\"); // Pretty-printed\n```\n\n### PartialEq and Eq\n\nThe `PartialEq` trait allows you to compare instances of a type for equality using `==` and `!=`. The `Eq` trait has no methods and signals that for every value of the annotated type, the value is equal to itself. A type that implements `Eq` must also implement `PartialEq`. Types where not all values are equal to themselves (like `f64`, due to `NaN != NaN`) can implement `PartialEq` but not `Eq`.\n\n### PartialOrd and Ord\n\nThe `PartialOrd` trait allows you to compare instances for sorting purposes. A type that implements `PartialOrd` can be used with `<`, `>`, `<=`, and `>=` operators. `Ord` indicates that for any two values of the annotated type, a valid ordering exists. A type that implements `Ord` must also implement `PartialOrd`, `Eq`, and `PartialEq`.\n\n### Clone and Copy\n\nThe `Clone` trait allows you to explicitly create a deep copy of a value. The `Copy` trait allows you to duplicate a value by only copying bits stored on the stack; no arbitrary code is necessary. Every type that implements `Copy` must also implement `Clone`.\n\n### Hash\n\nThe `Hash` trait allows you to take an instance of a type of arbitrary size and map that instance to a value of fixed size using a hash function. Deriving `Hash` implements the `hash` method.\n\n### Default\n\nThe `Default` trait allows you to create a default value for a type. Deriving `Default` implements the `default` function:\n\n```rust\n#[derive(Default, Debug)]\nstruct Config {\n    width: u32,\n    height: u32,\n    title: String,\n}\n\nlet config = Config::default();\n// Config { width: 0, height: 0, title: \"\" }\n```\n\nYou can also use `Default` with struct update syntax: `let config = Config { title: String::from(\"My App\"), ..Default::default() };`",
+      "codeExamples": [
+        {
+          "description": "Common derive attributes",
+          "code": "#[derive(Debug, Clone, PartialEq, Eq, Hash)]\nstruct Point {\n    x: i32,\n    y: i32,\n}\n\nlet p1 = Point { x: 1, y: 2 };\nlet p2 = p1.clone();\nassert_eq!(p1, p2);"
+        },
+        {
+          "description": "Default trait",
+          "code": "#[derive(Default, Debug)]\nstruct Config {\n    width: u32,\n    height: u32,\n}\n\nlet c = Config::default();\nprintln!(\"{c:?}\"); // Config { width: 0, height: 0 }"
+        }
+      ],
+      "keyTerms": ["derive", "Debug", "PartialEq", "Eq", "PartialOrd", "Ord", "Clone", "Copy", "Hash", "Default"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch21-04-useful-tools",
+      "title": "D - Useful Development Tools",
+      "content": "The Rust ecosystem includes many useful tools for development. Here are some of the most important ones:\n\n### Automatic Formatting with rustfmt\n\nThe `rustfmt` tool reformats your code according to the community code style. Many collaborative projects use `rustfmt` to prevent arguments about which style to use when writing Rust: everyone formats their code using the tool.\n\nTo install rustfmt:\n```\n$ rustup component add rustfmt\n```\n\nTo format your project:\n```\n$ cargo fmt\n```\n\nRunning this command reformats all the Rust code in the current crate. This should only change the code style, not the code semantics.\n\n### Fix Your Code with rustfix\n\nThe `rustfix` tool is included with Rust installations and can automatically fix compiler warnings that have a clear way to correct the problem. You've likely seen compiler warnings before. For example, if you have an unused variable, the compiler suggests a fix. You can automatically apply all suggestions:\n\n```\n$ cargo fix\n```\n\n### More Lints with Clippy\n\nThe Clippy tool is a collection of lints to analyze your code so you can catch common mistakes and improve your Rust code. Clippy is included with standard Rust installations.\n\nTo install clippy:\n```\n$ rustup component add clippy\n```\n\nTo run clippy on any Cargo project:\n```\n$ cargo clippy\n```\n\nClippy provides hundreds of lints that catch common patterns. For example, it will warn about using `.len() == 0` instead of `.is_empty()`, or creating `Range` values that are immediately indexed.\n\n### IDE Integration Using rust-analyzer\n\nTo help IDE integration, the Rust community recommends using `rust-analyzer`. This tool provides auto-completion, jump to definition, inline errors, and many more features. It works with many editors including VS Code, Vim/Neovim, Emacs, Sublime Text, and others.\n\n### Other Notable Tools\n\n- **cargo-watch**: Automatically re-runs cargo commands when files change\n- **cargo-expand**: Shows the result of macro expansion\n- **cargo-audit**: Checks your dependencies for known security vulnerabilities\n- **cargo-tarpaulin**: Measures code coverage for your tests\n- **cargo-bench**: Built-in benchmarking support",
+      "codeExamples": [
+        {
+          "description": "Common development tools",
+          "code": "$ cargo fmt       # Format code\n$ cargo clippy    # Lint code\n$ cargo fix       # Auto-fix warnings\n$ cargo test      # Run tests\n$ cargo doc       # Generate docs\n$ cargo bench     # Run benchmarks"
+        }
+      ],
+      "keyTerms": ["rustfmt", "clippy", "rust-analyzer", "cargo fmt", "cargo clippy", "cargo fix", "lints"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch21-05-editions",
+      "title": "E - Editions",
+      "content": "Rust has a concept called *editions*. Every two to three years, the Rust team produces a new Rust *edition*, which is a collection of changes that fall into a clear package with fully updated documentation and tooling. New editions ship as part of the normal six-week release process.\n\nEditions serve different purposes for different people:\n\n- For active Rust users, a new edition brings together incremental changes into an easy-to-understand package.\n- For non-users, a new edition signals that some major advancements have landed, which might make Rust worth another look.\n- For those developing Rust, a new edition provides a rallying point for the project as a whole.\n\n### Current Editions\n\nAt the time of this writing, four Rust editions are available:\n\n- **Rust 2015**: The original edition. Essentially the baseline.\n- **Rust 2018**: Introduced the module system improvements, `async`/`await`, and many other ergonomic changes.\n- **Rust 2021**: Introduced closure capture improvements, `IntoIterator` for arrays, and updates to the prelude.\n- **Rust 2024**: The latest edition, which includes further ergonomic improvements and feature updates.\n\n### How Editions Work\n\nThe key point to understand about editions is that they are *opt-in*. When you create a new project with `cargo new`, the `edition` key in *Cargo.toml* specifies the edition:\n\n```toml\n[package]\nname = \"my-project\"\nversion = \"0.1.0\"\nedition = \"2021\"\n```\n\nExisting projects can upgrade to a newer edition. The Rust compiler supports all editions that existed at the time of the compiler's release. A library written using one edition can interoperate with libraries written using other editions. Even if one library uses Rust 2015 and a dependent library uses Rust 2021, they can interoperate with each other. The edition only affects the way the compiler initially parses code.\n\nTo migrate an existing project to a newer edition, you can use `cargo fix`:\n\n```\n$ cargo fix --edition\n```\n\nThis command will analyze your code and suggest changes needed for the new edition. After running the fix command, update the `edition` value in *Cargo.toml*.\n\nThe edition mechanism ensures that Rust can evolve and introduce breaking changes to the language syntax without breaking existing code. Old code continues to work, and new code can take advantage of new features. This is a key design principle of Rust's evolution strategy.",
+      "codeExamples": [
+        {
+          "description": "Setting the edition in Cargo.toml",
+          "code": "[package]\nname = \"my-project\"\nversion = \"0.1.0\"\nedition = \"2021\""
+        },
+        {
+          "description": "Migrating to a new edition",
+          "code": "$ cargo fix --edition"
+        }
+      ],
+      "keyTerms": ["edition", "Rust 2015", "Rust 2018", "Rust 2021", "Rust 2024", "backward compatibility", "cargo fix --edition"],
+      "relatedExercises": []
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types4",
+  "title": "Primitive Types 4",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "You can take a slice of an array using range syntax. Slices let you reference a contiguous sequence of elements.",
+  "instructions": "Use a slice to get a portion of the array.",
+  "starterCode": "fn main() {\n    let a = [1, 2, 3, 4, 5];\n\n    let nice_slice = // Create a slice of `a` that contains [2, 3, 4]\n\n    println!(\"Nice slice: {:?}\", nice_slice);\n    assert_eq!([2, 3, 4], nice_slice);\n}",
+  "hints": [
+    "Slices use the range syntax: &array[start..end]",
+    "The range is half-open: start is inclusive, end is exclusive.",
+    "To get elements at indices 1, 2, 3: &a[1..4]"
+  ],
+  "solution": "fn main() {\n    let a = [1, 2, 3, 4, 5];\n\n    let nice_slice = &a[1..4];\n\n    println!(\"Nice slice: {:?}\", nice_slice);\n    assert_eq!([2, 3, 4], nice_slice);\n}",
+  "explanation": "A slice is a reference to a contiguous sequence of elements in a collection. The syntax `&a[1..4]` creates a slice starting at index 1 and ending before index 4 (exclusive). Slices don't own the data; they borrow it. The type of a slice of i32 values is `&[i32]`.",
+  "relatedBookSection": "ch04-03-slices"
+}

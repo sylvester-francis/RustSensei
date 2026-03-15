@@ -1,0 +1,17 @@
+{
+  "id": "errors6",
+  "title": "Errors 6",
+  "category": "error_handling",
+  "difficulty": "intermediate",
+  "description": "Using `Box<dyn Error>` as the error type allows any error to be returned, which is useful for quick prototyping.",
+  "instructions": "Use Box<dyn Error> to handle multiple error types in a single function.",
+  "starterCode": "use std::error::Error;\nuse std::num::ParseIntError;\n\nfn parse_pos_nonzero(s: &str) -> Result<u64, Box<dyn Error>> {\n    // TODO: Parse the string to i64, check if positive, return as u64\n    // Use ? to propagate parse errors\n    // Return a custom error message for non-positive values\n    let n = s.parse::<i64>()?;\n    if n <= 0 {\n        let err = \"Value must be positive and non-zero\".to_string();\n        // How do you return a String as Box<dyn Error>?\n    }\n    Ok(n as u64)\n}\n\nfn main() {\n    println!(\"{:?}\", parse_pos_nonzero(\"42\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"abc\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"-5\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"0\"));\n}",
+  "hints": [
+    "A String can be converted to Box<dyn Error> using `.into()`.",
+    "Alternatively, use `Err(err.into())` to box the string error.",
+    "Box<dyn Error> accepts any type that implements the Error trait."
+  ],
+  "solution": "use std::error::Error;\nuse std::num::ParseIntError;\n\nfn parse_pos_nonzero(s: &str) -> Result<u64, Box<dyn Error>> {\n    let n = s.parse::<i64>()?;\n    if n <= 0 {\n        let err = \"Value must be positive and non-zero\".to_string();\n        return Err(err.into());\n    }\n    Ok(n as u64)\n}\n\nfn main() {\n    println!(\"{:?}\", parse_pos_nonzero(\"42\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"abc\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"-5\"));\n    println!(\"{:?}\", parse_pos_nonzero(\"0\"));\n}",
+  "explanation": "`Box<dyn Error>` is a trait object that can hold any error type. It is convenient for functions that might produce different error types, especially during prototyping. The `.into()` method converts concrete error types into the boxed trait object. For production code, custom error enums or crates like `thiserror` and `anyhow` are often preferred.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "errors4",
+  "title": "Errors 4",
+  "category": "error_handling",
+  "difficulty": "intermediate",
+  "description": "The `map_err` method lets you transform one error type into another, which is useful when combining different error types.",
+  "instructions": "Use map_err to convert the error type so both operations return the same error type.",
+  "starterCode": "#[derive(Debug)]\nenum CreationError {\n    Negative,\n    Zero,\n}\n\n#[derive(Debug)]\nstruct PositiveNonzeroInteger(u64);\n\nimpl PositiveNonzeroInteger {\n    fn new(value: i64) -> Result<PositiveNonzeroInteger, CreationError> {\n        // TODO: Return an error for negative or zero values\n        if value < 0 {\n            Err(CreationError::Negative)\n        } else if value == 0 {\n            Err(CreationError::Zero)\n        } else {\n            Ok(PositiveNonzeroInteger(value as u64))\n        }\n    }\n}\n\nfn main() {\n    let result = PositiveNonzeroInteger::new(10);\n    println!(\"{:?}\", result);\n\n    let zero_result = PositiveNonzeroInteger::new(0);\n    println!(\"{:?}\", zero_result);\n\n    let negative_result = PositiveNonzeroInteger::new(-5);\n    println!(\"{:?}\", negative_result);\n}",
+  "hints": [
+    "Check if the value is negative first, then if it's zero.",
+    "Return the appropriate CreationError variant for each case.",
+    "Cast with `as u64` for the success case since the value is confirmed positive."
+  ],
+  "solution": "#[derive(Debug)]\nenum CreationError {\n    Negative,\n    Zero,\n}\n\n#[derive(Debug)]\nstruct PositiveNonzeroInteger(u64);\n\nimpl PositiveNonzeroInteger {\n    fn new(value: i64) -> Result<PositiveNonzeroInteger, CreationError> {\n        if value < 0 {\n            Err(CreationError::Negative)\n        } else if value == 0 {\n            Err(CreationError::Zero)\n        } else {\n            Ok(PositiveNonzeroInteger(value as u64))\n        }\n    }\n}\n\nfn main() {\n    let result = PositiveNonzeroInteger::new(10);\n    println!(\"{:?}\", result);\n\n    let zero_result = PositiveNonzeroInteger::new(0);\n    println!(\"{:?}\", zero_result);\n\n    let negative_result = PositiveNonzeroInteger::new(-5);\n    println!(\"{:?}\", negative_result);\n}",
+  "explanation": "Custom error types help describe what went wrong in domain-specific terms. Using an enum for errors lets you represent multiple failure modes with a single type. The `map_err` method on Result can convert between error types: `result.map_err(|e| MyError::from(e))`. This is essential when combining operations that produce different error types.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "structs3",
+  "title": "Structs 3",
+  "category": "structs",
+  "difficulty": "beginner",
+  "description": "You can define methods on structs using `impl` blocks. Methods take `&self` as their first parameter.",
+  "instructions": "Implement the methods for the Package struct.",
+  "starterCode": "struct Package {\n    sender: String,\n    recipient: String,\n    weight_in_grams: i32,\n}\n\nimpl Package {\n    fn new(sender: String, recipient: String, weight_in_grams: i32) -> Package {\n        if weight_in_grams <= 0 {\n            panic!(\"Weight must be positive!\");\n        }\n        Package {\n            sender,\n            recipient,\n            weight_in_grams,\n        }\n    }\n\n    fn is_international(&self) -> bool {\n        // TODO: Implement - something is international if sender and recipient\n        // countries (first 2 chars) differ\n    }\n\n    fn get_fees(&self, cents_per_gram: i32) -> i32 {\n        // TODO: Implement - return the fees for shipping\n    }\n}\n\nfn main() {\n    let package = Package::new(\n        \"Alice, US\".to_string(),\n        \"Bob, JP\".to_string(),\n        500,\n    );\n    println!(\"International: {}\", package.is_international());\n    println!(\"Fees: {} cents\", package.get_fees(2));\n}",
+  "hints": [
+    "For is_international, compare the sender and recipient country portions.",
+    "You can use string slicing or check if sender starts with the same prefix as recipient.",
+    "For get_fees, multiply weight_in_grams by cents_per_gram."
+  ],
+  "solution": "struct Package {\n    sender: String,\n    recipient: String,\n    weight_in_grams: i32,\n}\n\nimpl Package {\n    fn new(sender: String, recipient: String, weight_in_grams: i32) -> Package {\n        if weight_in_grams <= 0 {\n            panic!(\"Weight must be positive!\");\n        }\n        Package {\n            sender,\n            recipient,\n            weight_in_grams,\n        }\n    }\n\n    fn is_international(&self) -> bool {\n        self.sender.split(\", \").last() != self.recipient.split(\", \").last()\n    }\n\n    fn get_fees(&self, cents_per_gram: i32) -> i32 {\n        self.weight_in_grams * cents_per_gram\n    }\n}\n\nfn main() {\n    let package = Package::new(\n        \"Alice, US\".to_string(),\n        \"Bob, JP\".to_string(),\n        500,\n    );\n    println!(\"International: {}\", package.is_international());\n    println!(\"Fees: {} cents\", package.get_fees(2));\n}",
+  "explanation": "Methods are defined in `impl` blocks and take `&self` (a reference to the instance) as their first parameter. Associated functions (like `new`) don't take `self` and are called with `::` syntax. Methods are called with dot notation. The `self` parameter gives access to the struct's fields.",
+  "relatedBookSection": "ch05-03-method-syntax"
+}

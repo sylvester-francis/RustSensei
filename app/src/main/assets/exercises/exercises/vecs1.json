@@ -1,0 +1,17 @@
+{
+  "id": "vecs1",
+  "title": "Vecs 1",
+  "category": "vecs",
+  "difficulty": "beginner",
+  "description": "Vectors are resizable arrays. You can create them with `Vec::new()` or the `vec!` macro.",
+  "instructions": "Create a vector that passes the tests using either Vec::new() with push, or the vec! macro.",
+  "starterCode": "fn array_and_vec() -> ([i32; 4], Vec<i32>) {\n    let a = [10, 20, 30, 40];\n\n    let v = // TODO: Create a Vec that has the same elements as `a`\n\n    (a, v)\n}\n\nfn main() {\n    let (a, v) = array_and_vec();\n    assert_eq!(a, v[..]);\n    println!(\"Arrays and vectors look the same: {:?} vs {:?}\", a, v);\n}",
+  "hints": [
+    "You can use the `vec!` macro to create a vector with initial values.",
+    "The syntax is: vec![element1, element2, ...]",
+    "Try: let v = vec![10, 20, 30, 40];"
+  ],
+  "solution": "fn array_and_vec() -> ([i32; 4], Vec<i32>) {\n    let a = [10, 20, 30, 40];\n\n    let v = vec![10, 20, 30, 40];\n\n    (a, v)\n}\n\nfn main() {\n    let (a, v) = array_and_vec();\n    assert_eq!(a, v[..]);\n    println!(\"Arrays and vectors look the same: {:?} vs {:?}\", a, v);\n}",
+  "explanation": "Vectors (`Vec<T>`) are dynamically-sized arrays allocated on the heap. The `vec!` macro provides convenient syntax for creating vectors with initial values, similar to array literal syntax. You can also create an empty vector with `Vec::new()` and add elements with `.push()`.",
+  "relatedBookSection": "ch08-01-vectors"
+}

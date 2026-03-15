@@ -1,0 +1,17 @@
+{
+  "id": "clippy2",
+  "title": "Clippy 2",
+  "category": "clippy",
+  "difficulty": "beginner",
+  "description": "Clippy catches redundant code, shadowing issues, and suggests simplifications.",
+  "instructions": "Fix the Clippy warnings in this code.",
+  "starterCode": "fn main() {\n    let mut res = 42;\n    let option = Some(12);\n    // Clippy: redundant pattern matching\n    if let Some(_) = option {\n        // Using _ means we don't use the value\n    }\n\n    // Clippy: creating a reference only to dereference\n    let x = 5;\n    let _y = &x;\n    let _z = *_y;\n\n    // Clippy: manual implementation of Default\n    let _empty: Vec<i32> = Vec::new();\n    println!(\"Result: {res}\");\n}",
+  "hints": [
+    "Use `option.is_some()` instead of `if let Some(_) = option`.",
+    "If you just need to check if an Option has a value, use is_some().",
+    "The reference/dereference pattern is redundant - just use the value directly."
+  ],
+  "solution": "fn main() {\n    let mut res = 42;\n    let option = Some(12);\n    if option.is_some() {\n        // Just checking if there's a value\n    }\n\n    let x = 5;\n    let _z = x;\n\n    let _empty: Vec<i32> = Vec::new();\n    println!(\"Result: {res}\");\n}",
+  "explanation": "Clippy identifies unnecessary complexity: `if let Some(_) = option` can be simplified to `option.is_some()` when you don't need the value. Creating a reference just to immediately dereference it is redundant. These cleanups make code more readable and idiomatic.",
+  "relatedBookSection": "ch01-03-hello-cargo"
+}

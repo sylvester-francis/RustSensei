@@ -1,0 +1,17 @@
+{
+  "id": "if3",
+  "title": "If 3",
+  "category": "if",
+  "difficulty": "beginner",
+  "description": "Since `if` is an expression in Rust, you can use it on the right side of a `let` statement.",
+  "instructions": "Fix the code so that the animal_habitat variable is assigned correctly using an if expression.",
+  "starterCode": "pub fn animal_habitat(animal: &str) -> &str {\n    let identifier = if animal == \"crab\" {\n        1\n    } else if animal == \"gopher\" {\n        2.0\n    } else if animal == \"snake\" {\n        3\n    } else {\n        \"Unknown\"\n    };\n\n    if identifier == 1 {\n        \"Beach\"\n    } else if identifier == 2 {\n        \"Burrow\"\n    } else if identifier == 3 {\n        \"Desert\"\n    } else {\n        \"Unknown\"\n    }\n}\n\nfn main() {\n    println!(\"{}\", animal_habitat(\"crab\"));\n}",
+  "hints": [
+    "All branches of an if expression used in a `let` statement must return the same type.",
+    "Branch 2 returns a float (2.0) while the others return integers. They must all match.",
+    "Consider making all branches return the same type, or restructure to directly return the habitat string."
+  ],
+  "solution": "pub fn animal_habitat(animal: &str) -> &str {\n    let identifier = if animal == \"crab\" {\n        1\n    } else if animal == \"gopher\" {\n        2\n    } else if animal == \"snake\" {\n        3\n    } else {\n        0\n    };\n\n    if identifier == 1 {\n        \"Beach\"\n    } else if identifier == 2 {\n        \"Burrow\"\n    } else if identifier == 3 {\n        \"Desert\"\n    } else {\n        \"Unknown\"\n    }\n}\n\nfn main() {\n    println!(\"{}\", animal_habitat(\"crab\"));\n}",
+  "explanation": "When using `if` as an expression in a `let` binding, all branches must evaluate to the same type. Rust infers the type of the variable from the branches, and if they disagree (e.g., integer vs float vs string), the code won't compile. This ensures type safety at compile time.",
+  "relatedBookSection": "ch03-05-control-flow"
+}

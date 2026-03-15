@@ -1,0 +1,17 @@
+{
+  "id": "lifetimes3",
+  "title": "Lifetimes 3",
+  "category": "lifetimes",
+  "difficulty": "intermediate",
+  "description": "Structs that hold references need lifetime annotations to ensure the references outlive the struct.",
+  "instructions": "Add lifetime annotations to the struct definition.",
+  "starterCode": "// TODO: Add lifetime annotations to the struct\nstruct Book {\n    author: &str,\n    title: &str,\n}\n\nfn main() {\n    let name = String::from(\"Jill Smith\");\n    let title = String::from(\"Fish Fly\");\n    let book = Book {\n        author: &name,\n        title: &title,\n    };\n    println!(\"{} by {}\", book.title, book.author);\n}",
+  "hints": [
+    "Structs with reference fields must declare lifetime parameters.",
+    "Add a lifetime parameter: struct Book<'a> { ... }",
+    "Each reference field needs the lifetime: author: &'a str"
+  ],
+  "solution": "struct Book<'a> {\n    author: &'a str,\n    title: &'a str,\n}\n\nfn main() {\n    let name = String::from(\"Jill Smith\");\n    let title = String::from(\"Fish Fly\");\n    let book = Book {\n        author: &name,\n        title: &title,\n    };\n    println!(\"{} by {}\", book.title, book.author);\n}",
+  "explanation": "When a struct holds references, it needs a lifetime parameter to ensure the references it holds are valid for as long as the struct exists. `struct Book<'a>` declares that instances of Book cannot outlive the references they contain. Without this, the struct could hold dangling references.",
+  "relatedBookSection": "ch10-03-lifetime-syntax"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "vecs2",
+  "title": "Vecs 2",
+  "category": "vecs",
+  "difficulty": "beginner",
+  "description": "You can iterate over vectors and modify their elements. This exercise explores both approaches.",
+  "instructions": "Complete the two functions to transform vectors by multiplying each element by 2.",
+  "starterCode": "fn vec_loop(mut v: Vec<i32>) -> Vec<i32> {\n    for element in v.iter_mut() {\n        // TODO: Multiply each element by 2\n    }\n    v\n}\n\nfn vec_map(v: &Vec<i32>) -> Vec<i32> {\n    v.iter().map(|element| {\n        // TODO: Return each element multiplied by 2\n    }).collect()\n}\n\nfn main() {\n    let v = vec![2, 4, 6, 8, 10];\n    println!(\"Loop: {:?}\", vec_loop(v.clone()));\n    println!(\"Map: {:?}\", vec_map(&v));\n}",
+  "hints": [
+    "For the loop version, `element` is a mutable reference. Use `*element` to dereference it.",
+    "For the map version, `element` is a reference. Multiply and return: `element * 2`.",
+    "iter_mut() gives &mut i32, so use: *element *= 2;"
+  ],
+  "solution": "fn vec_loop(mut v: Vec<i32>) -> Vec<i32> {\n    for element in v.iter_mut() {\n        *element *= 2;\n    }\n    v\n}\n\nfn vec_map(v: &Vec<i32>) -> Vec<i32> {\n    v.iter().map(|element| {\n        element * 2\n    }).collect()\n}\n\nfn main() {\n    let v = vec![2, 4, 6, 8, 10];\n    println!(\"Loop: {:?}\", vec_loop(v.clone()));\n    println!(\"Map: {:?}\", vec_map(&v));\n}",
+  "explanation": "There are two main approaches to transforming vectors: imperative (using a loop with `iter_mut()`) and functional (using `iter().map().collect()`). With `iter_mut()`, you get mutable references and must dereference with `*` to modify values in place. With `map()`, you create a new vector from transformed values.",
+  "relatedBookSection": "ch08-01-vectors"
+}

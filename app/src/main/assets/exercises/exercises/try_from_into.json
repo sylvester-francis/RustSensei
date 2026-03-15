@@ -1,0 +1,17 @@
+{
+  "id": "try_from_into",
+  "title": "TryFrom/TryInto",
+  "category": "conversions",
+  "difficulty": "intermediate",
+  "description": "TryFrom/TryInto are like From/Into but for conversions that can fail, returning a Result.",
+  "instructions": "Implement TryFrom to convert with validation.",
+  "starterCode": "use std::convert::TryFrom;\n\n#[derive(Debug, PartialEq)]\nstruct Color {\n    red: u8,\n    green: u8,\n    blue: u8,\n}\n\nimpl TryFrom<(i16, i16, i16)> for Color {\n    type Error = String;\n\n    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {\n        // TODO: Validate each value is 0-255, then convert\n        Err(\"Not implemented\".to_string())\n    }\n}\n\nfn main() {\n    let c1 = Color::try_from((255, 128, 0));\n    println!(\"{:?}\", c1);\n    assert!(c1.is_ok());\n\n    let c2 = Color::try_from((-1, 128, 0));\n    println!(\"{:?}\", c2);\n    assert!(c2.is_err());\n\n    let c3 = Color::try_from((256, 0, 0));\n    println!(\"{:?}\", c3);\n    assert!(c3.is_err());\n}",
+  "hints": [
+    "Check that each component is in the range 0..=255.",
+    "Use `u8::try_from(value)` or check manually and cast.",
+    "Return a descriptive error message for out-of-range values."
+  ],
+  "solution": "use std::convert::TryFrom;\n\n#[derive(Debug, PartialEq)]\nstruct Color {\n    red: u8,\n    green: u8,\n    blue: u8,\n}\n\nimpl TryFrom<(i16, i16, i16)> for Color {\n    type Error = String;\n\n    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {\n        let (r, g, b) = tuple;\n        for &val in &[r, g, b] {\n            if val < 0 || val > 255 {\n                return Err(format!(\"Color value {val} is out of range (0-255)\"));\n            }\n        }\n        Ok(Color {\n            red: r as u8,\n            green: g as u8,\n            blue: b as u8,\n        })\n    }\n}\n\nfn main() {\n    let c1 = Color::try_from((255, 128, 0));\n    println!(\"{:?}\", c1);\n    assert!(c1.is_ok());\n\n    let c2 = Color::try_from((-1, 128, 0));\n    println!(\"{:?}\", c2);\n    assert!(c2.is_err());\n\n    let c3 = Color::try_from((256, 0, 0));\n    println!(\"{:?}\", c3);\n    assert!(c3.is_err());\n}",
+  "explanation": "TryFrom is the fallible version of From. Use it when a conversion might fail (e.g., value out of range). It returns `Result<T, E>`. Implementing TryFrom automatically gives you TryInto. The `?` operator works seamlessly with TryFrom errors. This pattern is preferred over panicking on invalid conversions.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

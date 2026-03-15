@@ -1,0 +1,17 @@
+{
+  "id": "options3",
+  "title": "Options 3",
+  "category": "options",
+  "difficulty": "beginner",
+  "description": "Option has many useful methods like `unwrap_or`, `map`, and `and_then` for working with optional values.",
+  "instructions": "Use Option methods to provide default values and transform optional data.",
+  "starterCode": "struct Point {\n    x: i32,\n    y: i32,\n}\n\nfn main() {\n    let y: Option<Point> = Some(Point { x: 100, y: 200 });\n\n    // TODO: Use match or if let to extract the y coordinate\n    let result = match y {\n        Some(p) => println!(\"Co-ordinates are ({}, {})\", p.x, p.y),\n        _ => panic!(\"no match!\"),\n    };\n\n    let optional_value: Option<i32> = None;\n\n    // TODO: Use unwrap_or to provide a default\n    let value = optional_value.unwrap_or(/* default */);\n    println!(\"Value: {value}\");\n    assert_eq!(value, 42);\n\n    y; // Fix this: y is moved because of the match\n}",
+  "hints": [
+    "When you match on `y`, ownership of the Point moves. Use `&y` or `ref` to borrow instead.",
+    "`unwrap_or(default)` returns the contained value or a provided default.",
+    "Match on a reference: `match &y { Some(p) => ..., None => ... }`"
+  ],
+  "solution": "struct Point {\n    x: i32,\n    y: i32,\n}\n\nfn main() {\n    let y: Option<Point> = Some(Point { x: 100, y: 200 });\n\n    match &y {\n        Some(p) => println!(\"Co-ordinates are ({}, {})\", p.x, p.y),\n        _ => panic!(\"no match!\"),\n    };\n\n    let optional_value: Option<i32> = None;\n\n    let value = optional_value.unwrap_or(42);\n    println!(\"Value: {value}\");\n    assert_eq!(value, 42);\n\n    println!(\"y is still accessible: {:?}\", y.is_some());\n}",
+  "explanation": "Matching on a reference (`&y` instead of `y`) prevents the value from being moved, so you can still use it afterwards. `unwrap_or(default)` is a safe way to extract the value from an Option with a fallback. Other useful methods include `unwrap_or_else` (lazy default), `map` (transform the inner value), and `and_then` (chain operations).",
+  "relatedBookSection": "ch06-02-match"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "strings1",
+  "title": "Strings 1",
+  "category": "strings",
+  "difficulty": "beginner",
+  "description": "Rust has two main string types: `String` (owned, heap-allocated, growable) and `&str` (a string slice, a reference to string data).",
+  "instructions": "Fix the function to return a String instead of a string slice.",
+  "starterCode": "fn current_favorite_color() -> String {\n    \"blue\"\n}\n\nfn main() {\n    let answer = current_favorite_color();\n    println!(\"My favorite color is {answer}\");\n}",
+  "hints": [
+    "String literals like \"blue\" are of type &str, not String.",
+    "You need to convert the &str to a String.",
+    "Use `.to_string()`, `String::from()`, or `.into()` to convert."
+  ],
+  "solution": "fn current_favorite_color() -> String {\n    \"blue\".to_string()\n}\n\nfn main() {\n    let answer = current_favorite_color();\n    println!(\"My favorite color is {answer}\");\n}",
+  "explanation": "In Rust, `String` is an owned, heap-allocated string type, while `&str` is a borrowed string slice. String literals like `\"hello\"` are `&str` by default. To create a `String` from a `&str`, you can use `.to_string()`, `String::from(\"...\")`, or the `.into()` method.",
+  "relatedBookSection": "ch08-02-strings"
+}

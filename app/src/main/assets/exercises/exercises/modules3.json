@@ -1,0 +1,17 @@
+{
+  "id": "modules3",
+  "title": "Modules 3",
+  "category": "modules",
+  "difficulty": "beginner",
+  "description": "You can bring items from the standard library or other modules into scope using `use` statements.",
+  "instructions": "Add the correct `use` statement to bring SystemTime and UNIX_EPOCH into scope.",
+  "starterCode": "// TODO: Add the correct `use` statement\n\nfn main() {\n    match SystemTime::now().duration_since(UNIX_EPOCH) {\n        Ok(n) => println!(\"Seconds since Unix epoch: {}\", n.as_secs()),\n        Err(_) => panic!(\"SystemTime before UNIX EPOCH!\"),\n    }\n}",
+  "hints": [
+    "SystemTime and UNIX_EPOCH are in the `std::time` module.",
+    "You can bring multiple items from the same module using curly braces.",
+    "Try: use std::time::{SystemTime, UNIX_EPOCH};"
+  ],
+  "solution": "use std::time::{SystemTime, UNIX_EPOCH};\n\nfn main() {\n    match SystemTime::now().duration_since(UNIX_EPOCH) {\n        Ok(n) => println!(\"Seconds since Unix epoch: {}\", n.as_secs()),\n        Err(_) => panic!(\"SystemTime before UNIX EPOCH!\"),\n    }\n}",
+  "explanation": "The `use` keyword can bring items from the standard library into scope. You can import multiple items from the same module using curly braces: `use std::time::{SystemTime, UNIX_EPOCH}`. This avoids having to write the full path each time you use these types.",
+  "relatedBookSection": "ch07-04-bringing-paths-into-scope-with-the-use-keyword"
+}

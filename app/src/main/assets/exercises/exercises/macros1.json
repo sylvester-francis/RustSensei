@@ -1,0 +1,17 @@
+{
+  "id": "macros1",
+  "title": "Macros 1",
+  "category": "macros",
+  "difficulty": "intermediate",
+  "description": "Macros are defined with `macro_rules!` and allow you to write code that writes code (metaprogramming).",
+  "instructions": "Fix the macro definition so the code compiles.",
+  "starterCode": "// TODO: Fix the macro definition\nmacro_rules! my_macro {\n    () => {\n        println!(\"Check out my macro!\");\n    }\n}\n\nfn main() {\n    my_macro!();\n}",
+  "hints": [
+    "This macro definition looks correct - it matches empty parentheses and prints a message.",
+    "Macros must be defined before they are used (or use #[macro_export]).",
+    "Check that the macro name and invocation match."
+  ],
+  "solution": "macro_rules! my_macro {\n    () => {\n        println!(\"Check out my macro!\");\n    };\n}\n\nfn main() {\n    my_macro!();\n}",
+  "explanation": "Macros in Rust are defined with `macro_rules!`. The pattern `() => { ... }` matches an empty invocation `my_macro!()`. Macros operate on the token stream at compile time, generating code before it is compiled. They are invoked with `!` to distinguish them from function calls. Note the semicolon after the closing brace of the arm.",
+  "relatedBookSection": "ch19-06-macros"
+}

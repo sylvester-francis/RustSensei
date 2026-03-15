@@ -1,0 +1,17 @@
+{
+  "id": "move_semantics5",
+  "title": "Move Semantics 5",
+  "category": "move_semantics",
+  "difficulty": "intermediate",
+  "description": "Understanding the rules for mutable and immutable references is crucial. You cannot have a mutable reference while immutable references exist.",
+  "instructions": "Fix the code by ensuring mutable and immutable references don't overlap.",
+  "starterCode": "fn main() {\n    let mut x = 100;\n    let y = &mut x;\n    let z = &mut x;\n    *y += 100;\n    *z += 1000;\n    assert_eq!(x, 1200);\n}",
+  "hints": [
+    "You cannot have two mutable references to the same value at the same time.",
+    "Finish using one mutable reference before creating another.",
+    "Reorder the operations so that y is done being used before z is created."
+  ],
+  "solution": "fn main() {\n    let mut x = 100;\n    let y = &mut x;\n    *y += 100;\n    let z = &mut x;\n    *z += 1000;\n    assert_eq!(x, 1200);\n}",
+  "explanation": "Rust's borrowing rules prevent having two mutable references to the same data simultaneously, which prevents data races at compile time. By finishing the use of `y` before creating `z`, each mutable borrow's scope doesn't overlap with the other. The compiler tracks when references are last used (Non-Lexical Lifetimes) to determine if borrows overlap.",
+  "relatedBookSection": "ch04-02-references-and-borrowing"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "generics1",
+  "title": "Generics 1",
+  "category": "generics",
+  "difficulty": "intermediate",
+  "description": "Generic functions work with multiple types using type parameters. This avoids code duplication.",
+  "instructions": "Fix the shopping list by using a generic function instead of duplicating code.",
+  "starterCode": "fn main() {\n    let mut shopping_list: Vec<&str> = Vec::new();\n    shopping_list.push(\"milk\");\n    shopping_list.push(\"eggs\");\n\n    let mut numbers: Vec<i32> = Vec::new();\n    // TODO: Fix the function call to work with Vec<i32>\n    numbers.push(1);\n    numbers.push(2);\n\n    println!(\"Shopping list: {:?}\", shopping_list);\n    println!(\"Numbers: {:?}\", numbers);\n}",
+  "hints": [
+    "Vec<T> is already a generic type - it works with any type T.",
+    "The push method accepts values of type T when the Vec is Vec<T>.",
+    "This code should compile as-is. Observe how Vec works with different types."
+  ],
+  "solution": "fn main() {\n    let mut shopping_list: Vec<&str> = Vec::new();\n    shopping_list.push(\"milk\");\n    shopping_list.push(\"eggs\");\n\n    let mut numbers: Vec<i32> = Vec::new();\n    numbers.push(1);\n    numbers.push(2);\n\n    println!(\"Shopping list: {:?}\", shopping_list);\n    println!(\"Numbers: {:?}\", numbers);\n}",
+  "explanation": "Generics allow a single type or function definition to work with many concrete types. `Vec<T>` is a generic type - when you write `Vec<&str>`, T is replaced with `&str`. When you write `Vec<i32>`, T is replaced with `i32`. Rust uses monomorphization to generate specialized code for each concrete type at compile time, so there's no runtime cost.",
+  "relatedBookSection": "ch10-01-syntax"
+}

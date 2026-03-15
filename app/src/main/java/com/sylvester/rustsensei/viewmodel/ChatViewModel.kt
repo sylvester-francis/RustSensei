@@ -9,6 +9,7 @@ import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.LlamaEngine
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+sealed class ChatContext {
+    data object General : ChatContext()
+    data class BookSection(val sectionId: String, val content: String) : ChatContext()
+    data class Exercise(val exerciseId: String, val description: String, val userCode: String) : ChatContext()
+}
 
 data class ChatUiState(
     val messages: List<ChatMessage> = emptyList(),
@@ -27,29 +35,45 @@ data class ChatUiState(
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository: ChatRepository =
-        (application as RustSenseiApplication).repository
+    private val app = application as RustSenseiApplication
+    private val repository: ChatRepository = app.repository
 
     val llamaEngine = LlamaEngine()
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
-    private val _config = MutableStateFlow(InferenceConfig())
+    // P1 Fix #14: load persisted config on init, save on change
+    private val prefsManager = app.preferencesManager
+    private val _config = MutableStateFlow(prefsManager.loadInferenceConfig())
     val config: StateFlow<InferenceConfig> = _config.asStateFlow()
+
+    private val _chatContext = MutableStateFlow<ChatContext>(ChatContext.General)
+    val chatContext: StateFlow<ChatContext> = _chatContext.asStateFlow()
 
     private var generationJob: Job? = null
     private var messagesJob: Job? = null
 
     fun updateConfig(config: InferenceConfig) {
         _config.value = config
+        prefsManager.saveInferenceConfig(config)
+    }
+
+    fun setChatContext(context: ChatContext) {
+        _chatContext.value = context
+    }
+
+    fun clearChatContext() {
+        _chatContext.value = ChatContext.General
     }
 
     fun startNewConversation() {
         viewModelScope.launch {
             messagesJob?.cancel()
+            llamaEngine.clearCache()
             val convId = repository.createConversation()
             _uiState.value = ChatUiState(currentConversationId = convId)
+            _chatContext.value = ChatContext.General
             observeMessages(convId)
         }
     }
@@ -57,6 +81,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun loadConversation(conversationId: Long) {
         viewModelScope.launch {
             messagesJob?.cancel()
+            llamaEngine.clearCache()
             _uiState.value = _uiState.value.copy(currentConversationId = conversationId)
             observeMessages(conversationId)
         }
@@ -75,14 +100,42 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (text.isBlank() || _uiState.value.isGenerating) return
 
         viewModelScope.launch {
-            // Save user message
             repository.addMessage(convId, "user", text)
 
-            // Build the prompt from conversation history
-            val allMessages = repository.getMessagesOnce(convId)
-            val prompt = ChatTemplateFormatter.formatMessages(allMessages, _config.value.contextLength)
+            // Build RAG context based on current chat context
+            val ragContext = when (val ctx = _chatContext.value) {
+                is ChatContext.General -> {
+                    withContext(Dispatchers.IO) {
+                        app.ragRetriever.retrieveContext(text)
+                    }
+                }
+                is ChatContext.BookSection -> {
+                    ctx.content
+                }
+                is ChatContext.Exercise -> {
+                    buildString {
+                        appendLine("Exercise: ${ctx.description}")
+                        appendLine("\nStudent's code:")
+                        appendLine("```rust")
+                        appendLine(ctx.userCode)
+                        appendLine("```")
+                    }
+                }
+            }
 
-            // Start generation
+            // Fix #7: clear context after using it for the first message
+            // so subsequent messages in the same conversation don't re-inject stale context
+            if (_chatContext.value !is ChatContext.General) {
+                _chatContext.value = ChatContext.General
+            }
+
+            val allMessages = repository.getMessagesOnce(convId)
+            val prompt = ChatTemplateFormatter.formatMessages(
+                allMessages,
+                _config.value.contextLength,
+                ragContext = ragContext
+            )
+
             _uiState.value = _uiState.value.copy(
                 isGenerating = true,
                 streamingText = "",
@@ -99,7 +152,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                             isGenerating = false,
                             streamingText = ""
                         )
-                        // Save error as assistant message
                         repository.addMessage(convId, "assistant", "Error: ${e.message}")
                     }
                     .onCompletion {

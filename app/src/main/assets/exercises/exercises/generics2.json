@@ -1,0 +1,17 @@
+{
+  "id": "generics2",
+  "title": "Generics 2",
+  "category": "generics",
+  "difficulty": "intermediate",
+  "description": "You can implement methods on generic structs. The impl block must also declare the type parameter.",
+  "instructions": "Implement the methods for the generic Wrapper struct.",
+  "starterCode": "struct Wrapper<T> {\n    value: T,\n}\n\nimpl<T> Wrapper<T> {\n    pub fn new(value: T) -> Self {\n        Wrapper { value }\n    }\n}\n\nfn main() {\n    let wrapper_int = Wrapper::new(42);\n    let wrapper_str = Wrapper::new(\"Rust\");\n\n    println!(\"Int value: {}\", wrapper_int.value);\n    println!(\"Str value: {}\", wrapper_str.value);\n}",
+  "hints": [
+    "The `impl<T>` declares T as a type parameter for the implementation block.",
+    "Self is an alias for the type being implemented (Wrapper<T> in this case).",
+    "This code compiles. Study how generic impl blocks work."
+  ],
+  "solution": "struct Wrapper<T> {\n    value: T,\n}\n\nimpl<T> Wrapper<T> {\n    pub fn new(value: T) -> Self {\n        Wrapper { value }\n    }\n}\n\nfn main() {\n    let wrapper_int = Wrapper::new(42);\n    let wrapper_str = Wrapper::new(\"Rust\");\n\n    println!(\"Int value: {}\", wrapper_int.value);\n    println!(\"Str value: {}\", wrapper_str.value);\n}",
+  "explanation": "When implementing methods on a generic struct, you must declare the type parameter on the `impl` block: `impl<T> Wrapper<T>`. The `Self` type alias refers to `Wrapper<T>` within the impl block. You can also write specialized implementations for specific types: `impl Wrapper<i32>` would only apply when T is i32.",
+  "relatedBookSection": "ch10-01-syntax"
+}

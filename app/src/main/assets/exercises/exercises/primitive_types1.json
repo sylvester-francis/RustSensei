@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types1",
+  "title": "Primitive Types 1",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "Rust has several primitive types. The boolean type `bool` can be either `true` or `false`.",
+  "instructions": "Fix the code by creating the missing boolean variable.",
+  "starterCode": "fn main() {\n    let is_morning = true;\n    if is_morning {\n        println!(\"Good morning!\");\n    }\n\n    let // Finish this line\n    if is_evening {\n        println!(\"Good evening!\");\n    }\n}",
+  "hints": [
+    "You need to declare a boolean variable called `is_evening`.",
+    "Boolean values in Rust are `true` and `false` (lowercase).",
+    "Try: let is_evening = true;"
+  ],
+  "solution": "fn main() {\n    let is_morning = true;\n    if is_morning {\n        println!(\"Good morning!\");\n    }\n\n    let is_evening = true;\n    if is_evening {\n        println!(\"Good evening!\");\n    }\n}",
+  "explanation": "The `bool` type in Rust represents a boolean value, which can be either `true` or `false`. Booleans are used in conditions for `if` expressions, `while` loops, and `assert!` macros. They occupy one byte of memory.",
+  "relatedBookSection": "ch03-02-data-types"
+}

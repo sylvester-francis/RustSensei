@@ -1,10 +1,14 @@
 package com.sylvester.rustsensei.viewmodel
 
 import android.app.Application
+import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.llm.DownloadState
 import com.sylvester.rustsensei.llm.LlamaEngine
+import com.sylvester.rustsensei.llm.ModelForegroundService
+import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,43 +33,72 @@ data class ModelUiState(
     val downloadedMB: Long = 0,
     val totalMB: Long = 0,
     val errorMessage: String? = null,
-    val modelSizeMB: Long = 0
+    val modelSizeMB: Long = 0,
+    val availableModels: List<ModelInfo> = ModelManager.AVAILABLE_MODELS,
+    val selectedModelId: String = "qwen3-4b",
+    val loadedModelId: String? = null,
+    val downloadedModelIds: Set<String> = emptySet()
 )
 
 class ModelViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val app = application as RustSenseiApplication
     val modelManager = ModelManager(application)
+    private val prefsManager = app.preferencesManager
 
     private val _uiState = MutableStateFlow(ModelUiState())
     val uiState: StateFlow<ModelUiState> = _uiState.asStateFlow()
 
-    // One-shot event for navigation (survives composition changes)
     private val _navigateToChat = MutableSharedFlow<Unit>()
     val navigateToChat: SharedFlow<Unit> = _navigateToChat.asSharedFlow()
 
     init {
+        val savedModelId = prefsManager.getSelectedModelId()
+        _uiState.value = _uiState.value.copy(selectedModelId = savedModelId)
         checkModelStatus()
     }
 
     fun checkModelStatus() {
-        if (modelManager.isModelDownloaded()) {
-            _uiState.value = ModelUiState(
-                modelState = ModelState.DOWNLOADED,
-                modelSizeMB = modelManager.getModelSizeMB()
-            )
+        val selectedId = _uiState.value.selectedModelId
+        val selectedModel = ModelManager.getModelById(selectedId) ?: ModelManager.AVAILABLE_MODELS[0]
+        val downloadedIds = ModelManager.AVAILABLE_MODELS
+            .filter { modelManager.isModelDownloaded(it) }
+            .map { it.id }
+            .toSet()
+
+        val state = if (modelManager.isModelDownloaded(selectedModel)) {
+            ModelState.DOWNLOADED
         } else {
-            _uiState.value = ModelUiState(modelState = ModelState.NOT_DOWNLOADED)
+            ModelState.NOT_DOWNLOADED
         }
+
+        _uiState.value = _uiState.value.copy(
+            modelState = state,
+            modelSizeMB = modelManager.getModelSizeMB(selectedModel),
+            downloadedModelIds = downloadedIds
+        )
+    }
+
+    fun selectModel(modelId: String) {
+        prefsManager.saveSelectedModelId(modelId)
+        _uiState.value = _uiState.value.copy(selectedModelId = modelId)
+        checkModelStatus()
+    }
+
+    fun getSelectedModelInfo(): ModelInfo {
+        return ModelManager.getModelById(_uiState.value.selectedModelId)
+            ?: ModelManager.AVAILABLE_MODELS[0]
     }
 
     fun startDownload() {
+        val modelInfo = getSelectedModelInfo()
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 modelState = ModelState.DOWNLOADING,
                 errorMessage = null
             )
 
-            modelManager.downloadModel().collect { state ->
+            modelManager.downloadModel(modelInfo).collect { state ->
                 when (state) {
                     is DownloadState.Idle -> {}
                     is DownloadState.Downloading -> {
@@ -77,10 +110,12 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     }
                     is DownloadState.Completed -> {
+                        val downloadedIds = _uiState.value.downloadedModelIds + modelInfo.id
                         _uiState.value = _uiState.value.copy(
                             modelState = ModelState.DOWNLOADED,
                             downloadProgress = 1f,
-                            modelSizeMB = modelManager.getModelSizeMB()
+                            modelSizeMB = modelManager.getModelSizeMB(modelInfo),
+                            downloadedModelIds = downloadedIds
                         )
                     }
                     is DownloadState.Error -> {
@@ -94,25 +129,32 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /**
-     * Loads the model using viewModelScope — safe from composition lifecycle.
-     * Emits a navigation event on success.
-     */
     fun loadModel(llamaEngine: LlamaEngine) {
-        if (_uiState.value.modelState == ModelState.LOADING) return // already loading
+        if (_uiState.value.modelState == ModelState.LOADING) return
 
+        val modelInfo = getSelectedModelInfo()
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(modelState = ModelState.LOADING)
             try {
-                val modelPath = modelManager.modelFile.absolutePath
+                // Unload current model first if a different one is loaded
+                val currentLoaded = _uiState.value.loadedModelId
+                if (currentLoaded != null && currentLoaded != modelInfo.id) {
+                    llamaEngine.unloadModel()
+                }
+
+                val modelPath = modelManager.getModelFile(modelInfo).absolutePath
                 val success = llamaEngine.loadModel(modelPath)
                 if (success) {
-                    _uiState.value = _uiState.value.copy(modelState = ModelState.READY)
+                    _uiState.value = _uiState.value.copy(
+                        modelState = ModelState.READY,
+                        loadedModelId = modelInfo.id
+                    )
+                    startModelService()
                     _navigateToChat.emit(Unit)
                 } else {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.ERROR,
-                        errorMessage = "Failed to load model. The file may be corrupted — try deleting and re-downloading."
+                        errorMessage = "Failed to load ${modelInfo.displayName}. The file may be corrupted — try deleting and re-downloading."
                     )
                 }
             } catch (e: Exception) {
@@ -124,8 +166,47 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun switchModel(modelId: String, llamaEngine: LlamaEngine) {
+        selectModel(modelId)
+        val modelInfo = getSelectedModelInfo()
+        if (modelManager.isModelDownloaded(modelInfo)) {
+            loadModel(llamaEngine)
+        }
+        // If not downloaded, the UI will show the download button
+    }
+
     fun deleteModel() {
-        modelManager.deleteModel()
-        _uiState.value = ModelUiState(modelState = ModelState.NOT_DOWNLOADED)
+        val modelInfo = getSelectedModelInfo()
+        stopModelService()
+        modelManager.deleteModel(modelInfo)
+        val downloadedIds = _uiState.value.downloadedModelIds - modelInfo.id
+        _uiState.value = _uiState.value.copy(
+            modelState = ModelState.NOT_DOWNLOADED,
+            downloadedModelIds = downloadedIds,
+            loadedModelId = if (_uiState.value.loadedModelId == modelInfo.id) null else _uiState.value.loadedModelId
+        )
+    }
+
+    fun isModelDownloaded(): Boolean = modelManager.isModelDownloaded(getSelectedModelInfo())
+
+    private fun startModelService() {
+        try {
+            val context = getApplication<Application>()
+            val intent = Intent(context, ModelForegroundService::class.java)
+            context.startForegroundService(intent)
+        } catch (_: Exception) {}
+    }
+
+    private fun stopModelService() {
+        try {
+            val context = getApplication<Application>()
+            val intent = Intent(context, ModelForegroundService::class.java)
+            context.stopService(intent)
+        } catch (_: Exception) {}
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopModelService()
     }
 }

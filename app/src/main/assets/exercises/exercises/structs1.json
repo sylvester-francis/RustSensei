@@ -1,0 +1,17 @@
+{
+  "id": "structs1",
+  "title": "Structs 1",
+  "category": "structs",
+  "difficulty": "beginner",
+  "description": "Structs in Rust allow you to group related data together. Classic structs have named fields.",
+  "instructions": "Complete the struct definition and instantiation.",
+  "starterCode": "struct ColorClassicStruct {\n    // TODO: Add fields\n}\n\nfn main() {\n    let green = ColorClassicStruct {\n        red: 0,\n        green: 255,\n        blue: 0,\n    };\n\n    assert_eq!(green.red, 0);\n    assert_eq!(green.green, 255);\n    assert_eq!(green.blue, 0);\n    println!(\"Green color created!\");\n}",
+  "hints": [
+    "A struct field is defined as `field_name: Type`.",
+    "The fields should be `red`, `green`, and `blue`, each of type `u8` or `i32`.",
+    "Add: red: i32, green: i32, blue: i32 inside the struct body."
+  ],
+  "solution": "struct ColorClassicStruct {\n    red: i32,\n    green: i32,\n    blue: i32,\n}\n\nfn main() {\n    let green = ColorClassicStruct {\n        red: 0,\n        green: 255,\n        blue: 0,\n    };\n\n    assert_eq!(green.red, 0);\n    assert_eq!(green.green, 255);\n    assert_eq!(green.blue, 0);\n    println!(\"Green color created!\");\n}",
+  "explanation": "Classic structs in Rust have named fields, each with a type. You create instances by specifying values for all fields using `StructName { field: value }` syntax. Fields are accessed with dot notation. Structs are the primary way to create custom data types in Rust.",
+  "relatedBookSection": "ch05-01-defining-structs"
+}

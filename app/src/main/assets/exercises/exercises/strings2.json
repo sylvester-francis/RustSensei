@@ -1,0 +1,17 @@
+{
+  "id": "strings2",
+  "title": "Strings 2",
+  "category": "strings",
+  "difficulty": "beginner",
+  "description": "String has many useful methods. This exercise explores push_str and other String operations.",
+  "instructions": "Fix the code by using the correct String methods.",
+  "starterCode": "fn main() {\n    let mut string = String::from(\"Hello, \");\n    // TODO: Use a method to append \"World!\" to the string\n    string = \"World!\";\n\n    println!(\"{string}\");\n    assert_eq!(string, \"Hello, World!\");\n}",
+  "hints": [
+    "You want to append to the existing string, not replace it.",
+    "String has a `push_str` method that appends a string slice.",
+    "Replace the assignment with: string.push_str(\"World!\");"
+  ],
+  "solution": "fn main() {\n    let mut string = String::from(\"Hello, \");\n    string.push_str(\"World!\");\n\n    println!(\"{string}\");\n    assert_eq!(string, \"Hello, World!\");\n}",
+  "explanation": "The `push_str` method appends a string slice (`&str`) to a `String`. Unlike assignment, it extends the existing string rather than replacing it. There's also `push` for appending a single `char`. These methods require the String to be mutable (`mut`).",
+  "relatedBookSection": "ch08-02-strings"
+}

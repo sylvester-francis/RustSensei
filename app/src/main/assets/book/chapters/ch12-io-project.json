@@ -1,0 +1,100 @@
+{
+  "id": "ch12-io-project",
+  "title": "An I/O Project: Building a Command Line Program",
+  "sections": [
+    {
+      "id": "ch12-01-accepting-args",
+      "title": "Accepting Command Line Arguments",
+      "content": "Let's create a new project and build our very own version of the classic command line search tool `grep` (globally search a regular expression and print). In the simplest use case, `grep` searches a specified file for a specified string. Our tool, which we'll call `minigrep`, will take a filename and a string as command line arguments.\n\nWe create a new project with `cargo new minigrep`. The first task is to make `minigrep` accept its two command line arguments: the file path and a string to search for. We want to be able to run our program with `cargo run`, two hyphens to indicate the following arguments are for our program rather than for `cargo`, a string to search for, and a path to a file:\n\n```\n$ cargo run -- searchstring example-filename.txt\n```\n\nThe function provided in Rust's standard library to read command line arguments is `std::env::args`. This function returns an iterator of the command line arguments passed to the program:\n\n```rust\nuse std::env;\n\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    println!(\"{args:?}\");\n}\n```\n\nFirst, we bring the `std::env` module into scope with a `use` statement so we can use its `args` function. The `std::env::args` function returns an iterator, and we call `collect` on it to turn it into a vector containing all the values.\n\nNote that `std::env::args` will panic if any argument contains invalid Unicode. If your program needs to accept arguments containing invalid Unicode, use `std::env::args_os` instead.\n\nNow let's save the values of the two arguments in variables so we can use the values throughout the rest of the program:\n\n```rust\nuse std::env;\n\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    let query = &args[1];\n    let file_path = &args[2];\n    println!(\"Searching for {query}\");\n    println!(\"In file {file_path}\");\n}\n```",
+      "codeExamples": [
+        {
+          "description": "Reading command line arguments",
+          "code": "use std::env;\n\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    let query = &args[1];\n    let file_path = &args[2];\n    println!(\"Searching for {query} in file {file_path}\");\n}"
+        }
+      ],
+      "keyTerms": ["std::env::args", "command line arguments", "collect", "iterator"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch12-02-reading-a-file",
+      "title": "Reading a File",
+      "content": "Now we'll add functionality to read the file specified in the `file_path` argument. We need the `std::fs` module to handle files:\n\n```rust\nuse std::env;\nuse std::fs;\n\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    let query = &args[1];\n    let file_path = &args[2];\n\n    println!(\"Searching for {query}\");\n    println!(\"In file {file_path}\");\n\n    let contents = fs::read_to_string(file_path)\n        .expect(\"Should have been able to read the file\");\n\n    println!(\"With text:\\n{contents}\");\n}\n```\n\nWe use `fs::read_to_string` which takes the `file_path`, opens that file, and returns a `std::io::Result<String>` of the file's contents. This is a convenient function that opens a file, creates a new `String`, reads the contents of the file into that `String`, and returns it.\n\nAt this point, the program works but has some flaws. The `main` function has multiple responsibilities. It's best if each function is responsible for only one idea. The other problem is that we're not handling errors as well as we could. These issues might not matter for a small program, but as the program grows, it will be harder to fix them cleanly. It's good practice to begin refactoring early on when developing a program.",
+      "codeExamples": [
+        {
+          "description": "Reading a file's contents",
+          "code": "use std::fs;\n\nlet contents = fs::read_to_string(file_path)\n    .expect(\"Should have been able to read the file\");\n\nprintln!(\"With text:\\n{contents}\");"
+        }
+      ],
+      "keyTerms": ["fs::read_to_string", "std::fs", "file reading"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch12-03-refactoring",
+      "title": "Refactoring to Improve Modularity and Error Handling",
+      "content": "To improve our program, we'll fix four problems that have to do with the program's structure and how it's handling potential errors. First, our `main` function now performs two tasks: it parses arguments and reads files. Second, our configuration variables are scattered. Third, we use `expect` to print an error message when reading the file fails, but the error message just prints generic text. Fourth, if we used `expect` to handle different errors and the user runs our program without specifying enough arguments, they'd get an index out of bounds error that doesn't clearly explain the problem.\n\nLet's refactor by extracting the argument parsing logic into its own function and grouping the configuration values into a struct:\n\n```rust\nuse std::env;\nuse std::fs;\nuse std::process;\n\nstruct Config {\n    query: String,\n    file_path: String,\n}\n\nimpl Config {\n    fn build(args: &[String]) -> Result<Config, &'static str> {\n        if args.len() < 3 {\n            return Err(\"not enough arguments\");\n        }\n        let query = args[1].clone();\n        let file_path = args[2].clone();\n        Ok(Config { query, file_path })\n    }\n}\n\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    let config = Config::build(&args).unwrap_or_else(|err| {\n        eprintln!(\"Problem parsing arguments: {err}\");\n        process::exit(1);\n    });\n\n    if let Err(e) = run(config) {\n        eprintln!(\"Application error: {e}\");\n        process::exit(1);\n    }\n}\n\nfn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {\n    let contents = fs::read_to_string(config.file_path)?;\n    println!(\"With text:\\n{contents}\");\n    Ok(())\n}\n```\n\nThe `unwrap_or_else` method on `Result<T, E>` allows us to define some custom, non-`panic!` error handling. If the `Result` is an `Ok` value, this method's behavior is similar to `unwrap`: it returns the inner value `Ok` is wrapping. However, if the value is an `Err` value, this method calls the code in the *closure*, which is an anonymous function we define and pass as an argument to `unwrap_or_else`.\n\nWe've also separated the `run` function that contains all the logic that doesn't relate to setting up configuration or handling errors. The `run` function returns `Result<(), Box<dyn Error>>`. The `Box<dyn Error>` type is a *trait object* meaning the function will return a type that implements the `Error` trait, but we don't have to specify what particular type the return value will be.",
+      "codeExamples": [
+        {
+          "description": "Config struct with build method",
+          "code": "struct Config {\n    query: String,\n    file_path: String,\n}\n\nimpl Config {\n    fn build(args: &[String]) -> Result<Config, &'static str> {\n        if args.len() < 3 {\n            return Err(\"not enough arguments\");\n        }\n        let query = args[1].clone();\n        let file_path = args[2].clone();\n        Ok(Config { query, file_path })\n    }\n}"
+        },
+        {
+          "description": "Extracted run function",
+          "code": "fn run(config: Config) -> Result<(), Box<dyn std::error::Error>> {\n    let contents = fs::read_to_string(config.file_path)?;\n    println!(\"With text:\\n{contents}\");\n    Ok(())\n}"
+        }
+      ],
+      "keyTerms": ["refactoring", "separation of concerns", "Config struct", "Box<dyn Error>", "trait object", "unwrap_or_else"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch12-04-tdd",
+      "title": "Developing the Library's Functionality with TDD",
+      "content": "Now that we've extracted the logic into *src/lib.rs* and left the argument collecting and error handling in *src/main.rs*, it's much easier to write tests for the core functionality of our code. We can call functions directly with various arguments and check return values without having to call our binary from the command line.\n\nWe'll follow the Test Driven Development (TDD) process:\n\n1. Write a test that fails and run it to make sure it fails for the reason you expect.\n2. Write or modify just enough code to make the new test pass.\n3. Refactor the code you just added or changed and make sure the tests continue to pass.\n4. Repeat from step 1!\n\nLet's add the searching functionality. We need a function called `search` that will take a query and the text to search, and return only the lines from the text that contain the query:\n\n```rust\npub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {\n    let mut results = Vec::new();\n    for line in contents.lines() {\n        if line.contains(query) {\n            results.push(line);\n        }\n    }\n    results\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn one_result() {\n        let query = \"duct\";\n        let contents = \"\\nRust:\\nsafe, fast, productive.\\nPick three.\";\n        assert_eq!(vec![\"safe, fast, productive.\"], search(query, contents));\n    }\n}\n```\n\nNotice that we need to define an explicit lifetime `'a` in the signature of `search` and use that lifetime with the `contents` argument and the return value. The lifetime parameters specify which argument lifetime is connected to the lifetime of the return value. In this case, we indicate that the returned vector should contain string slices that reference slices of the argument `contents` (rather than the argument `query`).\n\nThis is important! The data referenced *by* a slice needs to be valid for the reference to be valid; if the compiler assumes we're making string slices of `query` rather than `contents`, it will do its safety checking incorrectly.",
+      "codeExamples": [
+        {
+          "description": "The search function",
+          "code": "pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {\n    let mut results = Vec::new();\n    for line in contents.lines() {\n        if line.contains(query) {\n            results.push(line);\n        }\n    }\n    results\n}"
+        },
+        {
+          "description": "Test for search function",
+          "code": "#[test]\nfn one_result() {\n    let query = \"duct\";\n    let contents = \"\\nRust:\\nsafe, fast, productive.\\nPick three.\";\n    assert_eq!(vec![\"safe, fast, productive.\"], search(query, contents));\n}"
+        }
+      ],
+      "keyTerms": ["TDD", "test driven development", "search", "lines", "contains", "lifetime"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch12-05-env-variables",
+      "title": "Working with Environment Variables",
+      "content": "We'll improve minigrep by adding an extra feature: an option for case-insensitive searching that the user can turn on via an environment variable. We could make this feature a command line option, but instead we'll use an environment variable, allowing our users to set the environment variable once and have all their searches be case insensitive in that terminal session.\n\nWe first add a new `search_case_insensitive` function:\n\n```rust\npub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {\n    let query = query.to_lowercase();\n    let mut results = Vec::new();\n    for line in contents.lines() {\n        if line.to_lowercase().contains(&query) {\n            results.push(line);\n        }\n    }\n    results\n}\n```\n\nThen we add a `ignore_case` field to our `Config` struct and check the `IGNORE_CASE` environment variable:\n\n```rust\nuse std::env;\n\nimpl Config {\n    pub fn build(args: &[String]) -> Result<Config, &'static str> {\n        if args.len() < 3 {\n            return Err(\"not enough arguments\");\n        }\n        let query = args[1].clone();\n        let file_path = args[2].clone();\n        let ignore_case = env::var(\"IGNORE_CASE\").is_ok();\n        Ok(Config { query, file_path, ignore_case })\n    }\n}\n```\n\nWe use the `env::var` function from the `std::env` module to check for an environment variable named `IGNORE_CASE`. The `env::var` function returns a `Result` that will be the successful `Ok` variant that contains the value of the environment variable if the environment variable is set to any value. It will return the `Err` variant if the environment variable is not set.\n\nWe use the `is_ok` method on the `Result` to check whether the environment variable is set, which means the program should do a case-insensitive search. If the `IGNORE_CASE` environment variable isn't set to anything, `is_ok` will return false and the program will perform a case-sensitive search.\n\nYou can set the environment variable when running the program:\n\n```\n$ IGNORE_CASE=1 cargo run -- to poem.txt\n```",
+      "codeExamples": [
+        {
+          "description": "Case-insensitive search",
+          "code": "pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {\n    let query = query.to_lowercase();\n    let mut results = Vec::new();\n    for line in contents.lines() {\n        if line.to_lowercase().contains(&query) {\n            results.push(line);\n        }\n    }\n    results\n}"
+        },
+        {
+          "description": "Reading environment variable",
+          "code": "let ignore_case = env::var(\"IGNORE_CASE\").is_ok();"
+        }
+      ],
+      "keyTerms": ["environment variable", "env::var", "case-insensitive", "to_lowercase"],
+      "relatedExercises": []
+    },
+    {
+      "id": "ch12-06-stderr",
+      "title": "Writing Error Messages to Standard Error",
+      "content": "At the moment, we're writing all of our output to the terminal using the `println!` macro. In most terminals, there are two kinds of output: *standard output* (`stdout`) for general information and *standard error* (`stderr`) for error messages. This distinction enables users to choose to direct the successful output of a program to a file but still print error messages to the screen.\n\nThe `println!` macro is only capable of printing to standard output, so we have to use something else to print to standard error.\n\n### Checking Where Errors Are Written\n\nLet's verify that our error messages are being printed to standard output by redirecting the standard output stream to a file while intentionally causing an error:\n\n```\n$ cargo run > output.txt\n```\n\nThe `>` syntax tells the shell to write the contents of standard output to *output.txt* instead of the screen. We didn't see the error message on the screen, so that means it ended up in the file. This is not what we want: we want error messages to print to the screen.\n\n### Printing Errors to Standard Error\n\nThe standard library provides the `eprintln!` macro that prints to the standard error stream:\n\n```rust\nfn main() {\n    let args: Vec<String> = env::args().collect();\n    let config = Config::build(&args).unwrap_or_else(|err| {\n        eprintln!(\"Problem parsing arguments: {err}\");\n        process::exit(1);\n    });\n\n    if let Err(e) = run(config) {\n        eprintln!(\"Application error: {e}\");\n        process::exit(1);\n    }\n}\n```\n\nNow if we run the program without any arguments and redirect standard output with `>`, we'll see the error message on the screen and *output.txt* will contain nothing:\n\n```\n$ cargo run > output.txt\nProblem parsing arguments: not enough arguments\n```\n\nIf we run the program with arguments that don't cause an error but still redirect standard output to a file, the file will contain the successful output:\n\n```\n$ cargo run -- to poem.txt > output.txt\n```\n\nThis behavior is what we'd expect of well-behaved command line programs: they send error messages to stderr so that the user can still see them even when successful output is redirected to a file.",
+      "codeExamples": [
+        {
+          "description": "Using eprintln! for error output",
+          "code": "eprintln!(\"Problem parsing arguments: {err}\");\nprocess::exit(1);"
+        },
+        {
+          "description": "Redirecting stdout to a file",
+          "code": "$ cargo run > output.txt"
+        }
+      ],
+      "keyTerms": ["stdout", "stderr", "eprintln!", "output redirection", "standard error"],
+      "relatedExercises": []
+    }
+  ]
+}

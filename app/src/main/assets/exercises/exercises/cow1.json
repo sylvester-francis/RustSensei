@@ -1,0 +1,17 @@
+{
+  "id": "cow1",
+  "title": "Cow 1",
+  "category": "smart_pointers",
+  "difficulty": "advanced",
+  "description": "Cow (Clone-on-Write) is a smart pointer that can hold either borrowed or owned data, cloning only when mutation is needed.",
+  "instructions": "Use Cow to avoid unnecessary allocations.",
+  "starterCode": "use std::borrow::Cow;\n\nfn abs_all(input: &mut Cow<[i32]>) {\n    for i in 0..input.len() {\n        let v = input[i];\n        if v < 0 {\n            // Clone only if we need to mutate\n            input.to_mut()[i] = -v;\n        }\n    }\n}\n\nfn main() {\n    // No clone needed - all values are positive\n    let slice = [1, 2, 3];\n    let mut input = Cow::from(&slice[..]);\n    abs_all(&mut input);\n    println!(\"No negatives: {:?}\", input);\n\n    // Clone needed - has negative values\n    let slice2 = [-1, 2, -3];\n    let mut input2 = Cow::from(&slice2[..]);\n    abs_all(&mut input2);\n    println!(\"Had negatives: {:?}\", input2);\n\n    // Already owned - no clone needed\n    let mut input3 = Cow::from(vec![-1, 2, -3]);\n    abs_all(&mut input3);\n    println!(\"Already owned: {:?}\", input3);\n}",
+  "hints": [
+    "Cow::from() can take either a reference or an owned value.",
+    "to_mut() returns a mutable reference, cloning the data if it was borrowed.",
+    "This code should compile. Study how Cow avoids unnecessary clones."
+  ],
+  "solution": "use std::borrow::Cow;\n\nfn abs_all(input: &mut Cow<[i32]>) {\n    for i in 0..input.len() {\n        let v = input[i];\n        if v < 0 {\n            input.to_mut()[i] = -v;\n        }\n    }\n}\n\nfn main() {\n    let slice = [1, 2, 3];\n    let mut input = Cow::from(&slice[..]);\n    abs_all(&mut input);\n    println!(\"No negatives: {:?}\", input);\n\n    let slice2 = [-1, 2, -3];\n    let mut input2 = Cow::from(&slice2[..]);\n    abs_all(&mut input2);\n    println!(\"Had negatives: {:?}\", input2);\n\n    let mut input3 = Cow::from(vec![-1, 2, -3]);\n    abs_all(&mut input3);\n    println!(\"Already owned: {:?}\", input3);\n}",
+  "explanation": "Cow<T> (Clone-on-Write) holds either a reference (`Borrowed`) or an owned value (`Owned`). The `to_mut()` method returns `&mut T` - if the data is borrowed, it clones it first. If the data is already owned, no clone is needed. This optimization pattern is useful when you might or might not need to modify data.",
+  "relatedBookSection": "ch15-05-interior-mutability"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "traits4",
+  "title": "Traits 4",
+  "category": "traits",
+  "difficulty": "intermediate",
+  "description": "Functions can return types that implement a trait using `impl Trait` syntax in the return position.",
+  "instructions": "Fix the return type of the function to use `impl Trait` syntax.",
+  "starterCode": "trait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct NewsArticle {\n    headline: String,\n    content: String,\n}\n\nimpl Summary for NewsArticle {\n    fn summarize(&self) -> String {\n        format!(\"{}: {}\", self.headline, &self.content[..20])\n    }\n}\n\n// TODO: Fix the return type\nfn create_article() -> ??? {\n    NewsArticle {\n        headline: String::from(\"Breaking News\"),\n        content: String::from(\"Something amazing happened today in the world of Rust...\"),\n    }\n}\n\nfn main() {\n    let article = create_article();\n    println!(\"{}\", article.summarize());\n}",
+  "hints": [
+    "Use `impl Trait` as the return type to return any type implementing that trait.",
+    "The syntax is: fn func() -> impl TraitName { ... }",
+    "Try: fn create_article() -> impl Summary { ... }"
+  ],
+  "solution": "trait Summary {\n    fn summarize(&self) -> String;\n}\n\nstruct NewsArticle {\n    headline: String,\n    content: String,\n}\n\nimpl Summary for NewsArticle {\n    fn summarize(&self) -> String {\n        format!(\"{}: {}\", self.headline, &self.content[..20])\n    }\n}\n\nfn create_article() -> impl Summary {\n    NewsArticle {\n        headline: String::from(\"Breaking News\"),\n        content: String::from(\"Something amazing happened today in the world of Rust...\"),\n    }\n}\n\nfn main() {\n    let article = create_article();\n    println!(\"{}\", article.summarize());\n}",
+  "explanation": "The `impl Trait` syntax in return position lets you specify that a function returns some type that implements a trait without naming the concrete type. The caller can only use methods defined by the trait. However, the function must return exactly one concrete type - you can't conditionally return different types with `impl Trait`.",
+  "relatedBookSection": "ch10-02-traits"
+}

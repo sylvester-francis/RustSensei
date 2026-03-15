@@ -1,0 +1,17 @@
+{
+  "id": "functions3",
+  "title": "Functions 3",
+  "category": "functions",
+  "difficulty": "beginner",
+  "description": "Functions can return values in Rust. The return type is declared with an arrow `->` after the parameter list.",
+  "instructions": "Fix the function so it correctly returns a value.",
+  "starterCode": "fn main() {\n    let answer = square(3);\n    println!(\"The square of 3 is {answer}\");\n}\n\nfn square(num: i32) -> i32 {\n    num * num;\n}",
+  "hints": [
+    "In Rust, the last expression in a function is automatically returned.",
+    "Note the difference: `num * num;` (with semicolon) is a statement, not an expression.",
+    "Remove the semicolon to make it an expression that gets returned, or use `return num * num;`."
+  ],
+  "solution": "fn main() {\n    let answer = square(3);\n    println!(\"The square of 3 is {answer}\");\n}\n\nfn square(num: i32) -> i32 {\n    num * num\n}",
+  "explanation": "In Rust, the last expression in a function body is implicitly returned. Adding a semicolon turns an expression into a statement, which returns `()` (the unit type) instead. This is a common source of confusion for newcomers. You can also use the `return` keyword for early returns.",
+  "relatedBookSection": "ch03-03-how-functions-work"
+}

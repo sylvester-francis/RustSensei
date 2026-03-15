@@ -1,0 +1,17 @@
+{
+  "id": "variables6",
+  "title": "Variables 6",
+  "category": "variables",
+  "difficulty": "beginner",
+  "description": "Rust has constants declared with `const`. Unlike `let` bindings, constants must have a type annotation and their value must be a constant expression.",
+  "instructions": "Fix the constant declaration so the code compiles.",
+  "starterCode": "const NUMBER = 3;\n\nfn main() {\n    println!(\"Number {NUMBER}\");\n}",
+  "hints": [
+    "Constants in Rust require an explicit type annotation.",
+    "The syntax for constants is: const NAME: Type = value;",
+    "Add a type annotation like `: i32` after the constant name."
+  ],
+  "solution": "const NUMBER: i32 = 3;\n\nfn main() {\n    println!(\"Number {NUMBER}\");\n}",
+  "explanation": "Constants in Rust are declared with `const` and always require a type annotation. They differ from `let` bindings in several ways: they can be declared in any scope including global, they must be set to a constant expression (computed at compile time), and they are always immutable - you cannot use `mut` with constants.",
+  "relatedBookSection": "ch03-01-variables-and-mutability"
+}

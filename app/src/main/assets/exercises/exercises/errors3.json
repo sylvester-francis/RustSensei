@@ -1,0 +1,17 @@
+{
+  "id": "errors3",
+  "title": "Errors 3",
+  "category": "error_handling",
+  "difficulty": "intermediate",
+  "description": "The `?` operator can be used to propagate errors up the call chain, making error handling concise.",
+  "instructions": "Fix main to handle the Result returned by total_cost correctly.",
+  "starterCode": "use std::num::ParseIntError;\n\nfn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {\n    let processing_fee = 1;\n    let cost_per_item = 5;\n    let qty = item_quantity.parse::<i32>()?;\n    Ok(qty * cost_per_item + processing_fee)\n}\n\n// TODO: Fix main to use the ? operator\nfn main() {\n    let mut tokens = 100;\n    let pretzel_cost = total_cost(\"5\")?;\n    tokens -= pretzel_cost;\n    println!(\"You have {tokens} tokens left.\");\n}",
+  "hints": [
+    "The `?` operator can only be used in functions that return Result or Option.",
+    "main can return Result<(), Box<dyn Error>> or you can use match instead.",
+    "Either change main's return type or use match/if-let to handle the Result."
+  ],
+  "solution": "use std::num::ParseIntError;\n\nfn total_cost(item_quantity: &str) -> Result<i32, ParseIntError> {\n    let processing_fee = 1;\n    let cost_per_item = 5;\n    let qty = item_quantity.parse::<i32>()?;\n    Ok(qty * cost_per_item + processing_fee)\n}\n\nfn main() {\n    let mut tokens = 100;\n    let pretzel_cost = match total_cost(\"5\") {\n        Ok(cost) => cost,\n        Err(e) => {\n            println!(\"Error: {e}\");\n            return;\n        }\n    };\n    tokens -= pretzel_cost;\n    println!(\"You have {tokens} tokens left.\");\n}",
+  "explanation": "The `?` operator can only be used in functions that return `Result` or `Option`. Since `main` normally returns `()`, you either need to change main's signature to return `Result<(), Error>` or handle the Result explicitly with `match`. Using `match` in `main` is often preferred as it lets you handle errors with user-friendly messages.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

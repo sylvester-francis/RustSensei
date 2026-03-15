@@ -1,0 +1,17 @@
+{
+  "id": "from_into",
+  "title": "From/Into",
+  "category": "conversions",
+  "difficulty": "intermediate",
+  "description": "The `From` and `Into` traits provide type conversions. Implementing `From` automatically gives you `Into`.",
+  "instructions": "Implement the From trait to convert from a default value.",
+  "starterCode": "#[derive(Debug)]\nstruct Person {\n    name: String,\n    age: usize,\n}\n\nimpl Default for Person {\n    fn default() -> Person {\n        Person {\n            name: String::from(\"John\"),\n            age: 30,\n        }\n    }\n}\n\n// TODO: Implement From<&str> for Person\n// Parse \"Name,Age\" format, fall back to default for invalid input\n\nfn main() {\n    let p1 = Person::from(\"Mark,20\");\n    println!(\"{:?}\", p1);\n\n    let p2: Person = \"Gerald,70\".into();\n    println!(\"{:?}\", p2);\n\n    let p3 = Person::from(\"invalid\");\n    println!(\"{:?}\", p3);\n}",
+  "hints": [
+    "Split the string by comma and parse the parts.",
+    "Use .split(',') to get name and age parts.",
+    "If parsing fails, return Person::default()."
+  ],
+  "solution": "#[derive(Debug)]\nstruct Person {\n    name: String,\n    age: usize,\n}\n\nimpl Default for Person {\n    fn default() -> Person {\n        Person {\n            name: String::from(\"John\"),\n            age: 30,\n        }\n    }\n}\n\nimpl From<&str> for Person {\n    fn from(s: &str) -> Person {\n        let parts: Vec<&str> = s.split(',').collect();\n        if parts.len() == 2 {\n            if let Ok(age) = parts[1].parse::<usize>() {\n                if !parts[0].is_empty() {\n                    return Person {\n                        name: parts[0].to_string(),\n                        age,\n                    };\n                }\n            }\n        }\n        Person::default()\n    }\n}\n\nfn main() {\n    let p1 = Person::from(\"Mark,20\");\n    println!(\"{:?}\", p1);\n\n    let p2: Person = \"Gerald,70\".into();\n    println!(\"{:?}\", p2);\n\n    let p3 = Person::from(\"invalid\");\n    println!(\"{:?}\", p3);\n}",
+  "explanation": "The `From` trait defines how to create a type from another type. When you implement `From<T> for U`, you automatically get `Into<U> for T`. This is why both `Person::from(\"...\")` and `\"...\".into()` work. The `From` trait is widely used in Rust for type conversions and is preferred over custom conversion functions.",
+  "relatedBookSection": "ch09-02-recoverable-errors-with-result"
+}

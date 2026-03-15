@@ -1,0 +1,17 @@
+{
+  "id": "iterators2",
+  "title": "Iterators 2",
+  "category": "iterators",
+  "difficulty": "intermediate",
+  "description": "The `collect()` method consumes an iterator and collects results into a collection.",
+  "instructions": "Use iterator methods and collect to transform strings.",
+  "starterCode": "fn capitalize_first(input: &str) -> String {\n    let mut chars = input.chars();\n    match chars.next() {\n        None => String::new(),\n        Some(first) => {\n            // TODO: Capitalize the first character and collect the rest\n        }\n    }\n}\n\nfn main() {\n    assert_eq!(capitalize_first(\"hello\"), \"Hello\");\n    assert_eq!(capitalize_first(\"\"), \"\");\n    assert_eq!(capitalize_first(\"a\"), \"A\");\n    println!(\"All tests passed!\");\n}",
+  "hints": [
+    "Use `.to_uppercase()` on a char to get an iterator of uppercase chars.",
+    "Chain the uppercase first char with the remaining chars.",
+    "Try: first.to_uppercase().collect::<String>() + chars.as_str()"
+  ],
+  "solution": "fn capitalize_first(input: &str) -> String {\n    let mut chars = input.chars();\n    match chars.next() {\n        None => String::new(),\n        Some(first) => {\n            first.to_uppercase().collect::<String>() + chars.as_str()\n        }\n    }\n}\n\nfn main() {\n    assert_eq!(capitalize_first(\"hello\"), \"Hello\");\n    assert_eq!(capitalize_first(\"\"), \"\");\n    assert_eq!(capitalize_first(\"a\"), \"A\");\n    println!(\"All tests passed!\");\n}",
+  "explanation": "The `collect()` method transforms an iterator into a collection. You often need to specify the target type with turbofish syntax: `collect::<String>()`. The `chars()` method creates an iterator over a string's characters. `char::to_uppercase()` returns an iterator because some characters map to multiple uppercase characters (like the German eszett).",
+  "relatedBookSection": "ch13-02-iterators"
+}

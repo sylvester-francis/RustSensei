@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types5",
+  "title": "Primitive Types 5",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "Tuples can hold multiple values of different types. You can destructure them to access individual elements.",
+  "instructions": "Destructure the tuple to extract the values into individual variables.",
+  "starterCode": "fn main() {\n    let cat = (\"Furry McFurson\", 3.5);\n\n    // Destructure the tuple into name and age\n    let /* your pattern here */ = cat;\n\n    println!(\"{name} is {age} years old.\");\n}",
+  "hints": [
+    "Tuple destructuring uses the same parenthesized pattern as tuple creation.",
+    "The syntax is: let (var1, var2) = tuple;",
+    "Try: let (name, age) = cat;"
+  ],
+  "solution": "fn main() {\n    let cat = (\"Furry McFurson\", 3.5);\n\n    let (name, age) = cat;\n\n    println!(\"{name} is {age} years old.\");\n}",
+  "explanation": "Tuples can be destructured using pattern matching in a `let` binding. The pattern `(name, age)` matches the tuple structure and binds each element to the corresponding variable. This is a common Rust idiom for working with tuples and is also used extensively in match expressions.",
+  "relatedBookSection": "ch03-02-data-types"
+}

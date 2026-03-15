@@ -1,0 +1,17 @@
+{
+  "id": "primitive_types6",
+  "title": "Primitive Types 6",
+  "category": "primitive_types",
+  "difficulty": "beginner",
+  "description": "You can also access tuple elements by their index using dot notation.",
+  "instructions": "Use tuple indexing to access the second element.",
+  "starterCode": "fn main() {\n    let numbers = (1, 2, 3);\n    // Use indexing to get the second element\n    let second = numbers.???;\n\n    println!(\"The second number is {second}\");\n    assert_eq!(2, second);\n}",
+  "hints": [
+    "Tuple elements are accessed with dot notation and a zero-based index.",
+    "The first element is `.0`, the second is `.1`, etc.",
+    "Try: numbers.1"
+  ],
+  "solution": "fn main() {\n    let numbers = (1, 2, 3);\n    let second = numbers.1;\n\n    println!(\"The second number is {second}\");\n    assert_eq!(2, second);\n}",
+  "explanation": "Tuple elements can be accessed by index using dot notation: `tuple.0`, `tuple.1`, etc. This is different from array indexing which uses square brackets. Tuple indexing must use literal integers - you cannot use a variable as the index because each position may have a different type.",
+  "relatedBookSection": "ch03-02-data-types"
+}

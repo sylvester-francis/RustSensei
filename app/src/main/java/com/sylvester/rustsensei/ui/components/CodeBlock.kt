@@ -24,6 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -76,6 +78,8 @@ fun CodeBlock(
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0xFF1E1E1E))
+            // P3 Fix #13: accessibility — provide code content to screen readers
+            .semantics { contentDescription = "$language code block: $code" }
     ) {
         // Header with language label and copy button
         Row(

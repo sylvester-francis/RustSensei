@@ -1,0 +1,17 @@
+{
+  "id": "threads1",
+  "title": "Threads 1",
+  "category": "threads",
+  "difficulty": "intermediate",
+  "description": "Rust's standard library provides threads for concurrent execution. Use `thread::spawn` to create new threads.",
+  "instructions": "Fix the code to properly spawn and join threads.",
+  "starterCode": "use std::thread;\nuse std::time::Duration;\n\nfn main() {\n    let mut handles = vec![];\n\n    for i in 0..10 {\n        // TODO: Spawn a thread and push the handle to the vector\n        thread::spawn(move || {\n            println!(\"Thread {i} is running\");\n            thread::sleep(Duration::from_millis(250));\n        });\n    }\n\n    // TODO: Wait for all threads to finish\n    for handle in handles {\n        // Join each thread\n    }\n\n    println!(\"All threads completed!\");\n}",
+  "hints": [
+    "thread::spawn returns a JoinHandle - save it to join later.",
+    "Push the handle: handles.push(thread::spawn(...));",
+    "Call handle.join().unwrap() to wait for each thread to finish."
+  ],
+  "solution": "use std::thread;\nuse std::time::Duration;\n\nfn main() {\n    let mut handles = vec![];\n\n    for i in 0..10 {\n        let handle = thread::spawn(move || {\n            println!(\"Thread {i} is running\");\n            thread::sleep(Duration::from_millis(250));\n        });\n        handles.push(handle);\n    }\n\n    for handle in handles {\n        handle.join().unwrap();\n    }\n\n    println!(\"All threads completed!\");\n}",
+  "explanation": "`thread::spawn` creates a new OS thread and returns a `JoinHandle`. The `move` keyword moves captured variables into the closure (important for thread safety). Calling `.join()` on the handle blocks until the thread finishes and returns a Result. Always join threads to ensure they complete before the main thread exits.",
+  "relatedBookSection": "ch16-01-threads"
+}

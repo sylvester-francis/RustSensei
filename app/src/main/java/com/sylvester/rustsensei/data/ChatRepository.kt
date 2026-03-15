@@ -16,6 +16,7 @@ class ChatRepository(private val chatDao: ChatDao) {
         return chatDao.insertConversation(Conversation(title = title))
     }
 
+    // P1 Fix #15: preserve createdAt by reading the existing conversation first
     suspend fun addMessage(conversationId: Long, role: String, content: String): Long {
         val message = ChatMessage(
             conversationId = conversationId,
@@ -23,19 +24,20 @@ class ChatRepository(private val chatDao: ChatDao) {
             content = content
         )
         val id = chatDao.insertMessage(message)
-        chatDao.updateConversation(
-            Conversation(
-                id = conversationId,
-                title = if (role == "user") content.take(50) else "New Conversation",
-                updatedAt = System.currentTimeMillis()
-            )
-        )
-        return id
-    }
 
-    suspend fun updateMessage(message: ChatMessage) {
-        chatDao.deleteMessagesForConversation(message.conversationId)
-        // This is a simplification — in production you'd update a single message
+        // Update title only on first user message, preserve createdAt
+        if (role == "user") {
+            val existing = chatDao.getConversation(conversationId)
+            if (existing != null) {
+                chatDao.updateConversation(
+                    existing.copy(
+                        title = content.take(50),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                )
+            }
+        }
+        return id
     }
 
     suspend fun clearAllData() {
