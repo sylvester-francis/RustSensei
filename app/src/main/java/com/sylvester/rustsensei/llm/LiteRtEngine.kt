@@ -41,13 +41,10 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 engine?.close()
                 conversation?.close()
 
-                // Tensor G3 (Mali-G715) doesn't have OpenCL — the GPU sampler
-                // requires it and crashes at decode time. Use CPU backend which
-                // uses XNNPack. GPU works on Snapdragon devices with Adreno GPU.
-                // TODO: detect GPU capability and auto-select backend
+                // Use GPU backend — WebGPU/Vulkan on Tensor G3
                 val config = EngineConfig(
                     modelPath = modelPath,
-                    backend = Backend.CPU(),
+                    backend = Backend.GPU(),
                     cacheDir = context.cacheDir.absolutePath
                 )
 
@@ -60,9 +57,9 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 val conv = newEngine.createConversation(
                     ConversationConfig(
                         samplerConfig = SamplerConfig(
-                            topK = 64,
-                            topP = 0.95,
-                            temperature = 1.0
+                            topK = 1,
+                            topP = 1.0,
+                            temperature = 0.0
                         )
                     )
                 )
