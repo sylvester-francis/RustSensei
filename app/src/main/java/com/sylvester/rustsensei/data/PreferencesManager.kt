@@ -53,6 +53,6 @@ class PreferencesManager(context: Context) {
     }
 
     fun getSelectedModelId(): String {
-        return prefs.getString("selected_model_id", "litert-0.6b") ?: "litert-0.6b"
+        return prefs.getString("selected_model_id", "litert-1b-gemma") ?: "litert-1b-gemma"
     }
 }

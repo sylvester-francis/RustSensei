@@ -47,26 +47,15 @@ class ModelManager(private val context: Context) {
 
         val AVAILABLE_MODELS = listOf(
             ModelInfo(
-                id = "litert-0.6b",
-                displayName = "Rust Mentor 0.6B",
-                parameterSize = "0.6B",
-                filename = "rust_mentor_0_6b_q8_ekv2048.litertlm",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-LiteRT/resolve/main/rust_mentor_0_6b_q8_ekv2048.litertlm",
-                expectedSizeBytes = 700_000_000L,
-                description = "GPU-accelerated. Fastest inference. Recommended.",
-                ramRequired = "~2 GB RAM",
-                minDeviceMemoryGb = 2f
-            ),
-            ModelInfo(
-                id = "litert-1.7b",
-                displayName = "Rust Mentor 1.7B",
-                parameterSize = "1.7B",
-                filename = "rust_mentor_1_7b_q8_ekv2048.tflite",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-LiteRT/resolve/main/rust_mentor_1_7b_q8_ekv2048.tflite",
-                expectedSizeBytes = 1_800_000_000L,
-                description = "GPU-accelerated. Best quality with fast inference.",
-                ramRequired = "~4 GB RAM",
-                minDeviceMemoryGb = 4f
+                id = "litert-1b-gemma",
+                displayName = "Rust Mentor 1B",
+                parameterSize = "1B",
+                filename = "rust-mentor-1b-mobile_q8_ekv2053.litertlm",
+                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1b-mobile-LiteRT/resolve/main/rust-mentor-1b-mobile_q8_ekv2053.litertlm",
+                expectedSizeBytes = 1_200_000_000L,
+                description = "Gemma3 based. GPU-accelerated. Recommended.",
+                ramRequired = "~3 GB RAM",
+                minDeviceMemoryGb = 3f
             )
         )
 
