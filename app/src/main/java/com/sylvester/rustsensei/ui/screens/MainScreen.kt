@@ -1,6 +1,5 @@
 package com.sylvester.rustsensei.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -11,7 +10,6 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -64,46 +63,36 @@ fun MainScreen(
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    // Fix #4: detect if we're on the Chat tab
-    val isOnChatTab = currentDestination?.hierarchy?.any { it.route == Tab.Chat.route } == true
 
     Scaffold(
         topBar = {
-            // Fix #4: hide the top bar when on Chat tab (Chat has its own controls row)
-            AnimatedVisibility(visible = !isOnChatTab) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "RustSensei",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    },
-                    actions = {
-                        IconButton(onClick = onNavigateToSettings) {
-                            Icon(
-                                Icons.Default.Settings,
-                                contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
+            TopAppBar(
+                title = {
+                    Text(
+                        "RustSensei",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge
                     )
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
-            }
+            )
         },
         bottomBar = {
-            // Subtle top border line
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            )
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 0.dp
+                tonalElevation = 0.5.dp
             ) {
                 tabs.forEach { tab ->
                     val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
@@ -112,13 +101,13 @@ fun MainScreen(
                             Icon(
                                 tab.icon,
                                 contentDescription = tab.title,
-                                modifier = Modifier.size(26.dp)
+                                modifier = Modifier.size(22.dp)
                             )
                         },
                         label = {
                             Text(
                                 tab.title,
-                                style = MaterialTheme.typography.labelMedium,
+                                fontSize = 11.sp,
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                             )
                         },
@@ -135,8 +124,8 @@ fun MainScreen(
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.primary,
                             selectedTextColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                         )
                     )

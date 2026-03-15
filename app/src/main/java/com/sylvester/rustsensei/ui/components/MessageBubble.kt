@@ -9,25 +9,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -37,119 +26,72 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun MessageBubble(
     content: String,
     isUser: Boolean,
+    isFirstInGroup: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val maxBubbleWidth = screenWidth * 0.85f
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Bottom
-    ) {
-        // Assistant avatar
-        if (!isUser) {
+    if (isUser) {
+        // User message: right-aligned pill, solid primary, generous padding
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
             Box(
                 modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.SmartToy,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
-        if (isUser) {
-            // User bubble with gradient
-            val primaryColor = MaterialTheme.colorScheme.primary
-            val primaryContainerColor = MaterialTheme.colorScheme.primaryContainer
-            Box(
-                modifier = Modifier
-                    .widthIn(max = maxBubbleWidth)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 20.dp,
-                            topEnd = 20.dp,
-                            bottomStart = 20.dp,
-                            bottomEnd = 6.dp
-                        )
-                    )
+                    .widthIn(max = screenWidth * 0.88f)
                     .background(
-                        Brush.linearGradient(
-                            colors = listOf(primaryColor, primaryContainerColor),
-                            start = Offset.Zero,
-                            end = Offset.Infinite
-                        )
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(20.dp)
                     )
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
             ) {
                 Text(
                     text = content,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    lineHeight = 24.sp
+                    fontSize = 15.sp,
+                    lineHeight = 22.sp
                 )
-            }
-        } else {
-            // Assistant bubble with left accent border
-            val accentColor = MaterialTheme.colorScheme.primary
-            Box(
-                modifier = Modifier
-                    .widthIn(max = maxBubbleWidth)
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 6.dp,
-                            topEnd = 20.dp,
-                            bottomStart = 20.dp,
-                            bottomEnd = 20.dp
-                        )
-                    )
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
-                    .drawBehind {
-                        drawRect(
-                            color = accentColor,
-                            topLeft = Offset.Zero,
-                            size = androidx.compose.ui.geometry.Size(
-                                width = 3.dp.toPx(),
-                                height = size.height
-                            )
-                        )
-                    }
-                    .padding(start = 14.dp, end = 14.dp, top = 10.dp, bottom = 10.dp)
-            ) {
-                MarkdownContent(content)
             }
         }
+    } else {
+        // Assistant message: full-width, no background card, clean text on surface
+        val accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+        val showBorder = isFirstInGroup
 
-        // User avatar
-        if (isUser) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.secondary
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .then(
+                    if (showBorder) {
+                        Modifier.drawBehind {
+                            drawRect(
+                                color = accentColor,
+                                topLeft = Offset.Zero,
+                                size = androidx.compose.ui.geometry.Size(
+                                    width = 2.dp.toPx(),
+                                    height = size.height
+                                )
+                            )
+                        }
+                    } else {
+                        Modifier
+                    }
                 )
-            }
+                .padding(
+                    start = if (showBorder) 12.dp else 4.dp,
+                    end = 4.dp,
+                    top = 2.dp,
+                    bottom = 2.dp
+                )
+        ) {
+            MarkdownContent(content)
         }
     }
 }
@@ -162,16 +104,16 @@ fun MarkdownContent(text: String) {
         blocks.forEachIndexed { index, block ->
             when (block) {
                 is MarkdownBlock.CodeBlock -> {
-                    if (index > 0) Spacer(modifier = Modifier.height(8.dp))
+                    if (index > 0) Spacer(modifier = Modifier.height(12.dp))
                     CodeBlock(code = block.code, language = block.language)
-                    if (index < blocks.lastIndex) Spacer(modifier = Modifier.height(8.dp))
+                    if (index < blocks.lastIndex) Spacer(modifier = Modifier.height(12.dp))
                 }
                 is MarkdownBlock.TextBlock -> {
                     Text(
                         text = parseInlineMarkdown(block.text),
                         color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.bodyLarge,
-                        lineHeight = 24.sp
+                        fontSize = 15.sp,
+                        lineHeight = 23.sp
                     )
                 }
             }

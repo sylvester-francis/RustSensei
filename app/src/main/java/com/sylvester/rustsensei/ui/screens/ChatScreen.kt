@@ -1,8 +1,6 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,22 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.EmojiObjects
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -49,18 +39,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.Conversation
 import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
-import com.sylvester.rustsensei.ui.components.QuickPromptChips
 import com.sylvester.rustsensei.ui.components.StreamingIndicator
-import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import kotlinx.coroutines.launch
 
@@ -71,7 +56,6 @@ fun ChatScreen(
     onNavigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -83,7 +67,8 @@ fun ChatScreen(
         if (uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()) {
             val targetIndex = uiState.messages.size +
                     (if (uiState.streamingText.isNotEmpty()) 1 else 0) +
-                    (if (uiState.isGenerating && uiState.streamingText.isEmpty()) 1 else 0)
+                    (if (uiState.isGenerating && uiState.streamingText.isEmpty()) 1 else 0) +
+                    (if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) 1 else 0)
             if (targetIndex > 0) {
                 listState.animateScrollToItem(targetIndex - 1)
             }
@@ -119,7 +104,7 @@ fun ChatScreen(
                 .fillMaxSize()
                 .imePadding()
         ) {
-            // Conversation controls row
+            // Clean top row: hamburger + new conversation only
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,60 +119,6 @@ fun ChatScreen(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
-
-                // Context indicator as a proper chip/pill
-                when (chatContext) {
-                    is ChatContext.BookSection -> {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.MenuBook,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Book context",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-                    is ChatContext.Exercise -> {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Code,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.tertiary
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Exercise context",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-                    else -> {}
-                }
-
                 IconButton(onClick = { viewModel.startNewConversation() }) {
                     Icon(
                         Icons.Default.Add,
@@ -201,7 +132,7 @@ fun ChatScreen(
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 state = listState,
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 if (uiState.messages.isEmpty() && !uiState.isGenerating) {
                     item {
@@ -212,10 +143,16 @@ fun ChatScreen(
                 }
 
                 items(uiState.messages, key = { it.id }) { message ->
+                    val messageIndex = uiState.messages.indexOf(message)
+                    val isUser = message.role == "user"
+                    val isFirstInGroup = messageIndex == 0 ||
+                            uiState.messages[messageIndex - 1].role != message.role
+
                     MessageBubble(
                         content = message.content,
-                        isUser = message.role == "user",
-                        modifier = Modifier.padding(vertical = 4.dp)
+                        isUser = isUser,
+                        isFirstInGroup = isFirstInGroup,
+                        modifier = Modifier.padding(vertical = 6.dp)
                     )
                 }
 
@@ -225,7 +162,8 @@ fun ChatScreen(
                         MessageBubble(
                             content = uiState.streamingText,
                             isUser = false,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            isFirstInGroup = true,
+                            modifier = Modifier.padding(vertical = 6.dp)
                         )
                     }
                 }
@@ -234,40 +172,28 @@ fun ChatScreen(
                 if (uiState.isGenerating && uiState.streamingText.isEmpty()) {
                     item {
                         StreamingIndicator(
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            modifier = Modifier.padding(vertical = 6.dp)
                         )
                     }
                 }
 
-                // Inference stats
+                // Inference stats — subtle single line
                 if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
                     item {
                         val statsText = buildString {
-                            append("Generated in %.1fs".format(uiState.inferenceTimeMs / 1000.0))
-                            if (uiState.lastPrefillTokPerSec > 0f) {
-                                append(" | Prefill: %.0f tok/s".format(uiState.lastPrefillTokPerSec))
-                            }
+                            append("%.1fs".format(uiState.inferenceTimeMs / 1000.0))
                             if (uiState.lastDecodeTokPerSec > 0f) {
-                                append(" | Decode: %.0f tok/s".format(uiState.lastDecodeTokPerSec))
+                                append(" \u00B7 %.0f tok/s".format(uiState.lastDecodeTokPerSec))
                             }
                         }
                         Text(
                             text = statsText,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.padding(start = 40.dp, top = 2.dp)
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                         )
                     }
                 }
-            }
-
-            // Quick prompts (show when no messages)
-            if (uiState.messages.isEmpty() && !uiState.isGenerating) {
-                QuickPromptChips(
-                    onPromptSelected = { prompt ->
-                        inputText = prompt
-                    }
-                )
             }
 
             // Input bar
@@ -292,82 +218,50 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Splash-style crab with gradient background
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(RoundedCornerShape(60.dp))
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.03f),
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "\uD83E\uDD80",
-                fontSize = 56.sp
-            )
-        }
+        // Large crab emoji, clean and centered
+        Text(
+            text = "\uD83E\uDD80",
+            fontSize = 80.sp
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = "Welcome to RustSensei",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Your offline Rust programming tutor.\nAsk me anything about Rust!",
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(28.dp))
 
-        // Suggestion chips with icons
-        val suggestions = listOf(
-            Triple("I'm new to Rust. Where do I start?", Icons.Default.AutoStories, "Start"),
-            Triple("Explain ownership like I'm a Go developer", Icons.Default.Psychology, "Ownership"),
-            Triple("Help me understand the borrow checker", Icons.Default.EmojiObjects, "Borrow checker")
+        Text(
+            text = "Ask me anything about Rust",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
-        suggestions.forEach { (suggestion, icon, _) ->
-            AssistChip(
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Suggestion buttons — simple, vertical, no icons
+        val suggestions = listOf(
+            "I'm new to Rust. Where do I start?",
+            "Explain ownership like I'm a Go developer",
+            "Help me understand the borrow checker"
+        )
+        suggestions.forEach { suggestion ->
+            OutlinedButton(
                 onClick = { onPromptSelected(suggestion) },
-                label = {
-                    Text(
-                        suggestion,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    labelColor = MaterialTheme.colorScheme.onSurface
-                ),
                 border = BorderStroke(
-                    width = 1.dp,
+                    width = 0.5.dp,
                     color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
-            )
+            ) {
+                Text(
+                    text = suggestion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }

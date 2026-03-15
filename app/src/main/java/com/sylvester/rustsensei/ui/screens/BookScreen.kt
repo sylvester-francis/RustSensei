@@ -1,10 +1,8 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,10 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -30,9 +27,6 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -99,118 +93,98 @@ private fun BookIndexView(viewModel: BookViewModel) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
     ) {
         item {
             Text(
                 text = "The Rust Programming Language",
-                style = MaterialTheme.typography.headlineLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
 
-        // Design Concern #3: "Continue Reading" card
+        // Continue Reading row
         if (uiState.lastReadChapterId != null && uiState.lastReadSectionId != null) {
             item {
-                Card(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
                         .clickable {
                             viewModel.openChapter(uiState.lastReadChapterId!!)
                             viewModel.openSection(
                                 uiState.lastReadChapterId!!,
                                 uiState.lastReadSectionId!!
                             )
-                        },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Continue Reading",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                            Text(
-                                text = uiState.lastReadSectionId!!.replace("-", " "),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
-                                maxLines = 1
-                            )
                         }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Continue Reading",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = uiState.lastReadSectionId!!.replace("-", " "),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
                     }
                 }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
 
         itemsIndexed(uiState.chapters, key = { _, ch -> ch.id }) { index, chapter ->
-            Card(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { viewModel.openChapter(chapter.id) },
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                )
+                    .clickable { viewModel.openChapter(chapter.id) }
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Chapter number badge
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${index + 1}",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = chapter.title,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "${chapter.sectionIds.size} sections",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                Text(
+                    text = "${index + 1}",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.width(32.dp)
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = chapter.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${chapter.sectionIds.size} sections",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier.size(20.dp)
+                )
             }
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(start = 48.dp)
+            )
         }
     }
 }
@@ -240,70 +214,63 @@ private fun ChapterView(viewModel: BookViewModel) {
         }
 
         LazyColumn(
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
         ) {
             items(chapter.sections, key = { it.id }) { section ->
                 val progress = uiState.sectionProgress[section.id]
                 val isCompleted = progress?.isCompleted == true
 
-                Card(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
                             viewModel.openSection(uiState.currentChapterId!!, section.id)
-                        },
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (isCompleted) {
-                            // Green checkmark for completed sections
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = "Completed",
-                                tint = Color(0xFF3FB950),
-                                modifier = Modifier.size(24.dp)
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.size(24.dp)
-                            )
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = section.title,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (isCompleted) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Completed",
+                            tint = Color(0xFF3FB950),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = section.title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
+                        )
+                        if (progress != null && !isCompleted && progress.readPercent > 0f) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            LinearProgressIndicator(
+                                progress = { progress.readPercent },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(2.dp)),
+                                strokeCap = StrokeCap.Round,
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant
                             )
-                            if (progress != null && !isCompleted && progress.readPercent > 0f) {
-                                Spacer(modifier = Modifier.height(6.dp))
-                                LinearProgressIndicator(
-                                    progress = { progress.readPercent },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp)),
-                                    strokeCap = StrokeCap.Round,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                                )
-                            }
                         }
                     }
                 }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                    modifier = Modifier.padding(start = 50.dp)
+                )
             }
         }
     }
@@ -371,7 +338,7 @@ private fun SectionView(
             }
         }
 
-        // Content — slightly larger text for readability
+        // Content
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -386,6 +353,7 @@ private fun SectionView(
                     text = example.description,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
+                    lineHeight = 26.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -398,10 +366,10 @@ private fun SectionView(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Fix #4b: Navigation bar + Ask Sensei button with top divider
+        // Bottom navigation
         HorizontalDivider(
             thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
         )
         Row(
             modifier = Modifier
@@ -419,14 +387,15 @@ private fun SectionView(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("Previous", style = MaterialTheme.typography.labelLarge)
             }
-            ExtendedFloatingActionButton(
-                onClick = { onAskSensei(section.content, "") },
-                icon = { Icon(Icons.Default.Chat, contentDescription = null) },
-                text = { Text("Ask Sensei", style = MaterialTheme.typography.labelLarge) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(24.dp)
-            )
+            TextButton(onClick = { onAskSensei(section.content, "") }) {
+                Icon(
+                    Icons.Default.Chat,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Ask Sensei", style = MaterialTheme.typography.labelLarge)
+            }
             TextButton(onClick = { viewModel.navigateToNextSection() }) {
                 Text("Next", style = MaterialTheme.typography.labelLarge)
                 Spacer(modifier = Modifier.width(4.dp))

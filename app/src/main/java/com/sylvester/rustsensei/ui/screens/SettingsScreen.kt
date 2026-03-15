@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,23 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -85,97 +83,80 @@ fun SettingsScreen(
         ) {
             // Model Selection
             SectionHeader("Model")
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             ModelManager.AVAILABLE_MODELS.forEach { model ->
                 val isLoaded = modelState.loadedModelId == model.id
                 val isDownloaded = model.id in modelState.downloadedModelIds
-                val isSelected = modelState.selectedModelId == model.id
 
-                OutlinedCard(
-                    onClick = {
-                        if (isDownloaded && !isLoaded) {
-                            modelViewModel.switchModel(model.id, chatViewModel.llamaEngine)
-                        } else if (!isDownloaded) {
-                            modelViewModel.selectModel(model.id)
-                            modelViewModel.startDownload()
-                        }
-                    },
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    border = BorderStroke(
-                        width = if (isLoaded) 2.dp else 1.dp,
-                        color = if (isLoaded) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.outlineVariant
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = if (model.parameterSize == "4B") Icons.Default.Speed
-                            else Icons.Default.Psychology,
-                            contentDescription = null,
-                            modifier = Modifier.size(28.dp),
-                            tint = if (isLoaded) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = model.displayName,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Medium
-                                )
-                                if (isLoaded) {
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = "Active",
-                                        fontSize = 11.sp,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                        .clickable {
+                            if (isDownloaded && !isLoaded) {
+                                modelViewModel.switchModel(model.id, chatViewModel.llamaEngine)
+                            } else if (!isDownloaded) {
+                                modelViewModel.selectModel(model.id)
+                                modelViewModel.startDownload()
                             }
-                            Text(
-                                text = model.ramRequired,
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
-                        if (isDownloaded) {
+                        .padding(vertical = 12.dp, horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = model.displayName,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Medium
+                            )
                             if (isLoaded) {
-                                Icon(
-                                    Icons.Default.CheckCircle,
-                                    contentDescription = "Active",
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            } else {
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Tap to switch",
+                                    text = "Active",
                                     fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
-                        } else {
+                        }
+                        Text(
+                            text = model.ramRequired,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (isDownloaded) {
+                        if (isLoaded) {
                             Icon(
-                                Icons.Default.Download,
-                                contentDescription = "Download",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                Icons.Default.CheckCircle,
+                                contentDescription = "Active",
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
+                        } else {
+                            Text(
+                                text = "Tap to switch",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
+                    } else {
+                        Icon(
+                            Icons.Default.Download,
+                            contentDescription = "Download",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                )
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Inference Settings
             SectionHeader("Inference Settings")
@@ -207,7 +188,7 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Model Info
             SectionHeader("Active Model Info")
@@ -238,17 +219,19 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // Data Management
-            SectionHeader("Data Management")
+            // Data Management (Danger Zone)
+            SectionHeader("Danger Zone")
             Spacer(modifier = Modifier.height(12.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = { showClearDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
                 Text("Clear All Conversations")
@@ -256,11 +239,13 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
+            OutlinedButton(
                 onClick = { showDeleteModelDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error
                 )
             ) {
                 Text("Delete Active Model")
@@ -314,8 +299,9 @@ fun SettingsScreen(
 private fun SectionHeader(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 24.dp)
     )
 }
 
