@@ -4,35 +4,66 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 
 // Rust brand colors
 val RustOrange = Color(0xFFCE412B)
 val RustOrangeLight = Color(0xFFFF7043)
 val RustOrangeDark = Color(0xFF9C1A0A)
 
-val DarkBackground = Color(0xFF121212)
-val DarkSurface = Color(0xFF1E1E1E)
-val DarkSurfaceVariant = Color(0xFF2D2D2D)
-val CodeBlockBackground = Color(0xFF1E1E1E)
+// Dark palette — GitHub-dark inspired
+val DarkBackground = Color(0xFF0D1117)
+val DarkSurface = Color(0xFF161B22)
+val DarkSurfaceVariant = Color(0xFF21262D)
+val CodeBlockBackground = Color(0xFF161B22)
+
+// Accent colors
+val WarmAmber = Color(0xFFF0883E)
+val CoolBlue = Color(0xFF58A6FF)
+val ErrorRed = Color(0xFFF85149)
+val SoftWhite = Color(0xFFE6EDF3)
+val MutedGray = Color(0xFF8B949E)
+val OutlineDark = Color(0xFF30363D)
+
+// Light palette
+val LightBackground = Color(0xFFFAFBFC)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFF0F2F5)
 
 private val DarkColorScheme = darkColorScheme(
     primary = RustOrange,
     onPrimary = Color.White,
     primaryContainer = RustOrangeDark,
-    onPrimaryContainer = Color.White,
-    secondary = RustOrangeLight,
+    onPrimaryContainer = Color(0xFFFFDAD4),
+    secondary = WarmAmber,
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFF5A3600),
+    onSecondaryContainer = Color(0xFFFFDDB3),
+    tertiary = CoolBlue,
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFF0A3069),
+    onTertiaryContainer = Color(0xFFB6D7FF),
+    error = ErrorRed,
+    onError = Color.White,
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
     background = DarkBackground,
+    onBackground = SoftWhite,
     surface = DarkSurface,
+    onSurface = SoftWhite,
     surfaceVariant = DarkSurfaceVariant,
-    onBackground = Color.White,
-    onSurface = Color.White,
-    onSurfaceVariant = Color(0xFFBBBBBB)
+    onSurfaceVariant = MutedGray,
+    outline = OutlineDark,
+    outlineVariant = Color(0xFF21262D),
+    inverseSurface = SoftWhite,
+    inverseOnSurface = DarkBackground,
+    surfaceContainerHighest = Color(0xFF2D333B),
+    surfaceContainerHigh = Color(0xFF262C36),
+    surfaceContainer = DarkSurfaceVariant,
+    surfaceContainerLow = DarkSurface,
+    surfaceContainerLowest = DarkBackground
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -40,36 +71,47 @@ private val LightColorScheme = lightColorScheme(
     onPrimary = Color.White,
     primaryContainer = Color(0xFFFFDBD1),
     onPrimaryContainer = RustOrangeDark,
-    secondary = RustOrangeLight,
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    secondary = Color(0xFFD97B2A),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFFFDDB3),
+    onSecondaryContainer = Color(0xFF5A3600),
+    tertiary = Color(0xFF1A7FC4),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFD1E8FF),
+    onTertiaryContainer = Color(0xFF0A3069),
+    error = Color(0xFFBA1A1A),
+    onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
+    background = LightBackground,
     onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F)
+    surface = LightSurface,
+    onSurface = Color(0xFF1C1B1F),
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = Color(0xFF57606A),
+    outline = Color(0xFFD0D7DE),
+    outlineVariant = Color(0xFFE1E4E8),
+    inverseSurface = Color(0xFF1C1B1F),
+    inverseOnSurface = LightBackground,
+    surfaceContainerHighest = Color(0xFFE1E4E8),
+    surfaceContainerHigh = Color(0xFFEAECEF),
+    surfaceContainer = LightSurfaceVariant,
+    surfaceContainerLow = LightSurface,
+    surfaceContainerLowest = Color.White
 )
 
 @Composable
 fun RustSenseiTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    // Dynamic colors disabled — app identity should be consistent
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context).copy(
-                primary = RustOrange,
-                onPrimary = Color.White
-            ) else dynamicLightColorScheme(context).copy(
-                primary = RustOrange,
-                onPrimary = Color.White
-            )
-        }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = RustSenseiTypography,
         content = content
     )
 }

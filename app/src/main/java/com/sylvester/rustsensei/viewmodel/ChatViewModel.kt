@@ -8,7 +8,6 @@ import com.sylvester.rustsensei.data.ChatMessage
 import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
-import com.sylvester.rustsensei.llm.LlamaEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +37,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val app = application as RustSenseiApplication
     private val repository: ChatRepository = app.repository
 
-    val llamaEngine = LlamaEngine()
+    val llamaEngine = app.llamaEngine
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()

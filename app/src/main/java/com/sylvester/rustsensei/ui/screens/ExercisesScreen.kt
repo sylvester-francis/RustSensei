@@ -443,20 +443,29 @@ private fun ExerciseDetailView(
                                 },
                                 fontWeight = FontWeight.Medium
                             )
-                            // Design Concern #1: LLM fallback — offer to ask Sensei or self-mark
+                            // Design Concern #1: LLM fallback — offer inline AI validation or self-mark
                             if (result == "uncertain") {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    OutlinedButton(
-                                        onClick = { onAskSensei(exercise.description, uiState.userCode) },
-                                        modifier = Modifier.weight(1f)
+                                    Button(
+                                        onClick = { viewModel.validateWithLlm() },
+                                        modifier = Modifier.weight(1f),
+                                        enabled = !uiState.isValidating
                                     ) {
-                                        Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        if (uiState.isValidating) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier.size(16.dp),
+                                                strokeWidth = 2.dp,
+                                                color = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        } else {
+                                            Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        }
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Ask Sensei", fontSize = 12.sp)
+                                        Text(if (uiState.isValidating) "Verifying..." else "Verify with AI", fontSize = 12.sp)
                                     }
                                     OutlinedButton(
                                         onClick = { viewModel.markCurrentExerciseCorrect() },
@@ -466,6 +475,53 @@ private fun ExerciseDetailView(
                                         Spacer(modifier = Modifier.width(4.dp))
                                         Text("Mark Correct", fontSize = 12.sp)
                                     }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // LLM validation streaming response
+                if (uiState.llmValidationResult.isNotEmpty() || uiState.isValidating) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "AI Review",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                if (uiState.isValidating) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            if (uiState.isValidating) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(
+                                    onClick = { viewModel.stopValidation() },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Stop", fontSize = 12.sp)
                                 }
                             }
                         }

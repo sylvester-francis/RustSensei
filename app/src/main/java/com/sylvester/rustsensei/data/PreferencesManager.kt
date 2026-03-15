@@ -34,6 +34,6 @@ class PreferencesManager(context: Context) {
     }
 
     fun getSelectedModelId(): String {
-        return prefs.getString("selected_model_id", "qwen3-4b") ?: "qwen3-4b"
+        return prefs.getString("selected_model_id", "qwen3-1b") ?: "qwen3-1b"
     }
 }

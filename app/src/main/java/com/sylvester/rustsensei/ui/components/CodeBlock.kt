@@ -4,9 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -33,6 +38,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +54,11 @@ private val NumberColor = Color(0xFFB5CEA8)        // light green - numbers
 private val MacroColor = Color(0xFFD4D4AA)         // yellow - macros
 private val FunctionColor = Color(0xFFDCDCAA)      // light yellow - functions
 private val DefaultCodeColor = Color(0xFFD4D4D4)   // light gray - default
+
+private val CodeBgColor = Color(0xFF0D1117)
+private val CodeHeaderColor = Color(0xFF161B22)
+private val LineNumberColor = Color(0xFF484F58)
+private val LineNumberDividerColor = Color(0xFF21262D)
 
 private val rustKeywords = setOf(
     "fn", "let", "mut", "pub", "struct", "enum", "impl", "trait", "use", "mod",
@@ -72,29 +83,43 @@ fun CodeBlock(
     val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     var showCopied by remember { mutableStateOf(false) }
+    val lines = code.lines()
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFF1E1E1E))
+            .clip(RoundedCornerShape(12.dp))
+            .background(CodeBgColor)
             // P3 Fix #13: accessibility — provide code content to screen readers
             .semantics { contentDescription = "$language code block: $code" }
     ) {
-        // Header with language label and copy button
+        // Header with language pill and copy button
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF2D2D2D))
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .background(CodeHeaderColor)
+                .padding(horizontal = 14.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = language,
-                color = Color(0xFF808080),
-                fontSize = 12.sp,
-                modifier = Modifier.weight(1f)
-            )
+            // Language pill badge
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color(0xFF21262D))
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = language,
+                    color = Color(0xFF8B949E),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = FontFamily.Monospace
+                )
+            }
+
+            Box(modifier = Modifier.weight(1f))
+
+            // Subtle copy button
             IconButton(
                 onClick = {
                     clipboardManager.setText(AnnotatedString(code))
@@ -103,34 +128,76 @@ fun CodeBlock(
                         delay(2000)
                         showCopied = false
                     }
-                }
+                },
+                modifier = Modifier.size(32.dp)
             ) {
                 if (showCopied) {
-                    Text("Copied!", color = Color(0xFF4EC9B0), fontSize = 12.sp)
+                    Text(
+                        "Copied!",
+                        color = Color(0xFF4EC9B0),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 } else {
                     Icon(
                         Icons.Default.ContentCopy,
                         contentDescription = "Copy code",
-                        tint = Color(0xFF808080)
+                        tint = Color(0xFF484F58),
+                        modifier = Modifier.size(16.dp)
                     )
                 }
             }
         }
 
-        // Code content with syntax highlighting
-        Box(
+        // Code content with line numbers
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(12.dp)
+                .height(IntrinsicSize.Min)
         ) {
-            Text(
-                text = if (language == "rust") highlightRustSyntax(code) else AnnotatedString(code),
-                fontFamily = FontFamily.Monospace,
-                fontSize = 13.sp,
-                lineHeight = 20.sp,
-                color = DefaultCodeColor
+            // Line numbers column
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(CodeBgColor)
+                    .padding(start = 12.dp, top = 14.dp, bottom = 14.dp, end = 8.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                lines.forEachIndexed { index, _ ->
+                    Text(
+                        text = "${index + 1}",
+                        color = LineNumberColor,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        lineHeight = 20.sp,
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
+
+            // Thin vertical divider
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(1.dp)
+                    .background(LineNumberDividerColor)
             )
+
+            // Code content
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .horizontalScroll(rememberScrollState())
+                    .padding(14.dp)
+            ) {
+                Text(
+                    text = if (language == "rust") highlightRustSyntax(code) else AnnotatedString(code),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    lineHeight = 20.sp,
+                    color = DefaultCodeColor
+                )
+            }
         }
     }
 }

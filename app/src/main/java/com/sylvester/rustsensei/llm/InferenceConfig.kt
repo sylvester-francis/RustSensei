@@ -7,16 +7,23 @@ data class InferenceConfig(
     val contextLength: Int = 2048
 ) {
     companion object {
-        // Model-specific defaults
         fun forModel(modelId: String): InferenceConfig {
             return when (modelId) {
+                "qwen3-0.6b" -> InferenceConfig(
+                    maxTokens = 256,
+                    contextLength = 2048   // tiny model: keep context small
+                )
+                "qwen3-1b" -> InferenceConfig(
+                    maxTokens = 384,
+                    contextLength = 2048   // small model: moderate context
+                )
                 "qwen3-4b" -> InferenceConfig(
                     maxTokens = 384,
-                    contextLength = 4096  // 4B model: plenty of room
+                    contextLength = 4096
                 )
                 "qwen3-8b" -> InferenceConfig(
-                    maxTokens = 256,       // 8B: shorter responses, faster
-                    contextLength = 2048   // 8B: smaller context, less KV cache memory
+                    maxTokens = 256,
+                    contextLength = 2048
                 )
                 else -> InferenceConfig()
             }

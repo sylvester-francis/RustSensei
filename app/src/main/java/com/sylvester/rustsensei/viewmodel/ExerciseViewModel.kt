@@ -7,10 +7,14 @@ import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.content.ExerciseCategory
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
+import com.sylvester.rustsensei.llm.InferenceConfig
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,7 +34,9 @@ data class ExerciseUiState(
     val showSolution: Boolean = false,
     val checkResult: String? = null, // "correct", "incorrect", "uncertain"
     val categoryProgress: Map<String, List<ExerciseProgress>> = emptyMap(),
-    val lastIncompleteExerciseId: String? = null
+    val lastIncompleteExerciseId: String? = null,
+    val llmValidationResult: String = "",
+    val isValidating: Boolean = false
 )
 
 class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
@@ -38,6 +44,9 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private val app = application as RustSenseiApplication
     private val contentRepo = app.contentRepository
     private val progressRepo = app.progressRepository
+    private val llamaEngine = app.llamaEngine
+
+    private var validationJob: Job? = null
 
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState.asStateFlow()
@@ -114,6 +123,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
             }
             val progress = progressRepo.getExerciseProgress(exerciseId)
             if (exercise != null) {
+                validationJob?.cancel()
                 _uiState.value = _uiState.value.copy(
                     mode = ExerciseScreenMode.DETAIL,
                     currentExercise = exercise,
@@ -121,7 +131,9 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                     userCode = progress?.userCode?.ifEmpty { exercise.starterCode } ?: exercise.starterCode,
                     hintsRevealed = progress?.hintsViewed ?: 0,
                     showSolution = false,
-                    checkResult = null
+                    checkResult = null,
+                    llmValidationResult = "",
+                    isValidating = false
                 )
             }
         }
@@ -129,12 +141,15 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     fun navigateBack() {
         saveCurrentCode()
+        validationJob?.cancel()
         _uiState.value = _uiState.value.copy(
             mode = ExerciseScreenMode.CATEGORIES,
             currentExercise = null,
             currentProgress = null,
             checkResult = null,
-            showSolution = false
+            showSolution = false,
+            llmValidationResult = "",
+            isValidating = false
         )
     }
 
@@ -201,12 +216,88 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun validateWithLlm() {
+        val exercise = _uiState.value.currentExercise ?: return
+        val userCode = _uiState.value.userCode.trim()
+
+        if (_uiState.value.isValidating) return
+        if (!llamaEngine.isModelLoaded()) return
+
+        validationJob?.cancel()
+
+        val prompt = buildString {
+            append("<|im_start|>system\n")
+            append("You are a Rust code reviewer. Evaluate if the student's code correctly solves the exercise. ")
+            append("Reply with CORRECT or INCORRECT on the first line, then explain why in 2-3 sentences.")
+            append("<|im_end|>\n")
+            append("<|im_start|>user\n")
+            append("Exercise: ${exercise.description}\n")
+            append("Instructions: ${exercise.instructions}\n")
+            append("Expected solution:\n```rust\n${exercise.solution}\n```\n")
+            append("Student's code:\n```rust\n$userCode\n```\n")
+            append("Is the student's code correct?\n")
+            append("<|im_end|>\n")
+            append("<|im_start|>assistant\n")
+        }
+
+        _uiState.value = _uiState.value.copy(
+            isValidating = true,
+            llmValidationResult = ""
+        )
+
+        val config = InferenceConfig(
+            temperature = 0.3f,
+            topP = 0.9f,
+            maxTokens = 256,
+            contextLength = 2048
+        )
+
+        val tokenBuffer = StringBuilder()
+
+        validationJob = viewModelScope.launch {
+            llamaEngine.generate(prompt, config)
+                .catch { e ->
+                    _uiState.value = _uiState.value.copy(
+                        isValidating = false,
+                        llmValidationResult = "Error: ${e.message}"
+                    )
+                }
+                .onCompletion {
+                    val finalText = tokenBuffer.toString().trim()
+                    _uiState.value = _uiState.value.copy(
+                        isValidating = false,
+                        llmValidationResult = finalText
+                    )
+                    // Auto-mark correct if LLM says CORRECT
+                    if (finalText.uppercase().startsWith("CORRECT")) {
+                        _uiState.value = _uiState.value.copy(checkResult = "correct")
+                        progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                        refreshCurrentCategoryProgress()
+                    }
+                }
+                .collect { token ->
+                    tokenBuffer.append(token)
+                    _uiState.value = _uiState.value.copy(
+                        llmValidationResult = tokenBuffer.toString()
+                    )
+                }
+        }
+    }
+
+    fun stopValidation() {
+        validationJob?.cancel()
+        _uiState.value = _uiState.value.copy(isValidating = false)
+    }
+
     fun resetExercise() {
         val exercise = _uiState.value.currentExercise ?: return
+        validationJob?.cancel()
         _uiState.value = _uiState.value.copy(
             userCode = exercise.starterCode,
             checkResult = null,
-            showSolution = false
+            showSolution = false,
+            llmValidationResult = "",
+            isValidating = false
         )
     }
 

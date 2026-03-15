@@ -7,6 +7,7 @@ import com.sylvester.rustsensei.data.AppDatabase
 import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.data.ProgressRepository
+import com.sylvester.rustsensei.llm.LlamaEngine
 
 class RustSenseiApplication : Application() {
 
@@ -16,4 +17,5 @@ class RustSenseiApplication : Application() {
     val contentRepository: ContentRepository by lazy { ContentRepository(this) }
     val ragRetriever: RagRetriever by lazy { RagRetriever(this) }
     val preferencesManager: PreferencesManager by lazy { PreferencesManager(this) }
+    val llamaEngine: LlamaEngine by lazy { LlamaEngine() }
 }
