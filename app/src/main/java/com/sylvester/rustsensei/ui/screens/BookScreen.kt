@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,6 +33,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -42,6 +47,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -92,13 +100,12 @@ private fun BookIndexView(viewModel: BookViewModel) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
             Text(
                 text = "The Rust Programming Language",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -116,6 +123,7 @@ private fun BookIndexView(viewModel: BookViewModel) {
                                 uiState.lastReadSectionId!!
                             )
                         },
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -141,7 +149,7 @@ private fun BookIndexView(viewModel: BookViewModel) {
                             )
                             Text(
                                 text = uiState.lastReadSectionId!!.replace("-", " "),
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                                 maxLines = 1
                             )
@@ -151,12 +159,16 @@ private fun BookIndexView(viewModel: BookViewModel) {
             }
         }
 
-        items(uiState.chapters, key = { it.id }) { chapter ->
+        itemsIndexed(uiState.chapters, key = { _, ch -> ch.id }) { index, chapter ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.openChapter(chapter.id) },
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                )
             ) {
                 Row(
                     modifier = Modifier
@@ -164,6 +176,22 @@ private fun BookIndexView(viewModel: BookViewModel) {
                         .padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Chapter number badge
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = chapter.title,
@@ -172,14 +200,14 @@ private fun BookIndexView(viewModel: BookViewModel) {
                         )
                         Text(
                             text = "${chapter.sectionIds.size} sections",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Icon(
                         Icons.Default.ChevronRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                 }
             }
@@ -204,8 +232,7 @@ private fun ChapterView(viewModel: BookViewModel) {
             }
             Text(
                 text = chapter.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -226,7 +253,11 @@ private fun ChapterView(viewModel: BookViewModel) {
                         .clickable {
                             viewModel.openSection(uiState.currentChapterId!!, section.id)
                         },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -235,17 +266,18 @@ private fun ChapterView(viewModel: BookViewModel) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (isCompleted) {
+                            // Green checkmark for completed sections
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = "Completed",
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = Color(0xFF3FB950),
                                 modifier = Modifier.size(24.dp)
                             )
                         } else {
                             Icon(
                                 Icons.Default.ChevronRight,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -257,10 +289,16 @@ private fun ChapterView(viewModel: BookViewModel) {
                                 fontWeight = FontWeight.Medium
                             )
                             if (progress != null && !isCompleted && progress.readPercent > 0f) {
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
                                 LinearProgressIndicator(
                                     progress = { progress.readPercent },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(4.dp)
+                                        .clip(RoundedCornerShape(2.dp)),
+                                    strokeCap = StrokeCap.Round,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
                             }
                         }
@@ -313,8 +351,7 @@ private fun SectionView(
             }
             Text(
                 text = section.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -325,12 +362,16 @@ private fun SectionView(
                         Icons.Default.Bookmark
                     else
                         Icons.Default.BookmarkBorder,
-                    contentDescription = "Bookmark"
+                    contentDescription = "Bookmark",
+                    tint = if (uiState.sectionProgress[section.id]?.bookmarked == true)
+                        MaterialTheme.colorScheme.secondary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
-        // Content
+        // Content — slightly larger text for readability
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -343,7 +384,7 @@ private fun SectionView(
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
                     text = example.description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -357,7 +398,11 @@ private fun SectionView(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Fix #4b: Navigation bar + Ask Sensei button in a single bottom row (no FAB overlap)
+        // Fix #4b: Navigation bar + Ask Sensei button with top divider
+        HorizontalDivider(
+            thickness = 0.5.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -366,19 +411,30 @@ private fun SectionView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = { viewModel.navigateToPreviousSection() }) {
-                Icon(Icons.AutoMirrored.Filled.NavigateBefore, contentDescription = null)
+                Icon(
+                    Icons.AutoMirrored.Filled.NavigateBefore,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Previous")
+                Text("Previous", style = MaterialTheme.typography.labelLarge)
             }
             ExtendedFloatingActionButton(
                 onClick = { onAskSensei(section.content, "") },
                 icon = { Icon(Icons.Default.Chat, contentDescription = null) },
-                text = { Text("Ask Sensei") }
+                text = { Text("Ask Sensei", style = MaterialTheme.typography.labelLarge) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = RoundedCornerShape(24.dp)
             )
             TextButton(onClick = { viewModel.navigateToNextSection() }) {
-                Text("Next")
+                Text("Next", style = MaterialTheme.typography.labelLarge)
                 Spacer(modifier = Modifier.width(4.dp))
-                Icon(Icons.AutoMirrored.Filled.NavigateNext, contentDescription = null)
+                Icon(
+                    Icons.AutoMirrored.Filled.NavigateNext,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }

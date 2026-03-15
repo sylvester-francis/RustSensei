@@ -97,13 +97,12 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         item {
             Text(
                 text = "Rustlings Exercises",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
@@ -115,6 +114,7 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { viewModel.openExercise(uiState.lastIncompleteExerciseId!!) },
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
@@ -140,7 +140,7 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                             )
                             Text(
                                 text = uiState.lastIncompleteExerciseId!!,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                             )
                         }
@@ -161,7 +161,11 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                )
             ) {
                 Column {
                     // Category header
@@ -185,11 +189,12 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                                 },
                                 modifier = Modifier.size(40.dp),
                                 strokeWidth = 3.dp,
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                color = MaterialTheme.colorScheme.primary
                             )
                             Text(
                                 text = "$completedCount/${category.exercises.size}",
-                                fontSize = 10.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -204,7 +209,7 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                             )
                             Text(
                                 text = category.description,
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1
                             )
@@ -212,7 +217,8 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
 
                         Icon(
                             if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = null
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -222,6 +228,9 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                             category.exercises.forEach { exerciseId ->
                                 val exerciseProgress = progress.find { it.exerciseId == exerciseId }
                                 val isCompleted = exerciseProgress?.status == "completed"
+
+                                // Determine difficulty for badge coloring
+                                val difficultyColor = getDifficultyColor(exerciseId)
 
                                 Row(
                                     modifier = Modifier
@@ -234,26 +243,41 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                                         Icon(
                                             Icons.Default.CheckCircle,
                                             contentDescription = "Completed",
-                                            tint = MaterialTheme.colorScheme.primary,
+                                            tint = Color(0xFF3FB950),
                                             modifier = Modifier.size(20.dp)
                                         )
                                     } else {
                                         Icon(
                                             Icons.Default.ChevronRight,
                                             contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = exerciseId,
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         color = if (isCompleted)
                                             MaterialTheme.colorScheme.onSurfaceVariant
                                         else
-                                            MaterialTheme.colorScheme.onSurface
+                                            MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.weight(1f)
                                     )
+                                    // Difficulty badge
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(difficultyColor.copy(alpha = 0.15f))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = getDifficultyLabel(exerciseId),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = difficultyColor,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -261,6 +285,31 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                 }
             }
         }
+    }
+}
+
+// Determine difficulty color based on exercise naming patterns
+private fun getDifficultyColor(exerciseId: String): Color {
+    return when {
+        exerciseId.contains("1") || exerciseId.contains("intro") ||
+            exerciseId.contains("primitive") || exerciseId.contains("variable") -> Color(0xFF3FB950) // green - beginner
+        exerciseId.contains("error") || exerciseId.contains("generic") ||
+            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
+            exerciseId.contains("thread") || exerciseId.contains("macro") ||
+            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> Color(0xFFF85149) // red - advanced
+        else -> Color(0xFFF0883E) // amber - intermediate
+    }
+}
+
+private fun getDifficultyLabel(exerciseId: String): String {
+    return when {
+        exerciseId.contains("1") || exerciseId.contains("intro") ||
+            exerciseId.contains("primitive") || exerciseId.contains("variable") -> "Beginner"
+        exerciseId.contains("error") || exerciseId.contains("generic") ||
+            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
+            exerciseId.contains("thread") || exerciseId.contains("macro") ||
+            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> "Advanced"
+        else -> "Intermediate"
     }
 }
 
@@ -280,7 +329,7 @@ private fun ExerciseDetailView(
             selection = TextRange(uiState.userCode.length)
         ))
     }
-    // Sync ViewModel → TextFieldValue only when exercise changes externally (reset)
+    // Sync ViewModel -> TextFieldValue only when exercise changes externally (reset)
     val currentExerciseCode = uiState.userCode
     androidx.compose.runtime.LaunchedEffect(uiState.currentExercise?.id) {
         if (textFieldValue.text != currentExerciseCode) {
@@ -289,6 +338,13 @@ private fun ExerciseDetailView(
                 selection = TextRange(currentExerciseCode.length)
             )
         }
+    }
+
+    // Difficulty badge color
+    val difficultyColor = when (exercise.difficulty.lowercase()) {
+        "beginner" -> Color(0xFF3FB950)
+        "advanced" -> Color(0xFFF85149)
+        else -> Color(0xFFF0883E)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -310,17 +366,30 @@ private fun ExerciseDetailView(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = exercise.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge
                     )
-                    Text(
-                        text = exercise.difficulty.replaceFirstChar { it.uppercase() },
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(difficultyColor.copy(alpha = 0.15f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = exercise.difficulty.replaceFirstChar { it.uppercase() },
+                                style = MaterialTheme.typography.labelSmall,
+                                color = difficultyColor,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
                 IconButton(onClick = { viewModel.resetExercise() }) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Reset")
+                    Icon(
+                        Icons.Default.Refresh,
+                        contentDescription = "Reset",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -330,53 +399,84 @@ private fun ExerciseDetailView(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp)
             ) {
-                // Instructions
-                Text(
-                    text = exercise.description,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = exercise.instructions,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
-                )
+                // Instructions with visual separation
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Text(
+                            text = exercise.description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            lineHeight = 22.sp,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = exercise.instructions,
+                            style = MaterialTheme.typography.bodyMedium,
+                            lineHeight = 20.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Code editor
-                Text(
-                    text = "Your Code:",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-
+                // Code editor with VS Code-style tab label
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF1E1E1E))
-                        .padding(12.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF0D1117))
                 ) {
-                    BasicTextField(
-                        value = textFieldValue,
-                        onValueChange = { newValue ->
-                            textFieldValue = newValue
-                            viewModel.updateCode(newValue.text)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        textStyle = TextStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 13.sp,
-                            lineHeight = 20.sp,
-                            color = Color(0xFFD4D4D4)
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-                    )
+                    Column {
+                        // "Editor" tab label
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF161B22))
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color(0xFF21262D))
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "Editor",
+                                    color = Color(0xFF8B949E),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
+                        }
+
+                        BasicTextField(
+                            value = textFieldValue,
+                            onValueChange = { newValue ->
+                                textFieldValue = newValue
+                                viewModel.updateCode(newValue.text)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            textStyle = TextStyle(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 13.sp,
+                                lineHeight = 20.sp,
+                                color = Color(0xFFD4D4D4)
+                            ),
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
+                        )
+                    }
                 }
 
                 // Fix #9: Coding toolbar inserts at cursor position
@@ -409,7 +509,8 @@ private fun ExerciseDetailView(
                             Text(
                                 text = symbol,
                                 fontFamily = FontFamily.Monospace,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -421,15 +522,16 @@ private fun ExerciseDetailView(
                 uiState.checkResult?.let { result ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = when (result) {
-                                "correct" -> Color(0xFF1B5E20).copy(alpha = 0.2f)
-                                "uncertain" -> Color(0xFFE65100).copy(alpha = 0.15f)
-                                else -> Color(0xFFB71C1C).copy(alpha = 0.2f)
+                                "correct" -> Color(0xFF3FB950).copy(alpha = 0.1f)
+                                "uncertain" -> Color(0xFFF0883E).copy(alpha = 0.1f)
+                                else -> Color(0xFFF85149).copy(alpha = 0.1f)
                             }
                         )
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(modifier = Modifier.padding(14.dp)) {
                             Text(
                                 text = when (result) {
                                     "correct" -> "Correct! Well done!"
@@ -437,15 +539,16 @@ private fun ExerciseDetailView(
                                     else -> "Not quite right. Try again or reveal a hint."
                                 },
                                 color = when (result) {
-                                    "correct" -> Color(0xFF4CAF50)
-                                    "uncertain" -> Color(0xFFFF9800)
-                                    else -> Color(0xFFEF5350)
+                                    "correct" -> Color(0xFF3FB950)
+                                    "uncertain" -> Color(0xFFF0883E)
+                                    else -> Color(0xFFF85149)
                                 },
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
                             // Design Concern #1: LLM fallback — offer inline AI validation or self-mark
                             if (result == "uncertain") {
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(10.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -453,7 +556,8 @@ private fun ExerciseDetailView(
                                     Button(
                                         onClick = { viewModel.validateWithLlm() },
                                         modifier = Modifier.weight(1f),
-                                        enabled = !uiState.isValidating
+                                        enabled = !uiState.isValidating,
+                                        shape = RoundedCornerShape(12.dp)
                                     ) {
                                         if (uiState.isValidating) {
                                             CircularProgressIndicator(
@@ -465,15 +569,19 @@ private fun ExerciseDetailView(
                                             Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
                                         }
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(if (uiState.isValidating) "Verifying..." else "Verify with AI", fontSize = 12.sp)
+                                        Text(
+                                            if (uiState.isValidating) "Verifying..." else "Verify with AI",
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
                                     }
                                     OutlinedButton(
                                         onClick = { viewModel.markCurrentExerciseCorrect() },
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp)
                                     ) {
                                         Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Mark Correct", fontSize = 12.sp)
+                                        Text("Mark Correct", style = MaterialTheme.typography.labelMedium)
                                     }
                                 }
                             }
@@ -486,11 +594,12 @@ private fun ExerciseDetailView(
                 if (uiState.llmValidationResult.isNotEmpty() || uiState.isValidating) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
                         )
                     ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Column(modifier = Modifier.padding(14.dp)) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -511,7 +620,7 @@ private fun ExerciseDetailView(
                             Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 lineHeight = 20.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -519,9 +628,10 @@ private fun ExerciseDetailView(
                                 Spacer(modifier = Modifier.height(8.dp))
                                 OutlinedButton(
                                     onClick = { viewModel.stopValidation() },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Text("Stop", fontSize = 12.sp)
+                                    Text("Stop", style = MaterialTheme.typography.labelMedium)
                                 }
                             }
                         }
@@ -536,20 +646,22 @@ private fun ExerciseDetailView(
                 ) {
                     Button(
                         onClick = { viewModel.checkSolution() },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Check")
+                        Text("Check", style = MaterialTheme.typography.labelLarge)
                     }
                     OutlinedButton(
                         onClick = { viewModel.revealHint() },
                         modifier = Modifier.weight(1f),
-                        enabled = uiState.hintsRevealed < exercise.hints.size
+                        enabled = uiState.hintsRevealed < exercise.hints.size,
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Default.Lightbulb, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Hint (${uiState.hintsRevealed}/${exercise.hints.size})")
+                        Text("Hint (${uiState.hintsRevealed}/${exercise.hints.size})", style = MaterialTheme.typography.labelLarge)
                     }
                 }
 
@@ -559,12 +671,12 @@ private fun ExerciseDetailView(
                     Text(
                         text = "Hints:",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.secondary
                     )
                     for (i in 0 until uiState.hintsRevealed.coerceAtMost(exercise.hints.size)) {
                         Text(
                             text = "${i + 1}. ${exercise.hints[i]}",
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 2.dp)
                         )
@@ -577,13 +689,14 @@ private fun ExerciseDetailView(
                     OutlinedButton(
                         onClick = { viewModel.showSolution() },
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error
                         )
                     ) {
                         Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Show Solution")
+                        Text("Show Solution", style = MaterialTheme.typography.labelLarge)
                     }
                 }
 
@@ -600,7 +713,7 @@ private fun ExerciseDetailView(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = exercise.explanation,
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -617,7 +730,10 @@ private fun ExerciseDetailView(
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
             icon = { Icon(Icons.Default.Chat, contentDescription = null) },
-            text = { Text("Ask Sensei") }
+            text = { Text("Ask Sensei", style = MaterialTheme.typography.labelLarge) },
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 }

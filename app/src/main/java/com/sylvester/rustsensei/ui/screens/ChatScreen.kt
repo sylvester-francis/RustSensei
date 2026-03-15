@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,12 +11,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.EmojiObjects
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +48,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -108,48 +122,79 @@ fun ChatScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                    Icon(Icons.Default.Menu, contentDescription = "Conversations")
+                    Icon(
+                        Icons.Default.Menu,
+                        contentDescription = "Conversations",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Context indicator
+                // Context indicator as a proper chip/pill
                 when (chatContext) {
                     is ChatContext.BookSection -> {
-                        Text(
-                            text = "Book context active",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.MenuBook,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Book context",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                     is ChatContext.Exercise -> {
-                        Text(
-                            text = "Exercise context active",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Code,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Exercise context",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
                     else -> {}
                 }
 
                 IconButton(onClick = { viewModel.startNewConversation() }) {
-                    Icon(Icons.Default.Add, contentDescription = "New conversation")
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = "New conversation",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-
-            // Offline badge
-            Text(
-                text = "Offline Mode \u2014 No data leaves your device",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                textAlign = TextAlign.Center,
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-            )
 
             // Messages list
             LazyColumn(
@@ -198,9 +243,9 @@ fun ChatScreen(
                     item {
                         Text(
                             text = "Generated in ${uiState.inferenceTimeMs / 1000.0}s",
-                            fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                            modifier = Modifier.padding(start = 40.dp, top = 2.dp)
                         )
                     }
                 }
@@ -237,14 +282,32 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp),
+            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "\uD83E\uDD80",
-            fontSize = 64.sp
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        // Splash-style crab with gradient background
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(RoundedCornerShape(60.dp))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.03f),
+                            MaterialTheme.colorScheme.surface
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "\uD83E\uDD80",
+                fontSize = 56.sp
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Welcome to RustSensei",
             style = MaterialTheme.typography.headlineSmall,
@@ -254,25 +317,46 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
         Text(
             text = "Your offline Rust programming tutor.\nAsk me anything about Rust!",
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
+        // Suggestion chips with icons
         val suggestions = listOf(
-            "I'm new to Rust. Where do I start?",
-            "Explain ownership like I'm a Go developer",
-            "Help me understand the borrow checker"
+            Triple("I'm new to Rust. Where do I start?", Icons.Default.AutoStories, "Start"),
+            Triple("Explain ownership like I'm a Go developer", Icons.Default.Psychology, "Ownership"),
+            Triple("Help me understand the borrow checker", Icons.Default.EmojiObjects, "Borrow checker")
         )
-        suggestions.forEach { suggestion ->
-            androidx.compose.material3.OutlinedButton(
+        suggestions.forEach { (suggestion, icon, _) ->
+            AssistChip(
                 onClick = { onPromptSelected(suggestion) },
+                label = {
+                    Text(
+                        suggestion,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-            ) {
-                Text(suggestion, fontSize = 13.sp)
-            }
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    labelColor = MaterialTheme.colorScheme.onSurface
+                ),
+                border = AssistChipDefaults.assistChipBorder(
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
+            )
         }
     }
 }
@@ -284,33 +368,40 @@ private fun ConversationDrawer(
     onConversationSelected: (Long) -> Unit,
     onNewConversation: () -> Unit
 ) {
-    ModalDrawerSheet {
+    ModalDrawerSheet(
+        drawerContainerColor = MaterialTheme.colorScheme.surface
+    ) {
         Text(
             text = "Conversations",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(16.dp)
         )
-        HorizontalDivider()
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
         NavigationDrawerItem(
-            label = { Text("New Conversation") },
+            label = { Text("New Conversation", style = MaterialTheme.typography.bodyLarge) },
             selected = false,
             onClick = onNewConversation,
             icon = { Icon(Icons.Default.Add, contentDescription = null) },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
-        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 4.dp),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        )
 
         conversations.forEach { conversation ->
             NavigationDrawerItem(
                 label = {
                     Text(
                         text = conversation.title,
-                        maxLines = 1
+                        maxLines = 1,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 },
                 selected = conversation.id == currentConversationId,
                 onClick = { onConversationSelected(conversation.id) },
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier.padding(horizontal = 12.dp),
+                shape = RoundedCornerShape(12.dp)
             )
         }
     }
