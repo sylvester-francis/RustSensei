@@ -3,19 +3,18 @@ package com.sylvester.rustsensei.llm
 import android.content.Context
 import android.util.Log
 import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
-import com.google.ai.edge.litertlm.InputData
-import com.google.ai.edge.litertlm.ResponseCallback
-import com.google.ai.edge.litertlm.SessionConfig
+import com.google.ai.edge.litertlm.Message
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class LiteRtEngine(private val context: Context) : InferenceEngine {
@@ -25,14 +24,15 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
     }
 
     private var engine: Engine? = null
+    private var conversation: Conversation? = null
     private var isLoaded = false
 
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 engine?.close()
+                conversation?.close()
 
-                // Try GPU first, fall back to CPU
                 try {
                     val config = EngineConfig(
                         modelPath = modelPath,
@@ -75,80 +75,58 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
             throw RuntimeException("Model not loaded")
         }
 
-        // Use low-level Session API — doesn't require stop tokens
-        return callbackFlow {
-            val startTime = System.currentTimeMillis()
-            var firstTokenTime: Long? = null
-            var tokenCount = 0
+        val startTime = System.currentTimeMillis()
+        var firstTokenTime: Long? = null
+        var tokenCount = 0
 
-            val session = try {
-                currentEngine.createSession(SessionConfig())
-            } catch (e: Exception) {
-                Log.e(TAG, "createSession failed: ${e.message}", e)
-                close(RuntimeException("Failed to create session: ${e.message}"))
-                return@callbackFlow
-            }
-
-            try {
-                val input = listOf(InputData.Text(prompt))
-
-                session.generateContentStream(input, object : ResponseCallback {
-                    override fun onNext(partialResult: String) {
-                        if (firstTokenTime == null && partialResult.isNotEmpty()) {
-                            firstTokenTime = System.currentTimeMillis()
-                            Log.i(TAG, "TTFT: ${firstTokenTime!! - startTime} ms")
-                        }
-                        tokenCount++
-                        trySend(partialResult)
-                    }
-
-                    override fun onDone() {
-                        val ftTime = firstTokenTime ?: startTime
-                        val genMs = System.currentTimeMillis() - ftTime
-                        val tokPerSec = if (genMs > 0) tokenCount * 1000f / genMs else 0f
-                        val prefillMs = (ftTime - startTime).toFloat()
-                        Log.i(TAG, "Done: $tokenCount chunks in ${genMs}ms (${"%.1f".format(tokPerSec)} tok/s)")
-                        onStats?.invoke(0f, tokPerSec, prefillMs)
-                        try { session.close() } catch (_: Exception) {}
-                        close()
-                    }
-
-                    override fun onError(error: Throwable) {
-                        Log.e(TAG, "Stream error: ${error.message}")
-                        try { session.close() } catch (_: Exception) {}
-                        close(RuntimeException(error.message))
-                    }
-                })
-            } catch (e: Exception) {
-                Log.e(TAG, "generateContentStream failed: ${e.message}", e)
-                try { session.close() } catch (_: Exception) {}
-                close(RuntimeException(e.message))
-            }
-
-            awaitClose {
-                try { session.cancelProcess() } catch (_: Exception) {}
-                try { session.close() } catch (_: Exception) {}
-            }
+        // Create a fresh conversation for each generation
+        val conv = try {
+            currentEngine.createConversation(ConversationConfig())
+        } catch (e: Exception) {
+            Log.e(TAG, "createConversation failed: ${e.message}", e)
+            return flow { throw RuntimeException("Failed to create conversation: ${e.message}") }
         }
-            .flowOn(Dispatchers.IO)
+        conversation = conv
+
+        // sendMessageAsync(String) returns Flow<Message> — stream tokens
+        return conv.sendMessageAsync(prompt)
+            .map { message: Message ->
+                if (firstTokenTime == null) {
+                    firstTokenTime = System.currentTimeMillis()
+                    Log.i(TAG, "TTFT: ${firstTokenTime!! - startTime} ms")
+                }
+                tokenCount++
+                message.contents.toString()
+            }
             .buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND)
     }
 
     override fun stopGeneration() {
-        // Session cancel is handled in awaitClose
+        try {
+            conversation?.cancelProcess()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error cancelling: ${e.message}")
+        }
     }
 
     override fun clearCache() {
-        // Sessions are per-request, no persistent cache to clear
+        try {
+            conversation?.close()
+            conversation = null
+        } catch (e: Exception) {
+            Log.w(TAG, "Error clearing: ${e.message}")
+        }
     }
 
     override suspend fun unloadModel() {
         withContext(Dispatchers.IO) {
             try {
+                conversation?.close()
                 engine?.close()
             } catch (e: Exception) {
                 Log.w(TAG, "Error unloading: ${e.message}")
             }
+            conversation = null
             engine = null
             isLoaded = false
         }
