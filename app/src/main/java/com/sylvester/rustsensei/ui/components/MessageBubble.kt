@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -40,7 +41,6 @@ fun MessageBubble(
     val primary = MaterialTheme.colorScheme.primary
 
     if (isUser) {
-        // User message: right-aligned pill with neon glow shadow
         Row(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -69,7 +69,6 @@ fun MessageBubble(
             }
         }
     } else {
-        // Assistant message: full-width, no background, neon accent line on left
         val accentColor = primary.copy(alpha = 0.25f)
         val showBorder = isFirstInGroup
 
@@ -88,9 +87,7 @@ fun MessageBubble(
                                 )
                             )
                         }
-                    } else {
-                        Modifier
-                    }
+                    } else Modifier
                 )
                 .padding(
                     start = if (showBorder) 12.dp else 4.dp,
@@ -99,113 +96,122 @@ fun MessageBubble(
                     bottom = 2.dp
                 )
         ) {
-            MarkdownContent(content)
+            RichContent(content)
         }
     }
 }
 
+/**
+ * Renders LLM output as seamless rich text.
+ * Code blocks get the CodeBlock component.
+ * Everything else is rendered as a single flowing AnnotatedString
+ * with bold, italic, inline code, and bullets handled natively.
+ * No raw markdown characters are visible.
+ */
 @Composable
-fun MarkdownContent(text: String) {
-    val blocks = parseMarkdownBlocks(text)
+fun RichContent(text: String) {
+    val blocks = splitCodeBlocks(text)
 
-    Column {
-        blocks.forEachIndexed { index, block ->
-            when (block) {
-                is MarkdownBlock.CodeBlock -> {
-                    if (index > 0) Spacer(modifier = Modifier.height(12.dp))
-                    CodeBlock(code = block.code, language = block.language)
-                    if (index < blocks.lastIndex) Spacer(modifier = Modifier.height(12.dp))
-                }
-                is MarkdownBlock.TextBlock -> {
-                    Text(
-                        text = parseInlineMarkdown(block.text),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 15.sp,
-                        lineHeight = 23.sp
-                    )
-                }
+    blocks.forEachIndexed { index, block ->
+        when (block) {
+            is ContentBlock.Code -> {
+                if (index > 0) Spacer(modifier = Modifier.height(10.dp))
+                CodeBlock(code = block.code, language = block.language)
+                if (index < blocks.lastIndex) Spacer(modifier = Modifier.height(10.dp))
+            }
+            is ContentBlock.Prose -> {
+                Text(
+                    text = renderInline(block.text),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 15.sp,
+                    lineHeight = 23.sp
+                )
             }
         }
     }
 }
 
-sealed class MarkdownBlock {
-    data class TextBlock(val text: String) : MarkdownBlock()
-    data class CodeBlock(val code: String, val language: String) : MarkdownBlock()
+// Keep these for backward compat (BookContentRenderer uses them)
+@Composable
+fun MarkdownContent(text: String) = RichContent(text)
+
+private sealed class ContentBlock {
+    data class Prose(val text: String) : ContentBlock()
+    data class Code(val code: String, val language: String) : ContentBlock()
 }
 
-fun parseMarkdownBlocks(text: String): List<MarkdownBlock> {
-    val blocks = mutableListOf<MarkdownBlock>()
-    val codeBlockRegex = Regex("```(\\w*)\\n([\\s\\S]*?)```")
+/**
+ * Splits text into prose and fenced code blocks.
+ * Only ``` fences are treated as code — everything else stays as prose.
+ */
+private fun splitCodeBlocks(text: String): List<ContentBlock> {
+    val blocks = mutableListOf<ContentBlock>()
+    val regex = Regex("```(\\w*)\\n([\\s\\S]*?)```")
 
-    var lastIndex = 0
-    codeBlockRegex.findAll(text).forEach { match ->
-        // Text before code block
-        if (match.range.first > lastIndex) {
-            val textBefore = text.substring(lastIndex, match.range.first).trim()
-            if (textBefore.isNotEmpty()) {
-                blocks.add(MarkdownBlock.TextBlock(textBefore))
-            }
+    var cursor = 0
+    regex.findAll(text).forEach { match ->
+        if (match.range.first > cursor) {
+            val prose = text.substring(cursor, match.range.first).trim()
+            if (prose.isNotEmpty()) blocks.add(ContentBlock.Prose(prose))
         }
-
-        val language = match.groupValues[1].ifEmpty { "text" }
-        val code = match.groupValues[2].trimEnd()
-        blocks.add(MarkdownBlock.CodeBlock(code, language))
-
-        lastIndex = match.range.last + 1
+        val lang = match.groupValues[1].ifEmpty { "text" }
+        blocks.add(ContentBlock.Code(match.groupValues[2].trimEnd(), lang))
+        cursor = match.range.last + 1
     }
-
-    // Remaining text after last code block
-    if (lastIndex < text.length) {
-        val remaining = text.substring(lastIndex).trim()
-        if (remaining.isNotEmpty()) {
-            blocks.add(MarkdownBlock.TextBlock(remaining))
-        }
+    if (cursor < text.length) {
+        val remaining = text.substring(cursor).trim()
+        if (remaining.isNotEmpty()) blocks.add(ContentBlock.Prose(remaining))
     }
-
-    if (blocks.isEmpty() && text.isNotBlank()) {
-        blocks.add(MarkdownBlock.TextBlock(text))
-    }
-
+    if (blocks.isEmpty() && text.isNotBlank()) blocks.add(ContentBlock.Prose(text))
     return blocks
 }
 
-fun parseInlineMarkdown(text: String): androidx.compose.ui.text.AnnotatedString {
+/**
+ * Renders inline markdown as an AnnotatedString.
+ * Handles: **bold**, *italic*, `inline code`, ### headings, - bullets.
+ * All markdown syntax characters are consumed — none leak to the user.
+ */
+private fun renderInline(text: String): AnnotatedString {
+    // Pre-process: convert markdown headings to bold lines
+    val processed = text
+        .replace(Regex("^###\\s+(.+)", RegexOption.MULTILINE), "$1")
+        .replace(Regex("^##\\s+(.+)", RegexOption.MULTILINE), "$1")
+        .replace(Regex("^#\\s+(.+)", RegexOption.MULTILINE), "$1")
+        .replace(Regex("^[-*]\\s+", RegexOption.MULTILINE), "  \u2022 ")
+
     return buildAnnotatedString {
         var i = 0
-        val str = text
+        val s = processed
 
-        while (i < str.length) {
+        while (i < s.length) {
             when {
                 // Bold **text**
-                i + 1 < str.length && str[i] == '*' && str[i + 1] == '*' -> {
-                    val end = str.indexOf("**", i + 2)
+                i + 1 < s.length && s[i] == '*' && s[i + 1] == '*' -> {
+                    val end = s.indexOf("**", i + 2)
                     if (end != -1) {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(str.substring(i + 2, end))
+                            append(s.substring(i + 2, end))
                         }
                         i = end + 2
                     } else {
-                        append(str[i])
-                        i++
+                        append(s[i]); i++
                     }
                 }
                 // Italic *text*
-                str[i] == '*' && (i == 0 || str[i - 1] != '*') -> {
-                    val end = str.indexOf('*', i + 1)
-                    if (end != -1 && (end + 1 >= str.length || str[end + 1] != '*')) {
+                s[i] == '*' && (i == 0 || s[i - 1] != '*') -> {
+                    val end = s.indexOf('*', i + 1)
+                    if (end != -1 && (end + 1 >= s.length || s[end + 1] != '*')) {
                         withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                            append(str.substring(i + 1, end))
+                            append(s.substring(i + 1, end))
                         }
                         i = end + 1
                     } else {
-                        append(str[i])
-                        i++
+                        append(s[i]); i++
                     }
                 }
-                // Inline code `text` — neon terminal style
-                str[i] == '`' -> {
-                    val end = str.indexOf('`', i + 1)
+                // Inline code `text`
+                s[i] == '`' -> {
+                    val end = s.indexOf('`', i + 1)
                     if (end != -1) {
                         withStyle(SpanStyle(
                             fontFamily = FontFamily.Monospace,
@@ -213,25 +219,34 @@ fun parseInlineMarkdown(text: String): androidx.compose.ui.text.AnnotatedString 
                             color = Color(0xFFCE412B),
                             fontSize = 14.sp
                         )) {
-                            append(" ${str.substring(i + 1, end)} ")
+                            append(" ${s.substring(i + 1, end)} ")
                         }
                         i = end + 1
                     } else {
-                        append(str[i])
-                        i++
+                        append(s[i]); i++
                     }
                 }
-                // Bullet points
-                (str[i] == '-' || str[i] == '*') && i > 0 && str[i - 1] == '\n'
-                        && i + 1 < str.length && str[i + 1] == ' ' -> {
-                    append("  \u2022 ")
-                    i += 2
-                }
                 else -> {
-                    append(str[i])
-                    i++
+                    append(s[i]); i++
                 }
             }
         }
     }
 }
+
+// Legacy aliases used by other files
+sealed class MarkdownBlock {
+    data class TextBlock(val text: String) : MarkdownBlock()
+    data class CodeBlock(val code: String, val language: String) : MarkdownBlock()
+}
+
+fun parseMarkdownBlocks(text: String): List<MarkdownBlock> {
+    return splitCodeBlocks(text).map {
+        when (it) {
+            is ContentBlock.Prose -> MarkdownBlock.TextBlock(it.text)
+            is ContentBlock.Code -> MarkdownBlock.CodeBlock(it.code, it.language)
+        }
+    }
+}
+
+fun parseInlineMarkdown(text: String): AnnotatedString = renderInline(text)
