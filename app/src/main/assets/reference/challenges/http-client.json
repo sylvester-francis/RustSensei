@@ -1,0 +1,25 @@
+{
+  "id": "http-client",
+  "title": "Simple HTTP GET Client",
+  "difficulty": "intermediate",
+  "estimatedTime": "60 min",
+  "description": "Build a simple HTTP GET client using std::net::TcpStream that can connect to a server, send an HTTP request, and parse the response headers and body.",
+  "concepts": ["networking", "TcpStream", "error handling", "string parsing", "Result"],
+  "requirements": [
+    "Connect to a host on port 80 using TcpStream",
+    "Send a properly formatted HTTP/1.1 GET request",
+    "Read the full response from the server",
+    "Parse the response into status code, headers, and body",
+    "Handle connection errors gracefully with Result"
+  ],
+  "starterCode": "use std::io::{Read, Write};\nuse std::net::TcpStream;\n\n#[derive(Debug)]\nstruct HttpResponse {\n    status_code: u16,\n    headers: Vec<(String, String)>,\n    body: String,\n}\n\nfn http_get(host: &str, path: &str) -> Result<HttpResponse, String> {\n    // TODO: Connect to host:80, send GET request, parse response\n    Err(\"Not implemented\".to_string())\n}\n\nfn parse_response(raw: &str) -> Result<HttpResponse, String> {\n    // TODO: Parse raw HTTP response into HttpResponse struct\n    Err(\"Not implemented\".to_string())\n}\n\nfn main() {\n    match http_get(\"example.com\", \"/\") {\n        Ok(resp) => {\n            println!(\"Status: {}\", resp.status_code);\n            println!(\"Headers: {:?}\", resp.headers);\n            println!(\"Body length: {} bytes\", resp.body.len());\n        }\n        Err(e) => println!(\"Error: {}\", e),\n    }\n}",
+  "solution": "use std::io::{Read, Write};\nuse std::net::TcpStream;\n\n#[derive(Debug)]\nstruct HttpResponse {\n    status_code: u16,\n    headers: Vec<(String, String)>,\n    body: String,\n}\n\nfn http_get(host: &str, path: &str) -> Result<HttpResponse, String> {\n    let addr = format!(\"{}:80\", host);\n    let mut stream = TcpStream::connect(&addr)\n        .map_err(|e| format!(\"Connection failed: {}\", e))?;\n\n    let request = format!(\n        \"GET {} HTTP/1.1\\r\\nHost: {}\\r\\nConnection: close\\r\\n\\r\\n\",\n        path, host\n    );\n\n    stream\n        .write_all(request.as_bytes())\n        .map_err(|e| format!(\"Write failed: {}\", e))?;\n\n    let mut response = String::new();\n    stream\n        .read_to_string(&mut response)\n        .map_err(|e| format!(\"Read failed: {}\", e))?;\n\n    parse_response(&response)\n}\n\nfn parse_response(raw: &str) -> Result<HttpResponse, String> {\n    let (header_section, body) = raw\n        .split_once(\"\\r\\n\\r\\n\")\n        .ok_or_else(|| \"Invalid HTTP response: no header/body separator\".to_string())?;\n\n    let mut lines = header_section.lines();\n    let status_line = lines.next()\n        .ok_or_else(|| \"Missing status line\".to_string())?;\n\n    let status_code: u16 = status_line\n        .split_whitespace()\n        .nth(1)\n        .ok_or_else(|| \"Missing status code\".to_string())?\n        .parse()\n        .map_err(|e| format!(\"Invalid status code: {}\", e))?;\n\n    let mut headers = Vec::new();\n    for line in lines {\n        if let Some((key, value)) = line.split_once(\":\" ) {\n            headers.push((key.trim().to_string(), value.trim().to_string()));\n        }\n    }\n\n    Ok(HttpResponse {\n        status_code,\n        headers,\n        body: body.to_string(),\n    })\n}\n\nfn main() {\n    match http_get(\"example.com\", \"/\") {\n        Ok(resp) => {\n            println!(\"Status: {}\", resp.status_code);\n            println!(\"Headers:\");\n            for (key, value) in &resp.headers {\n                println!(\"  {}: {}\", key, value);\n            }\n            println!(\"Body length: {} bytes\", resp.body.len());\n        }\n        Err(e) => println!(\"Error: {}\", e),\n    }\n}",
+  "hints": [
+    "Use TcpStream::connect(\"host:80\") to establish a TCP connection",
+    "HTTP requests end with \\r\\n\\r\\n (two CRLFs)",
+    "Use Connection: close header so the server closes the connection after responding",
+    "split_once(\"\\r\\n\\r\\n\") separates headers from body",
+    "The status code is the second token on the first line of the response"
+  ],
+  "bonusChallenge": "Add HTTPS support using the native-tls crate. Support following redirects (301/302). Add timeout handling."
+}

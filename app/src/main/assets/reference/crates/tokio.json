@@ -1,0 +1,28 @@
+{
+  "id": "tokio",
+  "title": "tokio -- Async Runtime",
+  "version": "1.x",
+  "description": "The most popular async runtime for Rust. Tokio provides async I/O, timers, task spawning, synchronization primitives, and channels. It powers most async Rust applications including web servers, database clients, and network services.",
+  "cargoToml": "[dependencies]\ntokio = { version = \"1\", features = [\"full\"] }",
+  "quickStart": "use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    println!(\"Starting...\");\n\n    // Spawn a concurrent task\n    let handle = tokio::spawn(async {\n        sleep(Duration::from_millis(100)).await;\n        println!(\"Task completed!\");\n        42\n    });\n\n    // Do other work while task runs\n    println!(\"Doing other work...\");\n\n    // Await the task result\n    let result = handle.await.unwrap();\n    println!(\"Task returned: {}\", result);\n}",
+  "commonPatterns": [
+    {
+      "title": "Running multiple tasks concurrently",
+      "code": "use tokio::join;\n\nasync fn fetch_user() -> String { \"Alice\".to_string() }\nasync fn fetch_orders() -> Vec<String> { vec![\"order1\".into()] }\n\n#[tokio::main]\nasync fn main() {\n    let (user, orders) = join!(fetch_user(), fetch_orders());\n    println!(\"User: {}, Orders: {:?}\", user, orders);\n}"
+    },
+    {
+      "title": "Select the first completed future",
+      "code": "use tokio::select;\nuse tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    select! {\n        _ = sleep(Duration::from_secs(1)) => println!(\"timeout\"),\n        result = async { \"data\" } => println!(\"got: {}\", result),\n    }\n}"
+    },
+    {
+      "title": "Channels for message passing",
+      "code": "use tokio::sync::mpsc;\n\n#[tokio::main]\nasync fn main() {\n    let (tx, mut rx) = mpsc::channel(32);\n\n    tokio::spawn(async move {\n        tx.send(\"hello\").await.unwrap();\n        tx.send(\"world\").await.unwrap();\n    });\n\n    while let Some(msg) = rx.recv().await {\n        println!(\"Received: {}\", msg);\n    }\n}"
+    },
+    {
+      "title": "Shared state with Mutex",
+      "code": "use std::sync::Arc;\nuse tokio::sync::Mutex;\n\n#[tokio::main]\nasync fn main() {\n    let counter = Arc::new(Mutex::new(0u64));\n\n    let mut handles = vec![];\n    for _ in 0..10 {\n        let counter = Arc::clone(&counter);\n        handles.push(tokio::spawn(async move {\n            let mut lock = counter.lock().await;\n            *lock += 1;\n        }));\n    }\n\n    for h in handles { h.await.unwrap(); }\n    println!(\"Counter: {}\", *counter.lock().await);\n}"
+    }
+  ],
+  "whenToUse": "When you need async I/O: web servers, API clients, database connections, file I/O at scale, network protocols, or any application that benefits from non-blocking concurrency.",
+  "alternatives": "async-std (similar API to std), smol (lightweight), monoio (io_uring-based, thread-per-core). For simple concurrency without async: rayon (data parallelism), crossbeam (channels and scoped threads)."
+}

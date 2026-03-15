@@ -1,0 +1,32 @@
+{
+  "id": "channels",
+  "title": "Async Channels and Message Passing",
+  "order": 4,
+  "content": "Channels let async tasks communicate by passing messages. Tokio provides several channel types for different use cases.\n\nmpsc (multi-producer, single-consumer): The most common channel. Multiple senders, one receiver. Bounded (backpressure) or unbounded.\n\noneshot: Send a single value. Perfect for request-response patterns where you spawn a task and wait for one result.\n\nbroadcast: Multi-producer, multi-consumer. Every receiver gets every message. Good for event broadcasting.\n\nwatch: Single-producer, multi-consumer for a single value that changes over time. Receivers always see the latest value.\n\nChannels are the preferred way to communicate between async tasks -- they avoid shared mutable state and the complexity of locks.",
+  "codeExamples": [
+    {
+      "description": "mpsc channel: producer-consumer pattern",
+      "code": "use tokio::sync::mpsc;\n\n#[tokio::main]\nasync fn main() {\n    let (tx, mut rx) = mpsc::channel::<String>(32);  // buffer size 32\n\n    // Spawn a producer\n    let tx2 = tx.clone();  // Clone for multiple producers\n    tokio::spawn(async move {\n        tx.send(\"hello from task 1\".into()).await.unwrap();\n    });\n    tokio::spawn(async move {\n        tx2.send(\"hello from task 2\".into()).await.unwrap();\n    });\n\n    // Receive messages\n    while let Some(msg) = rx.recv().await {\n        println!(\"Received: {}\", msg);\n    }\n}"
+    },
+    {
+      "description": "oneshot for request-response",
+      "code": "use tokio::sync::oneshot;\n\nasync fn compute(input: u32, reply: oneshot::Sender<u64>) {\n    let result = (input as u64) * (input as u64);\n    let _ = reply.send(result);  // Send response back\n}\n\n#[tokio::main]\nasync fn main() {\n    let (tx, rx) = oneshot::channel();\n\n    tokio::spawn(compute(42, tx));\n\n    let result = rx.await.unwrap();\n    println!(\"42 squared = {}\", result);\n}"
+    },
+    {
+      "description": "broadcast for fan-out events",
+      "code": "use tokio::sync::broadcast;\n\n#[tokio::main]\nasync fn main() {\n    let (tx, _) = broadcast::channel::<String>(16);\n\n    let mut rx1 = tx.subscribe();\n    let mut rx2 = tx.subscribe();\n\n    tokio::spawn(async move {\n        while let Ok(msg) = rx1.recv().await {\n            println!(\"Subscriber 1: {}\", msg);\n        }\n    });\n    tokio::spawn(async move {\n        while let Ok(msg) = rx2.recv().await {\n            println!(\"Subscriber 2: {}\", msg);\n        }\n    });\n\n    tx.send(\"event A\".into()).unwrap();\n    tx.send(\"event B\".into()).unwrap();\n\n    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;\n}"
+    },
+    {
+      "description": "watch for shared configuration",
+      "code": "use tokio::sync::watch;\n\n#[tokio::main]\nasync fn main() {\n    let (tx, mut rx) = watch::channel(\"initial config\".to_string());\n\n    tokio::spawn(async move {\n        loop {\n            rx.changed().await.unwrap();\n            println!(\"Config updated to: {}\", *rx.borrow());\n        }\n    });\n\n    tx.send(\"updated config v1\".to_string()).unwrap();\n    tx.send(\"updated config v2\".to_string()).unwrap();\n\n    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;\n}"
+    }
+  ],
+  "keyPoints": [
+    "mpsc is the workhorse channel: multiple senders, one receiver, with backpressure",
+    "oneshot sends exactly one value -- perfect for spawning a task and getting a reply",
+    "broadcast delivers every message to every subscriber",
+    "watch lets receivers always see the latest value",
+    "Bounded channels provide backpressure -- senders block when the buffer is full",
+    "Channels avoid shared mutable state and are the preferred communication mechanism"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "code": "E0152",
+  "title": "Duplicate lang item",
+  "severity": "occasional",
+  "explanation": "This error occurs when two items are marked with the same #[lang] attribute. Lang items are special items that the compiler needs (like the entry point, panic handler, or allocator), and there can only be one of each.",
+  "example_bad": "#[lang = \"panic_impl\"]\nfn my_panic(_: &core::panic::PanicInfo) -> ! {\n    loop {}\n}\n// Error if another panic_impl already exists",
+  "error_message": "error[E0152]: found duplicate lang item `panic_impl`",
+  "fixes": [
+    {
+      "description": "Remove the duplicate lang item",
+      "code": "// Only define lang items in #![no_std] environments\n// where the standard library doesn't provide them"
+    },
+    {
+      "description": "Use #![no_std] correctly",
+      "code": "#![no_std]\n#![no_main]\n\nuse core::panic::PanicInfo;\n\n#[panic_handler]\nfn panic(_info: &PanicInfo) -> ! {\n    loop {}\n}"
+    }
+  ],
+  "related": ["E0554"],
+  "tip": "Lang items are only needed in #![no_std] or freestanding environments. In normal Rust programs, the standard library provides all lang items."
+}

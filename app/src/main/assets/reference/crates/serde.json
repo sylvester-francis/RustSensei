@@ -1,0 +1,28 @@
+{
+  "id": "serde",
+  "title": "serde -- Serialization Framework",
+  "version": "1.x",
+  "description": "The standard serialization/deserialization framework for Rust. Used by virtually every project that handles JSON, TOML, YAML, or any structured data format. Serde's derive macros make it nearly zero-effort to add serialization to your types.",
+  "cargoToml": "[dependencies]\nserde = { version = \"1\", features = [\"derive\"] }\nserde_json = \"1\"",
+  "quickStart": "use serde::{Serialize, Deserialize};\n\n#[derive(Serialize, Deserialize, Debug)]\nstruct User {\n    name: String,\n    age: u32,\n    email: Option<String>,\n}\n\nfn main() -> Result<(), serde_json::Error> {\n    let user = User {\n        name: \"Alice\".into(),\n        age: 30,\n        email: Some(\"alice@example.com\".into()),\n    };\n\n    // Serialize to JSON\n    let json = serde_json::to_string_pretty(&user)?;\n    println!(\"{}\", json);\n\n    // Deserialize from JSON\n    let parsed: User = serde_json::from_str(&json)?;\n    println!(\"{:?}\", parsed);\n\n    Ok(())\n}",
+  "commonPatterns": [
+    {
+      "title": "Rename fields for JSON conventions",
+      "code": "#[derive(Serialize, Deserialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct ApiResponse {\n    user_name: String,     // serialized as \"userName\"\n    is_active: bool,       // serialized as \"isActive\"\n}"
+    },
+    {
+      "title": "Optional and default fields",
+      "code": "#[derive(Serialize, Deserialize)]\nstruct Config {\n    #[serde(default)]\n    port: u16,                    // defaults to 0 if missing\n    #[serde(skip_serializing_if = \"Option::is_none\")]\n    api_key: Option<String>,      // omitted from JSON if None\n}"
+    },
+    {
+      "title": "Enum serialization",
+      "code": "#[derive(Serialize, Deserialize)]\n#[serde(tag = \"type\")]\nenum Message {\n    Text { content: String },\n    Image { url: String, width: u32 },\n}"
+    },
+    {
+      "title": "Custom deserialization",
+      "code": "use serde::Deserializer;\n\nfn deserialize_from_str<'de, D>(deserializer: D) -> Result<u64, D::Error>\nwhere\n    D: Deserializer<'de>,\n{\n    let s: String = Deserialize::deserialize(deserializer)?;\n    s.parse::<u64>().map_err(serde::de::Error::custom)\n}"
+    }
+  ],
+  "whenToUse": "Any time you need to convert between Rust types and data formats (JSON, TOML, YAML, MessagePack, bincode, etc.). Essentially every Rust project that does I/O uses serde.",
+  "alternatives": "For JSON-only with maximum speed: simd-json, sonic-rs. For configuration files: the config crate provides layered config with serde. For binary formats: bincode, postcard."
+}

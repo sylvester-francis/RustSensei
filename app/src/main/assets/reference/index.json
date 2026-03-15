@@ -1,0 +1,76 @@
+{
+  "sections": [
+    {
+      "id": "cheatsheets",
+      "title": "Cheat Sheets",
+      "description": "Quick reference cards for Rust syntax and patterns",
+      "items": ["syntax", "ownership", "traits", "collections", "error-handling", "strings", "iterators", "smart-pointers", "concurrency", "cargo", "operators", "type-conversions", "macros", "attributes", "closures", "pattern-matching", "lifetimes", "unsafe"]
+    },
+    {
+      "id": "compiler-errors",
+      "title": "Compiler Error Guide",
+      "description": "Common Rust compiler errors explained with fixes",
+      "items": ["E0382", "E0505", "E0106", "E0277", "E0308", "E0499", "E0502", "E0597", "E0425", "E0433", "E0412", "E0369", "E0507", "E0515", "E0599", "E0609", "E0614", "E0615", "E0716", "E0728", "E0373", "E0282", "E0283", "E0119", "E0117", "E0432", "E0554", "E0015", "E0053", "E0061", "E0063", "E0072", "E0080", "E0093", "E0107", "E0133", "E0152", "E0184", "E0195", "E0200", "E0252", "E0255", "E0271", "E0301", "E0317", "E0384", "E0428", "E0463"]
+    },
+    {
+      "id": "comparisons",
+      "title": "Language Comparisons",
+      "description": "Rust vs Go, Python, and TypeScript side by side",
+      "items": ["rust-vs-go", "rust-vs-python", "rust-vs-typescript", "concepts-mapping"]
+    },
+    {
+      "id": "challenges",
+      "title": "Coding Challenges",
+      "description": "Build real projects to practice Rust skills",
+      "items": ["word-counter", "mini-grep", "todo-cli", "json-parser", "http-client", "file-watcher", "markdown-renderer", "calculator-repl", "csv-processor", "url-shortener"]
+    },
+    {
+      "id": "crates",
+      "title": "Popular Crates",
+      "description": "Essential crates every Rust developer should know",
+      "items": ["serde", "tokio", "clap", "reqwest", "anyhow", "thiserror", "itertools", "rayon", "tracing", "regex"]
+    },
+    {
+      "id": "async-rust",
+      "title": "Async Rust Guide",
+      "description": "Understanding async/await, Futures, and Tokio",
+      "items": ["async-basics", "tokio-runtime", "futures-and-streams", "select-join", "channels-async", "error-handling-async", "testing-async"]
+    },
+    {
+      "id": "cli-guide",
+      "title": "CLI Tool Building",
+      "description": "Build command-line tools with Rust",
+      "items": ["clap-basics", "stdin-stdout", "file-io", "colored-output", "progress-bars", "config-files", "testing-cli"]
+    },
+    {
+      "id": "design-patterns",
+      "title": "Design Patterns",
+      "description": "Common patterns in idiomatic Rust",
+      "items": ["builder", "newtype", "typestate", "strategy-traits", "visitor", "observer", "command", "state-machine", "raii-guard"]
+    },
+    {
+      "id": "glossary",
+      "title": "Rust Glossary",
+      "description": "Key terms and definitions",
+      "items": ["glossary"]
+    },
+    {
+      "id": "testing",
+      "title": "Testing Patterns",
+      "description": "Effective testing strategies in Rust",
+      "items": ["unit-tests", "integration-tests", "property-testing", "mocking", "test-organization", "benchmarking"]
+    },
+    {
+      "id": "unsafe-guide",
+      "title": "Unsafe Rust",
+      "description": "When and how to use unsafe correctly",
+      "items": ["unsafe-basics", "raw-pointers", "ffi", "unsafe-traits", "unsafe-patterns", "auditing-unsafe"]
+    },
+    {
+      "id": "interview-prep",
+      "title": "Interview Prep",
+      "description": "Common Rust interview questions",
+      "items": ["ownership-questions", "concurrency-questions", "trait-questions", "lifetime-questions", "systems-questions", "coding-questions"]
+    }
+  ]
+}

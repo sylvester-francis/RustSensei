@@ -1,0 +1,20 @@
+{
+  "code": "E0505",
+  "title": "Cannot move out of borrowed content",
+  "severity": "common",
+  "explanation": "This error occurs when you try to move a value while it is still borrowed. Rust's borrow checker ensures that references remain valid, so you cannot move a value out from under an active borrow.",
+  "example_bad": "fn main() {\n    let mut s = String::from(\"hello\");\n    let r = &s;\n    let s2 = s; // Error: cannot move out of `s` because it is borrowed\n    println!(\"{}\", r);\n}",
+  "error_message": "error[E0505]: cannot move out of `s` because it is borrowed",
+  "fixes": [
+    {
+      "description": "Drop the borrow before moving",
+      "code": "let mut s = String::from(\"hello\");\n{\n    let r = &s;\n    println!(\"{}\", r);\n} // r goes out of scope here\nlet s2 = s; // Now this works"
+    },
+    {
+      "description": "Clone instead of moving",
+      "code": "let s = String::from(\"hello\");\nlet r = &s;\nlet s2 = s.clone();\nprintln!(\"{}\", r); // Works!"
+    }
+  ],
+  "related": ["E0382", "E0502"],
+  "tip": "The borrow checker tracks when references are last used — a reference is considered dropped after its last use, not at end of scope."
+}

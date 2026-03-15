@@ -1,0 +1,166 @@
+{
+  "id": "concepts-mapping",
+  "title": "Concepts Mapping: Go/Python/TypeScript to Rust",
+  "mappings": [
+    {
+      "concept": "Null Safety",
+      "go": "nil checks, ok pattern",
+      "python": "None, Optional[]",
+      "typescript": "null | undefined, optional chaining",
+      "rust": "Option<T>, pattern matching",
+      "key_insight": "Rust eliminates null pointer exceptions at compile time. You must handle None explicitly."
+    },
+    {
+      "concept": "Error Handling",
+      "go": "Multiple return values (val, err)",
+      "python": "try/except exceptions",
+      "typescript": "try/catch, Promise rejection",
+      "rust": "Result<T, E>, ? operator",
+      "key_insight": "Rust errors are values in the type system. The ? operator provides concise propagation without hiding error paths."
+    },
+    {
+      "concept": "Memory Management",
+      "go": "Garbage collector",
+      "python": "Reference counting + GC",
+      "typescript": "Garbage collector (V8)",
+      "rust": "Ownership + borrowing (compile-time)",
+      "key_insight": "Rust has no garbage collector. Memory is freed deterministically when the owner goes out of scope."
+    },
+    {
+      "concept": "Immutability",
+      "go": "No built-in immutability (use convention)",
+      "python": "Tuples, frozensets (limited)",
+      "typescript": "const, readonly, as const",
+      "rust": "Immutable by default, let mut for mutable",
+      "key_insight": "Rust makes immutability the default, requiring explicit opt-in to mutation with `mut`."
+    },
+    {
+      "concept": "Concurrency",
+      "go": "Goroutines + channels",
+      "python": "asyncio, threading, multiprocessing",
+      "typescript": "async/await, Web Workers",
+      "rust": "std::thread, async/await, channels, Send/Sync traits",
+      "key_insight": "Rust prevents data races at compile time. The Send and Sync traits ensure safe sharing across threads."
+    },
+    {
+      "concept": "Generics",
+      "go": "Type parameters with constraints",
+      "python": "TypeVar, Generic[] (type hints only)",
+      "typescript": "Generic types with extends constraints",
+      "rust": "Generics with trait bounds, monomorphized",
+      "key_insight": "Rust generics are resolved at compile time with zero runtime cost. Each concrete type gets optimized code."
+    },
+    {
+      "concept": "Polymorphism",
+      "go": "Interfaces (implicit)",
+      "python": "Duck typing, ABC",
+      "typescript": "Interfaces, union types",
+      "rust": "Traits (explicit impl), trait objects (dyn Trait)",
+      "key_insight": "Rust offers both static dispatch (generics) and dynamic dispatch (dyn Trait). Static dispatch is zero-cost."
+    },
+    {
+      "concept": "Enums / Sum Types",
+      "go": "iota constants (no real enums)",
+      "python": "enum.Enum (simple values only)",
+      "typescript": "enum, discriminated unions",
+      "rust": "enum with data (algebraic data types)",
+      "key_insight": "Rust enums can hold different data per variant, making them as powerful as tagged unions with compiler exhaustiveness checks."
+    },
+    {
+      "concept": "Pattern Matching",
+      "go": "switch/type switch",
+      "python": "match/case (Python 3.10+)",
+      "typescript": "switch + type narrowing",
+      "rust": "match (exhaustive, destructuring)",
+      "key_insight": "Rust match is exhaustive — the compiler ensures all cases are handled. It supports deep destructuring and guards."
+    },
+    {
+      "concept": "String Types",
+      "go": "string (immutable bytes), []byte",
+      "python": "str (immutable), bytes",
+      "typescript": "string (immutable)",
+      "rust": "String (owned), &str (borrowed slice)",
+      "key_insight": "Rust distinguishes owned vs borrowed strings. Both are always valid UTF-8. This prevents use-after-free and encoding errors."
+    },
+    {
+      "concept": "Collections",
+      "go": "slices, maps (built-in)",
+      "python": "list, dict, set (built-in)",
+      "typescript": "Array, Map, Set (built-in)",
+      "rust": "Vec, HashMap, BTreeMap, HashSet (std::collections)",
+      "key_insight": "Rust collections must be imported from std::collections (except Vec). They are generic and type-safe."
+    },
+    {
+      "concept": "Closures / Lambdas",
+      "go": "func literals (closures)",
+      "python": "lambda, nested functions",
+      "typescript": "Arrow functions, function expressions",
+      "rust": "Closures |args| body, Fn/FnMut/FnOnce traits",
+      "key_insight": "Rust closures have three trait categories based on how they capture: Fn (borrow), FnMut (mutable borrow), FnOnce (move)."
+    },
+    {
+      "concept": "Package Management",
+      "go": "go mod, go get",
+      "python": "pip, poetry, uv",
+      "typescript": "npm, yarn, pnpm",
+      "rust": "cargo (build + package manager)",
+      "key_insight": "Cargo handles building, testing, dependencies, and documentation in one tool. Crates.io is the package registry."
+    },
+    {
+      "concept": "Testing",
+      "go": "testing package, go test",
+      "python": "unittest, pytest",
+      "typescript": "Jest, Vitest, Mocha",
+      "rust": "#[test], cargo test (built-in)",
+      "key_insight": "Rust testing is built into the language and toolchain. Unit tests live in the same file as the code they test."
+    },
+    {
+      "concept": "Resource Cleanup",
+      "go": "defer statement",
+      "python": "with statement (context managers)",
+      "typescript": "try/finally, using (TC39 proposal)",
+      "rust": "Drop trait (RAII, automatic)",
+      "key_insight": "Rust uses RAII — resources are automatically cleaned up when the owning variable goes out of scope. No explicit close/defer needed."
+    },
+    {
+      "concept": "Iteration",
+      "go": "for range loop",
+      "python": "for...in, itertools",
+      "typescript": "for...of, Array methods",
+      "rust": "for...in, Iterator trait, iterator adaptors",
+      "key_insight": "Rust iterators are lazy and zero-cost. Chain map/filter/fold operations that compile down to optimal loops."
+    },
+    {
+      "concept": "Type Aliases",
+      "go": "type Name = string",
+      "python": "Name = str (or TypeAlias)",
+      "typescript": "type Name = string",
+      "rust": "type Name = String",
+      "key_insight": "Rust type aliases are transparent (no new type). Use the newtype pattern (struct Wrapper(Inner)) for distinct types."
+    },
+    {
+      "concept": "Modules / Visibility",
+      "go": "Uppercase = exported, lowercase = private",
+      "python": "_ prefix convention (not enforced)",
+      "typescript": "export keyword",
+      "rust": "pub keyword (private by default)",
+      "key_insight": "Everything in Rust is private by default. Use pub, pub(crate), or pub(super) for fine-grained visibility control."
+    },
+    {
+      "concept": "Async Runtime",
+      "go": "Built-in goroutine scheduler",
+      "python": "asyncio event loop",
+      "typescript": "Built-in event loop (V8/Node)",
+      "rust": "External runtime (tokio, async-std)",
+      "key_insight": "Rust async is zero-cost but requires choosing a runtime. Tokio is the most popular. Futures are lazy — they do nothing until polled."
+    },
+    {
+      "concept": "Smart Pointers",
+      "go": "No equivalent (GC handles it)",
+      "python": "No equivalent (GC handles it)",
+      "typescript": "No equivalent (GC handles it)",
+      "rust": "Box<T>, Rc<T>, Arc<T>, RefCell<T>",
+      "key_insight": "Smart pointers provide different ownership strategies: Box (heap), Rc (shared), Arc (thread-safe shared), RefCell (interior mutability)."
+    }
+  ]
+}

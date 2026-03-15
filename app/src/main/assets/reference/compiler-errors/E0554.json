@@ -1,0 +1,24 @@
+{
+  "code": "E0554",
+  "title": "Feature is not available on stable Rust",
+  "severity": "occasional",
+  "explanation": "This error occurs when you try to use a feature that is only available in nightly Rust but you are compiling with the stable compiler. Feature gates protect unstable APIs and syntax.",
+  "example_bad": "#![feature(generators)] // Error on stable Rust\n\nfn main() {\n    // Using a nightly-only feature\n}",
+  "error_message": "error[E0554]: `#![feature]` may not be used on the stable release channel",
+  "fixes": [
+    {
+      "description": "Use the nightly compiler",
+      "code": "# Install and use nightly:\nrustup install nightly\nrustup run nightly cargo build\n\n# Or set for the project:\nrustup override set nightly"
+    },
+    {
+      "description": "Find a stable alternative",
+      "code": "// Instead of nightly features, check if there's a stable\n// alternative or a crate that provides the functionality.\n// Many features eventually stabilize — check the tracking issue."
+    },
+    {
+      "description": "Use a rust-toolchain.toml file",
+      "code": "# rust-toolchain.toml\n[toolchain]\nchannel = \"nightly\"\ncomponents = [\"rustfmt\", \"clippy\"]"
+    }
+  ],
+  "related": ["E0658"],
+  "tip": "Before using nightly, check if the feature has been stabilized in a recent Rust version. Run `rustup update` to get the latest stable features."
+}

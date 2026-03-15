@@ -1,0 +1,48 @@
+{
+  "id": "ownership-borrowing",
+  "title": "Ownership, Borrowing, and Lifetimes",
+  "order": 1,
+  "description": "Questions about Rust's core memory management concepts -- the most common interview topic.",
+  "questions": [
+    {
+      "question": "Explain Rust's ownership model. What are the three ownership rules?",
+      "answer": "Rust's ownership model manages memory without a garbage collector. The three rules are:\n\n1. Each value has exactly one owner.\n2. When the owner goes out of scope, the value is dropped (freed).\n3. Ownership can be transferred (moved), but only one variable owns the data at a time.\n\nThis means there is no double-free, no use-after-free, and no memory leaks from forgotten deallocation. The compiler enforces these rules at compile time with zero runtime cost.",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What is the difference between Copy and Clone? When would you implement each?",
+      "answer": "Copy is a marker trait for types that can be duplicated by simply copying bits (like memcpy). It is implicit -- values are copied automatically on assignment. Copy types include integers, bools, floats, and tuples of Copy types. A type can only implement Copy if all its fields are Copy and it does not implement Drop.\n\nClone is a trait requiring an explicit .clone() call. It can perform arbitrary logic (like heap allocation). String implements Clone (allocates a new buffer) but not Copy.\n\nUse Copy for small, simple, stack-only types. Use Clone for types that need deep copying of heap data.",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What are the borrowing rules? Why can't you have a mutable reference while immutable references exist?",
+      "answer": "The borrowing rules are:\n- You can have either one mutable reference (&mut T) OR any number of immutable references (&T) to a value, but not both simultaneously.\n- References must always be valid (no dangling references).\n\nThe reason for this restriction is data race prevention. A data race occurs when two or more pointers access the same memory, at least one is writing, and there is no synchronization. By enforcing 'either one writer or many readers,' Rust makes data races impossible at compile time. This also prevents iterator invalidation and other aliasing bugs.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Explain lifetimes. Why does Rust need them? Give an example where lifetime annotations are required.",
+      "answer": "Lifetimes are compile-time annotations that tell the compiler how long references are valid. They prevent dangling references (accessing freed memory).\n\nLifetimes are required when the compiler cannot determine the relationship between input and output references. For example:\n\nfn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}\n\nHere, 'a tells the compiler the returned reference lives at least as long as both inputs. Without annotations, the compiler cannot know if the return value comes from x or y, so it cannot verify safety.\n\nMost lifetimes are inferred by lifetime elision rules. You only annotate when the compiler cannot figure it out.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is the difference between &str and String? When would you use each?",
+      "answer": "&str is a borrowed reference to a UTF-8 string slice. It is a fat pointer: (pointer, length). It does not own the data.\n\nString is an owned, heap-allocated, growable UTF-8 string. It is essentially a Vec<u8> with a UTF-8 guarantee.\n\nGuidelines:\n- Function parameters: prefer &str (accepts both String and &str via deref coercion)\n- Return values: return String when the caller needs ownership\n- Struct fields: use String for owned data, &'a str if the struct borrows from something\n- String literals (\"hello\") are &'static str\n\nThe key insight: &str is more flexible as input, String is necessary when ownership is needed.",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What is the difference between Box<T>, Rc<T>, and Arc<T>? When would you use each?",
+      "answer": "Box<T>: Single owner, heap allocation. Use when you need heap allocation with one owner. Common for recursive types (like tree nodes) and trait objects (Box<dyn Trait>).\n\nRc<T>: Reference-counted, multiple owners, single-threaded. Use when multiple parts of your code need to own the same data and you know it is single-threaded. The value is dropped when the last Rc is dropped.\n\nArc<T>: Atomic reference-counted, multiple owners, thread-safe. Like Rc but with atomic operations for the reference count. Use when sharing ownership across threads. Often combined with Mutex: Arc<Mutex<T>>.\n\nCost hierarchy: Box (cheapest, no counting) < Rc (reference counting) < Arc (atomic reference counting, more expensive increments/decrements).",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is a dangling reference and how does Rust prevent them?",
+      "answer": "A dangling reference points to memory that has been freed or is no longer valid. In C/C++, this causes use-after-free bugs.\n\nRust prevents them through the borrow checker and lifetime system:\n\n1. The borrow checker ensures references do not outlive the data they point to.\n2. Lifetimes track the valid scope of references at compile time.\n3. When a value is moved, all references to it become invalid (the compiler catches any use).\n4. Returning a reference to a local variable is a compile error.\n\nExample that Rust rejects:\nfn dangling() -> &String {\n    let s = String::from(\"hello\");\n    &s  // Error: s is dropped at end of function, reference would dangle\n}",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Explain the 'static lifetime. What does it mean and when is it used?",
+      "answer": "'static means the reference is valid for the entire duration of the program. There are two common uses:\n\n1. String literals: \"hello\" has type &'static str because the string data is embedded in the binary.\n\n2. Owned types as 'static bounds: T: 'static means T contains no non-static references (it either owns all its data or only has 'static references). This is required by tokio::spawn because spawned tasks might outlive the scope that created them.\n\nCommon misconception: 'static does NOT mean the value lives forever. It means the value CAN live forever (it has no shorter-lived references inside it). String is 'static because it owns its data, even though it gets dropped normally.",
+      "difficulty": "advanced"
+    }
+  ]
+}

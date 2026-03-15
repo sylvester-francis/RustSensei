@@ -1,0 +1,20 @@
+{
+  "code": "E0255",
+  "title": "Name already imported",
+  "severity": "occasional",
+  "explanation": "This error occurs when an imported name conflicts with a locally defined item or another import. It is similar to E0252 but specifically covers conflicts between imports and local definitions.",
+  "example_bad": "use std::fmt::Display;\n\ntrait Display { // Error: `Display` already imported\n    fn show(&self);\n}",
+  "error_message": "error[E0255]: the name `Display` is defined multiple times",
+  "fixes": [
+    {
+      "description": "Rename the import with as",
+      "code": "use std::fmt::Display as StdDisplay;\n\ntrait Display {\n    fn show(&self);\n}"
+    },
+    {
+      "description": "Rename the local item",
+      "code": "use std::fmt::Display;\n\ntrait Showable {\n    fn show(&self);\n}"
+    }
+  ],
+  "related": ["E0252", "E0428"],
+  "tip": "Choose descriptive names for your types that won't conflict with standard library or common crate names."
+}

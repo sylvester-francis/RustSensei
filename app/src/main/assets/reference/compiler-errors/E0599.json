@@ -1,0 +1,24 @@
+{
+  "code": "E0599",
+  "title": "No method found for type",
+  "severity": "common",
+  "explanation": "This error occurs when you call a method that does not exist on a type. This could mean the method does not exist, the trait providing the method is not in scope, or you are calling it on the wrong type.",
+  "example_bad": "fn main() {\n    let v = vec![3, 1, 2];\n    v.sort(); // Error: cannot borrow as mutable\n    \n    let s = \"hello\";\n    s.push('!'); // Error: no method `push` on `&str`\n}",
+  "error_message": "error[E0599]: no method named `push` found for reference `&str` in the current scope",
+  "fixes": [
+    {
+      "description": "Use the correct type",
+      "code": "let mut s = String::from(\"hello\");\ns.push('!'); // String has push, &str does not"
+    },
+    {
+      "description": "Import the trait that provides the method",
+      "code": "use std::io::Read; // Now .read() is available on types implementing Read\n\nlet mut buf = Vec::new();\nfile.read_to_end(&mut buf)?;"
+    },
+    {
+      "description": "Make the variable mutable for mutating methods",
+      "code": "let mut v = vec![3, 1, 2];\nv.sort(); // sort() requires &mut self"
+    }
+  ],
+  "related": ["E0277", "E0609"],
+  "tip": "If the method exists but is not found, check if the trait needs to be imported with `use`. Many iterator methods need `use std::iter::Iterator` (though it's in the prelude)."
+}

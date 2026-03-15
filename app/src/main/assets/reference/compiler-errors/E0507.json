@@ -1,0 +1,24 @@
+{
+  "code": "E0507",
+  "title": "Cannot move out of borrowed content",
+  "severity": "common",
+  "explanation": "This error occurs when you try to move a value out of a reference. Since a reference does not own the value, you cannot take ownership of the value through a reference.",
+  "example_bad": "fn get_name(person: &Person) -> String {\n    person.name // Error: cannot move out of borrowed content\n}\n\nstruct Person {\n    name: String,\n}",
+  "error_message": "error[E0507]: cannot move out of `person.name` which is behind a shared reference",
+  "fixes": [
+    {
+      "description": "Clone the value",
+      "code": "fn get_name(person: &Person) -> String {\n    person.name.clone()\n}"
+    },
+    {
+      "description": "Return a reference instead",
+      "code": "fn get_name(person: &Person) -> &str {\n    &person.name\n}"
+    },
+    {
+      "description": "Take ownership of the whole struct",
+      "code": "fn get_name(person: Person) -> String {\n    person.name // Works because we own person\n}"
+    }
+  ],
+  "related": ["E0382", "E0505"],
+  "tip": "If the type implements Copy, it will be copied automatically. For other types, you need to clone or restructure your code."
+}

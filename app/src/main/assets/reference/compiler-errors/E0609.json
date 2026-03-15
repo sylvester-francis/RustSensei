@@ -1,0 +1,24 @@
+{
+  "code": "E0609",
+  "title": "No field on type",
+  "severity": "frequent",
+  "explanation": "This error occurs when you try to access a field that does not exist on a struct or type. This can be due to a typo, accessing a private field from outside its module, or confusing tuple struct indexing with named field access.",
+  "example_bad": "struct Point {\n    x: f64,\n    y: f64,\n}\n\nfn main() {\n    let p = Point { x: 1.0, y: 2.0 };\n    println!(\"{}\", p.z); // Error: no field `z` on type `Point`\n}",
+  "error_message": "error[E0609]: no field `z` on type `Point`",
+  "fixes": [
+    {
+      "description": "Use the correct field name",
+      "code": "println!(\"{}\", p.x); // Use an existing field"
+    },
+    {
+      "description": "Add the missing field to the struct",
+      "code": "struct Point {\n    x: f64,\n    y: f64,\n    z: f64, // Add the field\n}"
+    },
+    {
+      "description": "Use index syntax for tuple structs",
+      "code": "struct Color(u8, u8, u8);\n\nlet c = Color(255, 0, 128);\nprintln!(\"Red: {}\", c.0); // Use .0, .1, .2 for tuple structs"
+    }
+  ],
+  "related": ["E0599", "E0615"],
+  "tip": "Check the struct definition for the exact field names. Rust uses snake_case for field names by convention."
+}

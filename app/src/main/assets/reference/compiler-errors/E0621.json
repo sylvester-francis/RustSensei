@@ -1,0 +1,20 @@
+{
+  "code": "E0621",
+  "title": "Lifetime mismatch",
+  "severity": "frequent",
+  "explanation": "This error occurs when the lifetimes in your function signature do not match how the references are actually used. The compiler detects that the lifetime constraints you declared are inconsistent with the function body.",
+  "example_bad": "fn first<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {\n    if x.len() > 0 { x } else { y } // Error: lifetime mismatch\n}",
+  "error_message": "error[E0621]: explicit lifetime required in the type of `y`",
+  "fixes": [
+    {
+      "description": "Use the same lifetime for related references",
+      "code": "fn first<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > 0 { x } else { y }\n}"
+    },
+    {
+      "description": "Add a lifetime bound",
+      "code": "fn first<'a, 'b: 'a>(x: &'a str, y: &'b str) -> &'a str {\n    if x.len() > 0 { x } else { y }\n}"
+    }
+  ],
+  "related": ["E0106", "E0597"],
+  "tip": "The syntax 'b: 'a means 'b outlives 'a. If your function might return either reference, both must share or be bounded by the return lifetime."
+}

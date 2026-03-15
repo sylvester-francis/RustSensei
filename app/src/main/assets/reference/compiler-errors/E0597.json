@@ -1,0 +1,20 @@
+{
+  "code": "E0597",
+  "title": "Borrowed value does not live long enough",
+  "severity": "common",
+  "explanation": "This error occurs when a borrowed value is dropped while a reference to it still exists. The borrow checker ensures that all references are valid for their entire lifetime.",
+  "example_bad": "fn main() {\n    let r;\n    {\n        let s = String::from(\"hello\");\n        r = &s; // Error: `s` does not live long enough\n    }\n    println!(\"{}\", r);\n}",
+  "error_message": "error[E0597]: `s` does not live long enough",
+  "fixes": [
+    {
+      "description": "Move the value to the outer scope",
+      "code": "let s = String::from(\"hello\");\nlet r = &s;\nprintln!(\"{}\", r);"
+    },
+    {
+      "description": "Clone or own the value instead of borrowing",
+      "code": "let r;\n{\n    let s = String::from(\"hello\");\n    r = s; // Move instead of borrow\n}\nprintln!(\"{}\", r);"
+    }
+  ],
+  "related": ["E0515", "E0716"],
+  "tip": "Think about which scope owns the data. References can never outlive the data they point to."
+}

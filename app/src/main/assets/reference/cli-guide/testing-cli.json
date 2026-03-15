@@ -1,0 +1,32 @@
+{
+  "id": "testing-cli",
+  "title": "Testing CLI Applications",
+  "order": 6,
+  "content": "Test CLI tools at multiple levels: unit tests for individual functions, integration tests that run the actual binary, and snapshot tests for output verification.\n\nThe assert_cmd crate lets you run your binary as a subprocess and check its exit code, stdout, and stderr. The predicates crate provides flexible assertions.\n\nBy separating logic into lib.rs, you can unit test business logic without spawning processes. Integration tests in tests/ verify the full CLI experience.",
+  "codeExamples": [
+    {
+      "description": "Unit testing library functions",
+      "code": "// src/lib.rs\npub fn count_words(text: &str) -> usize {\n    text.split_whitespace().count()\n}\n\npub fn find_matches(content: &str, pattern: &str) -> Vec<String> {\n    content\n        .lines()\n        .filter(|line| line.contains(pattern))\n        .map(String::from)\n        .collect()\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_count_words() {\n        assert_eq!(count_words(\"hello world\"), 2);\n        assert_eq!(count_words(\"\"), 0);\n        assert_eq!(count_words(\"  spaces  \"), 1);\n    }\n\n    #[test]\n    fn test_find_matches() {\n        let content = \"foo bar\\nbaz foo\\nqux\";\n        let matches = find_matches(content, \"foo\");\n        assert_eq!(matches.len(), 2);\n        assert_eq!(matches[0], \"foo bar\");\n    }\n}"
+    },
+    {
+      "description": "Integration testing with assert_cmd",
+      "code": "// tests/cli.rs\n// Cargo.toml: [dev-dependencies] assert_cmd = \"2\", predicates = \"3\"\n\nuse assert_cmd::Command;\nuse predicates::prelude::*;\n\n#[test]\nfn test_no_args_shows_help() {\n    Command::cargo_bin(\"my-tool\")\n        .unwrap()\n        .assert()\n        .failure()\n        .stderr(predicate::str::contains(\"Usage\"));\n}\n\n#[test]\nfn test_version_flag() {\n    Command::cargo_bin(\"my-tool\")\n        .unwrap()\n        .arg(\"--version\")\n        .assert()\n        .success()\n        .stdout(predicate::str::contains(env!(\"CARGO_PKG_VERSION\")));\n}\n\n#[test]\nfn test_processes_input() {\n    Command::cargo_bin(\"my-tool\")\n        .unwrap()\n        .arg(\"test-data/sample.txt\")\n        .assert()\n        .success()\n        .stdout(predicate::str::contains(\"Lines:\"));\n}"
+    },
+    {
+      "description": "Testing with stdin input",
+      "code": "use assert_cmd::Command;\n\n#[test]\nfn test_stdin_input() {\n    Command::cargo_bin(\"my-tool\")\n        .unwrap()\n        .arg(\"-\")  // read from stdin\n        .write_stdin(\"hello world\\nfoo bar\")\n        .assert()\n        .success()\n        .stdout(predicates::str::contains(\"2 lines\"));\n}"
+    },
+    {
+      "description": "Temporary files for testing",
+      "code": "use std::io::Write;\nuse tempfile::NamedTempFile;\n\n#[test]\nfn test_file_processing() {\n    let mut input = NamedTempFile::new().unwrap();\n    writeln!(input, \"line 1\").unwrap();\n    writeln!(input, \"line 2\").unwrap();\n    writeln!(input, \"line 3\").unwrap();\n\n    let result = my_tool::count_lines(input.path()).unwrap();\n    assert_eq!(result, 3);\n}"
+    }
+  ],
+  "keyPoints": [
+    "Separate logic into lib.rs for easy unit testing",
+    "Use assert_cmd to test the actual binary as a subprocess",
+    "Test exit codes, stdout, and stderr",
+    "Use tempfile for temporary test files that auto-cleanup",
+    "Test both success and error cases (missing files, bad input)",
+    "Integration tests in tests/ directory run against the compiled binary"
+  ]
+}

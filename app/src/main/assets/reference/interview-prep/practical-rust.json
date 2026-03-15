@@ -1,0 +1,43 @@
+{
+  "id": "practical-rust",
+  "title": "Practical Rust and Design",
+  "order": 6,
+  "description": "Questions about real-world Rust development, project structure, ecosystem, and design decisions.",
+  "questions": [
+    {
+      "question": "How do you structure a large Rust project?",
+      "answer": "A well-structured Rust project uses Cargo workspaces and clear module boundaries:\n\nWorkspace (for multi-crate projects):\nmy-project/\n  Cargo.toml          (workspace definition)\n  crates/\n    core/             (domain logic, no I/O)\n    api/              (HTTP handlers)\n    db/               (database layer)\n    cli/              (binary entry point)\n\nSingle crate structure:\nsrc/\n  main.rs             (thin entry point: parse args, call lib)\n  lib.rs              (public API, re-exports)\n  config.rs           (configuration)\n  error.rs            (error types)\n  models/\n    mod.rs\n    user.rs\n  services/\n    mod.rs\n    user_service.rs\n  handlers/\n    mod.rs\n\nPrinciples:\n- main.rs is a thin wrapper: parse args, set up logging, call into lib\n- Put logic in lib.rs so it is testable without running the binary\n- Group by domain (user, order) or by layer (model, service, handler)\n- Use pub(crate) for internal APIs that should not be exposed",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Compare Rust's enums with enums in other languages (Java, TypeScript). What makes Rust enums special?",
+      "answer": "Rust enums are algebraic data types (sum types) -- each variant can hold different data:\n\nenum Shape {\n    Circle { radius: f64 },\n    Rectangle { width: f64, height: f64 },\n    Triangle(f64, f64, f64),\n    Point,\n}\n\nCompared to Java/TypeScript enums:\n\n1. Data carrying: Rust enum variants hold data. Java enums are essentially fixed constants. TypeScript enums are just named numbers/strings.\n\n2. Exhaustive matching: match on a Rust enum must handle all variants (the compiler enforces this). Adding a variant breaks all incomplete matches, catching bugs at compile time.\n\n3. No null: Option<T> replaces null. Result<T, E> replaces exceptions. Both are enums.\n\n4. Pattern matching: deeply nested destructuring with guards:\n   match shape {\n       Shape::Circle { radius } if radius > 10.0 => ...,\n       Shape::Rectangle { width, height } => ...,\n       _ => ...,\n   }\n\n5. Zero overhead: enum size equals the largest variant + a discriminant tag. No heap allocation.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is the difference between a library crate and a binary crate?",
+      "answer": "Binary crate (src/main.rs): compiles to an executable. Has a fn main() entry point. This is what users run.\n\nLibrary crate (src/lib.rs): compiles to a library that other crates depend on. No main() function. Exposes a public API via pub items.\n\nA project can have both: src/main.rs uses the library from src/lib.rs. This is the recommended pattern because:\n- The library is independently testable\n- Other projects can depend on your library\n- Integration tests (tests/) can access the library\n- main.rs stays thin (arg parsing + calling library)\n\nA workspace can contain multiple binary crates and library crates. Each is a separate compilation unit with its own Cargo.toml.",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "How would you handle configuration in a Rust application?",
+      "answer": "The typical approach layers multiple configuration sources with increasing priority:\n\n1. Default values in code\n2. Configuration file (TOML/YAML/JSON)\n3. Environment variables\n4. Command-line arguments\n\nUsing serde + clap + dotenvy:\n\n#[derive(Deserialize)]\nstruct Config {\n    #[serde(default = \"default_port\")]\n    port: u16,\n    database_url: String,\n    log_level: String,\n}\n\nfn default_port() -> u16 { 8080 }\n\nfn load_config() -> Result<Config> {\n    // Load .env file\n    dotenvy::dotenv().ok();\n    \n    // Read from file\n    let file_config = std::fs::read_to_string(\"config.toml\")?;\n    let mut config: Config = toml::from_str(&file_config)?;\n    \n    // Override with environment variables\n    if let Ok(url) = std::env::var(\"DATABASE_URL\") {\n        config.database_url = url;\n    }\n    \n    Ok(config)\n}\n\nThe config crate provides a more automated layered approach. For simple CLIs, clap alone may suffice.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "When would you choose Rust over Go, Python, or C++?",
+      "answer": "Choose Rust over Python when:\n- You need high performance (10-100x faster)\n- You need memory safety without GC pauses\n- You are building systems software, CLI tools, or WebAssembly\n\nChoose Rust over Go when:\n- You need zero-cost abstractions and no GC\n- You need fine-grained memory control\n- The type system expressiveness matters (enums, traits, generics)\n- You are building embedded systems, OS components, or game engines\n\nChoose Rust over C++ when:\n- Memory safety is critical (no use-after-free, no buffer overflows)\n- You want modern tooling (cargo, crates.io, clippy, rustfmt)\n- You want thread safety guaranteed at compile time\n- Starting a new project (C++ has huge legacy codebases to consider)\n\nChoose something else when:\n- Rapid prototyping is the priority (Python)\n- Your team does not know Rust and time-to-market is critical\n- The ecosystem you need is stronger elsewhere (ML = Python, enterprise = Java)\n- Compile times are a major concern (Go compiles faster)",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is unsafe Rust and when is it acceptable to use?",
+      "answer": "unsafe Rust unlocks five capabilities the compiler cannot verify: raw pointer dereferencing, calling unsafe functions, mutable static access, unsafe trait implementation, and union field access.\n\nAcceptable uses:\n1. FFI: calling C libraries (the compiler cannot verify foreign code)\n2. Performance-critical code where bounds checking is the bottleneck AND you can prove safety\n3. Implementing low-level abstractions (custom allocators, lock-free data structures)\n4. Working with hardware (memory-mapped I/O, device registers)\n\nNot acceptable:\n- Bypassing the borrow checker because it is 'annoying' (redesign your data structures instead)\n- Performance optimization without profiling first\n- When a safe alternative exists with acceptable performance\n\nBest practices:\n- Keep unsafe blocks minimal and well-documented\n- Wrap unsafe code in safe public APIs\n- Document all safety invariants with // SAFETY: comments\n- Test with Miri to detect undefined behavior\n- Get code review from experienced Rust developers",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Describe Rust's module system and visibility rules.",
+      "answer": "Modules organize code into namespaces. They form a tree rooted at lib.rs or main.rs.\n\nDeclaration:\n- mod foo; in parent looks for src/foo.rs or src/foo/mod.rs\n- mod foo { ... } defines inline module\n\nVisibility:\n- Private by default (only accessible within the same module and its children)\n- pub: visible to everyone\n- pub(crate): visible within the crate only\n- pub(super): visible to the parent module\n- pub(in path): visible within a specific path\n\nRe-exports:\n- pub use crate::internal::Thing; exposes Thing at the crate root\n- Lets you restructure internals without breaking the public API\n\nKey rules:\n- Child modules can access private items in parent modules\n- Parent modules CANNOT access private items in child modules\n- Struct fields are private by default (even on pub structs)\n- Enum variants inherit the enum's visibility (if pub enum, all variants are pub)\n\nThe prelude pattern: pub mod prelude { pub use crate::ImportantTrait; pub use crate::CommonType; } lets users write use my_crate::prelude::*;",
+      "difficulty": "intermediate"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "memory-performance",
+  "title": "Memory Management and Performance",
+  "order": 5,
+  "description": "Questions about how Rust manages memory, zero-cost abstractions, and performance.",
+  "questions": [
+    {
+      "question": "How does Rust manage memory without a garbage collector?",
+      "answer": "Rust uses ownership with compile-time enforcement. The compiler inserts deallocation code (drop calls) at deterministic points -- when the owner goes out of scope. This is called RAII (Resource Acquisition Is Initialization).\n\nMemory management rules:\n1. Each value has one owner. When the owner's scope ends, the value is dropped.\n2. Values can be moved (ownership transfer) to extend their lifetime.\n3. References (borrowing) access data without taking ownership.\n4. Smart pointers (Box, Rc, Arc) provide heap allocation with automatic cleanup.\n\nAdvantages over GC:\n- Deterministic cleanup: you know exactly when memory is freed\n- No GC pauses: consistent latency\n- No runtime overhead: zero-cost at runtime, all checking is at compile time\n- Memory is freed immediately when no longer needed, not at GC's discretion\n\nThe trade-off: more work for the programmer (satisfying the borrow checker) in exchange for better runtime performance.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What are zero-cost abstractions? Give examples.",
+      "answer": "Zero-cost abstractions are high-level programming features that compile down to code as efficient as hand-written low-level code. The abstraction imposes no runtime overhead.\n\nExamples in Rust:\n\n1. Iterators: a chain like v.iter().map(|x| x*2).filter(|x| x > 5).sum() compiles to a single loop, identical to a hand-written for loop.\n\n2. Generics: fn max<T: Ord>(a: T, b: T) is monomorphized -- the compiler generates specialized versions for each type. No vtable overhead.\n\n3. Closures: statically-dispatched closures (Fn, FnMut, FnOnce) are inlined, with no heap allocation or virtual call.\n\n4. Newtype wrappers: struct Meters(f64) has zero overhead -- the wrapper is optimized away at compile time.\n\n5. Option<&T>: uses null-pointer optimization. Since references cannot be null, Option<&T> has the same size as &T, using null to represent None.\n\nThe principle from C++: 'You don't pay for what you don't use, and what you do use, you couldn't hand-code any better.'",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is the difference between stack and heap allocation in Rust? When does each happen?",
+      "answer": "Stack allocation: fixed-size values are placed on the stack. Allocation and deallocation are instant (just moving the stack pointer). Local variables, function parameters, and fixed-size types go on the stack.\n\nlet x: i32 = 42;           // Stack\nlet arr: [u8; 100] = [0; 100]; // Stack\n\nHeap allocation: dynamically-sized or long-lived values go on the heap. Allocation uses the system allocator (slower). Deallocation happens when the owner is dropped.\n\nlet s = String::from(\"hello\"); // Heap (String data)\nlet v = vec![1, 2, 3];         // Heap (Vec data)\nlet b = Box::new(42);          // Heap (explicit boxing)\n\nKey insight: String and Vec have a small struct on the stack (pointer + length + capacity) that points to heap data. When the stack struct is dropped, the heap data is freed.\n\nPerformance: stack allocation is nearly free. Avoid unnecessary heap allocations in hot paths. Use references and slices to avoid copying.",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "What is the null pointer optimization (NPO)?",
+      "answer": "Rust guarantees that references and certain pointer types are never null. The compiler exploits this: it uses the null bit pattern to represent None in Option.\n\nThis means:\n- Option<&T> has the same size as &T (8 bytes on 64-bit, not 16)\n- Option<Box<T>> has the same size as Box<T>\n- Option<NonZeroU64> has the same size as u64\n\nThe null value (all-zero bit pattern) represents None, and any non-null value represents Some.\n\nThis also works for function pointers, NonNull<T>, and any type with a niche (a bit pattern that is never a valid value).\n\nPractical impact: using Option<&T> is completely free compared to a raw pointer with null checks. There is no size or performance penalty for Rust's safety guarantee.",
+      "difficulty": "advanced"
+    },
+    {
+      "question": "Explain monomorphization. What are its trade-offs?",
+      "answer": "Monomorphization is the process where the compiler generates specialized code for each concrete type used with a generic function or type.\n\nfn max<T: Ord>(a: T, b: T) -> T { if a > b { a } else { b } }\n\nIf called with max(1i32, 2i32) and max(\"a\", \"b\"), the compiler generates two functions: max_i32 and max_str.\n\nAdvantages:\n- Zero runtime overhead (no vtable lookup, direct function calls)\n- Enables inlining (the specialized function can be inlined at call sites)\n- Same performance as hand-written specialized code\n\nDisadvantages:\n- Increased binary size (N types means N copies of the function)\n- Longer compile times (more code to generate and optimize)\n- Can cause code bloat in large generic libraries\n\nAlternative: use trait objects (dyn Trait) for dynamic dispatch when binary size or compile time matters more than runtime performance.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "How do you profile and optimize Rust code?",
+      "answer": "Profiling tools:\n- cargo bench: built-in benchmarking (requires nightly or criterion crate)\n- criterion: statistical benchmarking, tracks performance over time\n- perf (Linux): CPU profiling with flame graphs\n- Instruments (macOS): CPU, memory, I/O profiling\n- cargo flamegraph: generates flame graphs from perf data\n- DHAT (via Miri): heap allocation profiling\n\nCommon optimizations:\n1. Build with --release (enables optimizations, huge difference)\n2. Avoid unnecessary allocations: use &str instead of String, &[T] instead of Vec<T>\n3. Use iterators instead of indexed loops (enables auto-vectorization)\n4. Minimize cloning: use references and borrowing\n5. Use SmallVec for frequently small collections\n6. Prefer stack allocation over heap when possible\n7. Use rayon for data-parallel CPU-bound work\n8. Profile first, optimize second (do not guess where bottlenecks are)\n\nCargo.toml release profile:\n[profile.release]\nlto = true\ncodegen-units = 1\nopt-level = 3",
+      "difficulty": "intermediate"
+    }
+  ]
+}

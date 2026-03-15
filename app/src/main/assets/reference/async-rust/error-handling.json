@@ -1,0 +1,32 @@
+{
+  "id": "error-handling",
+  "title": "Error Handling in Async Code",
+  "order": 5,
+  "content": "Error handling in async Rust follows the same Result<T, E> pattern as synchronous code, but with additional considerations.\n\nThe ? operator works naturally inside async functions. You can use anyhow::Result or custom error types just like in sync code.\n\nSpawned tasks add a layer: JoinHandle::await returns Result<T, JoinError> where JoinError indicates the task panicked or was cancelled. This means you often deal with nested Results.\n\ntry_join! is the error-aware version of join! -- it runs futures concurrently and returns early if any future returns an Err.\n\nA common pattern is to use channels to propagate errors from spawned tasks back to the main task, especially when you cannot directly await the task result.",
+  "codeExamples": [
+    {
+      "description": "The ? operator in async functions",
+      "code": "use std::io;\n\nasync fn read_and_parse(path: &str) -> Result<Vec<i32>, Box<dyn std::error::Error>> {\n    let content = tokio::fs::read_to_string(path).await?;\n    let numbers: Vec<i32> = content\n        .lines()\n        .map(|line| line.trim().parse::<i32>())\n        .collect::<Result<_, _>>()?;\n    Ok(numbers)\n}"
+    },
+    {
+      "description": "Handling JoinHandle errors (nested Result)",
+      "code": "#[tokio::main]\nasync fn main() {\n    let handle = tokio::spawn(async {\n        // This could fail\n        might_fail().await\n    });\n\n    match handle.await {\n        Ok(Ok(value)) => println!(\"Success: {}\", value),\n        Ok(Err(e)) => println!(\"Task returned error: {}\", e),\n        Err(join_err) => println!(\"Task panicked: {}\", join_err),\n    }\n}\n\nasync fn might_fail() -> Result<String, String> {\n    Err(\"something went wrong\".to_string())\n}"
+    },
+    {
+      "description": "try_join! for concurrent fallible operations",
+      "code": "use tokio::try_join;\n\nasync fn fetch_user() -> Result<String, String> {\n    Ok(\"Alice\".to_string())\n}\n\nasync fn fetch_permissions() -> Result<Vec<String>, String> {\n    Ok(vec![\"read\".to_string(), \"write\".to_string()])\n}\n\n#[tokio::main]\nasync fn main() -> Result<(), String> {\n    // If either fails, try_join! returns the first error immediately\n    let (user, perms) = try_join!(fetch_user(), fetch_permissions())?;\n    println!(\"User: {}, Permissions: {:?}\", user, perms);\n    Ok(())\n}"
+    },
+    {
+      "description": "Timeout as error handling",
+      "code": "use tokio::time::{timeout, Duration};\n\nasync fn slow_operation() -> String {\n    tokio::time::sleep(Duration::from_secs(10)).await;\n    \"done\".to_string()\n}\n\n#[tokio::main]\nasync fn main() {\n    match timeout(Duration::from_secs(2), slow_operation()).await {\n        Ok(result) => println!(\"Got: {}\", result),\n        Err(_) => println!(\"Operation timed out!\"),\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "The ? operator works in async functions just like sync ones",
+    "tokio::spawn wraps the result in Result<T, JoinError> for panic safety",
+    "try_join! runs futures concurrently and short-circuits on the first error",
+    "timeout() wraps any future with a deadline, returning Err on timeout",
+    "Use anyhow for application-level async error handling",
+    "Consider error channels (mpsc) for complex error propagation from spawned tasks"
+  ]
+}

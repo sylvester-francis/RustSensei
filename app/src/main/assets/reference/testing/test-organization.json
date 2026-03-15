@@ -1,0 +1,32 @@
+{
+  "id": "test-organization",
+  "title": "Test Organization and Patterns",
+  "order": 3,
+  "content": "Organizing tests well is crucial for maintainability. Follow patterns like Arrange-Act-Assert, use descriptive test names, group related tests in modules, and use helper functions to reduce duplication.\n\nCargo provides test filtering, output control, and parallel execution. Learn these tools to run tests efficiently during development.",
+  "codeExamples": [
+    {
+      "description": "Arrange-Act-Assert pattern",
+      "code": "#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_user_creation() {\n        // Arrange: set up test data\n        let name = \"Alice\";\n        let email = \"alice@example.com\";\n\n        // Act: perform the operation\n        let user = User::new(name, email);\n\n        // Assert: verify the result\n        assert_eq!(user.name(), name);\n        assert_eq!(user.email(), email);\n        assert!(user.is_active());\n    }\n}"
+    },
+    {
+      "description": "Nested test modules for grouping",
+      "code": "#[cfg(test)]\nmod tests {\n    use super::*;\n\n    mod creation {\n        use super::*;\n\n        #[test]\n        fn creates_with_valid_data() {\n            let result = Widget::new(\"test\", 42);\n            assert!(result.is_ok());\n        }\n\n        #[test]\n        fn rejects_empty_name() {\n            let result = Widget::new(\"\", 42);\n            assert!(result.is_err());\n        }\n\n        #[test]\n        fn rejects_negative_value() {\n            let result = Widget::new(\"test\", -1);\n            assert!(result.is_err());\n        }\n    }\n\n    mod serialization {\n        use super::*;\n\n        #[test]\n        fn round_trips_through_json() {\n            let original = Widget::new(\"test\", 42).unwrap();\n            let json = serde_json::to_string(&original).unwrap();\n            let parsed: Widget = serde_json::from_str(&json).unwrap();\n            assert_eq!(original, parsed);\n        }\n    }\n}"
+    },
+    {
+      "description": "Cargo test commands",
+      "code": "// Run all tests:\n// cargo test\n\n// Run tests matching a name:\n// cargo test test_user\n\n// Run tests in a specific module:\n// cargo test tests::creation\n\n// Show println! output (normally suppressed):\n// cargo test -- --nocapture\n\n// Run tests sequentially (not parallel):\n// cargo test -- --test-threads=1\n\n// Run only integration tests:\n// cargo test --test integration_test\n\n// Run only unit tests (skip integration):\n// cargo test --lib\n\n// Run ignored tests:\n// cargo test -- --ignored\n\n// List all tests without running:\n// cargo test -- --list"
+    },
+    {
+      "description": "Ignoring and conditionally running tests",
+      "code": "#[test]\n#[ignore = \"requires network access\"]\nfn test_api_call() {\n    // This test is skipped by default\n    // Run with: cargo test -- --ignored\n}\n\n#[test]\n#[cfg(target_os = \"linux\")]\nfn test_linux_specific() {\n    // Only compiled and run on Linux\n}"
+    }
+  ],
+  "keyPoints": [
+    "Follow Arrange-Act-Assert for clear test structure",
+    "Use nested modules to group related tests",
+    "Use descriptive names: test_<function>_<scenario>_<expected>",
+    "cargo test -- --nocapture shows println! output",
+    "#[ignore] skips slow tests by default",
+    "cargo test <pattern> runs only matching tests"
+  ]
+}

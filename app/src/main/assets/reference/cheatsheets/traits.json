@@ -1,0 +1,88 @@
+{
+  "id": "traits",
+  "title": "Traits & Generics",
+  "sections": [
+    {
+      "heading": "Defining Traits",
+      "entries": [
+        {"label": "Basic trait", "code": "trait Greet {\n    fn hello(&self) -> String;\n}", "note": "Declare a trait with required method signatures"},
+        {"label": "Default implementation", "code": "trait Greet {\n    fn hello(&self) -> String {\n        String::from(\"Hello!\")\n    }\n}", "note": "Provide a body; implementors can override"},
+        {"label": "Multiple methods", "code": "trait Summary {\n    fn title(&self) -> &str;\n    fn author(&self) -> &str;\n    fn summarize(&self) -> String {\n        format!(\"{} by {}\", self.title(), self.author())\n    }\n}", "note": "Defaults can call other trait methods"},
+        {"label": "Associated types", "code": "trait Iterator {\n    type Item;\n    fn next(&mut self) -> Option<Self::Item>;\n}", "note": "Placeholder type defined by implementor"},
+        {"label": "Associated constants", "code": "trait Bounded {\n    const MAX: u32;\n    const MIN: u32;\n}", "note": "Constants that implementors must define"}
+      ]
+    },
+    {
+      "heading": "Implementing Traits",
+      "entries": [
+        {"label": "Implement for struct", "code": "struct Article {\n    title: String,\n    author: String,\n}\nimpl Summary for Article {\n    fn title(&self) -> &str { &self.title }\n    fn author(&self) -> &str { &self.author }\n}", "note": "impl TraitName for TypeName { ... }"},
+        {"label": "Implement for enum", "code": "enum Shape {\n    Circle(f64),\n    Square(f64),\n}\nimpl std::fmt::Display for Shape {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        match self {\n            Shape::Circle(r) => write!(f, \"Circle(r={r})\"),\n            Shape::Square(s) => write!(f, \"Square(s={s})\"),\n        }\n    }\n}", "note": "Traits can be implemented for enums too"},
+        {"label": "Orphan rule", "code": "// You can implement:\n// - Your trait for any type\n// - Any trait for your type\n// You CANNOT implement:\n// - External trait for external type", "note": "Either the trait or the type must be local to your crate"},
+        {"label": "Blanket implementation", "code": "impl<T: Display> ToString for T {\n    fn to_string(&self) -> String {\n        format!(\"{self}\")\n    }\n}", "note": "Implement a trait for all types that satisfy a bound"}
+      ]
+    },
+    {
+      "heading": "Trait Bounds",
+      "entries": [
+        {"label": "Bound syntax", "code": "fn print_it<T: Display>(item: T) {\n    println!(\"{item}\");\n}", "note": "T must implement Display"},
+        {"label": "impl Trait syntax", "code": "fn print_it(item: &impl Display) {\n    println!(\"{item}\");\n}", "note": "Sugar for simple trait bounds in function parameters"},
+        {"label": "Multiple bounds", "code": "fn process<T: Display + Clone>(item: T) {\n    let copy = item.clone();\n    println!(\"{item} and {copy}\");\n}", "note": "Use + to require multiple traits"},
+        {"label": "Where clause", "code": "fn complex<T, U>(t: &T, u: &U) -> String\nwhere\n    T: Display + Clone,\n    U: Debug + PartialOrd,\n{\n    format!(\"{t}: {u:?}\")\n}", "note": "Cleaner syntax for complex bounds"},
+        {"label": "Return impl Trait", "code": "fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |y| x + y\n}", "note": "Return an opaque type that implements a trait"},
+        {"label": "Trait bound on struct", "code": "struct Wrapper<T: Display> {\n    value: T,\n}", "note": "Generic structs can have trait bounds too"}
+      ]
+    },
+    {
+      "heading": "Dynamic Dispatch (dyn)",
+      "entries": [
+        {"label": "Trait object", "code": "fn print_shape(shape: &dyn Display) {\n    println!(\"{shape}\");\n}", "note": "Runtime dispatch via vtable; use when type is not known at compile time"},
+        {"label": "Boxed trait object", "code": "fn create_greeting(formal: bool) -> Box<dyn Greet> {\n    if formal {\n        Box::new(FormalGreeter)\n    } else {\n        Box::new(CasualGreeter)\n    }\n}", "note": "Heap-allocated trait object; needed for returning different concrete types"},
+        {"label": "Vec of trait objects", "code": "let shapes: Vec<Box<dyn Draw>> = vec![\n    Box::new(Circle { radius: 5.0 }),\n    Box::new(Square { side: 3.0 }),\n];", "note": "Heterogeneous collection of different types"},
+        {"label": "dyn vs impl", "code": "// Static dispatch (monomorphized, faster):\nfn do_it(item: &impl Trait) { ... }\n\n// Dynamic dispatch (vtable, flexible):\nfn do_it(item: &dyn Trait) { ... }", "note": "impl Trait = compile-time; dyn Trait = runtime. Choose based on needs"},
+        {"label": "Object safety", "code": "// A trait is object-safe if:\n// - Methods don't return Self\n// - Methods don't have generic type parameters\n// - No associated functions without self\ntrait ObjectSafe {\n    fn method(&self);\n}", "note": "Only object-safe traits can be used as dyn Trait"}
+      ]
+    },
+    {
+      "heading": "Supertraits",
+      "entries": [
+        {"label": "Supertrait requirement", "code": "trait PrettyPrint: Display {\n    fn pretty_print(&self) {\n        println!(\"=== {} ===\", self);\n    }\n}", "note": "PrettyPrint requires implementors to also implement Display"},
+        {"label": "Multiple supertraits", "code": "trait Serializable: Display + Debug + Clone {\n    fn serialize(&self) -> String;\n}", "note": "Use + for multiple supertrait requirements"},
+        {"label": "Using supertraits", "code": "fn process<T: PrettyPrint>(item: &T) {\n    println!(\"{item}\"); // Display methods available\n    item.pretty_print(); // PrettyPrint methods too\n}", "note": "Supertrait methods are automatically available"}
+      ]
+    },
+    {
+      "heading": "Common Std Traits: Formatting",
+      "entries": [
+        {"label": "Display", "code": "use std::fmt;\nstruct Point { x: f64, y: f64 }\nimpl fmt::Display for Point {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        write!(f, \"({}, {})\", self.x, self.y)\n    }\n}", "note": "User-facing output; used by {} in format strings"},
+        {"label": "Debug", "code": "#[derive(Debug)]\nstruct Point { x: f64, y: f64 }\nlet p = Point { x: 1.0, y: 2.0 };\nprintln!(\"{:?}\", p);\nprintln!(\"{:#?}\", p);", "note": "Developer-facing output; used by {:?} and {:#?} (pretty)"}
+      ]
+    },
+    {
+      "heading": "Common Std Traits: Conversion",
+      "entries": [
+        {"label": "From / Into", "code": "impl From<(f64, f64)> for Point {\n    fn from((x, y): (f64, f64)) -> Self {\n        Point { x, y }\n    }\n}\nlet p: Point = (1.0, 2.0).into();\nlet p2 = Point::from((3.0, 4.0));", "note": "Implement From; you get Into for free"},
+        {"label": "TryFrom / TryInto", "code": "use std::convert::TryFrom;\nimpl TryFrom<i32> for EvenNumber {\n    type Error = String;\n    fn try_from(value: i32) -> Result<Self, Self::Error> {\n        if value % 2 == 0 {\n            Ok(EvenNumber(value))\n        } else {\n            Err(format!(\"{value} is not even\"))\n        }\n    }\n}", "note": "Fallible conversion; returns Result"},
+        {"label": "AsRef / AsMut", "code": "fn print_bytes(data: &impl AsRef<[u8]>) {\n    println!(\"{:?}\", data.as_ref());\n}\nprint_bytes(\"hello\");\nprint_bytes(&vec![1, 2, 3]);", "note": "Cheap reference-to-reference conversions"},
+        {"label": "ToString / FromStr", "code": "use std::str::FromStr;\nlet n: i32 = \"42\".parse().unwrap();\nlet n = i32::from_str(\"42\").unwrap();\nlet s = 42.to_string();", "note": "Implement Display to get ToString for free; FromStr for parsing"}
+      ]
+    },
+    {
+      "heading": "Common Std Traits: Comparison & Operators",
+      "entries": [
+        {"label": "PartialEq / Eq", "code": "#[derive(PartialEq, Eq)]\nstruct Point { x: i32, y: i32 }\nassert_eq!(Point { x: 1, y: 2 }, Point { x: 1, y: 2 });", "note": "PartialEq for == and !=; Eq adds reflexivity guarantee (a == a)"},
+        {"label": "PartialOrd / Ord", "code": "#[derive(PartialEq, Eq, PartialOrd, Ord)]\nstruct Score(u32);\nlet mut scores = vec![Score(3), Score(1), Score(2)];\nscores.sort();", "note": "PartialOrd for < > <= >=; Ord for total ordering (required for sort)"},
+        {"label": "Hash", "code": "#[derive(Hash, PartialEq, Eq)]\nstruct Id(u64);\nuse std::collections::HashMap;\nlet mut map = HashMap::new();\nmap.insert(Id(1), \"first\");", "note": "Required for HashMap/HashSet keys; derive with Eq"},
+        {"label": "Default", "code": "#[derive(Default)]\nstruct Config {\n    verbose: bool,\n    retries: u32,\n}\nlet cfg = Config::default();\nassert_eq!(cfg.retries, 0);", "note": "Default values: 0 for numbers, false for bool, empty for String/Vec"}
+      ]
+    },
+    {
+      "heading": "Common Std Traits: Iteration & Cloning",
+      "entries": [
+        {"label": "Iterator", "code": "struct Counter { count: u32, max: u32 }\nimpl Iterator for Counter {\n    type Item = u32;\n    fn next(&mut self) -> Option<Self::Item> {\n        if self.count < self.max {\n            self.count += 1;\n            Some(self.count)\n        } else {\n            None\n        }\n    }\n}", "note": "Implement next() to create a custom iterator"},
+        {"label": "IntoIterator", "code": "impl IntoIterator for MyCollection {\n    type Item = i32;\n    type IntoIter = std::vec::IntoIter<i32>;\n    fn into_iter(self) -> Self::IntoIter {\n        self.items.into_iter()\n    }\n}", "note": "Allows your type to be used in for loops"},
+        {"label": "Clone", "code": "#[derive(Clone)]\nstruct Matrix {\n    data: Vec<Vec<f64>>,\n}\nlet m2 = m1.clone();", "note": "Explicit deep copy; may be expensive for heap data"},
+        {"label": "Drop", "code": "struct TempFile { path: String }\nimpl Drop for TempFile {\n    fn drop(&mut self) {\n        std::fs::remove_file(&self.path).ok();\n    }\n}", "note": "Custom cleanup when value goes out of scope; cannot be called explicitly (use std::mem::drop)"}
+      ]
+    }
+  ]
+}

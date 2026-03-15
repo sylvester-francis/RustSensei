@@ -1,0 +1,239 @@
+{
+  "id": "glossary",
+  "title": "Rust Glossary",
+  "description": "A comprehensive glossary of Rust programming terminology.",
+  "terms": [
+    {
+      "term": "Ownership",
+      "definition": "Rust's core memory management concept. Each value has exactly one owner. When the owner goes out of scope, the value is dropped (freed). Ownership can be transferred (moved) but not duplicated (unless the type implements Copy)."
+    },
+    {
+      "term": "Borrowing",
+      "definition": "Temporarily accessing a value without taking ownership. Shared borrows (&T) allow multiple readers. Mutable borrows (&mut T) allow one writer. You cannot have a mutable borrow while shared borrows exist."
+    },
+    {
+      "term": "Borrow Checker",
+      "definition": "The compiler component that enforces borrowing rules at compile time: no dangling references, no data races, and either one mutable reference or any number of shared references. It is the foundation of Rust's memory safety guarantees."
+    },
+    {
+      "term": "Lifetime",
+      "definition": "A compile-time annotation ('a) that tells the compiler how long a reference is valid. Lifetimes prevent dangling references by ensuring referenced data lives at least as long as the reference. Most lifetimes are inferred by the compiler (lifetime elision)."
+    },
+    {
+      "term": "Lifetime Elision",
+      "definition": "Rules that let the compiler infer lifetimes in common cases so you don't have to annotate them. For example, fn first(s: &str) -> &str automatically gets the lifetime of the input. The three elision rules cover most function signatures."
+    },
+    {
+      "term": "Move",
+      "definition": "Transferring ownership of a value from one binding to another. After a move, the original binding is no longer valid. Move is the default for non-Copy types like String, Vec, and Box."
+    },
+    {
+      "term": "Copy",
+      "definition": "A marker trait indicating a type can be duplicated by copying bits (memcpy). Copy types (integers, bools, floats, tuples of Copy types) are implicitly copied instead of moved on assignment. Types that own heap memory (String, Vec) cannot be Copy."
+    },
+    {
+      "term": "Clone",
+      "definition": "A trait for explicitly duplicating a value. Unlike Copy (implicit, cheap), Clone is explicit (.clone()) and can be expensive. Clone is available for types that Copy is not, like String (which allocates a new heap buffer)."
+    },
+    {
+      "term": "Trait",
+      "definition": "A collection of methods that types can implement, similar to interfaces in other languages. Traits enable polymorphism, operator overloading, and shared behavior. Examples: Display, Debug, Iterator, From, Into, Clone."
+    },
+    {
+      "term": "Trait Object",
+      "definition": "A dynamically-dispatched reference to a type implementing a trait: dyn Trait. Trait objects use vtable-based dispatch (like virtual methods in C++). They enable runtime polymorphism at the cost of a pointer indirection. Used as Box<dyn Trait> or &dyn Trait."
+    },
+    {
+      "term": "Generic",
+      "definition": "A type or function parameterized over one or more type variables: fn foo<T>(x: T). The compiler generates specialized code for each concrete type used (monomorphization), giving zero-cost abstraction with no runtime overhead."
+    },
+    {
+      "term": "Monomorphization",
+      "definition": "The compiler's process of generating specialized copies of generic code for each concrete type. Vec<i32> and Vec<String> become separate compiled functions. This gives generics the same performance as hand-written specialized code."
+    },
+    {
+      "term": "Static Dispatch",
+      "definition": "Function calls resolved at compile time. Generic functions use static dispatch: the compiler generates a separate function for each type. Zero runtime cost because the exact function to call is known at compile time."
+    },
+    {
+      "term": "Dynamic Dispatch",
+      "definition": "Function calls resolved at runtime through a vtable (virtual function table). Used with trait objects (dyn Trait). Slightly slower than static dispatch due to indirection, but allows heterogeneous collections and runtime polymorphism."
+    },
+    {
+      "term": "vtable",
+      "definition": "A virtual method table: a struct of function pointers used for dynamic dispatch. When you use dyn Trait, the compiler creates a vtable containing pointers to each method implementation. A trait object is a fat pointer: (data pointer, vtable pointer)."
+    },
+    {
+      "term": "Crate",
+      "definition": "A compilation unit in Rust, either a binary (executable) or library. A crate is a package of Rust code distributed via crates.io. Cargo manages crate dependencies."
+    },
+    {
+      "term": "Cargo",
+      "definition": "Rust's build system and package manager. Handles building, testing, dependency management, documentation generation, and publishing to crates.io. Configuration lives in Cargo.toml."
+    },
+    {
+      "term": "Module",
+      "definition": "A namespace for organizing code within a crate. Declared with mod keyword. Controls visibility (pub/private). Modules can be inline, in separate files, or in directories."
+    },
+    {
+      "term": "Macro",
+      "definition": "Code that generates code at compile time. Declarative macros (macro_rules!) match patterns. Procedural macros (derive, attribute, function-like) operate on token streams. Examples: println!, vec!, #[derive(Debug)]."
+    },
+    {
+      "term": "Derive",
+      "definition": "An attribute that automatically generates trait implementations for a struct or enum. #[derive(Debug, Clone, PartialEq)] generates Debug, Clone, and PartialEq implementations. Custom derive macros are created with procedural macros."
+    },
+    {
+      "term": "Enum",
+      "definition": "An algebraic data type that can be one of several variants. Variants can hold data (tuple or struct variants). Rust enums with match expressions are far more powerful than enums in most other languages. Option and Result are enums."
+    },
+    {
+      "term": "Pattern Matching",
+      "definition": "Destructuring values using match, if let, while let, or let. Match is exhaustive -- the compiler ensures all variants/cases are handled. Patterns can bind variables, match constants, use guards, and nest arbitrarily."
+    },
+    {
+      "term": "Option<T>",
+      "definition": "An enum representing an optional value: Some(T) or None. Rust's replacement for null -- the compiler forces you to handle the None case. Methods: unwrap(), map(), and_then(), unwrap_or_default()."
+    },
+    {
+      "term": "Result<T, E>",
+      "definition": "An enum representing success (Ok(T)) or failure (Err(E)). The standard way to handle errors in Rust. The ? operator propagates Err values up the call stack. Prefer Result over panicking."
+    },
+    {
+      "term": "Closure",
+      "definition": "An anonymous function that captures variables from its environment. Syntax: |x| x + 1. Closures implement one of Fn, FnMut, or FnOnce traits depending on how they capture. Used extensively with iterators (map, filter, etc.)."
+    },
+    {
+      "term": "Fn / FnMut / FnOnce",
+      "definition": "The three closure traits. Fn: borrows captured variables immutably. FnMut: borrows mutably. FnOnce: takes ownership (can only be called once). Fn is the most restrictive but most flexible for callers."
+    },
+    {
+      "term": "Iterator",
+      "definition": "A trait with one method: next() -> Option<Item>. Provides a lazy sequence of values. Supports combinators: map, filter, fold, collect, zip, chain, etc. Iterators are zero-cost abstractions compiled to efficient loops."
+    },
+    {
+      "term": "Turbofish",
+      "definition": "The ::<Type> syntax for specifying generic type parameters on expressions. Example: \"42\".parse::<i32>(), Vec::<u8>::new(). Named because ::<> looks like a fish. Used when the compiler cannot infer the type."
+    },
+    {
+      "term": "Deref Coercion",
+      "definition": "Automatic conversion of a reference to one type into a reference to another via the Deref trait. &String automatically becomes &str, &Vec<T> becomes &[T], &Box<T> becomes &T. Makes smart pointers ergonomic."
+    },
+    {
+      "term": "Slice",
+      "definition": "A dynamically-sized view into a contiguous sequence: &[T] or &str. Slices are fat pointers: (pointer to data, length). They don't own data -- they borrow it. &[T] works with arrays, vectors, and other slices."
+    },
+    {
+      "term": "String vs &str",
+      "definition": "String is an owned, heap-allocated, growable UTF-8 string. &str is a borrowed reference to a UTF-8 string slice. Functions should generally accept &str (more flexible) and return String (gives caller ownership)."
+    },
+    {
+      "term": "Box<T>",
+      "definition": "A smart pointer that heap-allocates a value. Provides ownership of heap data with automatic deallocation. Used for recursive types, large values, and trait objects (Box<dyn Trait>)."
+    },
+    {
+      "term": "Rc<T>",
+      "definition": "Reference Counted smart pointer for shared ownership in single-threaded code. Multiple Rc pointers can own the same value. The value is dropped when the last Rc is dropped. Not thread-safe -- use Arc for multi-threaded code."
+    },
+    {
+      "term": "Arc<T>",
+      "definition": "Atomic Reference Counted smart pointer for shared ownership across threads. Like Rc but with atomic reference counting, making it safe to share between threads. Commonly used as Arc<Mutex<T>> for shared mutable state."
+    },
+    {
+      "term": "Send",
+      "definition": "A marker trait indicating a type can be safely transferred to another thread. Most types are Send. Rc is NOT Send (use Arc instead). Raw pointers are not Send. The compiler auto-implements Send when safe."
+    },
+    {
+      "term": "Sync",
+      "definition": "A marker trait indicating a type can be safely shared between threads via references (&T). T is Sync if &T is Send. Mutex<T> is Sync (even if T is not Sync, the Mutex makes concurrent access safe). Cell and RefCell are NOT Sync."
+    },
+    {
+      "term": "Pin<T>",
+      "definition": "A wrapper that prevents a value from being moved in memory. Needed for self-referential types, primarily async futures. Pin<Box<T>> guarantees the inner T will not be relocated. You rarely need Pin directly in application code."
+    },
+    {
+      "term": "Unpin",
+      "definition": "A marker trait indicating a type can be safely moved even when pinned. Most types are Unpin. Self-referential types (like async futures) are !Unpin. If a type is Unpin, Pin<&mut T> gives you &mut T freely."
+    },
+    {
+      "term": "Future",
+      "definition": "A trait representing an asynchronous computation. Has one method: poll() returns Ready(value) or Pending. async fn returns impl Future. Futures are lazy -- they do nothing until polled by an async runtime."
+    },
+    {
+      "term": "Stream",
+      "definition": "The async version of Iterator. Yields a sequence of values asynchronously. Each call to poll_next() may return Pending (not ready yet), Ready(Some(item)), or Ready(None) (stream ended)."
+    },
+    {
+      "term": "async/await",
+      "definition": "Syntax for writing asynchronous code that looks synchronous. async fn returns a Future. .await suspends execution until a Future completes. The compiler transforms async functions into state machines."
+    },
+    {
+      "term": "RAII",
+      "definition": "Resource Acquisition Is Initialization. A pattern where resource cleanup is tied to object destruction. In Rust, the Drop trait runs automatically when a value goes out of scope. File handles close, Mutexes unlock, memory is freed."
+    },
+    {
+      "term": "Drop",
+      "definition": "A trait with one method: drop(&mut self). Called automatically when a value goes out of scope. Used for cleanup: closing files, releasing memory, flushing buffers. You cannot call drop() directly -- use std::mem::drop() instead."
+    },
+    {
+      "term": "FFI",
+      "definition": "Foreign Function Interface. Calling C code from Rust or Rust code from C. Uses extern \"C\" functions and #[repr(C)] types. The unsafe keyword is required because the compiler cannot verify foreign code's safety guarantees."
+    },
+    {
+      "term": "ABI",
+      "definition": "Application Binary Interface. The low-level calling convention between compiled code. Rust does not have a stable ABI (it can change between compiler versions). Use extern \"C\" for a stable ABI when doing FFI."
+    },
+    {
+      "term": "unsafe",
+      "definition": "A keyword that unlocks five superpowers: dereference raw pointers, call unsafe functions, access mutable statics, implement unsafe traits, and access union fields. Unsafe does not disable the borrow checker -- it just adds capabilities."
+    },
+    {
+      "term": "PhantomData",
+      "definition": "A zero-sized type used to indicate ownership or lifetime relationships that the compiler cannot otherwise see. Used in unsafe code, FFI wrappers, and the typestate pattern. PhantomData<T> tells the compiler 'this type logically owns a T.'"
+    },
+    {
+      "term": "Zero-Cost Abstractions",
+      "definition": "The principle that high-level features (generics, iterators, closures, traits) compile to code as efficient as hand-written low-level code. You don't pay a runtime cost for abstractions you use, and you pay nothing for those you don't use."
+    },
+    {
+      "term": "Type Inference",
+      "definition": "The compiler's ability to determine types without explicit annotations. Rust uses local type inference (Hindley-Milner style) -- it can infer types within a function body. You must annotate function signatures, struct fields, and statics."
+    },
+    {
+      "term": "Shadowing",
+      "definition": "Declaring a new variable with the same name in the same scope. The new variable shadows the old one. Unlike mutation, shadowing can change the type: let x = \"5\"; let x: i32 = x.parse().unwrap();"
+    },
+    {
+      "term": "Trait Bound",
+      "definition": "A constraint on a generic type parameter: fn foo<T: Display + Clone>(x: T). The where clause is equivalent: fn foo<T>(x: T) where T: Display + Clone. Bounds specify which traits a generic type must implement."
+    },
+    {
+      "term": "Associated Type",
+      "definition": "A type placeholder in a trait definition: type Item in Iterator. Unlike generic parameters, associated types are fixed per implementation: Vec<i32>'s Iterator has Item = i32. Avoids verbose type annotations."
+    },
+    {
+      "term": "Sized",
+      "definition": "A trait automatically implemented for types with a known size at compile time. Generic parameters have an implicit Sized bound. Dynamically sized types (DSTs) like str and [T] are ?Sized and can only be used behind a pointer."
+    },
+    {
+      "term": "DST (Dynamically Sized Type)",
+      "definition": "A type whose size is not known at compile time: str, [T], and dyn Trait. DSTs can only be used behind a fat pointer (&str, &[T], Box<dyn Trait>) which carries both a pointer and size/vtable information."
+    },
+    {
+      "term": "Fat Pointer",
+      "definition": "A pointer that is two words wide: a data pointer plus metadata. &[T] carries (pointer, length). &dyn Trait carries (pointer, vtable). &str carries (pointer, length in bytes). Regular references are thin (one word)."
+    },
+    {
+      "term": "Newtype",
+      "definition": "A pattern of wrapping a type in a single-field tuple struct: struct UserId(u64). Provides type safety, allows implementing traits on foreign types, and has zero runtime cost (the wrapper is optimized away)."
+    },
+    {
+      "term": "Orphan Rule",
+      "definition": "You can only implement a trait for a type if either the trait or the type is defined in your crate. Prevents conflicting implementations across crates. Workaround: use the newtype pattern to wrap foreign types."
+    },
+    {
+      "term": "Blanket Implementation",
+      "definition": "A trait implementation for all types matching a bound: impl<T: Display> ToString for T. This means every type that implements Display automatically gets ToString. Used extensively in the standard library."
+    }
+  ]
+}

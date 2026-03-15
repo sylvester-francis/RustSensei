@@ -1,0 +1,14 @@
+{
+  "id": "visitor",
+  "title": "Visitor Pattern with Enums",
+  "order": 7,
+  "description": "In Rust, the visitor pattern is naturally expressed using enums and match. Instead of the OOP double-dispatch visitor, Rust uses enum variants to represent different node types and match expressions to dispatch behavior. This is simpler, type-safe, and the compiler ensures all variants are handled (exhaustive matching).",
+  "whenToUse": [
+    "Processing ASTs (abstract syntax trees)",
+    "Walking tree or graph structures with different node types",
+    "When you need multiple operations over a fixed set of types",
+    "Interpreters, compilers, linters, formatters"
+  ],
+  "codeExample": "// An expression AST\n#[derive(Debug)]\nenum Expr {\n    Literal(f64),\n    Add(Box<Expr>, Box<Expr>),\n    Mul(Box<Expr>, Box<Expr>),\n    Neg(Box<Expr>),\n}\n\n// \"Visitor\" 1: Evaluate the expression\nfn eval(expr: &Expr) -> f64 {\n    match expr {\n        Expr::Literal(n) => *n,\n        Expr::Add(a, b) => eval(a) + eval(b),\n        Expr::Mul(a, b) => eval(a) * eval(b),\n        Expr::Neg(e) => -eval(e),\n    }\n}\n\n// \"Visitor\" 2: Pretty-print the expression\nfn pretty_print(expr: &Expr) -> String {\n    match expr {\n        Expr::Literal(n) => format!(\"{}\", n),\n        Expr::Add(a, b) => format!(\"({} + {})\", pretty_print(a), pretty_print(b)),\n        Expr::Mul(a, b) => format!(\"({} * {})\", pretty_print(a), pretty_print(b)),\n        Expr::Neg(e) => format!(\"(-{})\", pretty_print(e)),\n    }\n}\n\n// \"Visitor\" 3: Count nodes\nfn count_nodes(expr: &Expr) -> usize {\n    match expr {\n        Expr::Literal(_) => 1,\n        Expr::Add(a, b) | Expr::Mul(a, b) => 1 + count_nodes(a) + count_nodes(b),\n        Expr::Neg(e) => 1 + count_nodes(e),\n    }\n}\n\nfn main() {\n    // Represents: (3 + 4) * (-(2))\n    let expr = Expr::Mul(\n        Box::new(Expr::Add(\n            Box::new(Expr::Literal(3.0)),\n            Box::new(Expr::Literal(4.0)),\n        )),\n        Box::new(Expr::Neg(\n            Box::new(Expr::Literal(2.0)),\n        )),\n    );\n\n    println!(\"Expression: {}\", pretty_print(&expr));\n    println!(\"Result: {}\", eval(&expr));\n    println!(\"Nodes: {}\", count_nodes(&expr));\n}",
+  "realWorldUse": "syn crate (Rust proc-macro AST walking), serde's data model (Deserializer visits), regex-syntax crate (regex AST), any compiler or interpreter built in Rust."
+}

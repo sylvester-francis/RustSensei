@@ -1,0 +1,43 @@
+{
+  "id": "traits-generics",
+  "title": "Traits and Generics",
+  "order": 2,
+  "description": "Questions about Rust's type system, polymorphism, and generic programming.",
+  "questions": [
+    {
+      "question": "What is the difference between static dispatch and dynamic dispatch in Rust?",
+      "answer": "Static dispatch uses generics: fn foo<T: Display>(x: T). The compiler generates a separate specialized function for each concrete type at compile time (monomorphization). Zero runtime cost, but increases binary size.\n\nDynamic dispatch uses trait objects: fn foo(x: &dyn Display). A single function handles all types at runtime using a vtable (a table of function pointers). There is a small runtime cost from pointer indirection, but binary size is smaller.\n\nChoose static dispatch (generics) for performance-critical code. Choose dynamic dispatch (dyn Trait) when you need heterogeneous collections, runtime polymorphism, or smaller binaries.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What are trait objects and what is 'object safety'? Why can't all traits be used as trait objects?",
+      "answer": "A trait object (dyn Trait) allows runtime polymorphism. It is a fat pointer containing a data pointer and a vtable pointer.\n\nObject safety means a trait can be used as a trait object. A trait is object-safe if:\n- All methods have a receiver (self, &self, &mut self)\n- No method returns Self (the concrete type is unknown at runtime)\n- No method uses generic type parameters\n- The trait does not require Self: Sized\n\nFor example, Clone is not object-safe because clone() returns Self. Iterator is not object-safe because it has a generic associated type Item that methods like map<F>() use with generic parameters.\n\nWorkaround: use a wrapper trait that erases the problematic methods, or use Box<dyn Trait> with a helper method.",
+      "difficulty": "advanced"
+    },
+    {
+      "question": "Explain the From and Into traits. How does the ? operator relate to From?",
+      "answer": "From<T> defines how to create a type from another: impl From<i32> for MyType. Into<T> is the reverse: it is automatically implemented when From is implemented (blanket implementation).\n\nConvention: implement From, not Into, because From gives you both.\n\nThe ? operator uses From for error conversion. When you write:\n  let value = operation()?;\nIf operation() returns Err(e), the ? operator calls From::from(e) to convert the error type to the function's return error type. This is why thiserror's #[from] attribute works: it implements From for your error enum.\n\nExample: if your function returns Result<T, MyError> and you call something returning io::Error, the ? operator calls MyError::from(io_error).",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is a blanket implementation? Give an example.",
+      "answer": "A blanket implementation is a trait implementation for all types matching a trait bound, rather than for a specific type. It uses generics in the impl block.\n\nClassic example from the standard library:\n\nimpl<T: Display> ToString for T {\n    fn to_string(&self) -> String {\n        format!(\"{}\", self)\n    }\n}\n\nThis means every type that implements Display automatically gets ToString for free. You never need to implement ToString manually.\n\nOther examples:\n- impl<T> From<T> for T -- every type can be converted from itself\n- impl<T: Into<U>> From<T> for U -- the Into/From duality\n- impl<T: Error> From<T> for Box<dyn Error> -- any error can become a boxed error",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What are associated types vs. generic parameters on traits? When would you use each?",
+      "answer": "Generic parameters: trait MyTrait<T>. A type can implement the trait multiple times for different T values. Example: From<i32>, From<String>, From<&str> all on one type.\n\nAssociated types: trait Iterator { type Item; }. The implementing type fixes the associated type once. Vec<i32>::IntoIter always has Item = i32.\n\nUse generic parameters when:\n- A type should implement the trait multiple times with different types\n- Example: From<T> -- a type converts from many sources\n\nUse associated types when:\n- Each implementation should have exactly one choice\n- It simplifies the API (no need for Iterator<Item = i32>, just Iterator)\n- Example: Iterator, Deref, IntoIterator",
+      "difficulty": "advanced"
+    },
+    {
+      "question": "What is the orphan rule? How do you work around it?",
+      "answer": "The orphan rule states: you can implement a trait for a type only if either the trait or the type is defined in your crate. This prevents conflicting implementations across crates.\n\nYou CANNOT do: impl Display for Vec<T> (both Display and Vec are from external crates).\n\nWorkarounds:\n1. Newtype pattern: struct MyVec(Vec<i32>); impl Display for MyVec { ... }\n2. Create your own trait: trait MyDisplay { ... } impl MyDisplay for Vec<T> { ... }\n3. Extension trait: trait VecExt { fn my_method(&self); } impl VecExt for Vec<T> { ... }\n\nThe newtype pattern is the most common and idiomatic solution.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Explain the Sized trait. What does ?Sized mean?",
+      "answer": "Sized is an auto-trait meaning 'this type has a known size at compile time.' Almost all types are Sized. Generic type parameters have an implicit T: Sized bound.\n\n?Sized (pronounced 'maybe sized') relaxes this bound, allowing dynamically-sized types (DSTs) like str, [T], and dyn Trait.\n\nDSTs can only exist behind a pointer: &str, &[T], Box<dyn Trait>. These are 'fat pointers' carrying both a data pointer and size/vtable metadata.\n\nUsing ?Sized is necessary when writing generic code that should work with both sized and unsized types:\n\nfn print_it<T: Display + ?Sized>(value: &T) {\n    println!(\"{}\", value);\n}\n// Works with both &String (Sized) and &str (unsized)",
+      "difficulty": "advanced"
+    }
+  ]
+}

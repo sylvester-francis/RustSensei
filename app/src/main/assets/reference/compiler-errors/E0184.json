@@ -1,0 +1,20 @@
+{
+  "code": "E0184",
+  "title": "Drop and Copy are mutually exclusive",
+  "severity": "frequent",
+  "explanation": "This error occurs when you try to implement or derive both Copy and Drop for the same type. These traits are fundamentally incompatible: Copy means bitwise duplication with no cleanup, while Drop means custom cleanup is needed when a value goes out of scope.",
+  "example_bad": "#[derive(Copy, Clone)]\nstruct Resource {\n    id: u32,\n}\n\nimpl Drop for Resource {\n    fn drop(&mut self) {\n        println!(\"Dropping resource {}\", self.id);\n    }\n}",
+  "error_message": "error[E0184]: the trait `Copy` cannot be implemented for this type; the type has a destructor",
+  "fixes": [
+    {
+      "description": "Remove Copy and keep Drop",
+      "code": "#[derive(Clone)]\nstruct Resource {\n    id: u32,\n}\n\nimpl Drop for Resource {\n    fn drop(&mut self) {\n        println!(\"Dropping resource {}\", self.id);\n    }\n}"
+    },
+    {
+      "description": "Remove Drop and keep Copy",
+      "code": "#[derive(Copy, Clone)]\nstruct Resource {\n    id: u32,\n}\n// No Drop impl — value is just bitwise copied"
+    }
+  ],
+  "related": ["E0277", "E0119"],
+  "tip": "If a type needs cleanup (Drop), it should use Clone for explicit duplication, not Copy. Copy types must be simple data with no owned resources."
+}

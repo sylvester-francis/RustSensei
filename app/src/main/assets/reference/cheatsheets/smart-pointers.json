@@ -1,0 +1,77 @@
+{
+  "id": "smart-pointers",
+  "title": "Smart Pointers",
+  "sections": [
+    {
+      "heading": "Box<T>",
+      "entries": [
+        {"label": "Basic allocation", "code": "let b = Box::new(5);\nprintln!(\"{b}\");", "note": "Allocates value on the heap; owns the data; auto-derefs"},
+        {"label": "Recursive types", "code": "enum List {\n    Cons(i32, Box<List>),\n    Nil,\n}\nlet list = List::Cons(1, Box::new(List::Cons(2, Box::new(List::Nil))));", "note": "Box gives recursive types a known size at compile time"},
+        {"label": "Trait objects", "code": "trait Animal {\n    fn speak(&self) -> &str;\n}\nlet pet: Box<dyn Animal> = Box::new(Dog);\nprintln!(\"{}\", pet.speak());", "note": "Box<dyn Trait> for heap-allocated dynamic dispatch"},
+        {"label": "Box::leak", "code": "let s: &'static str = Box::leak(String::from(\"hello\").into_boxed_str());", "note": "Leak memory to get a 'static reference; useful for global data"},
+        {"label": "Into and from raw", "code": "let b = Box::new(42);\nlet raw = Box::into_raw(b);\n// ... later ...\nlet b = unsafe { Box::from_raw(raw) };", "note": "Convert to/from raw pointer; must manually manage lifetime"}
+      ]
+    },
+    {
+      "heading": "Rc<T> (Reference Counted)",
+      "entries": [
+        {"label": "Shared ownership", "code": "use std::rc::Rc;\nlet a = Rc::new(String::from(\"hello\"));\nlet b = Rc::clone(&a);\nlet c = Rc::clone(&a);\nprintln!(\"count: {}\", Rc::strong_count(&a)); // 3", "note": "Multiple owners; reference count tracks how many Rc point to data"},
+        {"label": "Accessing data", "code": "let rc = Rc::new(vec![1, 2, 3]);\nprintln!(\"{}\", rc.len()); // auto-deref\nlet slice: &[i32] = &rc;", "note": "Rc auto-derefs to the inner type for method calls"},
+        {"label": "Rc is immutable", "code": "let rc = Rc::new(5);\n// Cannot get &mut through Rc alone\n// Use Rc<RefCell<T>> for interior mutability", "note": "Rc only gives shared (&T) access; combine with RefCell for mutation"},
+        {"label": "Rc::try_unwrap", "code": "let rc = Rc::new(42);\nlet val = Rc::try_unwrap(rc).unwrap(); // Ok if count == 1", "note": "Extract the inner value if this is the only Rc"},
+        {"label": "Shared graph node", "code": "use std::rc::Rc;\nuse std::cell::RefCell;\n\nstruct Node {\n    value: i32,\n    children: RefCell<Vec<Rc<Node>>>,\n}\nlet root = Rc::new(Node {\n    value: 1,\n    children: RefCell::new(vec![]),\n});\nlet child = Rc::new(Node {\n    value: 2,\n    children: RefCell::new(vec![]),\n});\nroot.children.borrow_mut().push(Rc::clone(&child));", "note": "Common pattern for tree/graph structures with shared nodes"}
+      ]
+    },
+    {
+      "heading": "Arc<T> (Atomic Reference Counted)",
+      "entries": [
+        {"label": "Thread-safe shared ownership", "code": "use std::sync::Arc;\nuse std::thread;\n\nlet data = Arc::new(vec![1, 2, 3]);\nlet handles: Vec<_> = (0..3).map(|_| {\n    let data = Arc::clone(&data);\n    thread::spawn(move || {\n        println!(\"{:?}\", data);\n    })\n}).collect();\nfor h in handles { h.join().unwrap(); }", "note": "Like Rc but uses atomic operations; safe across threads"},
+        {"label": "Arc + Mutex", "code": "use std::sync::{Arc, Mutex};\nlet counter = Arc::new(Mutex::new(0));\nlet handles: Vec<_> = (0..10).map(|_| {\n    let counter = Arc::clone(&counter);\n    std::thread::spawn(move || {\n        let mut num = counter.lock().unwrap();\n        *num += 1;\n    })\n}).collect();\nfor h in handles { h.join().unwrap(); }\nprintln!(\"Result: {}\", *counter.lock().unwrap());", "note": "Arc for shared ownership + Mutex for interior mutability across threads"},
+        {"label": "Arc vs Rc", "code": "// Rc: single-threaded, lower overhead\n// Arc: thread-safe, slight overhead from atomics\n// Rc does NOT implement Send/Sync\n// Arc implements Send + Sync when T: Send + Sync", "note": "Use Rc when single-threaded; Arc when crossing thread boundaries"}
+      ]
+    },
+    {
+      "heading": "RefCell<T> (Interior Mutability)",
+      "entries": [
+        {"label": "Borrow at runtime", "code": "use std::cell::RefCell;\nlet data = RefCell::new(vec![1, 2, 3]);\ndata.borrow_mut().push(4);\nprintln!(\"{:?}\", data.borrow());", "note": "Enforces borrowing rules at runtime instead of compile time"},
+        {"label": "borrow and borrow_mut", "code": "let cell = RefCell::new(42);\n{\n    let r = cell.borrow();     // immutable borrow\n    println!(\"{r}\");\n} // r dropped here\n{\n    let mut w = cell.borrow_mut(); // mutable borrow\n    *w += 1;\n}", "note": "Cannot have borrow() and borrow_mut() active simultaneously; panics at runtime"},
+        {"label": "try_borrow", "code": "let cell = RefCell::new(42);\nlet r = cell.borrow();\nmatch cell.try_borrow_mut() {\n    Ok(mut w) => *w += 1,\n    Err(_) => println!(\"already borrowed\"),\n}", "note": "Returns Result instead of panicking on borrow conflict"},
+        {"label": "Rc<RefCell<T>>", "code": "use std::rc::Rc;\nuse std::cell::RefCell;\n\nlet shared = Rc::new(RefCell::new(String::from(\"hello\")));\nlet clone1 = Rc::clone(&shared);\nlet clone2 = Rc::clone(&shared);\nclone1.borrow_mut().push_str(\" world\");\nprintln!(\"{}\", clone2.borrow());", "note": "Multiple owners with mutability; common pattern for graphs and shared state"}
+      ]
+    },
+    {
+      "heading": "Cell<T>",
+      "entries": [
+        {"label": "Get and set", "code": "use std::cell::Cell;\nlet cell = Cell::new(42);\nprintln!(\"{}\", cell.get());\ncell.set(99);\nprintln!(\"{}\", cell.get());", "note": "Interior mutability for Copy types; no borrowing, just get/set"},
+        {"label": "In structs", "code": "struct Counter {\n    count: Cell<u32>,\n}\nimpl Counter {\n    fn increment(&self) {\n        self.count.set(self.count.get() + 1);\n    }\n}", "note": "Allows mutation through &self; useful for caches and counters"},
+        {"label": "Cell vs RefCell", "code": "// Cell<T>: T must be Copy; no runtime borrow checking; cheaper\n// RefCell<T>: any T; runtime borrow checking; can panic\n// Both provide interior mutability", "note": "Prefer Cell for Copy types; RefCell when you need references to inner data"}
+      ]
+    },
+    {
+      "heading": "Cow<T> (Clone on Write)",
+      "entries": [
+        {"label": "Borrowed or owned", "code": "use std::borrow::Cow;\n\nfn process(input: &str) -> Cow<str> {\n    if input.contains(' ') {\n        Cow::Owned(input.replace(' ', \"_\"))\n    } else {\n        Cow::Borrowed(input)\n    }\n}", "note": "Avoids cloning when not necessary; borrows when possible, owns when needed"},
+        {"label": "From &str or String", "code": "let borrowed: Cow<str> = Cow::Borrowed(\"hello\");\nlet owned: Cow<str> = Cow::Owned(String::from(\"hello\"));\n\n// Both can be used as &str:\nprintln!(\"{borrowed} {owned}\");", "note": "Cow<str> can hold either &str or String transparently"},
+        {"label": "into_owned", "code": "let cow: Cow<str> = Cow::Borrowed(\"hello\");\nlet owned: String = cow.into_owned(); // clones if borrowed", "note": "Convert to owned type; only clones if currently borrowing"},
+        {"label": "Cow with Vec", "code": "fn maybe_sort(data: &[i32]) -> Cow<[i32]> {\n    if data.windows(2).all(|w| w[0] <= w[1]) {\n        Cow::Borrowed(data)\n    } else {\n        let mut sorted = data.to_vec();\n        sorted.sort();\n        Cow::Owned(sorted)\n    }\n}", "note": "Works with any type implementing ToOwned: str, [T], Path, etc."}
+      ]
+    },
+    {
+      "heading": "Weak<T>",
+      "entries": [
+        {"label": "Prevent reference cycles", "code": "use std::rc::{Rc, Weak};\nstruct Node {\n    value: i32,\n    parent: RefCell<Weak<Node>>,\n    children: RefCell<Vec<Rc<Node>>>,\n}", "note": "Weak does not prevent deallocation; breaks reference cycles"},
+        {"label": "Create and upgrade", "code": "let strong = Rc::new(42);\nlet weak = Rc::downgrade(&strong);\n\nassert_eq!(weak.upgrade(), Some(Rc::new(42)));\ndrop(strong);\nassert_eq!(weak.upgrade(), None);", "note": "downgrade creates Weak; upgrade returns Option<Rc<T>>"},
+        {"label": "Weak count", "code": "let rc = Rc::new(42);\nlet weak = Rc::downgrade(&rc);\nprintln!(\"strong: {}\", Rc::strong_count(&rc)); // 1\nprintln!(\"weak: {}\", Rc::weak_count(&rc));     // 1", "note": "Track both strong and weak reference counts"}
+      ]
+    },
+    {
+      "heading": "Pin<P>",
+      "entries": [
+        {"label": "Basic Pin", "code": "use std::pin::Pin;\nlet mut val = 42;\nlet pinned: Pin<&mut i32> = Pin::new(&mut val);", "note": "Guarantees the value will not be moved in memory"},
+        {"label": "Why Pin exists", "code": "// Pin is needed for self-referential types,\n// most commonly async Futures.\n// Once pinned, the value's memory address is stable.\nasync fn example() {\n    let data = vec![1, 2, 3];\n    some_async_fn(&data).await;\n    // data must not move while awaited\n}", "note": "Futures may contain self-references; Pin ensures they stay in place"},
+        {"label": "Box::pin", "code": "use std::pin::Pin;\nlet pinned: Pin<Box<MyFuture>> = Box::pin(MyFuture::new());", "note": "Pin a heap-allocated value; common for futures"},
+        {"label": "Unpin trait", "code": "// Most types implement Unpin (can be moved even when pinned)\n// Types with self-references do NOT implement Unpin\n// async fn return types are !Unpin", "note": "Unpin means Pin has no effect; most types are Unpin by default"}
+      ]
+    }
+  ]
+}

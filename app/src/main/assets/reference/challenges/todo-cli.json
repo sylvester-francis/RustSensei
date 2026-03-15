@@ -1,0 +1,24 @@
+{
+  "id": "todo-cli",
+  "title": "CLI Todo List",
+  "difficulty": "intermediate",
+  "estimatedTime": "60 min",
+  "description": "Build a command-line todo list application that supports adding, removing, listing, and completing tasks with persistent storage using a JSON file.",
+  "concepts": ["structs", "enums", "file I/O", "serde", "Vec", "command parsing"],
+  "requirements": [
+    "Define a Todo struct with id, title, completed, and created_at fields",
+    "Support commands: add, remove, list, complete, clear",
+    "Persist todos to a JSON file between runs",
+    "Display todos with their completion status",
+    "Generate unique IDs for each todo"
+  ],
+  "starterCode": "use std::collections::HashMap;\n\n#[derive(Debug)]\nstruct Todo {\n    id: u32,\n    title: String,\n    completed: bool,\n}\n\nstruct TodoList {\n    todos: Vec<Todo>,\n    next_id: u32,\n}\n\nimpl TodoList {\n    fn new() -> Self {\n        TodoList {\n            todos: Vec::new(),\n            next_id: 1,\n        }\n    }\n\n    fn add(&mut self, title: String) {\n        // TODO: Add a new todo\n    }\n\n    fn remove(&mut self, id: u32) -> bool {\n        // TODO: Remove a todo by ID, return true if found\n        false\n    }\n\n    fn complete(&mut self, id: u32) -> bool {\n        // TODO: Mark a todo as complete, return true if found\n        false\n    }\n\n    fn list(&self) {\n        // TODO: Print all todos\n    }\n}\n\nfn main() {\n    let mut todos = TodoList::new();\n    todos.add(\"Learn Rust ownership\".to_string());\n    todos.add(\"Build a CLI app\".to_string());\n    todos.list();\n    todos.complete(1);\n    todos.list();\n}",
+  "solution": "use std::collections::HashMap;\n\n#[derive(Debug)]\nstruct Todo {\n    id: u32,\n    title: String,\n    completed: bool,\n}\n\nstruct TodoList {\n    todos: Vec<Todo>,\n    next_id: u32,\n}\n\nimpl TodoList {\n    fn new() -> Self {\n        TodoList {\n            todos: Vec::new(),\n            next_id: 1,\n        }\n    }\n\n    fn add(&mut self, title: String) {\n        let todo = Todo {\n            id: self.next_id,\n            title,\n            completed: false,\n        };\n        self.next_id += 1;\n        println!(\"Added: #{} - {}\", todo.id, todo.title);\n        self.todos.push(todo);\n    }\n\n    fn remove(&mut self, id: u32) -> bool {\n        if let Some(pos) = self.todos.iter().position(|t| t.id == id) {\n            let removed = self.todos.remove(pos);\n            println!(\"Removed: #{} - {}\", removed.id, removed.title);\n            true\n        } else {\n            println!(\"Todo #{} not found\", id);\n            false\n        }\n    }\n\n    fn complete(&mut self, id: u32) -> bool {\n        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {\n            todo.completed = true;\n            println!(\"Completed: #{} - {}\", todo.id, todo.title);\n            true\n        } else {\n            println!(\"Todo #{} not found\", id);\n            false\n        }\n    }\n\n    fn list(&self) {\n        if self.todos.is_empty() {\n            println!(\"No todos!\");\n            return;\n        }\n        println!(\"\\n--- Todo List ---\");\n        for todo in &self.todos {\n            let status = if todo.completed { \"[x]\" } else { \"[ ]\" };\n            println!(\"  {} #{}: {}\", status, todo.id, todo.title);\n        }\n        println!();\n    }\n}\n\nfn main() {\n    let mut todos = TodoList::new();\n    todos.add(\"Learn Rust ownership\".to_string());\n    todos.add(\"Build a CLI app\".to_string());\n    todos.list();\n    todos.complete(1);\n    todos.list();\n    todos.remove(2);\n    todos.list();\n}",
+  "hints": [
+    "Use Vec::retain() or Vec::remove() with position() to remove items",
+    "iter_mut().find() lets you get a mutable reference to modify a todo",
+    "For persistence, use serde_json::to_string_pretty() and from_str()",
+    "Consider using std::fs::read_to_string and std::fs::write for file I/O"
+  ],
+  "bonusChallenge": "Add JSON file persistence so todos survive between runs. Add priority levels and due dates. Add a search/filter command."
+}

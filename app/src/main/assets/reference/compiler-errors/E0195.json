@@ -1,0 +1,16 @@
+{
+  "code": "E0195",
+  "title": "Lifetime parameters do not match trait definition",
+  "severity": "occasional",
+  "explanation": "This error occurs when the lifetime parameters in your trait implementation do not match those declared in the trait definition. The number and position of lifetime parameters must be identical.",
+  "example_bad": "trait Parser {\n    fn parse<'a>(&self, input: &'a str) -> &'a str;\n}\n\nstruct MyParser;\n\nimpl Parser for MyParser {\n    fn parse(&self, input: &str) -> &str { // Error: lifetime mismatch\n        input\n    }\n}",
+  "error_message": "error[E0195]: lifetime parameters or bounds on method `parse` do not match the trait declaration",
+  "fixes": [
+    {
+      "description": "Match the trait's lifetime parameters exactly",
+      "code": "impl Parser for MyParser {\n    fn parse<'a>(&self, input: &'a str) -> &'a str {\n        input\n    }\n}"
+    }
+  ],
+  "related": ["E0106", "E0621", "E0053"],
+  "tip": "When implementing a trait, your method signatures must exactly match the trait definition, including all lifetime parameters and bounds."
+}

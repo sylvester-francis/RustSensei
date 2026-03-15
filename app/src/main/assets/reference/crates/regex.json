@@ -1,0 +1,28 @@
+{
+  "id": "regex",
+  "title": "regex -- Regular Expressions",
+  "version": "1.x",
+  "description": "A fast regular expression library for Rust. Guarantees linear-time matching (no catastrophic backtracking), supports Unicode, and provides capture groups, find/replace, and splitting. The standard choice for regex in Rust.",
+  "cargoToml": "[dependencies]\nregex = \"1\"",
+  "quickStart": "use regex::Regex;\n\nfn main() {\n    let re = Regex::new(r\"\\b(\\w+)@(\\w+\\.\\w+)\\b\").unwrap();\n    let text = \"Contact alice@example.com or bob@rust-lang.org\";\n\n    // Check if pattern matches\n    println!(\"Has email: {}\", re.is_match(text));\n\n    // Find all matches\n    for cap in re.captures_iter(text) {\n        println!(\"Full: {}, User: {}, Domain: {}\",\n            &cap[0], &cap[1], &cap[2]);\n    }\n\n    // Replace matches\n    let redacted = re.replace_all(text, \"[REDACTED]\");\n    println!(\"Redacted: {}\", redacted);\n}",
+  "commonPatterns": [
+    {
+      "title": "Compile once with LazyLock",
+      "code": "use regex::Regex;\nuse std::sync::LazyLock;\n\nstatic EMAIL_RE: LazyLock<Regex> = LazyLock::new(|| {\n    Regex::new(r\"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$\").unwrap()\n});\n\nfn is_valid_email(email: &str) -> bool {\n    EMAIL_RE.is_match(email)\n}"
+    },
+    {
+      "title": "Named capture groups",
+      "code": "use regex::Regex;\n\nlet re = Regex::new(r\"(?P<year>\\d{4})-(?P<month>\\d{2})-(?P<day>\\d{2})\").unwrap();\nlet text = \"Date: 2024-03-15\";\n\nif let Some(caps) = re.captures(text) {\n    println!(\"Year: {}, Month: {}, Day: {}\",\n        &caps[\"year\"], &caps[\"month\"], &caps[\"day\"]);\n}"
+    },
+    {
+      "title": "Split by regex pattern",
+      "code": "use regex::Regex;\n\nlet re = Regex::new(r\"[,;\\s]+\").unwrap();\nlet fields: Vec<&str> = re.split(\"one, two; three   four\").collect();\n// [\"one\", \"two\", \"three\", \"four\"]"
+    },
+    {
+      "title": "Replace with capture group references",
+      "code": "use regex::Regex;\n\nlet re = Regex::new(r\"(\\w+), (\\w+)\").unwrap();\nlet result = re.replace(\"Doe, John\", \"$2 $1\");\n// \"John Doe\""
+    }
+  ],
+  "whenToUse": "Text searching, validation (emails, URLs, phone numbers), parsing semi-structured text, log analysis, find-and-replace transformations, and splitting text by complex patterns.",
+  "alternatives": "glob (for file path patterns only), aho-corasick (multiple literal string search, very fast), fancy-regex (supports lookahead/lookbehind but not linear-time). For full parsing: nom, pest, winnow."
+}

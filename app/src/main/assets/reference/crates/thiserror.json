@@ -1,0 +1,28 @@
+{
+  "id": "thiserror",
+  "title": "thiserror -- Derive Macro for Error Types",
+  "version": "2.x",
+  "description": "A derive macro for implementing std::error::Error on custom error enums and structs. Thiserror generates the Display and Error trait implementations from attributes, making it easy to define rich, typed error hierarchies for libraries.",
+  "cargoToml": "[dependencies]\nthiserror = \"2\"",
+  "quickStart": "use thiserror::Error;\n\n#[derive(Error, Debug)]\nenum AppError {\n    #[error(\"IO error: {0}\")]\n    Io(#[from] std::io::Error),\n\n    #[error(\"Parse error on line {line}: {message}\")]\n    Parse { line: usize, message: String },\n\n    #[error(\"Item not found: {0}\")]\n    NotFound(String),\n}\n\nfn read_data(path: &str) -> Result<String, AppError> {\n    let content = std::fs::read_to_string(path)?; // auto-converts io::Error\n    if content.is_empty() {\n        return Err(AppError::NotFound(path.to_string()));\n    }\n    Ok(content)\n}\n\nfn main() {\n    match read_data(\"test.txt\") {\n        Ok(data) => println!(\"Data: {}\", data),\n        Err(e) => eprintln!(\"Error: {}\", e),\n    }\n}",
+  "commonPatterns": [
+    {
+      "title": "Wrapping multiple error sources",
+      "code": "#[derive(thiserror::Error, Debug)]\nenum DataError {\n    #[error(\"Failed to read file\")]\n    Io(#[from] std::io::Error),\n\n    #[error(\"Failed to parse JSON\")]\n    Json(#[from] serde_json::Error),\n\n    #[error(\"Validation failed: {0}\")]\n    Validation(String),\n}"
+    },
+    {
+      "title": "Transparent error wrapping",
+      "code": "#[derive(thiserror::Error, Debug)]\n#[error(transparent)]\nstruct MyError(#[from] anyhow::Error);\n// Delegates Display and source() to the inner error"
+    },
+    {
+      "title": "Error with backtrace",
+      "code": "use std::backtrace::Backtrace;\n\n#[derive(thiserror::Error, Debug)]\nenum ServerError {\n    #[error(\"Internal error\")]\n    Internal {\n        source: Box<dyn std::error::Error + Send + Sync>,\n        backtrace: Backtrace,\n    },\n}"
+    },
+    {
+      "title": "Combining thiserror (library) with anyhow (application)",
+      "code": "// In your library crate:\n#[derive(thiserror::Error, Debug)]\npub enum LibError {\n    #[error(\"Invalid input: {0}\")]\n    InvalidInput(String),\n}\n\n// In your application crate:\n// use anyhow::Context;\n// lib_function().context(\"while processing data\")?;"
+    }
+  ],
+  "whenToUse": "In libraries where callers need to match on specific error variants. Also useful in large applications with distinct error domains per module. Use thiserror when you need typed, matchable errors.",
+  "alternatives": "anyhow (for applications, trait-object errors), snafu (similar but with context selectors), displaydoc (only derives Display). The standard approach is: thiserror for libraries, anyhow for applications."
+}

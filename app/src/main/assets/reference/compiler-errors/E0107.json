@@ -1,0 +1,20 @@
+{
+  "code": "E0107",
+  "title": "Wrong number of type arguments",
+  "severity": "frequent",
+  "explanation": "This error occurs when you provide the wrong number of generic type arguments to a type, function, or trait. Each generic parameter needs exactly one type argument unless it has a default.",
+  "example_bad": "fn main() {\n    let x: Vec = vec![1, 2, 3]; // Error: missing type argument\n    let y: Result<i32> = Ok(42); // Error: Result needs 2 type arguments\n    let z: Option<i32, String> = Some(5); // Error: too many type arguments\n}",
+  "error_message": "error[E0107]: wrong number of type arguments: expected 1, found 0",
+  "fixes": [
+    {
+      "description": "Provide the correct number of type arguments",
+      "code": "let x: Vec<i32> = vec![1, 2, 3];\nlet y: Result<i32, String> = Ok(42);\nlet z: Option<i32> = Some(5);"
+    },
+    {
+      "description": "Let the compiler infer the types",
+      "code": "let x = vec![1, 2, 3]; // Inferred as Vec<i32>\nlet y: Result<_, String> = Ok(42); // Partial inference with _"
+    }
+  ],
+  "related": ["E0282", "E0308"],
+  "tip": "Common generic types: Vec<T> (1 arg), HashMap<K, V> (2 args), Result<T, E> (2 args), Option<T> (1 arg). Use _ to let the compiler infer a specific argument."
+}

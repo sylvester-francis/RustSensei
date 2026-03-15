@@ -1,0 +1,81 @@
+{
+  "id": "unsafe",
+  "title": "Unsafe Rust",
+  "sections": [
+    {
+      "heading": "What Unsafe Enables",
+      "entries": [
+        {"label": "Five unsafe superpowers", "code": "// Inside an unsafe block, you can:\n// 1. Dereference a raw pointer\n// 2. Call an unsafe function or method\n// 3. Access or modify a mutable static variable\n// 4. Implement an unsafe trait\n// 5. Access fields of a union", "note": "unsafe does NOT turn off the borrow checker; it only enables these five operations"},
+        {"label": "Unsafe block", "code": "let mut x = 42;\nlet ptr = &mut x as *mut i32;\nunsafe {\n    *ptr = 100;\n}\nassert_eq!(x, 100);", "note": "Wrap unsafe operations in an unsafe { } block; keep blocks as small as possible"},
+        {"label": "Unsafe function", "code": "unsafe fn dangerous() {\n    // entire body is an unsafe context\n}\nunsafe {\n    dangerous();\n}", "note": "Marking a function unsafe means callers must uphold invariants not checked by compiler"},
+        {"label": "Safe abstraction over unsafe", "code": "pub fn split_at_mut(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {\n    let len = slice.len();\n    let ptr = slice.as_mut_ptr();\n    assert!(mid <= len);\n    unsafe {\n        (\n            std::slice::from_raw_parts_mut(ptr, mid),\n            std::slice::from_raw_parts_mut(ptr.add(mid), len - mid),\n        )\n    }\n}", "note": "Best practice: expose a safe API that encapsulates unsafe internals"}
+      ]
+    },
+    {
+      "heading": "Raw Pointers",
+      "entries": [
+        {"label": "Create raw pointers", "code": "let x = 42;\nlet r: *const i32 = &x;          // immutable raw pointer\nlet mut y = 42;\nlet mr: *mut i32 = &mut y;       // mutable raw pointer", "note": "Creating raw pointers is safe; only dereferencing requires unsafe"},
+        {"label": "From references", "code": "let val = 42;\nlet const_ptr: *const i32 = &val as *const i32;\nlet mut_val = 42;\nlet mut_ptr: *mut i32 = &mut mut_val as *mut i32;", "note": "Cast references to raw pointers with as"},
+        {"label": "From address", "code": "let address = 0x012345usize;\nlet ptr = address as *const i32;\n// Dereferencing an arbitrary address is extremely dangerous\n// unsafe { println!(\"{}\", *ptr); } // likely segfault", "note": "Creating from arbitrary address is safe; dereferencing it is UB unless valid"},
+        {"label": "Dereference", "code": "let x = 42;\nlet ptr = &x as *const i32;\nunsafe {\n    assert_eq!(*ptr, 42);\n}", "note": "Must be in unsafe block; pointer must be valid, aligned, and initialized"},
+        {"label": "Null and validity checks", "code": "let ptr: *const i32 = std::ptr::null();\nassert!(ptr.is_null());\n\nlet x = 42;\nlet valid_ptr = &x as *const i32;\nassert!(!valid_ptr.is_null());", "note": "Always check for null before dereferencing; is_null() is safe to call"},
+        {"label": "Pointer arithmetic", "code": "let arr = [10, 20, 30, 40, 50];\nlet ptr = arr.as_ptr();\nunsafe {\n    assert_eq!(*ptr, 10);\n    assert_eq!(*ptr.add(1), 20);\n    assert_eq!(*ptr.add(4), 50);\n    // ptr.offset(2) is equivalent to ptr.add(2) for positive offsets\n}", "note": "add/sub/offset for pointer arithmetic; must stay within allocation bounds"},
+        {"label": "Raw pointer vs reference", "code": "// Raw pointers (*const T, *mut T):\n// - Can be null\n// - No lifetime tracking\n// - Multiple *mut to same data allowed\n// - No auto-deref\n// - Manual memory management\n\n// References (&T, &mut T):\n// - Never null\n// - Lifetime tracked by compiler\n// - Borrowing rules enforced\n// - Auto-deref\n// - Memory managed by ownership", "note": "Raw pointers opt out of Rust's safety guarantees; use only when necessary"}
+      ]
+    },
+    {
+      "heading": "Unsafe Functions & Methods",
+      "entries": [
+        {"label": "Defining unsafe function", "code": "/// # Safety\n/// `ptr` must be a valid pointer to an initialized i32.\nunsafe fn read_value(ptr: *const i32) -> i32 {\n    *ptr\n}", "note": "Document safety requirements in a # Safety doc section"},
+        {"label": "Calling unsafe functions", "code": "let x = 42;\nlet ptr = &x as *const i32;\nlet val = unsafe { read_value(ptr) };", "note": "Caller is responsible for upholding the documented safety requirements"},
+        {"label": "Unsafe methods", "code": "struct Buffer {\n    data: *mut u8,\n    len: usize,\n}\nimpl Buffer {\n    /// # Safety\n    /// Index must be within bounds.\n    unsafe fn get_unchecked(&self, index: usize) -> u8 {\n        *self.data.add(index)\n    }\n}", "note": "Use unsafe methods for operations that can't be verified at compile time"},
+        {"label": "std unsafe functions", "code": "// Common unsafe functions in std:\nlet v = vec![1, 2, 3];\nunsafe {\n    let val = v.get_unchecked(1);  // no bounds check\n}\nlet s = unsafe { String::from_utf8_unchecked(vec![104, 105]) };", "note": "Standard library provides unchecked variants for performance-critical code"}
+      ]
+    },
+    {
+      "heading": "Mutable Statics",
+      "entries": [
+        {"label": "Static mut", "code": "static mut COUNTER: u32 = 0;\n\nfn increment() {\n    unsafe {\n        COUNTER += 1;\n    }\n}\nfn get_count() -> u32 {\n    unsafe { COUNTER }\n}", "note": "Accessing static mut is unsafe because of potential data races; prefer atomics"},
+        {"label": "Better alternative: atomics", "code": "use std::sync::atomic::{AtomicU32, Ordering};\nstatic COUNTER: AtomicU32 = AtomicU32::new(0);\n\nfn increment() {\n    COUNTER.fetch_add(1, Ordering::SeqCst);\n}\nfn get_count() -> u32 {\n    COUNTER.load(Ordering::SeqCst)\n}", "note": "Atomics are safe and thread-safe; prefer over static mut"},
+        {"label": "Better alternative: OnceLock", "code": "use std::sync::OnceLock;\nstatic CONFIG: OnceLock<String> = OnceLock::new();\n\nfn init_config(value: String) {\n    CONFIG.set(value).ok();\n}\nfn get_config() -> &'static str {\n    CONFIG.get().map(|s| s.as_str()).unwrap_or(\"default\")\n}", "note": "OnceLock for lazy one-time initialization; thread-safe without unsafe"}
+      ]
+    },
+    {
+      "heading": "Unsafe Traits",
+      "entries": [
+        {"label": "Defining unsafe trait", "code": "/// # Safety\n/// Implementors must ensure that `validate()` always\n/// returns true for valid instances.\nunsafe trait Validate {\n    fn validate(&self) -> bool;\n}", "note": "Trait is unsafe when implementations must uphold invariants the compiler can't check"},
+        {"label": "Implementing unsafe trait", "code": "struct PositiveInt(i32);\n\nunsafe impl Validate for PositiveInt {\n    fn validate(&self) -> bool {\n        self.0 > 0\n    }\n}", "note": "unsafe impl asserts the implementor upholds the trait's safety contract"},
+        {"label": "Send and Sync", "code": "struct MyWrapper(*mut u8);\n\n// We guarantee MyWrapper is safe to send between threads\nunsafe impl Send for MyWrapper {}\n\n// We guarantee &MyWrapper is safe to share between threads\nunsafe impl Sync for MyWrapper {}", "note": "Send and Sync are the most common unsafe traits; auto-derived for most types"},
+        {"label": "GlobalAlloc", "code": "use std::alloc::{GlobalAlloc, Layout};\n\nstruct MyAllocator;\n\nunsafe impl GlobalAlloc for MyAllocator {\n    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {\n        std::alloc::System.alloc(layout)\n    }\n    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {\n        std::alloc::System.dealloc(ptr, layout)\n    }\n}\n\n#[global_allocator]\nstatic ALLOC: MyAllocator = MyAllocator;", "note": "Custom allocator requires implementing unsafe GlobalAlloc trait"}
+      ]
+    },
+    {
+      "heading": "FFI (Foreign Function Interface)",
+      "entries": [
+        {"label": "Calling C functions", "code": "extern \"C\" {\n    fn abs(input: i32) -> i32;\n    fn strlen(s: *const std::ffi::c_char) -> usize;\n}\n\nlet result = unsafe { abs(-42) };\nassert_eq!(result, 42);", "note": "Declare external C functions with extern \"C\"; calling them is always unsafe"},
+        {"label": "Exposing Rust to C", "code": "#[no_mangle]\npub extern \"C\" fn rust_add(a: i32, b: i32) -> i32 {\n    a + b\n}", "note": "#[no_mangle] preserves function name; extern \"C\" uses C calling convention"},
+        {"label": "C strings", "code": "use std::ffi::{CString, CStr};\n\n// Rust -> C string\nlet c_string = CString::new(\"hello\").unwrap();\nlet ptr = c_string.as_ptr();\n\n// C string -> Rust\nlet c_str = unsafe { CStr::from_ptr(ptr) };\nlet rust_str = c_str.to_str().unwrap();", "note": "CString for owned null-terminated strings; CStr for borrowed; handle UTF-8 conversion"},
+        {"label": "Opaque types", "code": "// Represent a C struct we don't know the layout of:\n#[repr(C)]\npub struct OpaqueHandle {\n    _private: [u8; 0],\n}\n\nextern \"C\" {\n    fn create_handle() -> *mut OpaqueHandle;\n    fn destroy_handle(h: *mut OpaqueHandle);\n    fn use_handle(h: *const OpaqueHandle) -> i32;\n}", "note": "Use zero-sized private field for C opaque types you only access through pointers"},
+        {"label": "#[repr(C)] struct", "code": "#[repr(C)]\nstruct Point {\n    x: f64,\n    y: f64,\n}\n\nextern \"C\" {\n    fn distance(p1: *const Point, p2: *const Point) -> f64;\n}", "note": "#[repr(C)] ensures struct layout matches C; required for FFI structs"},
+        {"label": "Callbacks", "code": "extern \"C\" {\n    fn register_callback(cb: extern \"C\" fn(i32));\n}\n\nextern \"C\" fn my_callback(value: i32) {\n    println!(\"callback called with: {value}\");\n}\n\nunsafe {\n    register_callback(my_callback);\n}", "note": "Pass Rust functions to C as callbacks with extern \"C\" function pointers"}
+      ]
+    },
+    {
+      "heading": "Unions",
+      "entries": [
+        {"label": "Define union", "code": "#[repr(C)]\nunion IntOrFloat {\n    i: i32,\n    f: f32,\n}\n\nlet u = IntOrFloat { i: 42 };\nunsafe {\n    println!(\"as int: {}\", u.i);\n    println!(\"as float: {}\", u.f); // reinterprets bits\n}", "note": "All fields share memory; reading is unsafe because compiler can't know which is valid"},
+        {"label": "With ManuallyDrop", "code": "use std::mem::ManuallyDrop;\n\nunion MyUnion {\n    num: i32,\n    text: ManuallyDrop<String>,\n}\n\nlet u = MyUnion { num: 42 };\n// Drop is not automatically called for union fields", "note": "Non-Copy types in unions need ManuallyDrop; you must manage cleanup manually"}
+      ]
+    },
+    {
+      "heading": "Common Unsafe Patterns",
+      "entries": [
+        {"label": "Transmute", "code": "let x: u32 = 42;\nlet y: f32 = unsafe { std::mem::transmute(x) };", "note": "Reinterpret bits as a different type; extremely dangerous; prefer safer alternatives"},
+        {"label": "Safer transmute alternatives", "code": "// Instead of transmute for numeric types:\nlet x: u32 = 42;\nlet y = f32::from_bits(x);\nlet z = x.to_ne_bytes();\n\n// Instead of transmute for slices:\nlet bytes: &[u8] = &[1, 0, 0, 0];\nlet int = u32::from_ne_bytes(bytes.try_into().unwrap());", "note": "from_bits, to_bits, from_ne_bytes, to_ne_bytes are safe alternatives"},
+        {"label": "Pin + unsafe for self-referential", "code": "use std::pin::Pin;\nuse std::marker::PhantomPinned;\n\nstruct SelfRef {\n    data: String,\n    ptr: *const String,\n    _pin: PhantomPinned,\n}\n\nimpl SelfRef {\n    fn new(data: String) -> Pin<Box<Self>> {\n        let mut boxed = Box::pin(SelfRef {\n            data,\n            ptr: std::ptr::null(),\n            _pin: PhantomPinned,\n        });\n        let ptr = &boxed.data as *const String;\n        unsafe {\n            let mut_ref = Pin::as_mut(&mut boxed);\n            Pin::get_unchecked_mut(mut_ref).ptr = ptr;\n        }\n        boxed\n    }\n}", "note": "Self-referential types require Pin and unsafe; avoid if possible"},
+        {"label": "Inline assembly", "code": "use std::arch::asm;\n\nlet x: u64;\nunsafe {\n    asm!(\"mov {}, 42\", out(reg) x);\n}\nassert_eq!(x, 42);", "note": "asm! macro for inline assembly; platform-specific and unsafe"},
+        {"label": "Unsafe guidelines", "code": "// 1. Minimize unsafe blocks (smallest possible scope)\n// 2. Document all safety invariants\n// 3. Encapsulate unsafe in safe abstractions\n// 4. Use #[deny(unsafe_op_in_unsafe_fn)] in unsafe fns\n// 5. Test thoroughly (Miri, fuzzing, sanitizers)\n// 6. Consider cargo-audit and cargo-careful", "note": "Follow these practices to use unsafe responsibly"}
+      ]
+    }
+  ]
+}

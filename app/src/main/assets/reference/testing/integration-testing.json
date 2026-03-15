@@ -1,0 +1,28 @@
+{
+  "id": "integration-testing",
+  "title": "Integration Testing",
+  "order": 2,
+  "content": "Integration tests live in the tests/ directory at the project root (alongside src/). Each file in tests/ is compiled as a separate crate that depends on your library. This means integration tests can only access your public API, testing your code the way external users would.\n\nIntegration tests verify that multiple components work together correctly. They test the public interface and can catch issues that unit tests miss, like incorrect module visibility or broken API contracts.",
+  "codeExamples": [
+    {
+      "description": "Integration test file structure",
+      "code": "// tests/integration_test.rs\n// This file is a separate crate, it uses your library like any user would\n\nuse my_library::{Config, process_data};\n\n#[test]\nfn test_full_pipeline() {\n    let config = Config::default();\n    let input = \"hello world foo bar\";\n    let result = process_data(input, &config);\n\n    assert!(result.is_ok());\n    let output = result.unwrap();\n    assert_eq!(output.word_count, 4);\n    assert!(output.processing_time.as_millis() < 100);\n}\n\n#[test]\nfn test_empty_input() {\n    let config = Config::default();\n    let result = process_data(\"\", &config);\n    assert!(result.is_ok());\n    assert_eq!(result.unwrap().word_count, 0);\n}"
+    },
+    {
+      "description": "Shared test utilities in a common module",
+      "code": "// tests/common/mod.rs  (shared helpers)\npub fn setup_test_data() -> Vec<String> {\n    vec![\n        \"line one\".to_string(),\n        \"line two\".to_string(),\n        \"line three\".to_string(),\n    ]\n}\n\npub fn create_temp_file(content: &str) -> tempfile::NamedTempFile {\n    use std::io::Write;\n    let mut file = tempfile::NamedTempFile::new().unwrap();\n    write!(file, \"{}\", content).unwrap();\n    file\n}\n\n// tests/file_tests.rs\nmod common;\n\n#[test]\nfn test_file_processing() {\n    let data = common::setup_test_data();\n    assert_eq!(data.len(), 3);\n}"
+    },
+    {
+      "description": "Testing with fixtures and setup/teardown",
+      "code": "// tests/db_tests.rs\nstruct TestContext {\n    data_dir: tempfile::TempDir,\n}\n\nimpl TestContext {\n    fn new() -> Self {\n        let data_dir = tempfile::TempDir::new().unwrap();\n        // Setup: create test files, initialize state\n        std::fs::write(\n            data_dir.path().join(\"test.txt\"),\n            \"test data\"\n        ).unwrap();\n        TestContext { data_dir }\n    }\n\n    fn data_path(&self) -> &std::path::Path {\n        self.data_dir.path()\n    }\n}\n\nimpl Drop for TestContext {\n    fn drop(&mut self) {\n        // Teardown: TempDir auto-cleans, but you can add more cleanup\n        println!(\"Test cleanup complete\");\n    }\n}\n\n#[test]\nfn test_with_context() {\n    let ctx = TestContext::new();\n    let path = ctx.data_path().join(\"test.txt\");\n    let content = std::fs::read_to_string(path).unwrap();\n    assert_eq!(content, \"test data\");\n} // ctx dropped here, cleanup runs"
+    }
+  ],
+  "keyPoints": [
+    "Integration tests live in tests/ directory, each file is a separate crate",
+    "They can only access your public API (pub items)",
+    "Share test utilities in tests/common/mod.rs",
+    "Each test file is compiled independently (useful for parallel testing)",
+    "Use tempfile crate for test files that auto-cleanup",
+    "Run specific test files: cargo test --test integration_test"
+  ]
+}

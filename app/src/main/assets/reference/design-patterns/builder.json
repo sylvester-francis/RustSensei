@@ -1,0 +1,14 @@
+{
+  "id": "builder",
+  "title": "Builder Pattern",
+  "order": 1,
+  "description": "Construct complex objects step-by-step using method chaining. The builder pattern is extremely common in Rust because the language lacks default/named arguments and function overloading. It separates construction logic from the final type, allowing optional configuration while ensuring the final object is always valid.",
+  "whenToUse": [
+    "When a struct has many optional fields",
+    "When construction requires validation",
+    "When you want a fluent, readable configuration API",
+    "Examples: reqwest::Client::builder(), Command::new(), tokio::runtime::Builder"
+  ],
+  "codeExample": "struct Email {\n    from: String,\n    to: Vec<String>,\n    subject: String,\n    body: String,\n    cc: Vec<String>,\n    html: bool,\n}\n\nstruct EmailBuilder {\n    from: String,\n    to: Vec<String>,\n    subject: String,\n    body: String,\n    cc: Vec<String>,\n    html: bool,\n}\n\nimpl EmailBuilder {\n    fn new(from: impl Into<String>, to: impl Into<String>) -> Self {\n        EmailBuilder {\n            from: from.into(),\n            to: vec![to.into()],\n            subject: String::new(),\n            body: String::new(),\n            cc: Vec::new(),\n            html: false,\n        }\n    }\n\n    fn subject(mut self, subject: impl Into<String>) -> Self {\n        self.subject = subject.into();\n        self\n    }\n\n    fn body(mut self, body: impl Into<String>) -> Self {\n        self.body = body.into();\n        self\n    }\n\n    fn cc(mut self, cc: impl Into<String>) -> Self {\n        self.cc.push(cc.into());\n        self\n    }\n\n    fn html(mut self, html: bool) -> Self {\n        self.html = html;\n        self\n    }\n\n    fn build(self) -> Result<Email, String> {\n        if self.subject.is_empty() {\n            return Err(\"Subject is required\".to_string());\n        }\n        Ok(Email {\n            from: self.from,\n            to: self.to,\n            subject: self.subject,\n            body: self.body,\n            cc: self.cc,\n            html: self.html,\n        })\n    }\n}\n\nfn main() {\n    let email = EmailBuilder::new(\"alice@example.com\", \"bob@example.com\")\n        .subject(\"Hello!\")\n        .body(\"How are you?\")\n        .cc(\"charlie@example.com\")\n        .build()\n        .unwrap();\n\n    println!(\"Email from {} to {:?}: {}\", email.from, email.to, email.subject);\n}",
+  "realWorldUse": "reqwest::Client::builder().timeout(Duration::from_secs(30)).build(), Command::new(\"ls\").arg(\"-la\").output(), tokio::runtime::Builder::new_multi_thread().worker_threads(4).build()"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "argument-parsing",
+  "title": "Argument Parsing with Clap",
+  "order": 2,
+  "content": "Clap's derive API lets you define CLI arguments as a struct. Each field becomes a flag, option, or positional argument. Clap automatically generates help text, validates input, and provides shell completions.\n\nPositional arguments are fields without #[arg(short/long)]. Flags are bool fields with #[arg(short, long)]. Options accept values with #[arg(short, long)]. Optional arguments use Option<T>. Repeated arguments use Vec<T>.",
+  "codeExamples": [
+    {
+      "description": "Comprehensive argument types",
+      "code": "use clap::Parser;\nuse std::path::PathBuf;\n\n#[derive(Parser, Debug)]\n#[command(version, about = \"A file processing tool\")]\nstruct Args {\n    /// Input files to process\n    #[arg(required = true)]\n    files: Vec<PathBuf>,\n\n    /// Output directory\n    #[arg(short, long, default_value = \"./output\")]\n    output: PathBuf,\n\n    /// Processing format\n    #[arg(short, long, default_value = \"text\")]\n    format: String,\n\n    /// Maximum number of lines to process\n    #[arg(short = 'n', long)]\n    max_lines: Option<usize>,\n\n    /// Increase verbosity (-v, -vv, -vvv)\n    #[arg(short, long, action = clap::ArgAction::Count)]\n    verbose: u8,\n\n    /// Suppress all output\n    #[arg(short, long)]\n    quiet: bool,\n}\n\nfn main() {\n    let args = Args::parse();\n    println!(\"{:?}\", args);\n}"
+    },
+    {
+      "description": "Subcommands",
+      "code": "use clap::{Parser, Subcommand};\n\n#[derive(Parser)]\n#[command(name = \"db\", about = \"Database management tool\")]\nstruct Cli {\n    #[command(subcommand)]\n    command: Commands,\n}\n\n#[derive(Subcommand)]\nenum Commands {\n    /// Run database migrations\n    Migrate {\n        /// Migration direction\n        #[arg(default_value = \"up\")]\n        direction: String,\n    },\n    /// Seed the database with test data\n    Seed {\n        /// Number of records to create\n        #[arg(short, long, default_value_t = 100)]\n        count: u32,\n    },\n    /// Show database status\n    Status,\n}\n\nfn main() {\n    let cli = Cli::parse();\n    match cli.command {\n        Commands::Migrate { direction } => {\n            println!(\"Running migration: {}\", direction);\n        }\n        Commands::Seed { count } => {\n            println!(\"Seeding {} records\", count);\n        }\n        Commands::Status => {\n            println!(\"Database status: OK\");\n        }\n    }\n}"
+    },
+    {
+      "description": "Value enums for constrained choices",
+      "code": "use clap::{Parser, ValueEnum};\n\n#[derive(Clone, Debug, ValueEnum)]\nenum OutputFormat {\n    Json,\n    Csv,\n    Table,\n    Pretty,\n}\n\n#[derive(Parser, Debug)]\nstruct Args {\n    #[arg(short, long, value_enum, default_value_t = OutputFormat::Table)]\n    format: OutputFormat,\n}\n\nfn main() {\n    let args = Args::parse();\n    println!(\"Format: {:?}\", args.format);\n}"
+    }
+  ],
+  "keyPoints": [
+    "Positional args: fields without short/long attributes",
+    "Flags: bool fields with #[arg(short, long)]",
+    "Options: typed fields with #[arg(short, long)]",
+    "Vec<T> fields accept repeated arguments",
+    "Option<T> fields are optional",
+    "Subcommands map to enum variants",
+    "ValueEnum restricts choices to a predefined set"
+  ]
+}

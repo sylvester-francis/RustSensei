@@ -1,0 +1,24 @@
+{
+  "id": "what-is-unsafe",
+  "title": "What Is Unsafe Rust?",
+  "order": 1,
+  "content": "The unsafe keyword does not disable Rust's safety guarantees -- it unlocks five specific superpowers that the compiler cannot verify:\n\n1. Dereference raw pointers (*const T, *mut T)\n2. Call unsafe functions or methods\n3. Access or modify mutable static variables\n4. Implement unsafe traits (Send, Sync)\n5. Access fields of unions\n\nEverything else -- ownership, borrowing, type checking, lifetime checking -- still works inside unsafe blocks. The unsafe keyword is a contract: you are telling the compiler 'I have verified that this code upholds safety invariants that you cannot check.'\n\nThe key principle: keep unsafe blocks as small as possible and wrap them in safe abstractions. The rest of your code should use these safe wrappers.",
+  "codeExamples": [
+    {
+      "description": "The five unsafe superpowers",
+      "code": "// 1. Dereference raw pointers\nfn raw_pointer_example() {\n    let x = 42;\n    let ptr: *const i32 = &x;\n    unsafe {\n        println!(\"Value: {}\", *ptr);\n    }\n}\n\n// 2. Call unsafe functions\nunsafe fn dangerous() -> i32 {\n    // This function's contract must be upheld by callers\n    42\n}\n\nfn call_unsafe() {\n    let value = unsafe { dangerous() };\n    println!(\"{}\", value);\n}\n\n// 3. Access mutable statics\nstatic mut COUNTER: u64 = 0;\n\nfn increment() {\n    unsafe {\n        COUNTER += 1;\n    }\n}\n\n// 4. Implement unsafe traits\n// (Send and Sync are the most common unsafe traits)\n\n// 5. Access union fields\nunion IntOrFloat {\n    i: i32,\n    f: f32,\n}\n\nfn union_example() {\n    let u = IntOrFloat { i: 42 };\n    unsafe {\n        println!(\"As int: {}\", u.i);\n    }\n}"
+    },
+    {
+      "description": "Unsafe does NOT disable borrow checking",
+      "code": "fn still_checked() {\n    let mut x = 5;\n    let r1 = &x;\n    // let r2 = &mut x;  // Still a compile error, even in unsafe!\n    println!(\"{}\", r1);\n\n    unsafe {\n        // Ownership and borrowing rules still apply.\n        // Unsafe only adds the five superpowers listed above.\n        let ptr: *const i32 = &x;\n        println!(\"{}\", *ptr);\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "unsafe unlocks exactly five capabilities, not 'anything goes'",
+    "Borrow checking, type checking, and lifetime checking still apply",
+    "unsafe is a contract: 'I have verified the invariants the compiler cannot'",
+    "Keep unsafe blocks minimal and wrap them in safe APIs",
+    "Most Rust programmers rarely need to write unsafe code directly",
+    "When reviewing code, unsafe blocks deserve extra scrutiny"
+  ]
+}

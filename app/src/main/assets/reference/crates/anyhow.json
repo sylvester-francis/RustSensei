@@ -1,0 +1,28 @@
+{
+  "id": "anyhow",
+  "title": "anyhow -- Flexible Error Handling",
+  "version": "1.x",
+  "description": "Provides anyhow::Error, a trait object-based error type for easy error handling in applications. Anyhow lets you use the ? operator with any error type, attach context to errors, and create ad-hoc errors. Designed for applications (not libraries).",
+  "cargoToml": "[dependencies]\nanyhow = \"1\"",
+  "quickStart": "use anyhow::{Context, Result};\nuse std::fs;\n\nfn read_config(path: &str) -> Result<String> {\n    let contents = fs::read_to_string(path)\n        .with_context(|| format!(\"Failed to read config from {}\", path))?;\n    Ok(contents)\n}\n\nfn main() -> Result<()> {\n    let config = read_config(\"config.toml\")?;\n    println!(\"Config: {}\", config);\n    Ok(())\n}",
+  "commonPatterns": [
+    {
+      "title": "Ad-hoc errors with anyhow! macro",
+      "code": "use anyhow::{anyhow, Result};\n\nfn validate_age(age: i32) -> Result<()> {\n    if age < 0 {\n        return Err(anyhow!(\"Age cannot be negative: {}\", age));\n    }\n    if age > 150 {\n        return Err(anyhow!(\"Age seems unrealistic: {}\", age));\n    }\n    Ok(())\n}"
+    },
+    {
+      "title": "Chaining context for better error messages",
+      "code": "use anyhow::{Context, Result};\n\nfn process_file(path: &str) -> Result<Vec<u64>> {\n    let content = std::fs::read_to_string(path)\n        .with_context(|| format!(\"Could not read file: {}\", path))?;\n\n    let numbers: Vec<u64> = content\n        .lines()\n        .enumerate()\n        .map(|(i, line)| {\n            line.trim()\n                .parse::<u64>()\n                .with_context(|| format!(\"Invalid number on line {}: '{}'\", i + 1, line))\n        })\n        .collect::<Result<_>>()?;\n\n    Ok(numbers)\n}"
+    },
+    {
+      "title": "bail! for early returns",
+      "code": "use anyhow::{bail, Result};\n\nfn parse_command(input: &str) -> Result<(&str, &str)> {\n    let parts: Vec<&str> = input.splitn(2, ' ').collect();\n    if parts.len() != 2 {\n        bail!(\"Expected 'command argument', got: '{}'\", input);\n    }\n    Ok((parts[0], parts[1]))\n}"
+    },
+    {
+      "title": "Downcast to the original error type",
+      "code": "use anyhow::Result;\nuse std::io;\n\nfn handle_error(result: Result<()>) {\n    if let Err(err) = result {\n        if let Some(io_err) = err.downcast_ref::<io::Error>() {\n            println!(\"IO error: {}\", io_err);\n        } else {\n            println!(\"Other error: {}\", err);\n        }\n    }\n}"
+    }
+  ],
+  "whenToUse": "In applications (binaries, CLIs, services) where you want easy error propagation without defining custom error types for every module. Perfect for prototyping and for main() functions.",
+  "alternatives": "thiserror (for libraries that need typed errors), eyre (similar API, colored reports with color-eyre), snafu (context selectors, more structured). For libraries, prefer thiserror over anyhow."
+}

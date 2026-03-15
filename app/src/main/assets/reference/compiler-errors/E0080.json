@@ -1,0 +1,20 @@
+{
+  "code": "E0080",
+  "title": "Evaluation of constant value failed",
+  "severity": "occasional",
+  "explanation": "This error occurs when the compiler tries to evaluate a constant expression at compile time but encounters an error, such as integer overflow, division by zero, or an out-of-bounds array access.",
+  "example_bad": "const X: u8 = 255 + 1; // Error: overflow\nconst Y: i32 = 10 / 0; // Error: division by zero\nconst ARR: [i32; 3] = [1, 2, 3];\nconst Z: i32 = ARR[5]; // Error: index out of bounds",
+  "error_message": "error[E0080]: evaluation of constant value failed — attempt to compute `255_u8 + 1_u8`, which would overflow",
+  "fixes": [
+    {
+      "description": "Fix the arithmetic",
+      "code": "const X: u16 = 255 + 1; // Use a larger type\nconst Y: i32 = 10 / 2; // Fix division"
+    },
+    {
+      "description": "Use wrapping or saturating arithmetic",
+      "code": "const X: u8 = 255u8.wrapping_add(1); // Wraps to 0\nconst Y: u8 = 255u8.saturating_add(1); // Stays at 255"
+    }
+  ],
+  "related": ["E0015"],
+  "tip": "Constant evaluation happens at compile time. The compiler catches errors that would be runtime panics in non-const code. Use checked arithmetic methods for intentional wrapping."
+}

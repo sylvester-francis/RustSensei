@@ -1,0 +1,80 @@
+{
+  "id": "ownership",
+  "title": "Ownership & Borrowing",
+  "sections": [
+    {
+      "heading": "Ownership Rules",
+      "entries": [
+        {"label": "Each value has one owner", "code": "let s1 = String::from(\"hello\");\nlet s2 = s1;\n// s1 is no longer valid here", "note": "Assignment moves ownership for non-Copy types"},
+        {"label": "Value dropped when owner goes out of scope", "code": "{\n    let s = String::from(\"hello\");\n    // s is valid here\n}\n// s is dropped; memory freed", "note": "Rust calls drop() automatically at end of scope"},
+        {"label": "Clone for deep copy", "code": "let s1 = String::from(\"hello\");\nlet s2 = s1.clone();\nprintln!(\"{s1} {s2}\");", "note": "Explicit deep copy; both s1 and s2 are valid"}
+      ]
+    },
+    {
+      "heading": "Move Semantics",
+      "entries": [
+        {"label": "Move on assignment", "code": "let v1 = vec![1, 2, 3];\nlet v2 = v1;\n// v1 is moved; cannot use v1 anymore", "note": "Heap-allocated types are moved, not copied"},
+        {"label": "Move into function", "code": "fn take_ownership(s: String) {\n    println!(\"{s}\");\n}\nlet s = String::from(\"hello\");\ntake_ownership(s);\n// s is no longer valid", "note": "Passing a value to a function moves it"},
+        {"label": "Return transfers ownership", "code": "fn create_string() -> String {\n    String::from(\"hello\")\n}\nlet s = create_string();\n// s now owns the String", "note": "Returning a value moves ownership to the caller"},
+        {"label": "Move in match", "code": "let opt = Some(String::from(\"hello\"));\nmatch &opt {\n    Some(s) => println!(\"{s}\"),\n    None => println!(\"nothing\"),\n}\n// opt is still valid because we matched on &opt", "note": "Match on a reference to avoid moving the value"},
+        {"label": "Partial moves", "code": "struct Person {\n    name: String,\n    age: u32,\n}\nlet person = Person { name: String::from(\"Alice\"), age: 30 };\nlet name = person.name;\n// person.age is still accessible\n// person.name and person as a whole are not", "note": "Individual fields can be moved out of a struct"}
+      ]
+    },
+    {
+      "heading": "Copy Trait",
+      "entries": [
+        {"label": "Copy types", "code": "let x: i32 = 5;\nlet y = x;\nprintln!(\"{x} {y}\");", "note": "All integer, float, bool, char types implement Copy"},
+        {"label": "Tuples of Copy types", "code": "let t = (1, 2.0, true);\nlet t2 = t;\nprintln!(\"{:?} {:?}\", t, t2);", "note": "Tuples are Copy if all elements are Copy"},
+        {"label": "Derive Copy", "code": "#[derive(Copy, Clone)]\nstruct Point {\n    x: f64,\n    y: f64,\n}", "note": "Custom types can derive Copy if all fields are Copy; Clone is required"},
+        {"label": "Copy vs Clone", "code": "// Copy: implicit, bitwise, cheap\nlet a: i32 = 5;\nlet b = a; // Copy\n\n// Clone: explicit, may be expensive\nlet s1 = String::from(\"hello\");\nlet s2 = s1.clone(); // Clone", "note": "Copy is implicit and cheap; Clone is explicit and may allocate"}
+      ]
+    },
+    {
+      "heading": "Immutable References (&T)",
+      "entries": [
+        {"label": "Create a reference", "code": "let s = String::from(\"hello\");\nlet r = &s;\nprintln!(\"{r}\");", "note": "Borrow with & ; original owner retains ownership"},
+        {"label": "Multiple immutable refs", "code": "let s = String::from(\"hello\");\nlet r1 = &s;\nlet r2 = &s;\nprintln!(\"{r1} {r2}\");", "note": "Any number of immutable references can coexist"},
+        {"label": "Function borrowing", "code": "fn calculate_length(s: &String) -> usize {\n    s.len()\n}\nlet s = String::from(\"hello\");\nlet len = calculate_length(&s);\nprintln!(\"{s} has length {len}\");", "note": "Pass reference to avoid transferring ownership"},
+        {"label": "Cannot mutate through &T", "code": "let s = String::from(\"hello\");\nlet r = &s;\n// r.push_str(\" world\"); // ERROR: cannot mutate", "note": "Immutable references do not allow modification"}
+      ]
+    },
+    {
+      "heading": "Mutable References (&mut T)",
+      "entries": [
+        {"label": "Create mutable reference", "code": "let mut s = String::from(\"hello\");\nlet r = &mut s;\nr.push_str(\" world\");\nprintln!(\"{r}\");", "note": "Variable must be declared mut; borrow with &mut"},
+        {"label": "Only one mutable ref at a time", "code": "let mut s = String::from(\"hello\");\nlet r1 = &mut s;\n// let r2 = &mut s; // ERROR: second mutable borrow\nr1.push_str(\" world\");", "note": "Prevents data races at compile time"},
+        {"label": "No mixing mutable and immutable", "code": "let mut s = String::from(\"hello\");\nlet r1 = &s;\nlet r2 = &s;\n// let r3 = &mut s; // ERROR while r1 and r2 are in use\nprintln!(\"{r1} {r2}\");", "note": "Cannot have &mut while any & exists (within the same scope of use)"},
+        {"label": "Non-Lexical Lifetimes (NLL)", "code": "let mut s = String::from(\"hello\");\nlet r1 = &s;\nprintln!(\"{r1}\");\n// r1 is no longer used after this point\nlet r2 = &mut s; // OK: r1's lifetime has ended\nr2.push_str(\" world\");", "note": "References end when last used, not at end of scope (since Rust 2018)"}
+      ]
+    },
+    {
+      "heading": "Slices",
+      "entries": [
+        {"label": "String slice", "code": "let s = String::from(\"hello world\");\nlet hello: &str = &s[0..5];\nlet world: &str = &s[6..11];", "note": "&str is a reference to a portion of a String"},
+        {"label": "Slice shorthand", "code": "let s = String::from(\"hello\");\nlet full = &s[..];   // entire string\nlet first = &s[..3]; // \"hel\"\nlet last = &s[3..];  // \"lo\"", "note": "Omit start for 0; omit end for len"},
+        {"label": "Array slice", "code": "let arr = [1, 2, 3, 4, 5];\nlet slice: &[i32] = &arr[1..3];\nassert_eq!(slice, &[2, 3]);", "note": "&[T] is a slice of an array or Vec"},
+        {"label": "Mutable slice", "code": "let mut v = vec![1, 2, 3, 4];\nlet slice = &mut v[1..3];\nslice[0] = 20;\nassert_eq!(v, vec![1, 20, 3, 4]);", "note": "Mutable slices allow modifying elements in place"},
+        {"label": "String literals are slices", "code": "let s: &str = \"hello world\";\n// &str is a slice pointing to the binary", "note": "String literals have type &'static str"},
+        {"label": "Split slices", "code": "let mut v = vec![1, 2, 3, 4, 5];\nlet (left, right) = v.split_at_mut(2);\nleft[0] = 10;\nright[0] = 30;\nassert_eq!(v, vec![10, 2, 30, 4, 5]);", "note": "split_at_mut returns two non-overlapping mutable slices"}
+      ]
+    },
+    {
+      "heading": "Lifetime Basics",
+      "entries": [
+        {"label": "Lifetime annotation", "code": "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}", "note": "Tells compiler both inputs and output share the same lifetime"},
+        {"label": "Struct with lifetime", "code": "struct Excerpt<'a> {\n    text: &'a str,\n}\nlet novel = String::from(\"Call me Ishmael. Some years ago...\");\nlet first = novel.split('.').next().unwrap();\nlet excerpt = Excerpt { text: first };", "note": "Struct cannot outlive the reference it holds"},
+        {"label": "Static lifetime", "code": "let s: &'static str = \"I live forever\";", "note": "'static means the reference lives for the entire program"},
+        {"label": "Lifetime elision", "code": "// Compiler infers lifetimes for these common patterns:\nfn first_word(s: &str) -> &str { ... }\n// Equivalent to:\nfn first_word<'a>(s: &'a str) -> &'a str { ... }", "note": "Three rules allow omitting lifetime annotations in many cases"}
+      ]
+    },
+    {
+      "heading": "Common Ownership Patterns",
+      "entries": [
+        {"label": "Take and return", "code": "fn process(mut s: String) -> String {\n    s.push_str(\" processed\");\n    s\n}\nlet s = String::from(\"data\");\nlet s = process(s);", "note": "Move in, modify, move out; maintains single ownership"},
+        {"label": "Borrow for read-only access", "code": "fn print_info(data: &[i32]) {\n    for item in data {\n        println!(\"{item}\");\n    }\n}\nlet v = vec![1, 2, 3];\nprint_info(&v);\n// v is still valid", "note": "Prefer borrowing when function does not need ownership"},
+        {"label": "Rc for shared ownership", "code": "use std::rc::Rc;\nlet a = Rc::new(vec![1, 2, 3]);\nlet b = Rc::clone(&a);\nlet c = Rc::clone(&a);\nprintln!(\"count: {}\", Rc::strong_count(&a));", "note": "Reference-counted pointer for multiple owners (single-threaded)"},
+        {"label": "Arc for thread-safe sharing", "code": "use std::sync::Arc;\nuse std::thread;\nlet data = Arc::new(vec![1, 2, 3]);\nlet data_clone = Arc::clone(&data);\nthread::spawn(move || {\n    println!(\"{:?}\", data_clone);\n});", "note": "Atomic reference-counted; safe to share across threads"}
+      ]
+    }
+  ]
+}

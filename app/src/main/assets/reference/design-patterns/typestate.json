@@ -1,0 +1,14 @@
+{
+  "id": "typestate",
+  "title": "Typestate Pattern",
+  "order": 3,
+  "description": "Encode state transitions in the type system so that invalid state transitions are compile-time errors. Each state is a separate type, and methods are only available in the appropriate state. This moves runtime checks to compile time, making illegal states unrepresentable.",
+  "whenToUse": [
+    "When objects have distinct states with different valid operations",
+    "When you want to prevent calling methods in the wrong order",
+    "Protocol implementations, connection state machines, build pipelines",
+    "When the cost of a runtime error is high and you want compile-time guarantees"
+  ],
+  "codeExample": "use std::marker::PhantomData;\n\n// State types (zero-sized, exist only for the type system)\nstruct Draft;\nstruct Review;\nstruct Published;\n\nstruct Article<State> {\n    title: String,\n    body: String,\n    _state: PhantomData<State>,\n}\n\n// Only Draft articles can be edited\nimpl Article<Draft> {\n    fn new(title: String) -> Self {\n        Article {\n            title,\n            body: String::new(),\n            _state: PhantomData,\n        }\n    }\n\n    fn set_body(mut self, body: String) -> Self {\n        self.body = body;\n        self\n    }\n\n    fn submit_for_review(self) -> Article<Review> {\n        println!(\"'{}' submitted for review\", self.title);\n        Article {\n            title: self.title,\n            body: self.body,\n            _state: PhantomData,\n        }\n    }\n}\n\n// Only Review articles can be approved or rejected\nimpl Article<Review> {\n    fn approve(self) -> Article<Published> {\n        println!(\"'{}' approved!\", self.title);\n        Article {\n            title: self.title,\n            body: self.body,\n            _state: PhantomData,\n        }\n    }\n\n    fn reject(self) -> Article<Draft> {\n        println!(\"'{}' rejected, back to draft\", self.title);\n        Article {\n            title: self.title,\n            body: self.body,\n            _state: PhantomData,\n        }\n    }\n}\n\n// Only Published articles can be viewed\nimpl Article<Published> {\n    fn view(&self) -> String {\n        format!(\"# {}\\n\\n{}\", self.title, self.body)\n    }\n}\n\nfn main() {\n    let article = Article::<Draft>::new(\"Rust Typestate\".into())\n        .set_body(\"Typestate is a powerful pattern...\".into())\n        .submit_for_review()\n        .approve();\n\n    println!(\"{}\", article.view());\n\n    // These would NOT compile:\n    // article.set_body(\"...\".into());  // Can't edit a Published article\n    // article.approve();               // Can't approve a Published article\n}",
+  "realWorldUse": "hyper's HTTP response builder (must set status, then headers, then body). Diesel's query builder (type changes as you add clauses). TLS handshake state machines. File handles (open vs. closed)."
+}

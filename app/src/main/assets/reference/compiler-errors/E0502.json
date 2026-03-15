@@ -1,0 +1,20 @@
+{
+  "code": "E0502",
+  "title": "Cannot borrow as mutable because also borrowed as immutable",
+  "severity": "common",
+  "explanation": "This error occurs when you try to take a mutable reference to a value while an immutable reference to it still exists. Rust enforces that you can have either one mutable reference OR any number of immutable references, but not both at the same time.",
+  "example_bad": "fn main() {\n    let mut v = vec![1, 2, 3];\n    let first = &v[0];\n    v.push(4); // Error: cannot borrow `v` as mutable\n    println!(\"{}\", first);\n}",
+  "error_message": "error[E0502]: cannot borrow `v` as mutable because it is also borrowed as immutable",
+  "fixes": [
+    {
+      "description": "Use the immutable reference before mutating",
+      "code": "let mut v = vec![1, 2, 3];\nlet first = &v[0];\nprintln!(\"{}\", first); // Use it here\nv.push(4); // Now mutation is fine"
+    },
+    {
+      "description": "Clone the value you need",
+      "code": "let mut v = vec![1, 2, 3];\nlet first = v[0]; // Copy the i32 value\nv.push(4);\nprintln!(\"{}\", first); // Works!"
+    }
+  ],
+  "related": ["E0499", "E0505"],
+  "tip": "This rule prevents data races at compile time. If push() reallocates the vector, the reference to the first element would be invalidated."
+}

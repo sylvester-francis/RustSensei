@@ -1,0 +1,83 @@
+{
+  "id": "pattern-matching",
+  "title": "Pattern Matching",
+  "sections": [
+    {
+      "heading": "Literal & Variable Patterns",
+      "entries": [
+        {"label": "Literal matching", "code": "match x {\n    1 => println!(\"one\"),\n    2 => println!(\"two\"),\n    3 => println!(\"three\"),\n    _ => println!(\"other\"),\n}", "note": "Match exact values; _ is wildcard (matches anything)"},
+        {"label": "Variable binding", "code": "match x {\n    n => println!(\"got: {n}\"),\n}", "note": "A name in a pattern creates a new binding; always matches"},
+        {"label": "String/&str matching", "code": "let cmd = \"quit\";\nmatch cmd {\n    \"start\" => println!(\"starting\"),\n    \"stop\" => println!(\"stopping\"),\n    \"quit\" | \"exit\" => println!(\"goodbye\"),\n    other => println!(\"unknown: {other}\"),\n}", "note": "Match string slices with literals; bind remaining with a name"},
+        {"label": "Boolean matching", "code": "match (has_permission, is_admin) {\n    (true, true) => println!(\"full access\"),\n    (true, false) => println!(\"limited access\"),\n    (false, _) => println!(\"no access\"),\n}", "note": "Match on tuples of booleans for state combinations"}
+      ]
+    },
+    {
+      "heading": "Range & Or Patterns",
+      "entries": [
+        {"label": "Range patterns", "code": "match score {\n    90..=100 => println!(\"A\"),\n    80..=89 => println!(\"B\"),\n    70..=79 => println!(\"C\"),\n    60..=69 => println!(\"D\"),\n    0..=59 => println!(\"F\"),\n    _ => println!(\"invalid\"),\n}", "note": "..= for inclusive ranges; exclusive .. not allowed in patterns"},
+        {"label": "Char ranges", "code": "match c {\n    'a'..='z' => println!(\"lowercase\"),\n    'A'..='Z' => println!(\"uppercase\"),\n    '0'..='9' => println!(\"digit\"),\n    _ => println!(\"other\"),\n}", "note": "Ranges work with char values"},
+        {"label": "Or patterns", "code": "match x {\n    1 | 2 | 3 => println!(\"small\"),\n    4 | 5 | 6 => println!(\"medium\"),\n    _ => println!(\"large\"),\n}", "note": "| matches any of the alternatives"},
+        {"label": "Or in nested patterns", "code": "match msg {\n    Message::Move { x: 0, y: 0 } | Message::Quit => {\n        println!(\"stopping\");\n    }\n    _ => println!(\"continuing\"),\n}", "note": "Or patterns can combine different enum variants"}
+      ]
+    },
+    {
+      "heading": "Destructuring Structs",
+      "entries": [
+        {"label": "Struct fields", "code": "struct Point { x: i32, y: i32 }\nlet p = Point { x: 1, y: 2 };\nlet Point { x, y } = p;\nprintln!(\"{x}, {y}\");", "note": "Destructure in let bindings; field names become variables"},
+        {"label": "Rename fields", "code": "let Point { x: horizontal, y: vertical } = p;\nprintln!(\"{horizontal}, {vertical}\");", "note": "Rename destructured fields with : syntax"},
+        {"label": "Partial destructure", "code": "let Point { x, .. } = p;\nprintln!(\"x = {x}\");", "note": ".. ignores remaining fields"},
+        {"label": "In match", "code": "match point {\n    Point { x: 0, y: 0 } => println!(\"origin\"),\n    Point { x, y: 0 } => println!(\"on x-axis at {x}\"),\n    Point { x: 0, y } => println!(\"on y-axis at {y}\"),\n    Point { x, y } => println!(\"({x}, {y})\"),\n}", "note": "Match specific field values and bind others"},
+        {"label": "Nested struct destructure", "code": "struct Rect {\n    top_left: Point,\n    bottom_right: Point,\n}\nlet Rect {\n    top_left: Point { x: x1, y: y1 },\n    bottom_right: Point { x: x2, y: y2 },\n} = rect;", "note": "Destructure nested structs in one pattern"}
+      ]
+    },
+    {
+      "heading": "Destructuring Enums",
+      "entries": [
+        {"label": "Basic enum matching", "code": "enum Color {\n    Red,\n    Green,\n    Blue,\n    Custom(u8, u8, u8),\n}\nmatch color {\n    Color::Red => println!(\"red\"),\n    Color::Green => println!(\"green\"),\n    Color::Blue => println!(\"blue\"),\n    Color::Custom(r, g, b) => println!(\"rgb({r},{g},{b})\"),\n}", "note": "Match each variant; destructure data from variants"},
+        {"label": "Option matching", "code": "match opt {\n    Some(value) => println!(\"got: {value}\"),\n    None => println!(\"nothing\"),\n}", "note": "Most common enum pattern matching; Option<T>"},
+        {"label": "Result matching", "code": "match result {\n    Ok(value) => println!(\"success: {value}\"),\n    Err(e) => eprintln!(\"error: {e}\"),\n}", "note": "Handle success and error cases explicitly"},
+        {"label": "Nested enum", "code": "enum Expr {\n    Num(i32),\n    Add(Box<Expr>, Box<Expr>),\n    Mul(Box<Expr>, Box<Expr>),\n}\nfn eval(expr: &Expr) -> i32 {\n    match expr {\n        Expr::Num(n) => *n,\n        Expr::Add(a, b) => eval(a) + eval(b),\n        Expr::Mul(a, b) => eval(a) * eval(b),\n    }\n}", "note": "Recursive pattern matching for tree structures"},
+        {"label": "Struct variant", "code": "enum Shape {\n    Circle { radius: f64 },\n    Rectangle { width: f64, height: f64 },\n}\nmatch shape {\n    Shape::Circle { radius } => std::f64::consts::PI * radius * radius,\n    Shape::Rectangle { width, height } => width * height,\n}", "note": "Destructure named fields in enum variants"}
+      ]
+    },
+    {
+      "heading": "Tuple & Slice Patterns",
+      "entries": [
+        {"label": "Tuple destructuring", "code": "let (x, y, z) = (1, 2.0, \"three\");\n\nmatch (a, b) {\n    (0, 0) => println!(\"origin\"),\n    (x, 0) => println!(\"on x-axis: {x}\"),\n    (0, y) => println!(\"on y-axis: {y}\"),\n    (x, y) => println!(\"({x}, {y})\"),\n}", "note": "Destructure tuples by position"},
+        {"label": "Slice patterns", "code": "let v = [1, 2, 3, 4, 5];\nmatch v {\n    [first, .., last] => println!(\"first={first}, last={last}\"),\n}\nmatch &v[..] {\n    [] => println!(\"empty\"),\n    [only] => println!(\"one: {only}\"),\n    [first, rest @ ..] => println!(\"first={first}, rest={rest:?}\"),\n}", "note": "Match array/slice structure; .. matches any number of elements"},
+        {"label": "Rest pattern (@)", "code": "match numbers.as_slice() {\n    [first, second, rest @ ..] => {\n        println!(\"first two: {first}, {second}\");\n        println!(\"remaining: {rest:?}\");\n    }\n    _ => println!(\"too few\"),\n}", "note": "rest @ .. binds the remaining elements to a variable"},
+        {"label": "Exact length", "code": "match slice {\n    [a, b] => println!(\"pair: {a}, {b}\"),\n    [a, b, c] => println!(\"triple: {a}, {b}, {c}\"),\n    _ => println!(\"other length\"),\n}", "note": "Match slices of specific lengths"}
+      ]
+    },
+    {
+      "heading": "Guards & Bindings",
+      "entries": [
+        {"label": "Match guards", "code": "match num {\n    n if n < 0 => println!(\"negative: {n}\"),\n    0 => println!(\"zero\"),\n    n if n % 2 == 0 => println!(\"positive even: {n}\"),\n    n => println!(\"positive odd: {n}\"),\n}", "note": "if condition after pattern adds extra constraint; can use bound variables"},
+        {"label": "Guard with enum", "code": "match msg {\n    Message::Write(text) if text.len() > 100 => {\n        println!(\"long message\");\n    }\n    Message::Write(text) => println!(\"{text}\"),\n    _ => {}\n}", "note": "Guard narrows which arm matches; subsequent arms still checked"},
+        {"label": "@ bindings", "code": "match age {\n    n @ 0..=12 => println!(\"child, age {n}\"),\n    n @ 13..=19 => println!(\"teenager, age {n}\"),\n    n @ 20..=64 => println!(\"adult, age {n}\"),\n    n => println!(\"senior, age {n}\"),\n}", "note": "@ binds the matched value to a name while also testing a pattern"},
+        {"label": "@ with enums", "code": "match msg {\n    Message::Hello { id: id @ 3..=7 } => {\n        println!(\"Found id in range: {id}\");\n    }\n    Message::Hello { id } => {\n        println!(\"Other id: {id}\");\n    }\n    _ => {}\n}", "note": "Bind and constrain a field simultaneously"},
+        {"label": "Nested @ binding", "code": "match value {\n    Some(inner @ 1..=10) => println!(\"small value: {inner}\"),\n    Some(inner) => println!(\"large value: {inner}\"),\n    None => println!(\"nothing\"),\n}", "note": "@ works inside Option/Result destructuring too"}
+      ]
+    },
+    {
+      "heading": "if let, while let, let else",
+      "entries": [
+        {"label": "if let", "code": "if let Some(value) = optional {\n    println!(\"got: {value}\");\n} else {\n    println!(\"nothing\");\n}", "note": "Sugar for matching one pattern; else for the non-matching case"},
+        {"label": "if let chain", "code": "if let Some(x) = opt_x {\n    if let Some(y) = opt_y {\n        println!(\"{x}, {y}\");\n    }\n}", "note": "Nested if let for multiple Options; let chains available on nightly"},
+        {"label": "while let", "code": "let mut stack = vec![1, 2, 3];\nwhile let Some(top) = stack.pop() {\n    println!(\"{top}\");\n}\n// Prints: 3, 2, 1", "note": "Loop while pattern keeps matching; great for draining collections"},
+        {"label": "let else", "code": "fn process(value: Option<i32>) -> i32 {\n    let Some(v) = value else {\n        return -1;\n    };\n    v * 2\n}", "note": "Destructure or diverge (return/break/continue/panic); since Rust 1.65"},
+        {"label": "let else with Result", "code": "fn read_config() -> Result<Config, Error> {\n    let Ok(content) = std::fs::read_to_string(\"config.toml\") else {\n        return Err(Error::ConfigMissing);\n    };\n    parse_config(&content)\n}", "note": "Clean early return pattern for error handling"}
+      ]
+    },
+    {
+      "heading": "Advanced Patterns",
+      "entries": [
+        {"label": "Reference patterns", "code": "let reference = &42;\nmatch reference {\n    &val => println!(\"got value: {val}\"),\n}\n// Or dereference:\nmatch *reference {\n    val => println!(\"got value: {val}\"),\n}", "note": "& in pattern matches a reference; destructures one level"},
+        {"label": "ref keyword", "code": "let value = String::from(\"hello\");\nmatch value {\n    ref s => println!(\"{s}\"), // s: &String\n}\nprintln!(\"{value}\"); // value not moved", "note": "ref borrows instead of moving; mostly replaced by match ergonomics"},
+        {"label": "Match ergonomics", "code": "let opt = &Some(42);\nmatch opt {\n    Some(x) => println!(\"{x}\"), // x: &i32 automatically\n    None => println!(\"none\"),\n}", "note": "Since Rust 2018: matching on &T auto-adjusts; no need for &Some(ref x)"},
+        {"label": "Ignoring values", "code": "let (_, second, _) = (1, 2, 3);\n\nstruct Point { x: i32, y: i32, z: i32 }\nlet Point { x, .. } = point; // ignore y and z\n\nlet _unused = compute(); // suppress warning", "note": "_ discards; .. ignores rest; _name suppresses unused warning"},
+        {"label": "Complex nested pattern", "code": "match command {\n    Command::Set {\n        key,\n        value: Value::Int(n),\n    } if *n > 0 => {\n        println!(\"setting {key} to positive int {n}\");\n    }\n    Command::Set {\n        key,\n        value: Value::Str(s),\n    } if !s.is_empty() => {\n        println!(\"setting {key} to {s}\");\n    }\n    _ => println!(\"unhandled\"),\n}", "note": "Combine struct destructuring, enum matching, and guards for precise control"}
+      ]
+    }
+  ]
+}

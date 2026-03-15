@@ -1,0 +1,32 @@
+{
+  "id": "file-io",
+  "title": "File I/O for CLI Tools",
+  "order": 3,
+  "content": "CLI tools live and breathe file I/O. Rust's std::fs module provides the basics, and the standard Read/Write traits give you flexible streaming I/O.\n\nKey patterns: read_to_string for small files, BufReader for line-by-line processing of large files, BufWriter for efficient output. Always use the ? operator with context (via anyhow) for clear error messages.\n\nA common CLI idiom: accept '-' as a filename to mean stdin/stdout, allowing your tool to work in Unix pipelines.",
+  "codeExamples": [
+    {
+      "description": "Reading files with good error messages",
+      "code": "use anyhow::{Context, Result};\nuse std::fs;\nuse std::path::Path;\n\nfn read_file(path: &Path) -> Result<String> {\n    fs::read_to_string(path)\n        .with_context(|| format!(\"Failed to read {}\", path.display()))\n}\n\nfn read_lines(path: &Path) -> Result<Vec<String>> {\n    let content = read_file(path)?;\n    Ok(content.lines().map(String::from).collect())\n}"
+    },
+    {
+      "description": "BufReader for large files (line-by-line)",
+      "code": "use std::fs::File;\nuse std::io::{BufRead, BufReader};\nuse anyhow::Result;\n\nfn count_matching_lines(path: &str, pattern: &str) -> Result<usize> {\n    let file = File::open(path)?;\n    let reader = BufReader::new(file);\n    let mut count = 0;\n\n    for line in reader.lines() {\n        let line = line?;\n        if line.contains(pattern) {\n            count += 1;\n        }\n    }\n\n    Ok(count)\n}"
+    },
+    {
+      "description": "Writing output with BufWriter",
+      "code": "use std::fs::File;\nuse std::io::{BufWriter, Write};\nuse anyhow::Result;\n\nfn write_report(path: &str, data: &[(String, u32)]) -> Result<()> {\n    let file = File::create(path)?;\n    let mut writer = BufWriter::new(file);\n\n    writeln!(writer, \"Name,Count\")?;\n    for (name, count) in data {\n        writeln!(writer, \"{},{}\", name, count)?;\n    }\n\n    writer.flush()?;\n    Ok(())\n}"
+    },
+    {
+      "description": "Stdin/stdout support (Unix pipeline friendly)",
+      "code": "use std::io::{self, BufRead, Read, Write};\n\nfn read_input(path: Option<&str>) -> Result<String, io::Error> {\n    match path {\n        Some(\"-\") | None => {\n            let mut buf = String::new();\n            io::stdin().read_to_string(&mut buf)?;\n            Ok(buf)\n        }\n        Some(path) => std::fs::read_to_string(path),\n    }\n}\n\nfn write_output(path: Option<&str>, content: &str) -> Result<(), io::Error> {\n    match path {\n        Some(\"-\") | None => {\n            io::stdout().write_all(content.as_bytes())?;\n            Ok(())\n        }\n        Some(path) => std::fs::write(path, content),\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "Use fs::read_to_string for small files, BufReader for large ones",
+    "BufWriter batches writes for much better performance",
+    "Always add .with_context() for clear error messages with file paths",
+    "Support stdin ('-') for Unix pipeline compatibility",
+    "Use Path and PathBuf instead of raw strings for file paths",
+    "BufRead::lines() returns Result for each line, handling encoding errors"
+  ]
+}

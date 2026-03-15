@@ -1,0 +1,24 @@
+{
+  "id": "unit-testing",
+  "title": "Unit Testing Fundamentals",
+  "order": 1,
+  "content": "Rust has built-in unit testing support. Test functions are annotated with #[test] and placed in a #[cfg(test)] module inside the same file as the code they test. This module is only compiled when running tests, so test utilities don't bloat your release binary.\n\nUse assert!, assert_eq!, and assert_ne! macros for assertions. Tests fail by panicking. Use #[should_panic] for tests that expect panics, and return Result for tests that use the ? operator.",
+  "codeExamples": [
+    {
+      "description": "Basic unit test structure",
+      "code": "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n\npub fn divide(a: f64, b: f64) -> Result<f64, String> {\n    if b == 0.0 {\n        Err(\"Division by zero\".to_string())\n    } else {\n        Ok(a / b)\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n\n    #[test]\n    fn test_add_negative() {\n        assert_eq!(add(-1, 1), 0);\n    }\n\n    #[test]\n    fn test_divide() {\n        let result = divide(10.0, 3.0).unwrap();\n        assert!((result - 3.333).abs() < 0.01);\n    }\n\n    #[test]\n    fn test_divide_by_zero() {\n        assert!(divide(1.0, 0.0).is_err());\n    }\n\n    // Test that returns Result (can use ?)\n    #[test]\n    fn test_divide_result() -> Result<(), String> {\n        let result = divide(10.0, 2.0)?;\n        assert_eq!(result, 5.0);\n        Ok(())\n    }\n\n    #[test]\n    #[should_panic(expected = \"index out of bounds\")]\n    fn test_out_of_bounds() {\n        let v = vec![1, 2, 3];\n        let _ = v[10];  // panics\n    }\n}"
+    },
+    {
+      "description": "Custom assertion messages",
+      "code": "#[cfg(test)]\nmod tests {\n    #[test]\n    fn test_with_message() {\n        let result = 42;\n        assert_eq!(\n            result, 42,\n            \"Expected 42 but got {}. Check the computation.\",\n            result\n        );\n\n        let name = \"Alice\";\n        assert!(\n            name.starts_with('A'),\n            \"Name '{}' should start with 'A'\",\n            name\n        );\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "Tests are functions annotated with #[test]",
+    "#[cfg(test)] modules are only compiled during testing",
+    "assert!, assert_eq!, assert_ne! are the core assertion macros",
+    "#[should_panic] tests verify that code panics correctly",
+    "Tests can return Result<(), E> to use the ? operator",
+    "Run tests with: cargo test"
+  ]
+}

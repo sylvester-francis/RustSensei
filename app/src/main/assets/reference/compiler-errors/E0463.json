@@ -1,0 +1,24 @@
+{
+  "code": "E0463",
+  "title": "Can't find crate",
+  "severity": "frequent",
+  "explanation": "This error occurs when the compiler cannot find a crate that your code references with `extern crate` or `use`. The crate might not be listed in Cargo.toml, or the name might be misspelled.",
+  "example_bad": "use serde::Serialize; // Error if serde is not in Cargo.toml\n\nextern crate my_lib; // Error if crate doesn't exist",
+  "error_message": "error[E0463]: can't find crate for `serde`",
+  "fixes": [
+    {
+      "description": "Add the dependency to Cargo.toml",
+      "code": "# Cargo.toml\n[dependencies]\nserde = { version = \"1.0\", features = [\"derive\"] }"
+    },
+    {
+      "description": "Use cargo add for convenience",
+      "code": "# Terminal:\ncargo add serde --features derive"
+    },
+    {
+      "description": "Check the crate name (hyphens become underscores)",
+      "code": "# Cargo.toml has: my-cool-lib = \"1.0\"\n# In code, use underscores:\nuse my_cool_lib::something;"
+    }
+  ],
+  "related": ["E0432", "E0433"],
+  "tip": "Crate names with hyphens in Cargo.toml become underscores in Rust code. For example, `serde-json` becomes `serde_json`."
+}

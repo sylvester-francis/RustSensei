@@ -1,0 +1,32 @@
+{
+  "id": "itertools",
+  "title": "itertools -- Extra Iterator Adaptors",
+  "version": "0.13.x",
+  "description": "Extends Rust's standard Iterator trait with many additional methods: chunking, deduplication, combinations, permutations, interleaving, joining, grouping, and much more. An essential utility crate for data processing.",
+  "cargoToml": "[dependencies]\nitertools = \"0.13\"",
+  "quickStart": "use itertools::Itertools;\n\nfn main() {\n    let data = vec![1, 2, 3, 4, 5];\n\n    // Chunk into groups of 2\n    for chunk in &data.iter().chunks(2) {\n        let items: Vec<_> = chunk.collect();\n        println!(\"Chunk: {:?}\", items);\n    }\n\n    // Join with separator\n    let joined = data.iter().join(\", \");\n    println!(\"Joined: {}\", joined);\n\n    // All unique pairs\n    let pairs: Vec<_> = data.iter().tuple_combinations().collect::<Vec<(_, _)>>();\n    println!(\"Pairs: {:?}\", pairs);\n}",
+  "commonPatterns": [
+    {
+      "title": "Group consecutive elements",
+      "code": "use itertools::Itertools;\n\nlet data = vec![1, 1, 2, 2, 2, 3, 1, 1];\nfor (key, group) in &data.iter().group_by(|&&x| x) {\n    let items: Vec<_> = group.collect();\n    println!(\"Key: {}, Count: {}\", key, items.len());\n}\n// Key: 1, Count: 2\n// Key: 2, Count: 3\n// Key: 3, Count: 1\n// Key: 1, Count: 2"
+    },
+    {
+      "title": "Deduplicate and sort",
+      "code": "use itertools::Itertools;\n\nlet words = vec![\"banana\", \"apple\", \"cherry\", \"apple\", \"banana\"];\nlet unique: Vec<_> = words.into_iter().sorted().dedup().collect();\n// [\"apple\", \"banana\", \"cherry\"]"
+    },
+    {
+      "title": "Cartesian product",
+      "code": "use itertools::Itertools;\n\nlet colors = vec![\"red\", \"blue\"];\nlet sizes = vec![\"S\", \"M\", \"L\"];\n\nlet combos: Vec<_> = colors.iter()\n    .cartesian_product(sizes.iter())\n    .collect();\n// [(\"red\", \"S\"), (\"red\", \"M\"), (\"red\", \"L\"), (\"blue\", \"S\"), ...]"
+    },
+    {
+      "title": "Interleave two iterators",
+      "code": "use itertools::Itertools;\n\nlet a = vec![1, 3, 5];\nlet b = vec![2, 4, 6];\nlet merged: Vec<_> = a.into_iter().interleave(b).collect();\n// [1, 2, 3, 4, 5, 6]"
+    },
+    {
+      "title": "Fold results (collect first error)",
+      "code": "use itertools::Itertools;\n\nlet inputs = vec![\"1\", \"2\", \"bad\", \"4\"];\nlet result: Result<Vec<i32>, _> = inputs.iter()\n    .map(|s| s.parse::<i32>())\n    .try_collect();\n// Err(ParseIntError { ... })"
+    }
+  ],
+  "whenToUse": "Whenever you need iterator operations beyond what std provides: grouping, chunking, combinations, permutations, multi-iterator zipping, sorted/dedup, or formatted joining.",
+  "alternatives": "Most methods have manual implementations using std iterators, but itertools is more concise and tested. For parallel iteration: rayon. For streaming/async iteration: tokio-stream, futures::stream."
+}

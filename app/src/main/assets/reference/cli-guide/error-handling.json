@@ -1,0 +1,28 @@
+{
+  "id": "error-handling",
+  "title": "CLI Error Handling and Exit Codes",
+  "order": 4,
+  "content": "Good error handling is what separates a polished CLI from a frustrating one. Users need clear, actionable error messages -- not stack traces or cryptic codes.\n\nReturn anyhow::Result from main() for automatic error formatting. Use .with_context() to add information about what you were trying to do when the error occurred. Use std::process::exit() when you need specific exit codes.\n\nConvention: exit code 0 means success, 1 means general error, 2 means usage error (bad arguments). Match the conventions of similar tools.",
+  "codeExamples": [
+    {
+      "description": "Clean error output with anyhow",
+      "code": "use anyhow::{bail, Context, Result};\nuse std::path::Path;\n\nfn validate_input(path: &Path) -> Result<()> {\n    if !path.exists() {\n        bail!(\"Input file does not exist: {}\", path.display());\n    }\n    if !path.is_file() {\n        bail!(\"Path is not a file: {}\", path.display());\n    }\n    let metadata = path.metadata()\n        .with_context(|| format!(\"Cannot read metadata for {}\", path.display()))?;\n    if metadata.len() == 0 {\n        bail!(\"Input file is empty: {}\", path.display());\n    }\n    Ok(())\n}\n\nfn main() -> Result<()> {\n    let path = Path::new(\"input.txt\");\n    validate_input(path)?;\n    // Process file...\n    Ok(())\n}"
+    },
+    {
+      "description": "Custom exit codes",
+      "code": "use std::process;\n\nenum ExitCode {\n    Success = 0,\n    GeneralError = 1,\n    UsageError = 2,\n    IoError = 3,\n}\n\nfn main() {\n    if let Err(e) = run() {\n        eprintln!(\"Error: {:#}\", e);  // Print to stderr\n        process::exit(ExitCode::GeneralError as i32);\n    }\n}\n\nfn run() -> anyhow::Result<()> {\n    // Application logic here\n    Ok(())\n}"
+    },
+    {
+      "description": "User-friendly error formatting",
+      "code": "fn main() {\n    if let Err(err) = run() {\n        // Print error chain with causes\n        eprintln!(\"error: {}\", err);\n        for cause in err.chain().skip(1) {\n            eprintln!(\"  caused by: {}\", cause);\n        }\n        std::process::exit(1);\n    }\n}\n\nfn run() -> anyhow::Result<()> {\n    let config = load_config(\"app.toml\")\n        .context(\"Failed to initialize application\")?;\n    Ok(())\n}\n\nfn load_config(path: &str) -> anyhow::Result<String> {\n    std::fs::read_to_string(path)\n        .context(\"Could not read config file\")\n}"
+    }
+  ],
+  "keyPoints": [
+    "Return Result from main() for automatic error display",
+    "Use eprintln! for error output (goes to stderr, not stdout)",
+    "with_context() adds 'what were you doing' information to errors",
+    "bail!() is a shortcut for return Err(anyhow!(...))",
+    "Use {:#} format specifier to print the full error chain",
+    "Exit code 0 = success, 1 = error, 2 = usage error"
+  ]
+}

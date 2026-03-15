@@ -1,0 +1,24 @@
+{
+  "code": "E0061",
+  "title": "Wrong number of arguments in function call",
+  "severity": "common",
+  "explanation": "This error occurs when you call a function with a different number of arguments than its definition requires. Unlike some languages, Rust does not support optional arguments or function overloading.",
+  "example_bad": "fn greet(name: &str, age: u32) {\n    println!(\"Hello {}, age {}\", name, age);\n}\n\nfn main() {\n    greet(\"Alice\"); // Error: expected 2 arguments, found 1\n    greet(\"Bob\", 30, true); // Error: expected 2 arguments, found 3\n}",
+  "error_message": "error[E0061]: this function takes 2 arguments but 1 argument was supplied",
+  "fixes": [
+    {
+      "description": "Provide the correct number of arguments",
+      "code": "greet(\"Alice\", 25); // Provide both arguments"
+    },
+    {
+      "description": "Use Option for optional parameters",
+      "code": "fn greet(name: &str, age: Option<u32>) {\n    match age {\n        Some(a) => println!(\"Hello {}, age {}\", name, a),\n        None => println!(\"Hello {}\", name),\n    }\n}\n\ngreet(\"Alice\", None);\ngreet(\"Bob\", Some(30));"
+    },
+    {
+      "description": "Use a builder pattern for many optional parameters",
+      "code": "struct GreetingBuilder {\n    name: String,\n    age: Option<u32>,\n}\n\nimpl GreetingBuilder {\n    fn new(name: &str) -> Self {\n        Self { name: name.into(), age: None }\n    }\n    fn age(mut self, age: u32) -> Self {\n        self.age = Some(age);\n        self\n    }\n    fn build(self) -> String {\n        format!(\"Hello {}\", self.name)\n    }\n}"
+    }
+  ],
+  "related": ["E0308", "E0063"],
+  "tip": "Rust does not have default arguments or overloading. Use Option<T>, the builder pattern, or different function names for variants."
+}

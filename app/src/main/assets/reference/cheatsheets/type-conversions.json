@@ -1,0 +1,75 @@
+{
+  "id": "type-conversions",
+  "title": "Type Conversions",
+  "sections": [
+    {
+      "heading": "as Keyword",
+      "entries": [
+        {"label": "Integer conversions", "code": "let x: i32 = 42;\nlet y: i64 = x as i64;  // widening (safe)\nlet z: i16 = x as i16;  // narrowing (may truncate)\nlet w: u32 = x as u32;  // signed to unsigned", "note": "Widening is always safe; narrowing and sign changes may lose data"},
+        {"label": "Float conversions", "code": "let f: f64 = 3.99;\nlet i: i32 = f as i32;    // 3 (truncates, doesn't round)\nlet u: u8 = 256.0_f64 as u8; // 255 (saturates)", "note": "Float-to-int truncates toward zero; saturates at bounds"},
+        {"label": "Bool and char", "code": "let b = true as u8;    // 1\nlet c = 'A' as u32;    // 65\nlet c = 65u8 as char;  // 'A'", "note": "bool converts to 0/1; char to/from its Unicode code point"},
+        {"label": "usize for indexing", "code": "let i: i32 = 5;\nlet v = vec![1, 2, 3, 4, 5, 6];\nlet val = v[i as usize];", "note": "Array/Vec indices must be usize; use as usize to convert"}
+      ]
+    },
+    {
+      "heading": "From / Into",
+      "entries": [
+        {"label": "From trait", "code": "let s = String::from(\"hello\");\nlet n = i64::from(42i32);\nlet v = Vec::from([1, 2, 3]);", "note": "Infallible conversion; implement From to define type conversions"},
+        {"label": "Into trait", "code": "let s: String = \"hello\".into();\nlet n: i64 = 42i32.into();\nfn take_string(s: impl Into<String>) {\n    let s: String = s.into();\n    println!(\"{s}\");\n}\ntake_string(\"hello\"); // &str into String", "note": "Into is the reciprocal of From; implement From and get Into for free"},
+        {"label": "Custom From", "code": "struct Celsius(f64);\nstruct Fahrenheit(f64);\n\nimpl From<Celsius> for Fahrenheit {\n    fn from(c: Celsius) -> Self {\n        Fahrenheit(c.0 * 9.0 / 5.0 + 32.0)\n    }\n}\nlet f: Fahrenheit = Celsius(100.0).into();", "note": "Define conversions between your own types"},
+        {"label": "From for error types", "code": "#[derive(Debug)]\nenum AppError {\n    Io(std::io::Error),\n    Parse(std::num::ParseIntError),\n}\nimpl From<std::io::Error> for AppError {\n    fn from(e: std::io::Error) -> Self {\n        AppError::Io(e)\n    }\n}\n// Now ? auto-converts io::Error to AppError", "note": "Implement From to enable ? operator error conversion"},
+        {"label": "From<&str> for String", "code": "// All of these create a String from &str:\nlet s = String::from(\"hello\");\nlet s: String = \"hello\".into();\nlet s = \"hello\".to_string();\nlet s = \"hello\".to_owned();", "note": "Multiple ways to convert &str to String; all equivalent"}
+      ]
+    },
+    {
+      "heading": "TryFrom / TryInto",
+      "entries": [
+        {"label": "Fallible conversion", "code": "use std::convert::TryFrom;\nlet n: i32 = 256;\nlet small: Result<u8, _> = u8::try_from(n);\nassert!(small.is_err()); // 256 doesn't fit in u8", "note": "Returns Result instead of silently truncating; safer than as"},
+        {"label": "TryInto", "code": "use std::convert::TryInto;\nlet n: i32 = 42;\nlet small: u8 = n.try_into().unwrap(); // Ok(42)", "note": "Reciprocal of TryFrom; implement TryFrom and get TryInto free"},
+        {"label": "Custom TryFrom", "code": "struct Percentage(u8);\n\nimpl TryFrom<i32> for Percentage {\n    type Error = String;\n    fn try_from(value: i32) -> Result<Self, Self::Error> {\n        if value >= 0 && value <= 100 {\n            Ok(Percentage(value as u8))\n        } else {\n            Err(format!(\"{value} is not a valid percentage\"))\n        }\n    }\n}\nlet p = Percentage::try_from(50).unwrap();\nlet err = Percentage::try_from(150);", "note": "Validate during conversion; reject invalid inputs"},
+        {"label": "TryFrom with ?", "code": "fn process(input: i32) -> Result<u8, Box<dyn std::error::Error>> {\n    let byte: u8 = input.try_into()?;\n    Ok(byte)\n}", "note": "Combines naturally with ? operator for error propagation"}
+      ]
+    },
+    {
+      "heading": "ToString / FromStr / parse",
+      "entries": [
+        {"label": "to_string", "code": "let s = 42.to_string();       // \"42\"\nlet s = 3.14.to_string();     // \"3.14\"\nlet s = true.to_string();     // \"true\"\nlet s = 'A'.to_string();      // \"A\"", "note": "Available on all types that implement Display"},
+        {"label": "parse / FromStr", "code": "let n: i32 = \"42\".parse().unwrap();\nlet f: f64 = \"3.14\".parse().unwrap();\nlet b: bool = \"true\".parse().unwrap();\nlet addr: std::net::IpAddr = \"127.0.0.1\".parse().unwrap();", "note": "parse() works for any type implementing FromStr; turbofish or type annotation required"},
+        {"label": "Custom FromStr", "code": "use std::str::FromStr;\n\nstruct Point { x: f64, y: f64 }\n\nimpl FromStr for Point {\n    type Err = String;\n    fn from_str(s: &str) -> Result<Self, Self::Err> {\n        let parts: Vec<&str> = s.split(',').collect();\n        if parts.len() != 2 {\n            return Err(\"expected x,y\".into());\n        }\n        let x = parts[0].trim().parse().map_err(|e| format!(\"{e}\"))?;\n        let y = parts[1].trim().parse().map_err(|e| format!(\"{e}\"))?;\n        Ok(Point { x, y })\n    }\n}\nlet p: Point = \"1.5, 2.5\".parse().unwrap();", "note": "Implement FromStr to make your types parseable from strings"},
+        {"label": "Display for custom types", "code": "use std::fmt;\nstruct Point { x: f64, y: f64 }\nimpl fmt::Display for Point {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        write!(f, \"({}, {})\", self.x, self.y)\n    }\n}\nlet s = Point { x: 1.0, y: 2.0 }.to_string(); // \"(1, 2)\"", "note": "Implementing Display gives you to_string() and {} formatting for free"}
+      ]
+    },
+    {
+      "heading": "AsRef / AsMut",
+      "entries": [
+        {"label": "AsRef for borrowing", "code": "fn print_bytes(data: impl AsRef<[u8]>) {\n    for byte in data.as_ref() {\n        print!(\"{byte:02x} \");\n    }\n    println!();\n}\nprint_bytes(\"hello\");        // &str implements AsRef<[u8]>\nprint_bytes(vec![1, 2, 3]);  // Vec<u8> implements AsRef<[u8]>\nprint_bytes(&[4, 5, 6]);     // &[u8] implements AsRef<[u8]>", "note": "Generic function accepting multiple types that can be viewed as &T"},
+        {"label": "AsRef<str>", "code": "fn greet(name: impl AsRef<str>) {\n    println!(\"Hello, {}!\", name.as_ref());\n}\ngreet(\"Alice\");               // &str\ngreet(String::from(\"Bob\"));   // String\ngreet(&String::from(\"Carol\")); // &String", "note": "Accept &str, String, and &String with one parameter type"},
+        {"label": "AsRef<Path>", "code": "use std::path::Path;\nfn read_file(path: impl AsRef<Path>) -> std::io::Result<String> {\n    std::fs::read_to_string(path)\n}", "note": "Standard library functions use AsRef<Path> to accept &str, String, Path, PathBuf"}
+      ]
+    },
+    {
+      "heading": "Deref Coercion",
+      "entries": [
+        {"label": "Automatic coercion", "code": "fn takes_str(s: &str) { println!(\"{s}\"); }\n\nlet owned = String::from(\"hello\");\ntakes_str(&owned); // &String -> &str automatically\n\nlet boxed = Box::new(String::from(\"world\"));\ntakes_str(&boxed); // &Box<String> -> &String -> &str", "note": "Rust follows the Deref chain automatically in function calls"},
+        {"label": "Common coercions", "code": "// &String     -> &str\n// &Vec<T>     -> &[T]\n// &Box<T>     -> &T\n// &Arc<T>     -> &T\n// &Rc<T>      -> &T\n// &PathBuf    -> &Path\n// &CString    -> &CStr", "note": "Smart pointers and containers auto-deref to their inner type"},
+        {"label": "Custom Deref", "code": "use std::ops::Deref;\nstruct MyString(String);\nimpl Deref for MyString {\n    type Target = str;\n    fn deref(&self) -> &str {\n        &self.0\n    }\n}\nlet s = MyString(String::from(\"hello\"));\nprintln!(\"length: {}\", s.len()); // calls str::len()", "note": "Implement Deref to enable auto-dereferencing for your types"}
+      ]
+    },
+    {
+      "heading": "Borrow & ToOwned",
+      "entries": [
+        {"label": "Borrow trait", "code": "use std::borrow::Borrow;\nfn check<Q: ?Sized>(map: &HashMap<String, i32>, key: &Q) -> bool\nwhere\n    String: Borrow<Q>,\n    Q: Hash + Eq,\n{\n    map.contains_key(key)\n}\n// Can pass &str to look up String keys", "note": "Borrow allows looking up owned keys with borrowed equivalents"},
+        {"label": "ToOwned trait", "code": "let s: &str = \"hello\";\nlet owned: String = s.to_owned();\n\nlet slice: &[i32] = &[1, 2, 3];\nlet owned: Vec<i32> = slice.to_owned();", "note": "Generalized clone: &str -> String, &[T] -> Vec<T>, &Path -> PathBuf"},
+        {"label": "Cow (Clone on Write)", "code": "use std::borrow::Cow;\nfn process(input: &str) -> Cow<str> {\n    if input.is_ascii() {\n        Cow::Borrowed(input)\n    } else {\n        Cow::Owned(input.to_uppercase())\n    }\n}", "note": "Delay allocation until mutation is needed; borrow when possible"}
+      ]
+    },
+    {
+      "heading": "Numeric Conversion Summary",
+      "entries": [
+        {"label": "Safe widening", "code": "// These never lose data:\nlet a: i64 = i32::from(42i16);\nlet b: f64 = f64::from(42i32);\nlet c: u32 = u32::from(42u16);", "note": "Use From for infallible widening conversions"},
+        {"label": "Checked narrowing", "code": "use std::convert::TryFrom;\nlet a: Result<u8, _> = u8::try_from(256i32);  // Err\nlet b: Result<i8, _> = i8::try_from(200u8);   // Err\nlet c: Result<u16, _> = u16::try_from(42i32); // Ok(42)", "note": "Use TryFrom for conversions that might not fit"},
+        {"label": "When to use which", "code": "// as:       Quick and dirty, may truncate silently\n// From:     Infallible, compiler-verified safe\n// TryFrom:  Fallible, returns Result\n// parse():  String-to-type conversion", "note": "Prefer From > TryFrom > as for type safety"}
+      ]
+    }
+  ]
+}

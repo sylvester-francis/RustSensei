@@ -1,0 +1,20 @@
+{
+  "code": "E0716",
+  "title": "Temporary value dropped while borrowed",
+  "severity": "frequent",
+  "explanation": "This error occurs when you create a reference to a temporary value that gets dropped at the end of the statement. The reference would become dangling because the temporary value it points to no longer exists.",
+  "example_bad": "fn main() {\n    let r = &String::from(\"hello\"); // Error in some contexts\n    // or more commonly:\n    let r: &str = &format!(\"hello {}\", \"world\");\n    use_string(r);\n}\n\nfn use_string(s: &str) {}",
+  "error_message": "error[E0716]: temporary value dropped while borrowed",
+  "fixes": [
+    {
+      "description": "Bind the temporary to a variable first",
+      "code": "let s = format!(\"hello {}\", \"world\");\nlet r: &str = &s; // Now s lives long enough\nuse_string(r);"
+    },
+    {
+      "description": "Use the value directly without borrowing",
+      "code": "let s = format!(\"hello {}\", \"world\");\nuse_string(&s);"
+    }
+  ],
+  "related": ["E0597", "E0515"],
+  "tip": "Temporaries are dropped at the end of the statement unless bound to a let binding, which extends their lifetime to the enclosing scope."
+}

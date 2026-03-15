@@ -1,0 +1,20 @@
+{
+  "code": "E0093",
+  "title": "Unrecognized intrinsic function",
+  "severity": "occasional",
+  "explanation": "This error occurs when you declare an intrinsic function that the compiler does not recognize. Intrinsics are low-level functions provided by the compiler, and they must use exact, known names.",
+  "example_bad": "#![feature(intrinsics)]\n\nextern \"rust-intrinsic\" {\n    fn my_custom_intrinsic(); // Error: unrecognized intrinsic\n}",
+  "error_message": "error[E0093]: unrecognized intrinsic function: `my_custom_intrinsic`",
+  "fixes": [
+    {
+      "description": "Use a recognized intrinsic name",
+      "code": "#![feature(intrinsics)]\n\nextern \"rust-intrinsic\" {\n    fn size_of<T>() -> usize; // This is a real intrinsic\n}"
+    },
+    {
+      "description": "Use the stable std API instead of intrinsics",
+      "code": "// Instead of using intrinsics directly:\nlet size = std::mem::size_of::<i32>();\nlet aligned = std::mem::align_of::<i32>();"
+    }
+  ],
+  "related": ["E0554"],
+  "tip": "Intrinsics are internal compiler functions and should rarely be used directly. Prefer the stable std::mem, std::ptr, and std::sync::atomic APIs."
+}

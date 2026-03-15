@@ -1,0 +1,28 @@
+{
+  "id": "reqwest",
+  "title": "reqwest -- HTTP Client",
+  "version": "0.12.x",
+  "description": "A high-level, ergonomic HTTP client for Rust. Built on top of hyper and tokio, reqwest supports async and blocking requests, TLS, JSON serialization, cookies, proxies, and multipart uploads. It is the go-to HTTP client crate.",
+  "cargoToml": "[dependencies]\nreqwest = { version = \"0.12\", features = [\"json\"] }\ntokio = { version = \"1\", features = [\"full\"] }\nserde = { version = \"1\", features = [\"derive\"] }",
+  "quickStart": "use serde::Deserialize;\n\n#[derive(Deserialize, Debug)]\nstruct ApiResponse {\n    origin: String,\n    url: String,\n}\n\n#[tokio::main]\nasync fn main() -> Result<(), reqwest::Error> {\n    // Simple GET request\n    let resp = reqwest::get(\"https://httpbin.org/get\")\n        .await?\n        .json::<ApiResponse>()\n        .await?;\n\n    println!(\"Origin: {}\", resp.origin);\n    println!(\"URL: {}\", resp.url);\n    Ok(())\n}",
+  "commonPatterns": [
+    {
+      "title": "POST with JSON body",
+      "code": "use serde::Serialize;\n\n#[derive(Serialize)]\nstruct CreateUser {\n    name: String,\n    email: String,\n}\n\nasync fn create_user() -> Result<(), reqwest::Error> {\n    let client = reqwest::Client::new();\n    let user = CreateUser {\n        name: \"Alice\".into(),\n        email: \"alice@example.com\".into(),\n    };\n\n    let resp = client\n        .post(\"https://httpbin.org/post\")\n        .json(&user)\n        .send()\n        .await?;\n\n    println!(\"Status: {}\", resp.status());\n    Ok(())\n}"
+    },
+    {
+      "title": "Reusable client with headers",
+      "code": "use reqwest::header;\n\nfn build_client(api_key: &str) -> reqwest::Client {\n    let mut headers = header::HeaderMap::new();\n    headers.insert(\n        header::AUTHORIZATION,\n        header::HeaderValue::from_str(&format!(\"Bearer {}\", api_key)).unwrap(),\n    );\n\n    reqwest::Client::builder()\n        .default_headers(headers)\n        .timeout(std::time::Duration::from_secs(30))\n        .build()\n        .unwrap()\n}"
+    },
+    {
+      "title": "Error handling with status checks",
+      "code": "async fn fetch_data(url: &str) -> Result<String, Box<dyn std::error::Error>> {\n    let resp = reqwest::get(url).await?;\n\n    if !resp.status().is_success() {\n        return Err(format!(\"HTTP error: {}\", resp.status()).into());\n    }\n\n    let body = resp.text().await?;\n    Ok(body)\n}"
+    },
+    {
+      "title": "Blocking (synchronous) client",
+      "code": "// Add features = [\"blocking\"] to Cargo.toml\nfn main() -> Result<(), reqwest::Error> {\n    let body = reqwest::blocking::get(\"https://httpbin.org/get\")?\n        .text()?;\n    println!(\"{}\", body);\n    Ok(())\n}"
+    }
+  ],
+  "whenToUse": "Any time you need to make HTTP requests: calling REST APIs, downloading files, web scraping, or interacting with web services.",
+  "alternatives": "ureq (blocking only, no async, minimal dependencies), hyper (low-level, more control), surf (async-std ecosystem), isahc (curl-based)."
+}

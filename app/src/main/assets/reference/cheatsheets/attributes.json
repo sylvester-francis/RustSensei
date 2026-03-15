@@ -1,0 +1,81 @@
+{
+  "id": "attributes",
+  "title": "Attributes",
+  "sections": [
+    {
+      "heading": "Derive Attributes",
+      "entries": [
+        {"label": "#[derive(...)]", "code": "#[derive(Debug, Clone, PartialEq, Eq, Hash, Default)]\nstruct Config {\n    name: String,\n    retries: u32,\n}", "note": "Auto-implement traits; most common attribute in Rust"},
+        {"label": "Copy + Clone", "code": "#[derive(Copy, Clone)]\nstruct Point { x: f64, y: f64 }", "note": "Copy requires Clone; all fields must be Copy"},
+        {"label": "Ordering derives", "code": "#[derive(PartialEq, Eq, PartialOrd, Ord)]\nstruct Priority(u32);\nlet mut v = vec![Priority(3), Priority(1), Priority(2)];\nv.sort();", "note": "Eq requires PartialEq; Ord requires PartialOrd + Eq"},
+        {"label": "Serde derives", "code": "#[derive(serde::Serialize, serde::Deserialize)]\n#[serde(rename_all = \"camelCase\")]\nstruct ApiResponse {\n    status_code: u32,\n    #[serde(skip_serializing_if = \"Option::is_none\")]\n    error_message: Option<String>,\n}", "note": "Popular third-party derive for serialization/deserialization"}
+      ]
+    },
+    {
+      "heading": "Testing Attributes",
+      "entries": [
+        {"label": "#[test]", "code": "#[test]\nfn test_addition() {\n    assert_eq!(2 + 2, 4);\n}", "note": "Marks a function as a unit test; run with cargo test"},
+        {"label": "#[should_panic]", "code": "#[test]\n#[should_panic(expected = \"divide by zero\")]\nfn test_panic() {\n    divide(1, 0);\n}", "note": "Test passes if it panics with the expected message"},
+        {"label": "#[ignore]", "code": "#[test]\n#[ignore = \"takes too long\"]\nfn expensive_test() {\n    // Run with: cargo test -- --ignored\n}", "note": "Skip by default; run explicitly with --ignored flag"},
+        {"label": "#[cfg(test)]", "code": "#[cfg(test)]\nmod tests {\n    use super::*;\n    \n    #[test]\n    fn it_works() {\n        assert_eq!(add(2, 3), 5);\n    }\n}", "note": "Module only compiled when running tests; convention for unit tests"}
+      ]
+    },
+    {
+      "heading": "Conditional Compilation",
+      "entries": [
+        {"label": "#[cfg(...)]", "code": "#[cfg(target_os = \"linux\")]\nfn linux_only() { /* ... */ }\n\n#[cfg(target_os = \"windows\")]\nfn windows_only() { /* ... */ }\n\n#[cfg(target_arch = \"x86_64\")]\nfn x86_specific() { /* ... */ }", "note": "Include item only when condition is true; checked at compile time"},
+        {"label": "#[cfg(feature)]", "code": "#[cfg(feature = \"json\")]\npub mod json_support {\n    pub fn parse(s: &str) -> serde_json::Value {\n        serde_json::from_str(s).unwrap()\n    }\n}\n\n#[cfg(not(feature = \"json\"))]\npub fn parse(_s: &str) { panic!(\"json feature not enabled\"); }", "note": "Gate code on Cargo features; combine with not() for fallback"},
+        {"label": "cfg combinations", "code": "#[cfg(all(target_os = \"linux\", target_arch = \"x86_64\"))]\nfn linux_x86() { /* ... */ }\n\n#[cfg(any(target_os = \"linux\", target_os = \"macos\"))]\nfn unix_like() { /* ... */ }\n\n#[cfg(not(target_os = \"windows\"))]\nfn not_windows() { /* ... */ }", "note": "all() = AND, any() = OR, not() = NOT; can be nested"},
+        {"label": "#[cfg_attr]", "code": "#[cfg_attr(feature = \"serde\", derive(serde::Serialize))]\nstruct Data {\n    value: i32,\n}", "note": "Conditionally apply another attribute based on cfg condition"},
+        {"label": "cfg! macro", "code": "fn get_separator() -> &'static str {\n    if cfg!(target_os = \"windows\") {\n        \"\\\\\"\n    } else {\n        \"/\"\n    }\n}", "note": "Runtime-accessible cfg check; unlike #[cfg], both branches must compile"}
+      ]
+    },
+    {
+      "heading": "Function & Type Attributes",
+      "entries": [
+        {"label": "#[inline]", "code": "#[inline]\nfn small_function() -> i32 { 42 }\n\n#[inline(always)]\nfn critical_path() -> i32 { 42 }\n\n#[inline(never)]\nfn rarely_called() { panic!(); }", "note": "Hint to compiler; inline(always) forces inlining; inline(never) prevents it"},
+        {"label": "#[must_use]", "code": "#[must_use = \"this Result must be handled\"]\nfn important_operation() -> Result<(), Error> {\n    Ok(())\n}\n\n#[must_use]\nstruct Guard { /* ... */ }", "note": "Compiler warns if return value is unused; great for Result and guard types"},
+        {"label": "#[repr(...)]", "code": "#[repr(C)]\nstruct CCompatible {\n    x: i32,\n    y: i32,\n}\n\n#[repr(u8)]\nenum Color {\n    Red = 0,\n    Green = 1,\n    Blue = 2,\n}\n\n#[repr(transparent)]\nstruct Wrapper(i32);", "note": "Control memory layout; C for FFI; u8/u32 for enum discriminant; transparent for single-field"},
+        {"label": "#[non_exhaustive]", "code": "#[non_exhaustive]\npub enum Error {\n    NotFound,\n    PermissionDenied,\n}\n\n#[non_exhaustive]\npub struct Config {\n    pub name: String,\n}", "note": "Prevent external code from exhaustively matching or constructing; allows adding variants/fields later"},
+        {"label": "#[cold]", "code": "#[cold]\nfn error_handler() {\n    // unlikely path; hint for branch prediction\n}", "note": "Marks function as unlikely to be called; helps optimizer with branch prediction"}
+      ]
+    },
+    {
+      "heading": "Warning & Lint Attributes",
+      "entries": [
+        {"label": "#[allow(...)]", "code": "#[allow(dead_code)]\nfn unused_helper() { }\n\n#[allow(unused_variables)]\nlet x = 42;\n\n#[allow(clippy::too_many_arguments)]\nfn many_params(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32, g: i32) {}", "note": "Suppress specific compiler warnings locally"},
+        {"label": "#[warn(...)]", "code": "#[warn(missing_docs)]\npub mod api {\n    /// This function is documented.\n    pub fn documented() {}\n}", "note": "Enable a warning that may be off by default"},
+        {"label": "#[deny(...)]", "code": "#[deny(unsafe_code)]\nmod safe_module {\n    // Any unsafe code here is a compile error\n}", "note": "Turn a warning into a hard error"},
+        {"label": "#[forbid(...)]", "code": "#![forbid(unsafe_code)]\n// Cannot be overridden with #[allow] in this crate", "note": "Like deny but cannot be overridden by allow; strictest level"},
+        {"label": "Common lint names", "code": "// dead_code          - unused functions/types\n// unused_variables   - unused variables\n// unused_imports     - unused use statements\n// unused_mut         - unnecessary mut\n// unreachable_code   - code after return/panic\n// missing_docs       - public items without docs\n// non_snake_case     - naming convention", "note": "Full list: rustc -W help or clippy lint list online"}
+      ]
+    },
+    {
+      "heading": "Crate-Level Attributes",
+      "entries": [
+        {"label": "Inner attributes (#![...])", "code": "#![allow(unused)]\n#![warn(missing_docs)]\n#![forbid(unsafe_code)]", "note": "Apply to the enclosing item (crate or module); placed at top of file"},
+        {"label": "Feature gates", "code": "#![feature(let_chains)]\n#![feature(generic_const_exprs)]", "note": "Enable unstable features; requires nightly compiler"},
+        {"label": "Crate metadata", "code": "#![doc = \"My awesome crate\"]\n#![crate_name = \"my_crate\"]\n#![crate_type = \"lib\"]", "note": "Usually set in Cargo.toml instead; doc attribute for crate-level docs"},
+        {"label": "Windows subsystem", "code": "#![windows_subsystem = \"windows\"]", "note": "Prevents console window from appearing for GUI apps on Windows"}
+      ]
+    },
+    {
+      "heading": "Documentation Attributes",
+      "entries": [
+        {"label": "Doc comments as attributes", "code": "/// This is equivalent to:\n#[doc = \"This is equivalent to:\"]\npub fn example() {}", "note": "/// is syntactic sugar for #[doc = \"...\"]"},
+        {"label": "Doc hidden", "code": "#[doc(hidden)]\npub fn internal_api() { }", "note": "Public but hidden from documentation; for internal use"},
+        {"label": "Doc aliases", "code": "#[doc(alias = \"find\")]\npub fn search(query: &str) -> Option<Item> {\n    todo!()\n}", "note": "Allow searching docs by alternative names"},
+        {"label": "Module-level docs", "code": "//! # My Module\n//!\n//! This module provides utilities for...\n//!\n//! ## Examples\n//! ```\n//! use my_crate::my_module;\n//! ```", "note": "//! documents the containing item; placed at top of file/module"}
+      ]
+    },
+    {
+      "heading": "Async & External Attributes",
+      "entries": [
+        {"label": "#[tokio::main]", "code": "#[tokio::main]\nasync fn main() {\n    println!(\"async main!\");\n}", "note": "Sets up the Tokio runtime; transforms main into a synchronous function internally"},
+        {"label": "#[tokio::test]", "code": "#[tokio::test]\nasync fn test_async() {\n    let result = async_operation().await;\n    assert!(result.is_ok());\n}", "note": "Async test runner; sets up runtime for each test"},
+        {"label": "#[global_allocator]", "code": "use std::alloc::System;\n#[global_allocator]\nstatic GLOBAL: System = System;", "note": "Set the global memory allocator; default is usually jemalloc or system"},
+        {"label": "#[panic_handler]", "code": "#[panic_handler]\nfn panic(info: &core::panic::PanicInfo) -> ! {\n    loop {}\n}", "note": "Required in no_std binaries; defines what happens on panic"}
+      ]
+    }
+  ]
+}

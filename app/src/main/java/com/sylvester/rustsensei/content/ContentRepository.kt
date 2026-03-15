@@ -46,6 +46,18 @@ data class ExerciseData(
     val relatedBookSection: String
 )
 
+// Reference content models
+data class ReferenceIndex(
+    val sections: List<ReferenceSectionInfo>
+)
+
+data class ReferenceSectionInfo(
+    val id: String,
+    val title: String,
+    val description: String,
+    val items: List<String>
+)
+
 data class BookIndex(
     val chapters: List<BookIndexEntry>
 )
@@ -147,6 +159,39 @@ class ContentRepository(private val context: Context) {
             val exercise = parseExercise(json)
             exerciseCache.put(exerciseId, exercise)
             exercise
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    // Reference content
+    private var referenceIndex: ReferenceIndex? = null
+
+    fun getReferenceIndex(): ReferenceIndex {
+        referenceIndex?.let { return it }
+
+        val json = loadAssetJson("reference/index.json")
+        val sections = mutableListOf<ReferenceSectionInfo>()
+
+        val sectionsArray = json.getJSONArray("sections")
+        for (i in 0 until sectionsArray.length()) {
+            val sec = sectionsArray.getJSONObject(i)
+            sections.add(ReferenceSectionInfo(
+                id = sec.getString("id"),
+                title = sec.getString("title"),
+                description = sec.getString("description"),
+                items = jsonArrayToStringList(sec.getJSONArray("items"))
+            ))
+        }
+
+        val index = ReferenceIndex(sections)
+        referenceIndex = index
+        return index
+    }
+
+    fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
+        return try {
+            loadAssetJson("reference/$sectionId/$itemId.json")
         } catch (e: Exception) {
             null
         }

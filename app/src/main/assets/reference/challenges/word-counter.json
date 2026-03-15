@@ -1,0 +1,23 @@
+{
+  "id": "word-counter",
+  "title": "Word Frequency Counter",
+  "difficulty": "beginner",
+  "estimatedTime": "30 min",
+  "description": "Build a program that reads text and counts the frequency of each word, then displays the top N most common words.",
+  "concepts": ["HashMap", "iterators", "string manipulation", "sorting"],
+  "requirements": [
+    "Read text from a string (simulate file input)",
+    "Split into words, normalize to lowercase",
+    "Count occurrences using HashMap",
+    "Sort by frequency descending",
+    "Display top 10 words"
+  ],
+  "starterCode": "use std::collections::HashMap;\n\nfn count_words(text: &str) -> HashMap<String, usize> {\n    // TODO: implement\n    HashMap::new()\n}\n\nfn top_n(counts: &HashMap<String, usize>, n: usize) -> Vec<(&String, &usize)> {\n    // TODO: implement\n    vec![]\n}\n\nfn main() {\n    let text = \"the quick brown fox jumps over the lazy dog the fox\";\n    let counts = count_words(text);\n    let top = top_n(&counts, 5);\n    for (word, count) in top {\n        println!(\"{}: {}\", word, count);\n    }\n}",
+  "solution": "use std::collections::HashMap;\n\nfn count_words(text: &str) -> HashMap<String, usize> {\n    let mut counts = HashMap::new();\n    for word in text.split_whitespace() {\n        let word = word.to_lowercase();\n        *counts.entry(word).or_insert(0) += 1;\n    }\n    counts\n}\n\nfn top_n(counts: &HashMap<String, usize>, n: usize) -> Vec<(&String, &usize)> {\n    let mut pairs: Vec<_> = counts.iter().collect();\n    pairs.sort_by(|a, b| b.1.cmp(a.1));\n    pairs.truncate(n);\n    pairs\n}\n\nfn main() {\n    let text = \"the quick brown fox jumps over the lazy dog the fox\";\n    let counts = count_words(text);\n    let top = top_n(&counts, 5);\n    for (word, count) in top {\n        println!(\"{}: {}\", word, count);\n    }\n}",
+  "hints": [
+    "Use split_whitespace() to split text into words",
+    "HashMap::entry().or_insert(0) is the idiomatic way to count",
+    "Collect HashMap into a Vec of tuples for sorting"
+  ],
+  "bonusChallenge": "Handle punctuation (strip commas, periods). Support reading from stdin."
+}

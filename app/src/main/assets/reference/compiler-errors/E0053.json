@@ -1,0 +1,16 @@
+{
+  "code": "E0053",
+  "title": "Method signature differs from trait declaration",
+  "severity": "frequent",
+  "explanation": "This error occurs when a method in a trait implementation has a different signature (parameters, return type, or bounds) than what the trait declared. The implementation must exactly match the trait definition.",
+  "example_bad": "trait Processor {\n    fn process(&self, data: &str) -> String;\n}\n\nstruct MyProcessor;\n\nimpl Processor for MyProcessor {\n    fn process(&self, data: String) -> String { // Error: expected &str, got String\n        data.to_uppercase()\n    }\n}",
+  "error_message": "error[E0053]: method `process` has an incompatible type for trait",
+  "fixes": [
+    {
+      "description": "Match the parameter types exactly",
+      "code": "impl Processor for MyProcessor {\n    fn process(&self, data: &str) -> String {\n        data.to_uppercase()\n    }\n}"
+    }
+  ],
+  "related": ["E0200", "E0195"],
+  "tip": "Copy the method signature from the trait definition to ensure an exact match, then fill in the body. Your IDE can often generate the impl skeleton for you."
+}

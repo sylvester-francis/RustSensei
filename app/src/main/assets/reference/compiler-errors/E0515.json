@@ -1,0 +1,20 @@
+{
+  "code": "E0515",
+  "title": "Cannot return reference to local variable",
+  "severity": "common",
+  "explanation": "This error occurs when you try to return a reference to a value that is created inside a function. When the function returns, the local variable is dropped, so the reference would point to invalid memory.",
+  "example_bad": "fn create_greeting() -> &str {\n    let s = String::from(\"hello\");\n    &s // Error: returns a reference to data owned by the function\n}",
+  "error_message": "error[E0515]: cannot return reference to local variable `s`",
+  "fixes": [
+    {
+      "description": "Return an owned value instead",
+      "code": "fn create_greeting() -> String {\n    let s = String::from(\"hello\");\n    s // Return the owned String\n}"
+    },
+    {
+      "description": "Return a static string slice",
+      "code": "fn create_greeting() -> &'static str {\n    \"hello\" // String literals have 'static lifetime\n}"
+    }
+  ],
+  "related": ["E0597", "E0106"],
+  "tip": "If you need to return a reference, the referenced data must outlive the function — it must come from a parameter or be 'static."
+}

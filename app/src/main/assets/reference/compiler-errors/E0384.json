@@ -1,0 +1,24 @@
+{
+  "code": "E0384",
+  "title": "Cannot assign twice to immutable variable",
+  "severity": "common",
+  "explanation": "This error occurs when you try to reassign a value to a variable that was not declared as mutable. In Rust, variables are immutable by default. You must use `let mut` to make a variable mutable.",
+  "example_bad": "fn main() {\n    let x = 5;\n    x = 10; // Error: cannot assign twice to immutable variable\n}",
+  "error_message": "error[E0384]: cannot assign twice to immutable variable `x`",
+  "fixes": [
+    {
+      "description": "Make the variable mutable",
+      "code": "let mut x = 5;\nx = 10; // Works!"
+    },
+    {
+      "description": "Use shadowing instead of mutation",
+      "code": "let x = 5;\nlet x = 10; // Creates a new variable, shadowing the old one"
+    },
+    {
+      "description": "Use shadowing with transformation",
+      "code": "let x = \"42\";\nlet x: i32 = x.parse().unwrap(); // Shadow with a different type"
+    }
+  ],
+  "related": ["E0382", "E0506"],
+  "tip": "Immutability by default is a Rust design choice that prevents accidental mutation. Use `let mut` when you genuinely need to change the value. Shadowing with `let` is preferred for type transformations."
+}

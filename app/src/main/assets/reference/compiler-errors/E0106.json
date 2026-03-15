@@ -1,0 +1,24 @@
+{
+  "code": "E0106",
+  "title": "Missing lifetime specifier",
+  "severity": "common",
+  "explanation": "This error occurs when the compiler cannot determine the lifetime of a reference in a function signature or type definition. When a function takes multiple references as input and returns a reference, you need to tell the compiler which input lifetime the output is tied to.",
+  "example_bad": "fn longest(x: &str, y: &str) -> &str { // Error: missing lifetime\n    if x.len() > y.len() { x } else { y }\n}\n\nstruct Config {\n    name: &str, // Error: missing lifetime specifier\n}",
+  "error_message": "error[E0106]: missing lifetime specifier",
+  "fixes": [
+    {
+      "description": "Add lifetime annotations to functions",
+      "code": "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}"
+    },
+    {
+      "description": "Add lifetime annotations to structs",
+      "code": "struct Config<'a> {\n    name: &'a str,\n}"
+    },
+    {
+      "description": "Use owned types to avoid lifetimes",
+      "code": "struct Config {\n    name: String, // Owned String, no lifetime needed\n}"
+    }
+  ],
+  "related": ["E0621", "E0597"],
+  "tip": "Lifetime elision rules handle most cases automatically. You only need explicit lifetimes when there are multiple reference inputs and a reference output."
+}

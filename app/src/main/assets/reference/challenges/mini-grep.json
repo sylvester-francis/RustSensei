@@ -1,0 +1,24 @@
+{
+  "id": "mini-grep",
+  "title": "Mini Grep",
+  "difficulty": "beginner",
+  "estimatedTime": "45 min",
+  "description": "Build a simplified version of grep that searches through text for lines matching a given pattern and prints them with line numbers.",
+  "concepts": ["string matching", "iterators", "enumerate", "command-line arguments"],
+  "requirements": [
+    "Accept a search pattern and text input",
+    "Search each line for the pattern (case-insensitive option)",
+    "Print matching lines with their line numbers",
+    "Report total number of matches found",
+    "Support case-sensitive and case-insensitive modes"
+  ],
+  "starterCode": "fn search(query: &str, contents: &str, case_sensitive: bool) -> Vec<(usize, String)> {\n    // TODO: Return a Vec of (line_number, line_text) for matching lines\n    vec![]\n}\n\nfn main() {\n    let query = \"rust\";\n    let contents = \"Rust is a systems language.\\nI love programming in rust.\\nMemory safety is key.\\nRust has zero-cost abstractions.\";\n\n    let results = search(query, contents, false);\n    println!(\"Found {} matches:\", results.len());\n    for (line_num, line) in &results {\n        println!(\"  {}: {}\", line_num, line);\n    }\n}",
+  "solution": "fn search(query: &str, contents: &str, case_sensitive: bool) -> Vec<(usize, String)> {\n    let query_cmp = if case_sensitive {\n        query.to_string()\n    } else {\n        query.to_lowercase()\n    };\n\n    contents\n        .lines()\n        .enumerate()\n        .filter_map(|(i, line)| {\n            let line_cmp = if case_sensitive {\n                line.to_string()\n            } else {\n                line.to_lowercase()\n            };\n            if line_cmp.contains(&query_cmp) {\n                Some((i + 1, line.to_string()))\n            } else {\n                None\n            }\n        })\n        .collect()\n}\n\nfn main() {\n    let query = \"rust\";\n    let contents = \"Rust is a systems language.\\nI love programming in rust.\\nMemory safety is key.\\nRust has zero-cost abstractions.\";\n\n    let results = search(query, contents, false);\n    println!(\"Found {} matches:\", results.len());\n    for (line_num, line) in &results {\n        println!(\"  {}: {}\", line_num, line);\n    }\n}",
+  "hints": [
+    "Use lines() to iterate over each line of the text",
+    "enumerate() gives you the index alongside each element",
+    "to_lowercase() on both query and line enables case-insensitive matching",
+    "filter_map() lets you filter and transform in one step"
+  ],
+  "bonusChallenge": "Add support for regex patterns using the regex crate. Add an option to show N lines of context before and after each match."
+}

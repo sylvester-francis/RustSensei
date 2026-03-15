@@ -1,0 +1,29 @@
+{
+  "id": "undefined-behavior",
+  "title": "Undefined Behavior and How to Avoid It",
+  "order": 5,
+  "content": "Undefined behavior (UB) means the compiler makes no guarantees about what happens. In safe Rust, UB is impossible (that is the whole point of the borrow checker). In unsafe Rust, you can trigger UB by violating invariants the compiler assumes.\n\nUB does not necessarily crash immediately -- it can cause subtle corruption, work 'fine' in debug mode but fail in release, or break seemingly unrelated code. This makes it extremely dangerous.\n\nThe main sources of UB in Rust: dangling/null pointer dereference, data races, invalid values (e.g., bool that is not 0 or 1), breaking aliasing rules (multiple &mut to same memory), and uninitialized memory reads.",
+  "codeExamples": [
+    {
+      "description": "Common sources of undefined behavior",
+      "code": "// 1. Dangling pointer dereference\nfn dangling_ptr() {\n    let ptr: *const i32;\n    {\n        let x = 42;\n        ptr = &x as *const i32;\n    } // x is dropped here\n    // unsafe { println!(\"{}\", *ptr); }  // UB! ptr is dangling\n}\n\n// 2. Invalid enum discriminant\nfn invalid_enum() {\n    // bool must be 0 or 1. Creating a bool with value 2 is UB.\n    // unsafe {\n    //     let b: bool = std::mem::transmute(2u8);  // UB!\n    // }\n}\n\n// 3. Data race (two threads writing without synchronization)\n// static mut SHARED: u64 = 0;\n// If two threads do `unsafe { SHARED += 1; }` simultaneously, that's UB.\n\n// 4. Breaking aliasing rules\nfn aliasing_violation() {\n    let mut x = 42;\n    let ptr1 = &mut x as *mut i32;\n    let ptr2 = &mut x as *mut i32;\n    // Using both ptr1 and ptr2 to write is UB because it creates\n    // two &mut references to the same memory.\n    // unsafe {\n    //     *ptr1 = 1;\n    //     *ptr2 = 2;  // UB! Violates aliasing rules\n    // }\n}"
+    },
+    {
+      "description": "Using Miri to detect UB",
+      "code": "// Miri is an interpreter that detects undefined behavior.\n// Install: rustup +nightly component add miri\n// Run:     cargo +nightly miri test\n// Run:     cargo +nightly miri run\n\n// Miri catches:\n// - Out-of-bounds memory access\n// - Use of dangling pointers\n// - Use of uninitialized memory\n// - Violation of aliasing rules (Stacked Borrows)\n// - Data races\n// - Memory leaks\n// - Invalid enum/bool values\n\n// Example test that Miri would catch:\n#[test]\nfn test_no_ub() {\n    let mut v = vec![1, 2, 3];\n    let ptr = v.as_ptr();\n\n    unsafe {\n        // Safe: reading within bounds\n        assert_eq!(*ptr, 1);\n        assert_eq!(*ptr.add(1), 2);\n        assert_eq!(*ptr.add(2), 3);\n\n        // Miri would catch: *ptr.add(3) -- out of bounds!\n    }\n}"
+    },
+    {
+      "description": "Safe patterns to avoid UB",
+      "code": "// Instead of raw pointers, use safe abstractions:\n\n// 1. Use MaybeUninit for uninitialized memory\nuse std::mem::MaybeUninit;\n\nfn safe_uninit() -> [i32; 5] {\n    let mut arr: [MaybeUninit<i32>; 5] = unsafe {\n        MaybeUninit::uninit().assume_init()\n    };\n\n    for (i, elem) in arr.iter_mut().enumerate() {\n        elem.write(i as i32 * 10);\n    }\n\n    // SAFETY: All elements have been initialized above\n    unsafe {\n        std::mem::transmute::<[MaybeUninit<i32>; 5], [i32; 5]>(arr)\n    }\n}\n\n// 2. Use NonNull instead of raw *mut T\nuse std::ptr::NonNull;\n\nstruct SafeBox<T> {\n    ptr: NonNull<T>,  // Guaranteed non-null\n}\n\nimpl<T> SafeBox<T> {\n    fn new(value: T) -> Self {\n        let boxed = Box::new(value);\n        let ptr = NonNull::from(Box::leak(boxed));\n        SafeBox { ptr }\n    }\n\n    fn get(&self) -> &T {\n        unsafe { self.ptr.as_ref() }\n    }\n}\n\nimpl<T> Drop for SafeBox<T> {\n    fn drop(&mut self) {\n        unsafe {\n            let _ = Box::from_raw(self.ptr.as_ptr());\n        }\n    }\n}\n\nfn main() {\n    let arr = safe_uninit();\n    println!(\"{:?}\", arr);  // [0, 10, 20, 30, 40]\n\n    let sb = SafeBox::new(\"Hello\".to_string());\n    println!(\"{}\", sb.get());\n}"
+    }
+  ],
+  "keyPoints": [
+    "UB means the compiler makes zero guarantees about behavior",
+    "UB can cause silent corruption, not just crashes",
+    "Main UB sources: dangling pointers, data races, invalid values, aliasing violations",
+    "Use Miri (cargo +nightly miri test) to detect UB in tests",
+    "MaybeUninit handles uninitialized memory safely",
+    "NonNull provides a non-null pointer guarantee",
+    "When in doubt, avoid unsafe and use safe standard library abstractions"
+  ]
+}

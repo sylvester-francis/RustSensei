@@ -1,0 +1,20 @@
+{
+  "code": "E0382",
+  "title": "Use of moved value",
+  "severity": "common",
+  "explanation": "This error occurs when you try to use a value after it has been moved to another variable or function. In Rust, most types have move semantics — when you assign a value to another variable, the original variable can no longer be used.",
+  "example_bad": "fn main() {\n    let s = String::from(\"hello\");\n    let s2 = s;\n    println!(\"{}\", s); // Error: value used after move\n}",
+  "error_message": "error[E0382]: borrow of moved value: `s`",
+  "fixes": [
+    {
+      "description": "Clone the value",
+      "code": "let s = String::from(\"hello\");\nlet s2 = s.clone();\nprintln!(\"{}\", s); // Works!"
+    },
+    {
+      "description": "Use a reference instead",
+      "code": "let s = String::from(\"hello\");\nlet s2 = &s;\nprintln!(\"{}\", s); // Works!"
+    }
+  ],
+  "related": ["E0505", "E0507"],
+  "tip": "Types that implement Copy (like i32, bool, char) are duplicated instead of moved."
+}

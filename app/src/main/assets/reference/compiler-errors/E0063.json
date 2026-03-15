@@ -1,0 +1,24 @@
+{
+  "code": "E0063",
+  "title": "Missing struct fields in initialization",
+  "severity": "frequent",
+  "explanation": "This error occurs when you create a struct instance but do not provide values for all fields. Every field must be initialized unless you use the struct update syntax (..) to fill remaining fields from another instance.",
+  "example_bad": "struct User {\n    name: String,\n    email: String,\n    age: u32,\n}\n\nfn main() {\n    let u = User {\n        name: String::from(\"Alice\"),\n        // Error: missing fields `email` and `age`\n    };\n}",
+  "error_message": "error[E0063]: missing fields `email` and `age` in initializer of `User`",
+  "fixes": [
+    {
+      "description": "Provide all required fields",
+      "code": "let u = User {\n    name: String::from(\"Alice\"),\n    email: String::from(\"alice@example.com\"),\n    age: 30,\n};"
+    },
+    {
+      "description": "Use Default for optional fields",
+      "code": "#[derive(Default)]\nstruct User {\n    name: String,\n    email: String,\n    age: u32,\n}\n\nlet u = User {\n    name: String::from(\"Alice\"),\n    ..Default::default() // Fill remaining with defaults\n};"
+    },
+    {
+      "description": "Use struct update syntax from another instance",
+      "code": "let template = User {\n    name: String::from(\"\"),\n    email: String::from(\"\"),\n    age: 0,\n};\n\nlet u = User {\n    name: String::from(\"Alice\"),\n    ..template\n};"
+    }
+  ],
+  "related": ["E0061", "E0425"],
+  "tip": "Derive Default on your struct to use ..Default::default() for any unspecified fields. This is a very common Rust pattern."
+}

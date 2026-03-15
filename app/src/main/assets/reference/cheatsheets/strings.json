@@ -1,0 +1,83 @@
+{
+  "id": "strings",
+  "title": "Strings",
+  "sections": [
+    {
+      "heading": "String vs &str",
+      "entries": [
+        {"label": "String (owned)", "code": "let s = String::from(\"hello\");\nlet s = \"hello\".to_string();\nlet s: String = \"hello\".into();", "note": "Heap-allocated, growable, owned UTF-8 string"},
+        {"label": "&str (borrowed)", "code": "let s: &str = \"hello world\";\nlet owned = String::from(\"hello\");\nlet borrowed: &str = &owned;", "note": "Immutable reference to UTF-8 bytes; string literals are &'static str"},
+        {"label": "When to use which", "code": "// Use &str for:\nfn greet(name: &str) { ... }  // function params\n\n// Use String for:\nstruct User {\n    name: String, // owned data in structs\n}\n\n// Accept both:\nfn process(s: impl AsRef<str>) { ... }", "note": "Prefer &str for params; String for ownership; impl AsRef<str> for flexibility"},
+        {"label": "Conversion", "code": "let owned: String = \"hello\".to_string();\nlet borrowed: &str = &owned;\nlet owned2: String = borrowed.to_owned();\nlet owned3: String = String::from(borrowed);", "note": "&str -> String: .to_string(), .to_owned(), String::from(). String -> &str: &s or .as_str()"}
+      ]
+    },
+    {
+      "heading": "Creating Strings",
+      "entries": [
+        {"label": "Empty string", "code": "let s = String::new();\nlet s = String::with_capacity(100);", "note": "with_capacity pre-allocates to avoid reallocations"},
+        {"label": "From literal", "code": "let s = String::from(\"hello\");\nlet s = \"hello\".to_string();", "note": "Most common ways to create a String"},
+        {"label": "From bytes", "code": "let bytes = vec![72, 101, 108, 108, 111];\nlet s = String::from_utf8(bytes).unwrap(); // \"Hello\"\nlet s = String::from_utf8_lossy(&[0xff, 0xfe]); // replaces invalid UTF-8", "note": "from_utf8 validates; from_utf8_lossy replaces invalid bytes with U+FFFD"},
+        {"label": "From chars", "code": "let s: String = ['h', 'e', 'l', 'l', 'o'].iter().collect();\nlet s: String = \"hello\".chars().collect();", "note": "Collect an iterator of chars into a String"},
+        {"label": "Repeat", "code": "let s = \"ha\".repeat(3); // \"hahaha\"\nlet s = String::from(\"-\").repeat(40);", "note": "Repeat a string pattern n times"},
+        {"label": "Raw string", "code": "let s = r\"C:\\Users\\file\"; // no escape processing\nlet s = r#\"She said \"hello\"\"#; // delimited with #", "note": "r\"...\" for raw strings; r#\"...\"# when content contains quotes"}
+      ]
+    },
+    {
+      "heading": "Modifying Strings",
+      "entries": [
+        {"label": "Push", "code": "let mut s = String::from(\"hello\");\ns.push(' ');           // push single char\ns.push_str(\"world\");   // push string slice", "note": "push for char; push_str for &str"},
+        {"label": "Insert", "code": "let mut s = String::from(\"hello!\");\ns.insert(5, ',');           // \"hello,!\"\ns.insert_str(6, \" world\");  // \"hello, world!\"", "note": "Insert at byte index; panics if not on char boundary"},
+        {"label": "Concatenation", "code": "let s1 = String::from(\"hello\");\nlet s2 = String::from(\" world\");\nlet s3 = s1 + &s2; // s1 is moved!\n\nlet s = format!(\"{} {}\", \"hello\", \"world\"); // no moves", "note": "+ takes ownership of left operand; format! creates new String without moving"},
+        {"label": "Replace", "code": "let s = \"hello world\".replace(\"world\", \"Rust\");\nlet s = \"aabaa\".replacen(\"a\", \"b\", 2); // \"bbbaa\"", "note": "replace changes all occurrences; replacen limits count"},
+        {"label": "Remove", "code": "let mut s = String::from(\"hello\");\ns.truncate(3);   // \"hel\"\ns.pop();          // Some('l'), s = \"he\"\ns.remove(0);      // 'h', s = \"e\"\ns.clear();        // \"\"", "note": "truncate/remove work on byte indices; must be char boundaries"},
+        {"label": "Trim", "code": "let s = \"  hello  \";\nlet trimmed = s.trim();       // \"hello\"\nlet left = s.trim_start();    // \"hello  \"\nlet right = s.trim_end();     // \"  hello\"", "note": "Returns &str; does not modify the original"}
+      ]
+    },
+    {
+      "heading": "Searching & Checking",
+      "entries": [
+        {"label": "Contains", "code": "\"hello world\".contains(\"world\");      // true\n\"hello world\".starts_with(\"hello\");   // true\n\"hello world\".ends_with(\"world\");     // true", "note": "Pattern can be &str, char, or &[char]"},
+        {"label": "Find position", "code": "\"hello\".find('l');    // Some(2)\n\"hello\".rfind('l');   // Some(3)\n\"abcabc\".find(\"bc\");  // Some(1)", "note": "Returns byte index of first/last match"},
+        {"label": "Check properties", "code": "\"hello\".is_empty();           // false\n\"\".is_empty();                // true\n\"hello\".len();                // 5 (bytes, not chars)\n\"hello\".is_ascii();           // true", "note": "len() returns byte count; use .chars().count() for character count"},
+        {"label": "Matches", "code": "let count = \"abcabc\".matches(\"bc\").count(); // 2\nlet positions: Vec<_> = \"abab\".match_indices('a').collect();\n// [(0, \"a\"), (2, \"a\")]", "note": "matches returns iterator of matches; match_indices includes positions"}
+      ]
+    },
+    {
+      "heading": "Splitting & Joining",
+      "entries": [
+        {"label": "Split", "code": "let parts: Vec<&str> = \"a,b,c\".split(',').collect();\nlet parts: Vec<&str> = \"hello world\".split_whitespace().collect();\nlet parts: Vec<&str> = \"a::b::c\".splitn(2, \"::\").collect(); // [\"a\", \"b::c\"]", "note": "split returns iterator; splitn limits number of splits"},
+        {"label": "Lines", "code": "let text = \"line1\\nline2\\nline3\";\nfor line in text.lines() {\n    println!(\"{line}\");\n}", "note": "Handles both \\n and \\r\\n line endings"},
+        {"label": "Join", "code": "let parts = vec![\"hello\", \"world\"];\nlet joined = parts.join(\", \"); // \"hello, world\"\nlet joined = parts.join(\"\\n\"); // multi-line", "note": "Join a slice of strings with a separator"},
+        {"label": "Chars and bytes", "code": "for c in \"hello\".chars() { println!(\"{c}\"); }\nfor b in \"hello\".bytes() { println!(\"{b}\"); }\nlet chars: Vec<char> = \"hello\".chars().collect();", "note": "chars() iterates Unicode scalar values; bytes() iterates raw bytes"}
+      ]
+    },
+    {
+      "heading": "Formatting",
+      "entries": [
+        {"label": "format! macro", "code": "let s = format!(\"Hello, {}!\", name);\nlet s = format!(\"{:>10}\", \"right\");  // right-align\nlet s = format!(\"{:<10}\", \"left\");   // left-align\nlet s = format!(\"{:^10}\", \"center\"); // center", "note": "Returns a String; supports alignment and fill"},
+        {"label": "Number formatting", "code": "format!(\"{:.2}\", 3.14159);   // \"3.14\"\nformat!(\"{:08b}\", 42);       // \"00101010\" (binary)\nformat!(\"{:#x}\", 255);       // \"0xff\" (hex)\nformat!(\"{:#o}\", 255);       // \"0o377\" (octal)\nformat!(\"{:e}\", 1000.0);     // \"1e3\" (scientific)", "note": "Precision, padding, and base formatting"},
+        {"label": "Debug formatting", "code": "format!(\"{:?}\", vec![1, 2, 3]);   // \"[1, 2, 3]\"\nformat!(\"{:#?}\", vec![1, 2, 3]);  // pretty-printed", "note": "{:?} uses Debug trait; {:#?} for pretty printing"},
+        {"label": "Named arguments", "code": "let name = \"Rust\";\nlet version = 2021;\nlet s = format!(\"{name} edition {version}\");", "note": "Captured variables in format strings (since Rust 1.58)"},
+        {"label": "Padding with fill", "code": "format!(\"{:0>5}\", 42);    // \"00042\"\nformat!(\"{:*<10}\", \"hi\"); // \"hi********\"\nformat!(\"{:-^20}\", \"title\"); // \"-------title--------\"", "note": "Fill character before alignment (< > ^), then width"}
+      ]
+    },
+    {
+      "heading": "UTF-8 & Unicode",
+      "entries": [
+        {"label": "Rust strings are UTF-8", "code": "let hello = \"Здравствуйте\";\nprintln!(\"bytes: {}\", hello.len());       // 24\nprintln!(\"chars: {}\", hello.chars().count()); // 12", "note": "len() is bytes, not characters; one char can be 1-4 bytes"},
+        {"label": "Char boundaries", "code": "let s = \"hello\";\nlet slice = &s[0..1]; // \"h\" - OK\n// let bad = &s[0..1]; // would panic if not on char boundary for multibyte", "note": "Indexing by byte; must land on valid char boundary or panics"},
+        {"label": "Safe character access", "code": "let s = \"hello\";\nlet ch = s.chars().nth(2); // Some('l')\nlet first_three: String = s.chars().take(3).collect(); // \"hel\"", "note": "Use .chars().nth() for safe character-level access"},
+        {"label": "Unicode escapes", "code": "let heart = '\\u{2764}';          // char\nlet emoji = \"\\u{1F600}\";          // in string\nlet snowman = '\\u{2603}';", "note": "\\u{XXXX} for Unicode code points in chars and strings"},
+        {"label": "Case conversion", "code": "let upper = \"hello\".to_uppercase();    // \"HELLO\"\nlet lower = \"HELLO\".to_lowercase();    // \"hello\"\nlet ascii = \"hello\".to_ascii_uppercase();", "note": "to_uppercase/lowercase handle Unicode; to_ascii_ for ASCII only"}
+      ]
+    },
+    {
+      "heading": "Useful Patterns",
+      "entries": [
+        {"label": "String builder pattern", "code": "let mut buf = String::with_capacity(256);\nfor i in 0..10 {\n    buf.push_str(&format!(\"{i}, \"));\n}\nlet result = buf.trim_end_matches(\", \").to_string();", "note": "Pre-allocate and build incrementally for efficiency"},
+        {"label": "Cow<str>", "code": "use std::borrow::Cow;\nfn maybe_uppercase(s: &str) -> Cow<str> {\n    if s.chars().any(|c| c.is_lowercase()) {\n        Cow::Owned(s.to_uppercase())\n    } else {\n        Cow::Borrowed(s)\n    }\n}", "note": "Avoid allocation when not needed; borrows or owns as needed"},
+        {"label": "Parse from string", "code": "let n: i32 = \"42\".parse().unwrap();\nlet f: f64 = \"3.14\".parse().unwrap();\nlet b: bool = \"true\".parse().unwrap();", "note": "parse() works for any type implementing FromStr"}
+      ]
+    }
+  ]
+}

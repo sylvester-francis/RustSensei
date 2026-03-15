@@ -1,0 +1,80 @@
+{
+  "id": "collections",
+  "title": "Collections",
+  "sections": [
+    {
+      "heading": "Vec<T>",
+      "entries": [
+        {"label": "Create", "code": "let v: Vec<i32> = Vec::new();\nlet v = vec![1, 2, 3];\nlet v = vec![0; 10]; // ten zeros", "note": "Growable array; most commonly used collection"},
+        {"label": "Add elements", "code": "let mut v = vec![1, 2];\nv.push(3);\nv.extend([4, 5]);\nv.insert(0, 0); // insert at index", "note": "push appends; insert shifts elements right"},
+        {"label": "Access elements", "code": "let v = vec![1, 2, 3];\nlet third = v[2];          // panics if out of bounds\nlet third = v.get(2);      // returns Option<&T>\nlet first = v.first();     // Option<&T>\nlet last = v.last();       // Option<&T>", "note": "Prefer .get() for safe access; indexing panics on out of bounds"},
+        {"label": "Remove elements", "code": "let mut v = vec![1, 2, 3, 4];\nv.pop();           // removes last -> Some(4)\nv.remove(0);       // removes at index, shifts left\nv.retain(|&x| x > 1); // keep only elements > 1\nv.clear();         // remove all", "note": "pop is O(1); remove is O(n) due to shifting"},
+        {"label": "Iterate", "code": "let v = vec![1, 2, 3];\nfor val in &v { println!(\"{val}\"); }\nfor val in &mut v { *val += 1; }\nfor val in v { /* consumes v */ }", "note": "&v borrows; &mut v borrows mutably; v moves/consumes"},
+        {"label": "Slice operations", "code": "let v = vec![1, 2, 3, 4, 5];\nlet slice = &v[1..3]; // &[2, 3]\nv.contains(&3);       // true\nv.windows(2);         // [1,2], [2,3], [3,4], [4,5]\nv.chunks(2);          // [1,2], [3,4], [5]", "note": "Vec auto-derefs to &[T] for slice methods"},
+        {"label": "Sort and search", "code": "let mut v = vec![3, 1, 4, 1, 5];\nv.sort();\nv.sort_by(|a, b| b.cmp(a)); // reverse\nv.dedup();                    // remove consecutive duplicates\nv.binary_search(&3);          // Ok(index) or Err(insert_pos)", "note": "sort requires Ord; sort_by for custom ordering"}
+      ]
+    },
+    {
+      "heading": "HashMap<K, V>",
+      "entries": [
+        {"label": "Create", "code": "use std::collections::HashMap;\nlet mut map = HashMap::new();\nlet map: HashMap<&str, i32> = HashMap::from([\n    (\"one\", 1),\n    (\"two\", 2),\n]);", "note": "Key must implement Eq + Hash"},
+        {"label": "Insert and update", "code": "let mut map = HashMap::new();\nmap.insert(\"key\", 1);\nmap.insert(\"key\", 2); // overwrites\nmap.entry(\"key\").or_insert(3); // only if absent\nmap.entry(\"new\").or_insert_with(|| expensive_fn());", "note": "entry API for conditional insertion"},
+        {"label": "Access", "code": "let val = map.get(\"key\");        // Option<&V>\nlet val = map[\"key\"];             // panics if missing\nlet has = map.contains_key(\"key\"); // bool\nlet len = map.len();", "note": "Prefer .get() over indexing to avoid panics"},
+        {"label": "Update with entry", "code": "let text = \"hello world hello\";\nlet mut word_count = HashMap::new();\nfor word in text.split_whitespace() {\n    let count = word_count.entry(word).or_insert(0);\n    *count += 1;\n}", "note": "Common pattern for counting occurrences"},
+        {"label": "Iterate", "code": "for (key, value) in &map {\n    println!(\"{key}: {value}\");\n}\nlet keys: Vec<_> = map.keys().collect();\nlet values: Vec<_> = map.values().collect();", "note": "Iteration order is not guaranteed"},
+        {"label": "Remove", "code": "map.remove(\"key\");        // Option<V>\nmap.remove_entry(\"key\");  // Option<(K, V)>\nmap.retain(|k, v| *v > 0);", "note": "remove returns the removed value if it existed"}
+      ]
+    },
+    {
+      "heading": "BTreeMap<K, V>",
+      "entries": [
+        {"label": "Create and use", "code": "use std::collections::BTreeMap;\nlet mut map = BTreeMap::new();\nmap.insert(3, \"three\");\nmap.insert(1, \"one\");\nmap.insert(2, \"two\");", "note": "Sorted by key; keys must implement Ord"},
+        {"label": "Ordered iteration", "code": "for (k, v) in &map {\n    println!(\"{k}: {v}\");\n}\n// Prints: 1: one, 2: two, 3: three", "note": "Always iterates in key order; unlike HashMap"},
+        {"label": "Range queries", "code": "use std::ops::Bound::*;\nlet range = map.range(2..=5);\nlet range = map.range((Included(&2), Excluded(&5)));", "note": "Efficient range queries; not available on HashMap"},
+        {"label": "First and last", "code": "let first = map.first_key_value(); // Some((&1, &\"one\"))\nlet last = map.last_key_value();   // Some((&3, &\"three\"))", "note": "Quick access to min and max keys"}
+      ]
+    },
+    {
+      "heading": "HashSet<T>",
+      "entries": [
+        {"label": "Create", "code": "use std::collections::HashSet;\nlet mut set = HashSet::new();\nset.insert(1);\nset.insert(2);\nlet set: HashSet<i32> = [1, 2, 3].into_iter().collect();", "note": "Unique elements; T must implement Eq + Hash"},
+        {"label": "Check membership", "code": "set.contains(&1); // true\nset.len();        // number of elements\nset.is_empty();   // bool", "note": "O(1) average lookup time"},
+        {"label": "Set operations", "code": "let a: HashSet<i32> = [1, 2, 3].into_iter().collect();\nlet b: HashSet<i32> = [2, 3, 4].into_iter().collect();\nlet union: HashSet<_> = a.union(&b).collect();\nlet inter: HashSet<_> = a.intersection(&b).collect();\nlet diff: HashSet<_> = a.difference(&b).collect();\nlet sym: HashSet<_> = a.symmetric_difference(&b).collect();", "note": "Mathematical set operations; returns iterators"},
+        {"label": "Subset/superset", "code": "let a: HashSet<i32> = [1, 2].into_iter().collect();\nlet b: HashSet<i32> = [1, 2, 3].into_iter().collect();\nassert!(a.is_subset(&b));\nassert!(b.is_superset(&a));\nassert!(a.is_disjoint(&[4, 5].into_iter().collect()));", "note": "Check set relationships"}
+      ]
+    },
+    {
+      "heading": "VecDeque<T>",
+      "entries": [
+        {"label": "Create", "code": "use std::collections::VecDeque;\nlet mut deque = VecDeque::new();\nlet deque = VecDeque::from(vec![1, 2, 3]);", "note": "Double-ended queue; efficient push/pop at both ends"},
+        {"label": "Push and pop", "code": "let mut dq = VecDeque::new();\ndq.push_back(1);\ndq.push_back(2);\ndq.push_front(0);\nlet front = dq.pop_front(); // Some(0)\nlet back = dq.pop_back();   // Some(2)", "note": "O(1) for push/pop at both ends"},
+        {"label": "Access", "code": "let dq = VecDeque::from(vec![1, 2, 3]);\nlet first = dq.front();  // Some(&1)\nlet last = dq.back();    // Some(&3)\nlet mid = dq.get(1);     // Some(&2)", "note": "front/back for ends; get for arbitrary index"},
+        {"label": "Use as queue", "code": "let mut queue = VecDeque::new();\nqueue.push_back(\"first\");\nqueue.push_back(\"second\");\nlet next = queue.pop_front(); // Some(\"first\")", "note": "FIFO: push_back + pop_front"}
+      ]
+    },
+    {
+      "heading": "BTreeSet<T>",
+      "entries": [
+        {"label": "Create and use", "code": "use std::collections::BTreeSet;\nlet mut set = BTreeSet::new();\nset.insert(3);\nset.insert(1);\nset.insert(2);", "note": "Sorted set; T must implement Ord"},
+        {"label": "Ordered iteration", "code": "for val in &set {\n    println!(\"{val}\");\n}\n// Prints: 1, 2, 3", "note": "Always iterates in sorted order"},
+        {"label": "Range queries", "code": "let range: Vec<_> = set.range(1..=2).collect();\nlet first = set.first(); // Some(&1)\nlet last = set.last();   // Some(&3)", "note": "Efficient range iteration; min/max access"}
+      ]
+    },
+    {
+      "heading": "LinkedList<T>",
+      "entries": [
+        {"label": "Create and use", "code": "use std::collections::LinkedList;\nlet mut list = LinkedList::new();\nlist.push_back(1);\nlist.push_back(2);\nlist.push_front(0);\nlet front = list.pop_front();", "note": "Doubly-linked list; rarely needed in Rust (Vec/VecDeque usually better)"},
+        {"label": "Append lists", "code": "let mut a = LinkedList::from([1, 2]);\nlet mut b = LinkedList::from([3, 4]);\na.append(&mut b);\n// a = [1, 2, 3, 4], b = []", "note": "O(1) append by moving pointers"}
+      ]
+    },
+    {
+      "heading": "Useful Patterns",
+      "entries": [
+        {"label": "Collect into collection", "code": "let v: Vec<i32> = (0..10).collect();\nlet s: HashSet<i32> = vec![1, 1, 2, 2].into_iter().collect();\nlet m: HashMap<&str, i32> = vec![(\"a\", 1)].into_iter().collect();", "note": "collect() can create any FromIterator collection"},
+        {"label": "Drain", "code": "let mut v = vec![1, 2, 3, 4, 5];\nlet drained: Vec<i32> = v.drain(1..3).collect();\n// drained = [2, 3], v = [1, 4, 5]", "note": "Remove a range and get the removed elements"},
+        {"label": "From iterator of tuples", "code": "let map: HashMap<String, i32> = vec![\"a\", \"b\", \"c\"]\n    .into_iter()\n    .enumerate()\n    .map(|(i, s)| (s.to_string(), i as i32))\n    .collect();", "note": "HashMap can be collected from (K, V) iterator"},
+        {"label": "Capacity management", "code": "let mut v = Vec::with_capacity(100);\nv.reserve(50);      // ensure room for 50 more\nv.shrink_to_fit();   // release excess capacity\nlet cap = v.capacity();", "note": "Pre-allocate to avoid reallocations"}
+      ]
+    }
+  ]
+}

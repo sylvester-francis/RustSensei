@@ -1,0 +1,28 @@
+{
+  "id": "raw-pointers",
+  "title": "Raw Pointers",
+  "order": 2,
+  "content": "Raw pointers (*const T and *mut T) are Rust's equivalent of C pointers. They can be null, dangling, or unaligned. Creating raw pointers is safe -- only dereferencing them requires unsafe.\n\nRaw pointers are needed for FFI (calling C code), implementing low-level data structures, and performance-critical code that needs to bypass borrow checking.\n\nCritical rules: never dereference a null or dangling pointer, ensure proper alignment, and be aware of aliasing rules (two &mut pointers to the same memory is undefined behavior).",
+  "codeExamples": [
+    {
+      "description": "Creating and dereferencing raw pointers",
+      "code": "fn main() {\n    let mut x = 10;\n\n    // Creating raw pointers is safe\n    let ptr_const: *const i32 = &x;\n    let ptr_mut: *mut i32 = &mut x;\n\n    // Dereferencing requires unsafe\n    unsafe {\n        println!(\"const ptr: {}\", *ptr_const);\n        *ptr_mut = 20;\n        println!(\"after mutation: {}\", *ptr_mut);\n    }\n\n    // Raw pointers from addresses (dangerous!)\n    let address = 0x012345usize;\n    let _wild_ptr = address as *const i32;\n    // Dereferencing this would be undefined behavior!\n}"
+    },
+    {
+      "description": "Safe abstraction over raw pointers: split_at_mut",
+      "code": "// This is how the standard library implements split_at_mut\n// It needs unsafe because Rust cannot prove the two slices don't overlap\nfn split_at_mut(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {\n    let len = slice.len();\n    let ptr = slice.as_mut_ptr();\n\n    assert!(mid <= len, \"mid out of bounds\");\n\n    unsafe {\n        (\n            std::slice::from_raw_parts_mut(ptr, mid),\n            std::slice::from_raw_parts_mut(ptr.add(mid), len - mid),\n        )\n    }\n}\n\nfn main() {\n    let mut data = vec![1, 2, 3, 4, 5];\n    let (left, right) = split_at_mut(&mut data, 3);\n    left[0] = 10;\n    right[0] = 40;\n    println!(\"left: {:?}, right: {:?}\", left, right);\n    // left: [10, 2, 3], right: [40, 5]\n}"
+    },
+    {
+      "description": "Null pointer checking",
+      "code": "fn safe_deref(ptr: *const i32) -> Option<i32> {\n    if ptr.is_null() {\n        None\n    } else {\n        unsafe { Some(*ptr) }\n    }\n}\n\nfn main() {\n    let x = 42;\n    let valid: *const i32 = &x;\n    let null: *const i32 = std::ptr::null();\n\n    println!(\"valid: {:?}\", safe_deref(valid));   // Some(42)\n    println!(\"null: {:?}\", safe_deref(null));      // None\n}"
+    }
+  ],
+  "keyPoints": [
+    "Creating raw pointers is safe; dereferencing them is unsafe",
+    "*const T is immutable, *mut T is mutable (but this is not enforced by the compiler)",
+    "Raw pointers can be null, dangling, or misaligned",
+    "Use is_null() to check for null before dereferencing",
+    "ptr.add(n) and ptr.offset(n) do pointer arithmetic",
+    "Wrap raw pointer operations in safe abstractions whenever possible"
+  ]
+}

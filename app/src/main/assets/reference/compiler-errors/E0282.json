@@ -1,0 +1,20 @@
+{
+  "code": "E0282",
+  "title": "Type annotations needed",
+  "severity": "frequent",
+  "explanation": "This error occurs when the compiler cannot infer the type of a value and needs you to provide an explicit type annotation. This commonly happens with methods like parse(), collect(), or when using generic types.",
+  "example_bad": "fn main() {\n    let x = \"42\".parse().unwrap(); // Error: type annotations needed\n    let v = Vec::new(); // Error if v is never used with a specific type\n}",
+  "error_message": "error[E0282]: type annotations needed",
+  "fixes": [
+    {
+      "description": "Add a type annotation to the variable",
+      "code": "let x: i32 = \"42\".parse().unwrap();\nlet v: Vec<String> = Vec::new();"
+    },
+    {
+      "description": "Use the turbofish syntax on the method",
+      "code": "let x = \"42\".parse::<i32>().unwrap();\nlet v = Vec::<String>::new();"
+    }
+  ],
+  "related": ["E0283", "E0308"],
+  "tip": "The turbofish syntax (::<Type>) lets you specify types on method calls. It is called turbofish because ::<> looks like a fish."
+}

@@ -1,0 +1,24 @@
+{
+  "code": "E0308",
+  "title": "Mismatched types",
+  "severity": "common",
+  "explanation": "This error occurs when the compiler expected one type but found a different one. This is one of the most common Rust errors and can happen in many contexts: function return types, variable assignments, function arguments, and more.",
+  "example_bad": "fn get_count() -> i32 {\n    \"five\" // Error: expected i32, found &str\n}\n\nfn main() {\n    let x: i32 = \"hello\"; // Error: mismatched types\n}",
+  "error_message": "error[E0308]: mismatched types — expected `i32`, found `&str`",
+  "fixes": [
+    {
+      "description": "Fix the return type to match the value",
+      "code": "fn get_count() -> &'static str {\n    \"five\"\n}"
+    },
+    {
+      "description": "Convert the value to the expected type",
+      "code": "fn get_count() -> i32 {\n    5 // Return an actual i32\n}"
+    },
+    {
+      "description": "Parse a string into the expected type",
+      "code": "let x: i32 = \"42\".parse().unwrap();"
+    }
+  ],
+  "related": ["E0277", "E0282"],
+  "tip": "Read the error message carefully — it tells you exactly which type was expected and which was found. The expected type comes from the context (annotation, return type, etc.)."
+}

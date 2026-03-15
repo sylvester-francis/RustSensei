@@ -1,0 +1,24 @@
+{
+  "id": "clap",
+  "title": "clap -- Command Line Argument Parser",
+  "version": "4.x",
+  "description": "The most popular CLI argument parsing crate for Rust. Clap provides a derive-based API for defining CLI arguments as structs, with automatic help generation, validation, subcommands, and shell completions.",
+  "cargoToml": "[dependencies]\nclap = { version = \"4\", features = [\"derive\"] }",
+  "quickStart": "use clap::Parser;\n\n/// A simple greeting program\n#[derive(Parser, Debug)]\n#[command(version, about)]\nstruct Args {\n    /// Name of the person to greet\n    #[arg(short, long)]\n    name: String,\n\n    /// Number of times to greet\n    #[arg(short, long, default_value_t = 1)]\n    count: u8,\n}\n\nfn main() {\n    let args = Args::parse();\n    for _ in 0..args.count {\n        println!(\"Hello, {}!\", args.name);\n    }\n}",
+  "commonPatterns": [
+    {
+      "title": "Subcommands",
+      "code": "use clap::{Parser, Subcommand};\n\n#[derive(Parser)]\nstruct Cli {\n    #[command(subcommand)]\n    command: Commands,\n}\n\n#[derive(Subcommand)]\nenum Commands {\n    /// Add a new item\n    Add { name: String },\n    /// List all items\n    List {\n        #[arg(short, long)]\n        verbose: bool,\n    },\n}"
+    },
+    {
+      "title": "Positional arguments and flags",
+      "code": "#[derive(Parser)]\nstruct Args {\n    /// Input file path\n    input: String,\n\n    /// Output file path (optional)\n    output: Option<String>,\n\n    /// Enable verbose output\n    #[arg(short, long)]\n    verbose: bool,\n\n    /// Set log level\n    #[arg(long, default_value = \"info\")]\n    log_level: String,\n}"
+    },
+    {
+      "title": "Value enums for constrained choices",
+      "code": "use clap::ValueEnum;\n\n#[derive(Clone, ValueEnum)]\nenum Format {\n    Json,\n    Yaml,\n    Toml,\n}\n\n#[derive(Parser)]\nstruct Args {\n    #[arg(short, long, value_enum, default_value_t = Format::Json)]\n    format: Format,\n}"
+    }
+  ],
+  "whenToUse": "Any time you are building a command-line tool and need to parse arguments, flags, subcommands, or generate --help output.",
+  "alternatives": "argh (simpler, from Google), pico-args (minimal, zero dependencies), bpaf (composable, derive + builder). For TUI apps: clap handles args, then use ratatui for the terminal UI."
+}

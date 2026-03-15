@@ -1,0 +1,24 @@
+{
+  "code": "E0425",
+  "title": "Cannot find value in this scope",
+  "severity": "common",
+  "explanation": "This error occurs when you try to use a variable, function, or constant that has not been defined in the current scope. Common causes include typos, forgotten imports, or using a variable outside its scope.",
+  "example_bad": "fn main() {\n    println!(\"{}\", x); // Error: cannot find value `x`\n    \n    {\n        let y = 10;\n    }\n    println!(\"{}\", y); // Error: `y` not in scope\n}",
+  "error_message": "error[E0425]: cannot find value `x` in this scope",
+  "fixes": [
+    {
+      "description": "Define the variable before using it",
+      "code": "fn main() {\n    let x = 42;\n    println!(\"{}\", x);\n}"
+    },
+    {
+      "description": "Check for typos in variable names",
+      "code": "let count = 5;\nprintln!(\"{}\", count); // Not 'coutn' or 'Count'"
+    },
+    {
+      "description": "Import the item if it's from another module",
+      "code": "use std::collections::HashMap;\n\nfn main() {\n    let map = HashMap::new();\n}"
+    }
+  ],
+  "related": ["E0433", "E0412"],
+  "tip": "Rust is case-sensitive. Also check that the variable is defined in the right scope — variables defined inside a block {} are not accessible outside it."
+}

@@ -1,0 +1,27 @@
+{
+  "id": "async-basics",
+  "title": "Async/Await Fundamentals",
+  "order": 1,
+  "content": "Rust's async/await system lets you write concurrent code that looks sequential. An `async fn` returns a `Future` -- a value representing a computation that will complete later. Futures are lazy: they do nothing until you `.await` them.\n\nUnlike Go's goroutines or JavaScript's promises that start immediately, Rust futures are inert values. This is a deliberate design choice: it gives you full control over when and where work happens.\n\nThe `.await` keyword suspends the current async function until the future completes, yielding control back to the executor so other tasks can run. This is cooperative multitasking -- your async code must periodically await to let other tasks proceed.\n\nKey mental model: async/await is syntactic sugar for state machines. The compiler transforms your async function into a state machine that implements the Future trait.",
+  "codeExamples": [
+    {
+      "description": "Basic async function",
+      "code": "async fn fetch_data() -> String {\n    // This function returns impl Future<Output = String>\n    // The body doesn't run until the future is awaited\n    \"data\".to_string()\n}\n\nasync fn process() {\n    let data = fetch_data().await;  // Runs fetch_data to completion\n    println!(\"Got: {}\", data);\n}"
+    },
+    {
+      "description": "Futures are lazy -- nothing happens without .await",
+      "code": "async fn greet(name: &str) -> String {\n    println!(\"Building greeting...\");  // Only prints when awaited\n    format!(\"Hello, {}!\", name)\n}\n\nasync fn demo() {\n    let future = greet(\"Alice\");  // Nothing happens yet!\n    println!(\"Future created but not started\");\n    let result = future.await;     // NOW greet() runs\n    println!(\"{}\", result);\n}"
+    },
+    {
+      "description": "The Future trait (simplified)",
+      "code": "use std::pin::Pin;\nuse std::task::{Context, Poll};\nuse std::future::Future;\n\n// This is what async fn desugars to (conceptually):\nstruct MyFuture {\n    value: String,\n}\n\nimpl Future for MyFuture {\n    type Output = String;\n\n    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<String> {\n        // In reality, this would check if work is done\n        Poll::Ready(self.value.clone())\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "async fn returns a Future, not the value directly",
+    "Futures are lazy -- they do nothing until polled (awaited)",
+    ".await suspends the current task and yields to the executor",
+    "The compiler transforms async functions into state machines",
+    "You need a runtime (like tokio) to actually execute futures"
+  ]
+}

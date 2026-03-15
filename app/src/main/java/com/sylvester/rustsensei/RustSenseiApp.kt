@@ -17,6 +17,7 @@ import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
+import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 
 sealed class Screen(val route: String) {
     data object Setup : Screen("setup")
@@ -32,6 +33,7 @@ fun RustSenseiApp() {
     val bookViewModel: BookViewModel = viewModel()
     val exerciseViewModel: ExerciseViewModel = viewModel()
     val progressViewModel: ProgressViewModel = viewModel()
+    val referenceViewModel: ReferenceViewModel = viewModel()
 
     // P0 Fix #1: Process death guard — if we're on Main but model isn't loaded,
     // redirect back to Setup. This handles the case where Android kills the process
@@ -84,6 +86,7 @@ fun RustSenseiApp() {
                 bookViewModel = bookViewModel,
                 exerciseViewModel = exerciseViewModel,
                 progressViewModel = progressViewModel,
+                referenceViewModel = referenceViewModel,
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 }

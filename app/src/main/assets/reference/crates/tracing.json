@@ -1,0 +1,28 @@
+{
+  "id": "tracing",
+  "title": "tracing -- Structured Diagnostics and Logging",
+  "version": "0.1.x",
+  "description": "A framework for instrumenting Rust programs to collect structured, event-based diagnostic information. Unlike simple logging, tracing supports spans (representing units of work) that give context to events. Essential for async and distributed systems.",
+  "cargoToml": "[dependencies]\ntracing = \"0.1\"\ntracing-subscriber = { version = \"0.3\", features = [\"env-filter\"] }",
+  "quickStart": "use tracing::{info, warn, error, debug, instrument};\nuse tracing_subscriber;\n\n#[instrument]\nfn process_order(order_id: u64, amount: f64) {\n    info!(order_id, amount, \"Processing order\");\n\n    if amount > 1000.0 {\n        warn!(order_id, amount, \"Large order detected\");\n    }\n\n    debug!(\"Order processing complete\");\n}\n\nfn main() {\n    // Initialize the default subscriber (prints to stdout)\n    tracing_subscriber::fmt()\n        .with_env_filter(\"debug\")\n        .init();\n\n    info!(\"Application starting\");\n    process_order(42, 1500.0);\n    process_order(43, 50.0);\n    error!(\"Something went wrong!\");\n}",
+  "commonPatterns": [
+    {
+      "title": "Instrument async functions",
+      "code": "use tracing::instrument;\n\n#[instrument(skip(password))]\nasync fn login(username: &str, password: &str) -> Result<String, String> {\n    tracing::info!(\"Attempting login\");\n    // password is skipped from span fields for security\n    Ok(format!(\"token_for_{}\", username))\n}"
+    },
+    {
+      "title": "Structured fields",
+      "code": "use tracing::{info, span, Level};\n\nfn handle_request(method: &str, path: &str) {\n    let span = span!(Level::INFO, \"request\", %method, %path);\n    let _guard = span.enter();\n\n    info!(\"Processing request\");\n    // All events within this scope include method and path\n}"
+    },
+    {
+      "title": "Environment-based filtering",
+      "code": "use tracing_subscriber::EnvFilter;\n\n// Set RUST_LOG=my_app=debug,tower=warn\ntracing_subscriber::fmt()\n    .with_env_filter(EnvFilter::from_default_env())\n    .init();"
+    },
+    {
+      "title": "JSON output for production",
+      "code": "tracing_subscriber::fmt()\n    .json()\n    .with_target(true)\n    .with_thread_ids(true)\n    .with_timer(tracing_subscriber::fmt::time::UtcTime::rfc_3339())\n    .init();"
+    }
+  ],
+  "whenToUse": "In any application or library where you need logging, diagnostics, or performance tracing. Especially valuable for async programs where traditional logging loses context. Replaces log + env_logger for new projects.",
+  "alternatives": "log + env_logger (simpler, widespread), slog (structured logging), log4rs (log4j-style). For distributed tracing: tracing + tracing-opentelemetry exports to Jaeger/Zipkin."
+}

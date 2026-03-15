@@ -1,0 +1,14 @@
+{
+  "id": "raii",
+  "title": "RAII and Drop Guards",
+  "order": 4,
+  "description": "Resource Acquisition Is Initialization (RAII) ties resource cleanup to object lifetime. When a value goes out of scope, its Drop implementation runs automatically. This guarantees cleanup of files, locks, network connections, and temporary state -- even when errors or panics occur. Rust's ownership system makes RAII pervasive and reliable.",
+  "whenToUse": [
+    "Managing any resource that requires cleanup: files, locks, connections, temp files",
+    "Ensuring paired operations: lock/unlock, open/close, begin/commit",
+    "Temporary state changes that must be reverted",
+    "Timer/profiling guards that measure scope duration"
+  ],
+  "codeExample": "use std::time::Instant;\n\n// A timer that prints elapsed time when dropped\nstruct Timer {\n    label: String,\n    start: Instant,\n}\n\nimpl Timer {\n    fn new(label: &str) -> Self {\n        println!(\"[{}] Starting...\", label);\n        Timer {\n            label: label.to_string(),\n            start: Instant::now(),\n        }\n    }\n}\n\nimpl Drop for Timer {\n    fn drop(&mut self) {\n        let elapsed = self.start.elapsed();\n        println!(\"[{}] Finished in {:?}\", self.label, elapsed);\n    }\n}\n\n// A temporary directory that cleans itself up\nstruct TempDir {\n    path: std::path::PathBuf,\n}\n\nimpl TempDir {\n    fn new(prefix: &str) -> std::io::Result<Self> {\n        let path = std::env::temp_dir().join(format!(\"{}-{}\", prefix, std::process::id()));\n        std::fs::create_dir_all(&path)?;\n        Ok(TempDir { path })\n    }\n\n    fn path(&self) -> &std::path::Path {\n        &self.path\n    }\n}\n\nimpl Drop for TempDir {\n    fn drop(&mut self) {\n        let _ = std::fs::remove_dir_all(&self.path);\n        println!(\"Cleaned up temp dir: {:?}\", self.path);\n    }\n}\n\nfn main() {\n    {\n        let _timer = Timer::new(\"computation\");\n        // Simulate work\n        let sum: u64 = (0..1_000_000).sum();\n        println!(\"Sum: {}\", sum);\n    } // Timer::drop() runs here, prints elapsed time\n\n    {\n        let tmp = TempDir::new(\"myapp\").unwrap();\n        println!(\"Using temp dir: {:?}\", tmp.path());\n        // Even if we return early or panic, the directory is cleaned up\n    } // TempDir::drop() removes the directory\n}",
+  "realWorldUse": "MutexGuard (automatically unlocks on drop), File (closes on drop), std::io::BufWriter (flushes on drop), tempfile::TempDir, scopeguard::defer!. Every smart pointer (Box, Rc, Arc) uses RAII to deallocate."
+}

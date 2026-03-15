@@ -1,0 +1,14 @@
+{
+  "id": "newtype",
+  "title": "Newtype Pattern",
+  "order": 2,
+  "description": "Wrap an existing type in a single-field tuple struct to create a distinct type. This gives you type safety (the compiler prevents mixing up values of the same underlying type), allows implementing traits on foreign types (orphan rule workaround), and provides a place to add validation and methods.",
+  "whenToUse": [
+    "When you want type safety between values with the same underlying type (e.g., UserId vs OrderId, both u64)",
+    "When you need to implement a foreign trait on a foreign type",
+    "When you want to restrict the API of an inner type",
+    "When you want to add validation on construction"
+  ],
+  "codeExample": "// Problem: easy to mix up different IDs that are all u64\n// user_service.get(order_id) compiles but is a bug!\n\n// Solution: newtypes\n#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]\nstruct UserId(u64);\n\n#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]\nstruct OrderId(u64);\n\n#[derive(Debug, Clone, PartialEq)]\nstruct EmailAddress(String);\n\nimpl EmailAddress {\n    fn new(email: &str) -> Result<Self, String> {\n        if email.contains('@') && email.contains('.') {\n            Ok(EmailAddress(email.to_lowercase()))\n        } else {\n            Err(format!(\"Invalid email: {}\", email))\n        }\n    }\n\n    fn as_str(&self) -> &str {\n        &self.0\n    }\n}\n\nimpl std::fmt::Display for EmailAddress {\n    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {\n        write!(f, \"{}\", self.0)\n    }\n}\n\nfn send_email(to: &EmailAddress, subject: &str) {\n    println!(\"Sending '{}' to {}\", subject, to);\n}\n\nfn get_user(id: UserId) -> String {\n    format!(\"User #{}\", id.0)\n}\n\nfn main() {\n    let user_id = UserId(42);\n    let _order_id = OrderId(42);\n\n    // get_user(order_id);  // Compile error! Expected UserId, got OrderId\n    println!(\"{}\", get_user(user_id));\n\n    let email = EmailAddress::new(\"Alice@Example.com\").unwrap();\n    send_email(&email, \"Hello!\");\n    // Stored as lowercase: alice@example.com\n    println!(\"Email: {}\", email);\n}",
+  "realWorldUse": "std::num::NonZeroU64, std::path::PathBuf (wraps OsString), String (wraps Vec<u8> with UTF-8 guarantee). Many libraries use newtypes for IDs, validated strings, and domain-specific values."
+}

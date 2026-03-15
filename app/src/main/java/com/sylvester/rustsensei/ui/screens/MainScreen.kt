@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Chat
@@ -38,15 +39,17 @@ import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
+import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 
 sealed class Tab(val route: String, val title: String, val icon: ImageVector) {
     data object Learn : Tab("learn", "Learn", Icons.Default.MenuBook)
     data object Practice : Tab("practice", "Practice", Icons.Default.Code)
+    data object Reference : Tab("reference", "Ref", Icons.Default.Book)
     data object Chat : Tab("chat", "Chat", Icons.Default.Chat)
     data object Progress : Tab("progress", "Progress", Icons.Default.TrendingUp)
 }
 
-private val tabs = listOf(Tab.Learn, Tab.Practice, Tab.Chat, Tab.Progress)
+private val tabs = listOf(Tab.Learn, Tab.Practice, Tab.Reference, Tab.Chat, Tab.Progress)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +58,7 @@ fun MainScreen(
     bookViewModel: BookViewModel,
     exerciseViewModel: ExerciseViewModel,
     progressViewModel: ProgressViewModel,
+    referenceViewModel: ReferenceViewModel,
     onNavigateToSettings: () -> Unit
 ) {
     val tabNavController = rememberNavController()
@@ -175,6 +179,9 @@ fun MainScreen(
                         tabNavController.navigate(Tab.Chat.route)
                     }
                 )
+            }
+            composable(Tab.Reference.route) {
+                ReferenceScreen(viewModel = referenceViewModel)
             }
             composable(Tab.Chat.route) {
                 ChatScreen(

@@ -1,0 +1,28 @@
+{
+  "id": "unsafe-functions",
+  "title": "Unsafe Functions and Traits",
+  "order": 3,
+  "content": "An unsafe function has preconditions the compiler cannot verify. Callers must use an unsafe block, acknowledging they have ensured the preconditions. This is a documentation contract.\n\nUnsafe traits have invariants that implementors must uphold. Send and Sync are the most common unsafe traits: incorrectly implementing them can cause data races.\n\nThe convention: document all safety requirements in a # Safety section in the doc comment. Explain exactly what the caller (or implementor) must guarantee.",
+  "codeExamples": [
+    {
+      "description": "Defining and calling unsafe functions",
+      "code": "/// Reads a value from a raw pointer.\n///\n/// # Safety\n///\n/// - `ptr` must be non-null\n/// - `ptr` must point to a valid, initialized `T`\n/// - `ptr` must be properly aligned\n/// - The memory must not be concurrently mutated\nunsafe fn read_ptr<T: Copy>(ptr: *const T) -> T {\n    *ptr\n}\n\nfn main() {\n    let value = 42i32;\n    let ptr: *const i32 = &value;\n\n    // Caller verifies safety requirements:\n    // - ptr is from a valid reference, so it's non-null, valid, and aligned\n    // - value is not being mutated concurrently\n    let result = unsafe { read_ptr(ptr) };\n    println!(\"Read: {}\", result);\n}"
+    },
+    {
+      "description": "Safe wrapper around unsafe code",
+      "code": "/// A fixed-size ring buffer.\nstruct RingBuffer<T> {\n    buffer: Vec<T>,\n    head: usize,\n    len: usize,\n}\n\nimpl<T: Default + Clone> RingBuffer<T> {\n    fn new(capacity: usize) -> Self {\n        RingBuffer {\n            buffer: vec![T::default(); capacity],\n            head: 0,\n            len: 0,\n        }\n    }\n\n    fn push(&mut self, value: T) {\n        let capacity = self.buffer.len();\n        let index = (self.head + self.len) % capacity;\n\n        // Safe because we ensure index is always in bounds\n        // through the modulo operation\n        unsafe {\n            *self.buffer.get_unchecked_mut(index) = value;\n        }\n\n        if self.len < capacity {\n            self.len += 1;\n        } else {\n            self.head = (self.head + 1) % capacity;\n        }\n    }\n\n    fn get(&self, index: usize) -> Option<&T> {\n        if index >= self.len {\n            return None;\n        }\n        let actual = (self.head + index) % self.buffer.len();\n        Some(&self.buffer[actual])\n    }\n}\n\nfn main() {\n    let mut rb = RingBuffer::new(3);\n    rb.push(1);\n    rb.push(2);\n    rb.push(3);\n    rb.push(4);  // Overwrites 1\n\n    println!(\"{:?}\", rb.get(0));  // Some(2)\n    println!(\"{:?}\", rb.get(1));  // Some(3)\n    println!(\"{:?}\", rb.get(2));  // Some(4)\n}"
+    },
+    {
+      "description": "Implementing unsafe traits",
+      "code": "use std::cell::UnsafeCell;\n\n/// A very simple mutex for demonstration.\n/// In real code, use std::sync::Mutex.\nstruct SimpleLock<T> {\n    data: UnsafeCell<T>,\n    locked: std::sync::atomic::AtomicBool,\n}\n\n// SAFETY: SimpleLock synchronizes access via the atomic flag,\n// so it is safe to share between threads.\nunsafe impl<T: Send> Sync for SimpleLock<T> {}\nunsafe impl<T: Send> Send for SimpleLock<T> {}\n\nimpl<T> SimpleLock<T> {\n    fn new(value: T) -> Self {\n        SimpleLock {\n            data: UnsafeCell::new(value),\n            locked: std::sync::atomic::AtomicBool::new(false),\n        }\n    }\n\n    fn lock(&self) -> &mut T {\n        use std::sync::atomic::Ordering;\n        // Spin until we acquire the lock\n        while self.locked.compare_exchange(\n            false, true, Ordering::Acquire, Ordering::Relaxed\n        ).is_err() {\n            std::hint::spin_loop();\n        }\n        unsafe { &mut *self.data.get() }\n    }\n\n    fn unlock(&self) {\n        use std::sync::atomic::Ordering;\n        self.locked.store(false, Ordering::Release);\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "unsafe fn means the function has preconditions the compiler cannot check",
+    "Document all safety requirements with a # Safety doc comment section",
+    "Safe wrappers ensure unsafe code's invariants are maintained",
+    "unsafe trait means implementors must uphold specific invariants",
+    "Send and Sync are unsafe traits -- incorrect impls cause data races",
+    "Prefer using safe abstractions from std (Mutex, atomic types) over writing your own"
+  ]
+}

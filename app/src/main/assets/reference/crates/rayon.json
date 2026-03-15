@@ -1,0 +1,28 @@
+{
+  "id": "rayon",
+  "title": "rayon -- Data Parallelism",
+  "version": "1.x",
+  "description": "Makes data-parallel programming effortless. Convert sequential iterators to parallel ones by replacing .iter() with .par_iter(). Rayon handles thread pool management, work stealing, and load balancing automatically.",
+  "cargoToml": "[dependencies]\nrayon = \"1\"",
+  "quickStart": "use rayon::prelude::*;\n\nfn main() {\n    let numbers: Vec<u64> = (0..1_000_000).collect();\n\n    // Sequential sum\n    let seq_sum: u64 = numbers.iter().sum();\n\n    // Parallel sum -- just change iter() to par_iter()\n    let par_sum: u64 = numbers.par_iter().sum();\n\n    assert_eq!(seq_sum, par_sum);\n    println!(\"Sum: {}\", par_sum);\n\n    // Parallel map + filter\n    let results: Vec<u64> = numbers\n        .par_iter()\n        .filter(|&&x| x % 2 == 0)\n        .map(|&x| x * x)\n        .collect();\n\n    println!(\"Even squares count: {}\", results.len());\n}",
+  "commonPatterns": [
+    {
+      "title": "Parallel map with collect",
+      "code": "use rayon::prelude::*;\n\nlet files = vec![\"a.txt\", \"b.txt\", \"c.txt\"];\nlet contents: Vec<_> = files\n    .par_iter()\n    .map(|f| std::fs::read_to_string(f).unwrap_or_default())\n    .collect();"
+    },
+    {
+      "title": "Parallel sort",
+      "code": "use rayon::prelude::*;\n\nlet mut data = vec![5, 2, 8, 1, 9, 3];\ndata.par_sort();           // parallel sort\ndata.par_sort_unstable();  // parallel unstable sort (faster)"
+    },
+    {
+      "title": "Parallel fold and reduce",
+      "code": "use rayon::prelude::*;\n\nlet words = vec![\"hello\", \"world\", \"foo\", \"bar\", \"baz\"];\n\nlet longest = words\n    .par_iter()\n    .reduce(|| &\"\", |a, b| if a.len() >= b.len() { a } else { b });\n\nprintln!(\"Longest: {}\", longest);"
+    },
+    {
+      "title": "Custom thread pool",
+      "code": "use rayon::ThreadPoolBuilder;\n\nlet pool = ThreadPoolBuilder::new()\n    .num_threads(4)\n    .build()\n    .unwrap();\n\npool.install(|| {\n    // All rayon operations in here use this 4-thread pool\n    let sum: u64 = (0..1000u64).into_par_iter().sum();\n    println!(\"Sum: {}\", sum);\n});"
+    }
+  ],
+  "whenToUse": "When you have CPU-bound work that can be split across data: processing large collections, image manipulation, number crunching, parallel sorting, or any embarrassingly parallel workload.",
+  "alternatives": "std::thread for manual threading, crossbeam for scoped threads and channels, tokio (for I/O-bound parallelism, not CPU-bound). For GPU parallelism: wgpu, vulkano."
+}

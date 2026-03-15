@@ -1,0 +1,127 @@
+{
+  "id": "rust-vs-python",
+  "title": "Rust vs Python",
+  "description": "Side-by-side comparison for Python developers learning Rust",
+  "comparisons": [
+    {
+      "concept": "Variable Declaration",
+      "python": "x = 5\nx: int = 5",
+      "rust": "let x = 5;\nlet x: i32 = 5;",
+      "note": "Rust variables are immutable by default and statically typed. Types are checked at compile time, not runtime."
+    },
+    {
+      "concept": "Functions",
+      "python": "def add(a: int, b: int) -> int:\n    return a + b",
+      "rust": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+      "note": "Rust type annotations are mandatory (not optional hints). The last expression is the return value."
+    },
+    {
+      "concept": "Classes / Structs",
+      "python": "class User:\n    def __init__(self, name: str, email: str):\n        self.name = name\n        self.email = email",
+      "rust": "struct User {\n    name: String,\n    email: String,\n}\n\nimpl User {\n    fn new(name: String, email: String) -> Self {\n        Self { name, email }\n    }\n}",
+      "note": "Rust separates data (struct) from behavior (impl). There are no constructors — use associated functions like `new()`."
+    },
+    {
+      "concept": "Inheritance / Traits",
+      "python": "class Animal:\n    def speak(self): ...\n\nclass Dog(Animal):\n    def speak(self):\n        return \"Woof\"",
+      "rust": "trait Animal {\n    fn speak(&self) -> &str;\n}\n\nstruct Dog;\nimpl Animal for Dog {\n    fn speak(&self) -> &str { \"Woof\" }\n}",
+      "note": "Rust has no inheritance. Use traits for shared behavior and composition over inheritance."
+    },
+    {
+      "concept": "Error Handling",
+      "python": "try:\n    result = do_something()\nexcept ValueError as e:\n    print(f\"Error: {e}\")",
+      "rust": "match do_something() {\n    Ok(result) => println!(\"{}\", result),\n    Err(e) => println!(\"Error: {}\", e),\n}\n// or with ? operator:\nlet result = do_something()?;",
+      "note": "Rust uses Result<T, E> instead of exceptions. Errors are values, making error paths explicit and checked at compile time."
+    },
+    {
+      "concept": "List Comprehensions / Iterators",
+      "python": "squares = [x**2 for x in range(10)]\nevens = [x for x in nums if x % 2 == 0]",
+      "rust": "let squares: Vec<i32> = (0..10).map(|x| x * x).collect();\nlet evens: Vec<i32> = nums.iter().filter(|&&x| x % 2 == 0).copied().collect();",
+      "note": "Rust uses iterator chains instead of comprehensions. They are lazy and zero-cost at runtime."
+    },
+    {
+      "concept": "Dictionaries / HashMaps",
+      "python": "d = {\"a\": 1, \"b\": 2}\nd[\"c\"] = 3\nval = d.get(\"a\", 0)",
+      "rust": "use std::collections::HashMap;\nlet mut d = HashMap::from([(\"a\", 1), (\"b\", 2)]);\nd.insert(\"c\", 3);\nlet val = d.get(\"a\").copied().unwrap_or(0);",
+      "note": "Rust's HashMap::get returns Option<&V>. Use unwrap_or() for default values instead of Python's get() default."
+    },
+    {
+      "concept": "Strings",
+      "python": "s = \"hello\"\ns_upper = s.upper()\njoined = \" \".join([\"a\", \"b\", \"c\"])",
+      "rust": "let s = String::from(\"hello\");\nlet s_upper = s.to_uppercase();\nlet joined = [\"a\", \"b\", \"c\"].join(\" \");",
+      "note": "Rust has String (owned, heap-allocated) and &str (borrowed slice). Python strings are more like Rust's String."
+    },
+    {
+      "concept": "Decorators / Attributes",
+      "python": "@staticmethod\ndef create():\n    pass\n\n@property\ndef name(self):\n    return self._name",
+      "rust": "#[derive(Debug, Clone)]\nstruct User { name: String }\n\n#[test]\nfn test_something() {}",
+      "note": "Rust attributes (#[...]) serve some decorator-like purposes but are compile-time only. Rust has no runtime decoration."
+    },
+    {
+      "concept": "Generators / Iterators",
+      "python": "def count_up(n):\n    i = 0\n    while i < n:\n        yield i\n        i += 1",
+      "rust": "struct CountUp { current: i32, max: i32 }\n\nimpl Iterator for CountUp {\n    type Item = i32;\n    fn next(&mut self) -> Option<i32> {\n        if self.current < self.max {\n            let val = self.current;\n            self.current += 1;\n            Some(val)\n        } else { None }\n    }\n}",
+      "note": "Rust implements iterators via the Iterator trait. There is no yield keyword in stable Rust; use state machines instead."
+    },
+    {
+      "concept": "Context Managers / RAII",
+      "python": "with open(\"file.txt\") as f:\n    data = f.read()",
+      "rust": "let data = std::fs::read_to_string(\"file.txt\")?;\n// or manually:\n{\n    let f = File::open(\"file.txt\")?;\n    // f is automatically closed at end of scope\n}",
+      "note": "Rust uses RAII — resources are automatically cleaned up when they go out of scope. No `with` statement needed."
+    },
+    {
+      "concept": "None / Option",
+      "python": "x: Optional[int] = None\nif x is not None:\n    print(x)",
+      "rust": "let x: Option<i32> = None;\nif let Some(val) = x {\n    println!(\"{}\", val);\n}",
+      "note": "Rust's Option<T> is an enum, not a special value. The compiler forces you to handle None, preventing null pointer errors."
+    },
+    {
+      "concept": "Type Hints / Types",
+      "python": "def greet(name: str) -> str:\n    return f\"Hello, {name}\"\n# Type hints are optional and not enforced",
+      "rust": "fn greet(name: &str) -> String {\n    format!(\"Hello, {}\", name)\n}\n// Types are mandatory and enforced at compile time",
+      "note": "Python type hints are optional documentation. Rust types are mandatory and enforced by the compiler."
+    },
+    {
+      "concept": "Async / Await",
+      "python": "import asyncio\n\nasync def fetch():\n    await asyncio.sleep(1)\n    return \"done\"",
+      "rust": "async fn fetch() -> String {\n    tokio::time::sleep(Duration::from_secs(1)).await;\n    \"done\".to_string()\n}",
+      "note": "Both use async/await syntax. Rust needs a runtime (tokio, async-std). Note .await comes after the expression in Rust."
+    },
+    {
+      "concept": "Testing",
+      "python": "import unittest\n\nclass TestMath(unittest.TestCase):\n    def test_add(self):\n        self.assertEqual(add(2, 3), 5)",
+      "rust": "#[cfg(test)]\nmod tests {\n    use super::*;\n    \n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n}",
+      "note": "Rust tests are built-in with #[test]. No separate test framework needed. Run with `cargo test`."
+    },
+    {
+      "concept": "Modules / Imports",
+      "python": "from collections import defaultdict\nimport os.path",
+      "rust": "use std::collections::HashMap;\nuse std::path;",
+      "note": "Rust modules map to files. Use `mod` to declare and `use` to bring into scope. Visibility is private by default."
+    },
+    {
+      "concept": "Lists / Vectors",
+      "python": "nums = [1, 2, 3]\nnums.append(4)\nfirst = nums[0]",
+      "rust": "let mut nums = vec![1, 2, 3];\nnums.push(4);\nlet first = nums[0]; // Panics if empty",
+      "note": "Rust's Vec<T> is like Python's list but homogeneous (one type). Use .get() for safe indexing that returns Option."
+    },
+    {
+      "concept": "Tuples",
+      "python": "point = (1.0, 2.0)\nx, y = point\nfirst = point[0]",
+      "rust": "let point = (1.0, 2.0);\nlet (x, y) = point;\nlet first = point.0;",
+      "note": "Both languages support tuple destructuring. Rust uses .0, .1 for indexing instead of [0], [1]."
+    },
+    {
+      "concept": "Pattern Matching",
+      "python": "match command:\n    case \"quit\":\n        exit()\n    case \"hello\" | \"hi\":\n        greet()\n    case _:\n        unknown()",
+      "rust": "match command {\n    \"quit\" => exit(),\n    \"hello\" | \"hi\" => greet(),\n    _ => unknown(),\n}",
+      "note": "Rust match is exhaustive — the compiler checks that all cases are covered. It can also destructure and bind values."
+    },
+    {
+      "concept": "F-strings / Format Strings",
+      "python": "name = \"world\"\nprint(f\"Hello, {name}!\")\nprint(f\"{value:.2f}\")",
+      "rust": "let name = \"world\";\nprintln!(\"Hello, {name}!\");\nprintln!(\"{value:.2}\");",
+      "note": "Rust's format strings use similar syntax. Since Rust 1.58, you can use variable names directly in format strings like Python f-strings."
+    }
+  ]
+}

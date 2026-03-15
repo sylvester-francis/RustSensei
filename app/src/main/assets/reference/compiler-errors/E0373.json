@@ -1,0 +1,20 @@
+{
+  "code": "E0373",
+  "title": "Closure may outlive the current function",
+  "severity": "frequent",
+  "explanation": "This error occurs when a closure captures a reference to a local variable but might outlive the function where that variable is defined. This commonly happens when passing closures to threads or returning them from functions.",
+  "example_bad": "use std::thread;\n\nfn main() {\n    let name = String::from(\"Rust\");\n    thread::spawn(|| {\n        println!(\"Hello, {}!\", name); // Error: closure may outlive function\n    });\n}",
+  "error_message": "error[E0373]: closure may outlive the current function, but it borrows `name`, which is owned by the current function",
+  "fixes": [
+    {
+      "description": "Use the move keyword to transfer ownership",
+      "code": "use std::thread;\n\nlet name = String::from(\"Rust\");\nthread::spawn(move || {\n    println!(\"Hello, {}!\", name); // Works!\n});"
+    },
+    {
+      "description": "Clone before moving into the closure",
+      "code": "use std::thread;\n\nlet name = String::from(\"Rust\");\nlet name_clone = name.clone();\nthread::spawn(move || {\n    println!(\"Hello, {}!\", name_clone);\n});\nprintln!(\"Still have: {}\", name);"
+    }
+  ],
+  "related": ["E0382", "E0597"],
+  "tip": "The `move` keyword forces the closure to take ownership of all captured variables. Use clone() if you need the value in both places."
+}

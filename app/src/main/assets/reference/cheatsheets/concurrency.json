@@ -1,0 +1,79 @@
+{
+  "id": "concurrency",
+  "title": "Concurrency",
+  "sections": [
+    {
+      "heading": "Spawning Threads",
+      "entries": [
+        {"label": "Basic thread", "code": "use std::thread;\n\nlet handle = thread::spawn(|| {\n    println!(\"Hello from a thread!\");\n});\nhandle.join().unwrap();", "note": "spawn returns JoinHandle; join() waits for the thread to finish"},
+        {"label": "Move closure", "code": "let data = vec![1, 2, 3];\nlet handle = thread::spawn(move || {\n    println!(\"{:?}\", data);\n});\nhandle.join().unwrap();\n// data has been moved into the thread", "note": "Use move to transfer ownership of captured variables to the thread"},
+        {"label": "Return value from thread", "code": "let handle = thread::spawn(|| {\n    42\n});\nlet result = handle.join().unwrap();\nassert_eq!(result, 42);", "note": "join() returns Result<T> where T is the closure's return type"},
+        {"label": "Named threads", "code": "let builder = thread::Builder::new()\n    .name(\"worker\".into())\n    .stack_size(4 * 1024 * 1024);\nlet handle = builder.spawn(|| {\n    println!(\"thread: {:?}\", thread::current().name());\n}).unwrap();", "note": "Builder allows setting name and stack size"},
+        {"label": "Scoped threads", "code": "let mut data = vec![1, 2, 3];\nthread::scope(|s| {\n    s.spawn(|| {\n        println!(\"{:?}\", data); // can borrow data\n    });\n    s.spawn(|| {\n        println!(\"another thread\");\n    });\n});\n// all scoped threads joined here; data is still accessible", "note": "Scoped threads can borrow from the parent stack; joined automatically"},
+        {"label": "Available parallelism", "code": "let cores = thread::available_parallelism()\n    .map(|n| n.get())\n    .unwrap_or(1);\nprintln!(\"Available cores: {cores}\");", "note": "Query the number of hardware threads available"}
+      ]
+    },
+    {
+      "heading": "Channels (Message Passing)",
+      "entries": [
+        {"label": "mpsc channel", "code": "use std::sync::mpsc;\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send(\"hello\").unwrap();\n});\nlet msg = rx.recv().unwrap();\nprintln!(\"{msg}\");", "note": "Multiple producer, single consumer; send/recv for communication"},
+        {"label": "Multiple producers", "code": "let (tx, rx) = mpsc::channel();\nfor i in 0..5 {\n    let tx = tx.clone();\n    thread::spawn(move || {\n        tx.send(i).unwrap();\n    });\n}\ndrop(tx); // drop original sender\nfor received in rx {\n    println!(\"{received}\");\n}", "note": "Clone the sender for multiple producers; drop original to close channel"},
+        {"label": "Sync channel", "code": "let (tx, rx) = mpsc::sync_channel(3); // buffer size 3\ntx.send(1).unwrap(); // non-blocking while buffer not full\ntx.send(2).unwrap();\ntx.send(3).unwrap();\n// tx.send(4) would block until rx.recv()", "note": "Bounded channel; send blocks when buffer is full"},
+        {"label": "try_recv", "code": "let (tx, rx) = mpsc::channel::<i32>();\nmatch rx.try_recv() {\n    Ok(msg) => println!(\"got: {msg}\"),\n    Err(mpsc::TryRecvError::Empty) => println!(\"no message yet\"),\n    Err(mpsc::TryRecvError::Disconnected) => println!(\"channel closed\"),\n}", "note": "Non-blocking receive; returns immediately with TryRecvError if empty"},
+        {"label": "recv_timeout", "code": "use std::time::Duration;\nlet (tx, rx) = mpsc::channel::<i32>();\nmatch rx.recv_timeout(Duration::from_secs(1)) {\n    Ok(msg) => println!(\"{msg}\"),\n    Err(_) => println!(\"timed out\"),\n}", "note": "Block up to a specified duration waiting for a message"}
+      ]
+    },
+    {
+      "heading": "Mutex<T>",
+      "entries": [
+        {"label": "Basic Mutex", "code": "use std::sync::Mutex;\nlet m = Mutex::new(5);\n{\n    let mut num = m.lock().unwrap();\n    *num = 6;\n} // lock released when MutexGuard is dropped\nprintln!(\"{}\", m.lock().unwrap());", "note": "lock() returns MutexGuard; auto-releases when guard is dropped"},
+        {"label": "Shared Mutex with Arc", "code": "use std::sync::{Arc, Mutex};\nlet data = Arc::new(Mutex::new(vec![]));\nlet handles: Vec<_> = (0..5).map(|i| {\n    let data = Arc::clone(&data);\n    thread::spawn(move || {\n        data.lock().unwrap().push(i);\n    })\n}).collect();\nfor h in handles { h.join().unwrap(); }\nprintln!(\"{:?}\", data.lock().unwrap());", "note": "Arc provides shared ownership; Mutex provides mutual exclusion"},
+        {"label": "Poisoned Mutex", "code": "let m = Mutex::new(5);\nlet _ = thread::spawn(move || {\n    let _lock = m.lock().unwrap();\n    panic!(\"thread panicked while holding lock\");\n}).join();\n// m is now poisoned; lock() returns Err\n// Use into_inner() or clear_poison() to recover", "note": "A Mutex becomes poisoned if a thread panics while holding the lock"},
+        {"label": "try_lock", "code": "let m = Mutex::new(42);\nmatch m.try_lock() {\n    Ok(guard) => println!(\"got lock: {}\", *guard),\n    Err(_) => println!(\"lock is held by another thread\"),\n}", "note": "Non-blocking attempt to acquire the lock"}
+      ]
+    },
+    {
+      "heading": "RwLock<T>",
+      "entries": [
+        {"label": "Read/write lock", "code": "use std::sync::RwLock;\nlet lock = RwLock::new(5);\n{\n    let r1 = lock.read().unwrap();\n    let r2 = lock.read().unwrap();\n    println!(\"{r1} {r2}\"); // multiple readers OK\n}\n{\n    let mut w = lock.write().unwrap();\n    *w = 10; // exclusive write access\n}", "note": "Multiple readers OR one writer; more efficient when reads dominate"},
+        {"label": "Shared RwLock", "code": "use std::sync::{Arc, RwLock};\nlet config = Arc::new(RwLock::new(String::from(\"default\")));\nlet reader = Arc::clone(&config);\nlet writer = Arc::clone(&config);\n\nthread::spawn(move || {\n    println!(\"{}\", reader.read().unwrap());\n});\nthread::spawn(move || {\n    *writer.write().unwrap() = String::from(\"updated\");\n});", "note": "Arc + RwLock for concurrent read-heavy shared state"},
+        {"label": "try_read / try_write", "code": "let lock = RwLock::new(42);\nif let Ok(val) = lock.try_read() {\n    println!(\"read: {val}\");\n}\nif let Ok(mut val) = lock.try_write() {\n    *val += 1;\n}", "note": "Non-blocking attempts; useful to avoid deadlocks"}
+      ]
+    },
+    {
+      "heading": "Atomic Types",
+      "entries": [
+        {"label": "AtomicBool", "code": "use std::sync::atomic::{AtomicBool, Ordering};\nlet running = AtomicBool::new(true);\nrunning.store(false, Ordering::SeqCst);\nassert!(!running.load(Ordering::SeqCst));", "note": "Lock-free boolean; use for flags and simple synchronization"},
+        {"label": "AtomicUsize counter", "code": "use std::sync::atomic::{AtomicUsize, Ordering};\nuse std::sync::Arc;\n\nlet counter = Arc::new(AtomicUsize::new(0));\nlet handles: Vec<_> = (0..10).map(|_| {\n    let counter = Arc::clone(&counter);\n    thread::spawn(move || {\n        counter.fetch_add(1, Ordering::SeqCst);\n    })\n}).collect();\nfor h in handles { h.join().unwrap(); }\nprintln!(\"count: {}\", counter.load(Ordering::SeqCst));", "note": "Lock-free counter; faster than Mutex for simple operations"},
+        {"label": "Compare and swap", "code": "use std::sync::atomic::{AtomicI32, Ordering};\nlet val = AtomicI32::new(5);\nlet result = val.compare_exchange(\n    5,    // expected\n    10,   // new value\n    Ordering::SeqCst,\n    Ordering::SeqCst,\n);\nassert_eq!(result, Ok(5));", "note": "Atomically set value only if current matches expected; CAS operation"},
+        {"label": "Ordering explained", "code": "// Ordering::Relaxed   - no ordering guarantees\n// Ordering::Acquire   - subsequent reads see writes before Release\n// Ordering::Release   - previous writes visible to Acquire loads\n// Ordering::AcqRel    - both Acquire and Release\n// Ordering::SeqCst    - strictest; total ordering across all threads", "note": "SeqCst is safest default; Relaxed is fastest but weakest guarantee"}
+      ]
+    },
+    {
+      "heading": "Send & Sync Traits",
+      "entries": [
+        {"label": "Send", "code": "// T: Send means T can be transferred to another thread\n// Most types are Send\n// Rc<T> is NOT Send (not thread-safe)\n// Raw pointers are NOT Send", "note": "Compiler checks Send bounds at compile time; prevents data races"},
+        {"label": "Sync", "code": "// T: Sync means &T can be shared across threads\n// T is Sync if &T is Send\n// Mutex<T> is Sync (provides synchronized access)\n// RefCell<T> is NOT Sync (runtime borrow checking is not thread-safe)", "note": "Sync means safe to reference from multiple threads simultaneously"},
+        {"label": "Auto-derived", "code": "// Send and Sync are auto-derived:\n// A struct is Send if all fields are Send\n// A struct is Sync if all fields are Sync\n\n// Manually implement (unsafe):\nunsafe impl Send for MyType {}\nunsafe impl Sync for MyType {}", "note": "Compiler derives automatically; manual impl requires unsafe and great care"}
+      ]
+    },
+    {
+      "heading": "Rayon (Data Parallelism)",
+      "entries": [
+        {"label": "Parallel iterator", "code": "use rayon::prelude::*;\nlet sum: i32 = (0..1_000_000)\n    .into_par_iter()\n    .sum();", "note": "Drop-in replacement for iterators; automatically parallelizes"},
+        {"label": "Parallel map/filter", "code": "use rayon::prelude::*;\nlet results: Vec<_> = data\n    .par_iter()\n    .filter(|x| x.is_valid())\n    .map(|x| x.process())\n    .collect();", "note": "Same API as regular iterators; work distributed across threads"},
+        {"label": "par_sort", "code": "use rayon::prelude::*;\nlet mut data = vec![5, 3, 1, 4, 2];\ndata.par_sort();", "note": "Parallel sort; significantly faster for large collections"},
+        {"label": "Custom thread pool", "code": "let pool = rayon::ThreadPoolBuilder::new()\n    .num_threads(4)\n    .build()\n    .unwrap();\npool.install(|| {\n    // parallel work runs on this pool\n    let sum: i32 = (0..100).into_par_iter().sum();\n    println!(\"{sum}\");\n});", "note": "Configure the number of threads; install runs closures on the pool"}
+      ]
+    },
+    {
+      "heading": "Common Patterns",
+      "entries": [
+        {"label": "Thread pool with channels", "code": "use std::sync::mpsc;\nlet (tx, rx) = mpsc::channel();\nfor i in 0..4 {\n    let tx = tx.clone();\n    thread::spawn(move || {\n        let result = expensive_computation(i);\n        tx.send((i, result)).unwrap();\n    });\n}\ndrop(tx);\nfor (id, result) in rx {\n    println!(\"Thread {id}: {result}\");\n}", "note": "Fan-out work to threads; collect results via channel"},
+        {"label": "Barrier", "code": "use std::sync::{Arc, Barrier};\nlet barrier = Arc::new(Barrier::new(3));\nfor _ in 0..3 {\n    let b = Arc::clone(&barrier);\n    thread::spawn(move || {\n        println!(\"before barrier\");\n        b.wait();\n        println!(\"after barrier\");\n    });\n}", "note": "Synchronization point; all threads wait until everyone arrives"},
+        {"label": "Once / OnceLock", "code": "use std::sync::OnceLock;\nstatic CONFIG: OnceLock<String> = OnceLock::new();\nfn get_config() -> &'static String {\n    CONFIG.get_or_init(|| {\n        String::from(\"initialized once\")\n    })\n}", "note": "Initialize exactly once; thread-safe; great for lazy global state"},
+        {"label": "Condvar", "code": "use std::sync::{Mutex, Condvar, Arc};\nlet pair = Arc::new((Mutex::new(false), Condvar::new()));\nlet pair2 = Arc::clone(&pair);\nthread::spawn(move || {\n    let (lock, cvar) = &*pair2;\n    let mut started = lock.lock().unwrap();\n    *started = true;\n    cvar.notify_one();\n});\nlet (lock, cvar) = &*pair;\nlet mut started = lock.lock().unwrap();\nwhile !*started {\n    started = cvar.wait(started).unwrap();\n}", "note": "Wait for a condition to become true; pairs with Mutex"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "code": "E0119",
+  "title": "Conflicting implementations of trait",
+  "severity": "occasional",
+  "explanation": "This error occurs when there are two or more implementations of the same trait for the same type, or when a blanket implementation conflicts with a specific one. Rust requires that trait implementations be unambiguous.",
+  "example_bad": "trait Greet {\n    fn hello(&self);\n}\n\nstruct Person;\n\nimpl Greet for Person {\n    fn hello(&self) { println!(\"Hi!\"); }\n}\n\nimpl Greet for Person { // Error: conflicting implementation\n    fn hello(&self) { println!(\"Hey!\"); }\n}",
+  "error_message": "error[E0119]: conflicting implementations of trait `Greet` for type `Person`",
+  "fixes": [
+    {
+      "description": "Remove the duplicate implementation",
+      "code": "impl Greet for Person {\n    fn hello(&self) { println!(\"Hi!\"); }\n}\n// Remove the second impl"
+    },
+    {
+      "description": "Use different types for different behavior",
+      "code": "struct FormalPerson;\nstruct CasualPerson;\n\nimpl Greet for FormalPerson {\n    fn hello(&self) { println!(\"Good day!\"); }\n}\nimpl Greet for CasualPerson {\n    fn hello(&self) { println!(\"Hey!\"); }\n}"
+    }
+  ],
+  "related": ["E0117", "E0277"],
+  "tip": "This often happens with blanket implementations like impl<T: Display> ToString for T. Your specific impl conflicts with the blanket one."
+}

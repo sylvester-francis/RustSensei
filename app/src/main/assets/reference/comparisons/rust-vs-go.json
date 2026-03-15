@@ -1,0 +1,139 @@
+{
+  "id": "rust-vs-go",
+  "title": "Rust vs Go",
+  "description": "Side-by-side comparison for Go developers learning Rust",
+  "comparisons": [
+    {
+      "concept": "Variable Declaration",
+      "go": "x := 5\nvar x int = 5",
+      "rust": "let x = 5;\nlet x: i32 = 5;",
+      "note": "Rust variables are immutable by default. Use `let mut` for mutable."
+    },
+    {
+      "concept": "Mutable Variables",
+      "go": "x := 5\nx = 10 // All variables are mutable",
+      "rust": "let mut x = 5;\nx = 10; // Must declare with `mut`",
+      "note": "Rust requires explicit opt-in to mutability, preventing accidental changes."
+    },
+    {
+      "concept": "Functions",
+      "go": "func add(a int, b int) int {\n    return a + b\n}",
+      "rust": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+      "note": "Rust functions return the last expression without `return`. The return type follows `->`."
+    },
+    {
+      "concept": "Structs",
+      "go": "type User struct {\n    Name  string\n    Email string\n}",
+      "rust": "struct User {\n    name: String,\n    email: String,\n}",
+      "note": "Rust uses snake_case for fields. Fields are private by default (use `pub` to export)."
+    },
+    {
+      "concept": "Methods",
+      "go": "func (u User) FullName() string {\n    return u.Name\n}",
+      "rust": "impl User {\n    fn full_name(&self) -> &str {\n        &self.name\n    }\n}",
+      "note": "Rust methods are defined in `impl` blocks. `&self` is like a pointer receiver in Go."
+    },
+    {
+      "concept": "Interfaces / Traits",
+      "go": "type Stringer interface {\n    String() string\n}",
+      "rust": "trait Display {\n    fn fmt(&self, f: &mut Formatter) -> Result;\n}",
+      "note": "Go interfaces are implicit; Rust traits must be explicitly implemented with `impl Trait for Type`."
+    },
+    {
+      "concept": "Error Handling",
+      "go": "val, err := doSomething()\nif err != nil {\n    return err\n}",
+      "rust": "let val = do_something()?;\n// or\nmatch do_something() {\n    Ok(val) => val,\n    Err(e) => return Err(e),\n}",
+      "note": "Rust uses Result<T, E> instead of multiple returns. The `?` operator propagates errors concisely."
+    },
+    {
+      "concept": "Goroutines / Threads",
+      "go": "go func() {\n    fmt.Println(\"hello\")\n}()",
+      "rust": "std::thread::spawn(|| {\n    println!(\"hello\");\n});",
+      "note": "Rust threads are OS threads. For async concurrency similar to goroutines, use tokio or async-std."
+    },
+    {
+      "concept": "Channels",
+      "go": "ch := make(chan int)\ngo func() { ch <- 42 }()\nval := <-ch",
+      "rust": "use std::sync::mpsc;\nlet (tx, rx) = mpsc::channel();\nstd::thread::spawn(move || tx.send(42).unwrap());\nlet val = rx.recv().unwrap();",
+      "note": "Rust's mpsc channels are multi-producer, single-consumer. Use crossbeam for more channel types."
+    },
+    {
+      "concept": "Slices / Vectors",
+      "go": "s := []int{1, 2, 3}\ns = append(s, 4)",
+      "rust": "let mut v = vec![1, 2, 3];\nv.push(4);",
+      "note": "Rust's Vec<T> is like Go slices. Rust also has slices (&[T]) which are borrowed views into contiguous data."
+    },
+    {
+      "concept": "Maps / HashMaps",
+      "go": "m := map[string]int{\"a\": 1}\nm[\"b\"] = 2\nval, ok := m[\"a\"]",
+      "rust": "use std::collections::HashMap;\nlet mut m = HashMap::from([(\"a\", 1)]);\nm.insert(\"b\", 2);\nlet val = m.get(\"a\"); // Returns Option<&V>",
+      "note": "Rust's HashMap returns Option instead of a zero value. No built-in map literal syntax."
+    },
+    {
+      "concept": "Strings",
+      "go": "s := \"hello\"\nbs := []byte(s)\nrs := []rune(s)",
+      "rust": "let s = String::from(\"hello\");\nlet bytes = s.as_bytes();\nlet chars = s.chars();",
+      "note": "Rust has two string types: String (owned, heap) and &str (borrowed slice). Both are UTF-8."
+    },
+    {
+      "concept": "Pointers / References",
+      "go": "x := 42\np := &x\nfmt.Println(*p)",
+      "rust": "let x = 42;\nlet p = &x;\nprintln!(\"{}\", p); // Auto-deref",
+      "note": "Rust references are always valid (no null). Mutable refs (&mut T) require exclusive access."
+    },
+    {
+      "concept": "Modules / Packages",
+      "go": "package main\nimport \"fmt\"",
+      "rust": "mod my_module;\nuse std::fmt;",
+      "note": "Rust modules map to files. Visibility is private by default; use `pub` to export."
+    },
+    {
+      "concept": "Testing",
+      "go": "func TestAdd(t *testing.T) {\n    if add(2, 3) != 5 {\n        t.Error(\"expected 5\")\n    }\n}",
+      "rust": "#[cfg(test)]\nmod tests {\n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n}",
+      "note": "Rust tests live in the same file with #[test]. Run with `cargo test`."
+    },
+    {
+      "concept": "Enums",
+      "go": "type Color int\nconst (\n    Red Color = iota\n    Green\n    Blue\n)",
+      "rust": "enum Color {\n    Red,\n    Green,\n    Blue,\n}",
+      "note": "Rust enums are algebraic data types — each variant can hold different data (like tagged unions)."
+    },
+    {
+      "concept": "Generics",
+      "go": "func Map[T any, U any](s []T, f func(T) U) []U {\n    // ...\n}",
+      "rust": "fn map<T, U>(s: &[T], f: impl Fn(&T) -> U) -> Vec<U> {\n    s.iter().map(f).collect()\n}",
+      "note": "Rust generics are monomorphized at compile time (zero runtime cost). Use trait bounds for constraints."
+    },
+    {
+      "concept": "Closures",
+      "go": "add := func(a, b int) int {\n    return a + b\n}",
+      "rust": "let add = |a: i32, b: i32| -> i32 {\n    a + b\n};",
+      "note": "Rust closures capture variables by reference or by move. The compiler infers the capture mode."
+    },
+    {
+      "concept": "Defer / Drop",
+      "go": "f, _ := os.Open(\"file.txt\")\ndefer f.Close()",
+      "rust": "let f = File::open(\"file.txt\")?;\n// f is automatically closed when it goes out of scope",
+      "note": "Rust uses RAII (Drop trait) instead of defer. Resources are cleaned up automatically when the owner goes out of scope."
+    },
+    {
+      "concept": "Nil / Option",
+      "go": "var p *int = nil\nif p != nil {\n    fmt.Println(*p)\n}",
+      "rust": "let p: Option<i32> = None;\nif let Some(val) = p {\n    println!(\"{}\", val);\n}",
+      "note": "Rust has no null/nil. Option<T> forces you to handle the absence case at compile time."
+    },
+    {
+      "concept": "Type Assertions / Pattern Matching",
+      "go": "switch v := i.(type) {\ncase int:\n    fmt.Println(v)\ncase string:\n    fmt.Println(v)\n}",
+      "rust": "match value {\n    Value::Int(v) => println!(\"{}\", v),\n    Value::Str(v) => println!(\"{}\", v),\n}",
+      "note": "Rust match is exhaustive — the compiler ensures you handle all variants. No runtime type checking needed."
+    },
+    {
+      "concept": "Concurrency Patterns",
+      "go": "var mu sync.Mutex\nmu.Lock()\n// critical section\nmu.Unlock()",
+      "rust": "use std::sync::Mutex;\nlet data = Mutex::new(0);\nlet mut lock = data.lock().unwrap();\n*lock += 1;\n// lock released when `lock` goes out of scope",
+      "note": "Rust's Mutex wraps the data it protects, making it impossible to access data without locking. The lock is released automatically via RAII."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "id": "cargo",
+  "title": "Cargo & Project Management",
+  "sections": [
+    {
+      "heading": "Creating Projects",
+      "entries": [
+        {"label": "New binary", "code": "cargo new my_project", "note": "Creates a new directory with src/main.rs and Cargo.toml"},
+        {"label": "New library", "code": "cargo new my_lib --lib", "note": "Creates a library project with src/lib.rs"},
+        {"label": "Init in existing dir", "code": "cargo init\ncargo init --lib", "note": "Initialize a Cargo project in the current directory"},
+        {"label": "Project structure", "code": "my_project/\n  Cargo.toml\n  src/\n    main.rs     # binary entry point\n    lib.rs      # library entry point\n    bin/        # additional binaries\n  tests/        # integration tests\n  benches/      # benchmarks\n  examples/     # example programs", "note": "Standard Rust project layout conventions"}
+      ]
+    },
+    {
+      "heading": "Building & Running",
+      "entries": [
+        {"label": "Build", "code": "cargo build          # debug build\ncargo build --release # optimized release build", "note": "Debug builds are faster to compile; release builds run faster"},
+        {"label": "Run", "code": "cargo run\ncargo run --release\ncargo run -- arg1 arg2  # pass args to binary\ncargo run --bin other   # run specific binary", "note": "Builds and runs in one step; -- separates cargo args from program args"},
+        {"label": "Check", "code": "cargo check", "note": "Type-check without producing a binary; much faster than build"},
+        {"label": "Clean", "code": "cargo clean", "note": "Remove the target/ directory and all build artifacts"},
+        {"label": "Build specific target", "code": "cargo build --target x86_64-unknown-linux-gnu\ncargo build --target aarch64-apple-darwin", "note": "Cross-compile for a different target architecture"}
+      ]
+    },
+    {
+      "heading": "Testing",
+      "entries": [
+        {"label": "Run all tests", "code": "cargo test", "note": "Runs unit tests, integration tests, and doc tests"},
+        {"label": "Filter tests", "code": "cargo test test_name\ncargo test module_name::\ncargo test -- --exact test_full_name", "note": "Run tests matching a pattern; --exact for full name match"},
+        {"label": "Test options", "code": "cargo test -- --nocapture    # show println output\ncargo test -- --test-threads=1  # run sequentially\ncargo test -- --ignored      # run only #[ignore] tests\ncargo test -- --show-output", "note": "Options after -- are passed to the test binary"},
+        {"label": "Specific test target", "code": "cargo test --lib             # only unit tests\ncargo test --test integration # specific integration test\ncargo test --doc             # only doc tests\ncargo test --bins            # tests in all binaries", "note": "Target specific test categories"},
+        {"label": "Test with features", "code": "cargo test --features \"feature1 feature2\"\ncargo test --all-features\ncargo test --no-default-features", "note": "Control which features are enabled during testing"}
+      ]
+    },
+    {
+      "heading": "Dependencies",
+      "entries": [
+        {"label": "Add dependency", "code": "cargo add serde\ncargo add serde --features derive\ncargo add tokio@1.35 --features full", "note": "cargo add modifies Cargo.toml; specify version and features"},
+        {"label": "Cargo.toml dependencies", "code": "[dependencies]\nserde = \"1.0\"\nserde_json = { version = \"1.0\", features = [\"preserve_order\"] }\ntokio = { version = \"1\", features = [\"full\"] }", "note": "Manual editing; specify version, features, and other options"},
+        {"label": "Dev dependencies", "code": "cargo add --dev proptest\n\n# In Cargo.toml:\n[dev-dependencies]\nproptest = \"1.0\"", "note": "Only compiled for tests and examples, not for the final binary"},
+        {"label": "Build dependencies", "code": "[build-dependencies]\ncc = \"1.0\"", "note": "Only available in build.rs build scripts"},
+        {"label": "Git dependency", "code": "[dependencies]\nmy_crate = { git = \"https://github.com/user/repo\", branch = \"main\" }\nmy_crate = { git = \"https://github.com/user/repo\", rev = \"abc123\" }", "note": "Depend on a git repository directly; pin with branch, tag, or rev"},
+        {"label": "Path dependency", "code": "[dependencies]\nmy_lib = { path = \"../my_lib\" }", "note": "Depend on a local crate; useful in workspaces or development"},
+        {"label": "Update dependencies", "code": "cargo update            # update all within semver constraints\ncargo update -p serde   # update specific crate", "note": "Updates Cargo.lock; respects version constraints in Cargo.toml"}
+      ]
+    },
+    {
+      "heading": "Features",
+      "entries": [
+        {"label": "Define features", "code": "[features]\ndefault = [\"json\"]\njson = [\"dep:serde_json\"]\nasync = [\"dep:tokio\"]\nfull = [\"json\", \"async\"]", "note": "Features enable optional functionality; default lists always-on features"},
+        {"label": "Optional dependencies", "code": "[dependencies]\nserde_json = { version = \"1.0\", optional = true }\ntokio = { version = \"1\", optional = true }", "note": "Optional deps are only compiled when their feature is enabled"},
+        {"label": "Conditional compilation", "code": "#[cfg(feature = \"json\")]\nmod json_support {\n    pub fn parse(s: &str) -> serde_json::Value {\n        serde_json::from_str(s).unwrap()\n    }\n}", "note": "#[cfg(feature = \"...\")] gates code on feature flags"},
+        {"label": "Use features", "code": "cargo build --features \"json async\"\ncargo build --all-features\ncargo build --no-default-features\ncargo build --no-default-features --features async", "note": "Enable specific features from command line"}
+      ]
+    },
+    {
+      "heading": "Workspaces",
+      "entries": [
+        {"label": "Define workspace", "code": "# Root Cargo.toml\n[workspace]\nmembers = [\n    \"crates/core\",\n    \"crates/cli\",\n    \"crates/server\",\n]", "note": "Workspace shares a single Cargo.lock and target/ directory"},
+        {"label": "Workspace dependencies", "code": "# Root Cargo.toml\n[workspace.dependencies]\nserde = { version = \"1.0\", features = [\"derive\"] }\ntokio = { version = \"1\", features = [\"full\"] }\n\n# Member Cargo.toml\n[dependencies]\nserde = { workspace = true }\ntokio = { workspace = true }", "note": "Define shared dependency versions in root; reference with workspace = true"},
+        {"label": "Run for specific member", "code": "cargo build -p core\ncargo test -p cli\ncargo run -p server", "note": "-p flag selects a specific workspace member"},
+        {"label": "Run for all members", "code": "cargo test --workspace\ncargo build --workspace\ncargo clippy --workspace", "note": "--workspace runs the command for all members"}
+      ]
+    },
+    {
+      "heading": "Linting & Formatting",
+      "entries": [
+        {"label": "Format code", "code": "cargo fmt\ncargo fmt --check  # check without modifying", "note": "Formats all .rs files using rustfmt; configure with rustfmt.toml"},
+        {"label": "Lint with clippy", "code": "cargo clippy\ncargo clippy -- -W clippy::pedantic\ncargo clippy --fix  # auto-fix suggestions", "note": "Catches common mistakes and suggests improvements"},
+        {"label": "Fix compiler suggestions", "code": "cargo fix\ncargo fix --edition  # fix edition migration issues", "note": "Automatically apply compiler suggestions"}
+      ]
+    },
+    {
+      "heading": "Publishing & Documentation",
+      "entries": [
+        {"label": "Generate docs", "code": "cargo doc\ncargo doc --open           # open in browser\ncargo doc --no-deps        # skip dependency docs\ncargo doc --document-private-items", "note": "Generates HTML documentation from doc comments"},
+        {"label": "Publish to crates.io", "code": "cargo login\ncargo publish --dry-run  # check first\ncargo publish", "note": "Requires a crates.io account and API token"},
+        {"label": "Package info", "code": "[package]\nname = \"my-crate\"\nversion = \"0.1.0\"\nedition = \"2021\"\ndescription = \"A useful crate\"\nlicense = \"MIT OR Apache-2.0\"\nrepository = \"https://github.com/user/repo\"", "note": "Required metadata for publishing to crates.io"},
+        {"label": "Benchmarks", "code": "cargo bench\ncargo bench -- bench_name", "note": "Run benchmarks; requires nightly for built-in bench or criterion crate for stable"}
+      ]
+    },
+    {
+      "heading": "Useful Commands",
+      "entries": [
+        {"label": "Inspect", "code": "cargo tree            # dependency tree\ncargo tree --duplicates  # find duplicate deps\ncargo metadata        # machine-readable project info", "note": "Understand your dependency graph"},
+        {"label": "Audit", "code": "cargo install cargo-audit\ncargo audit", "note": "Check dependencies for known security vulnerabilities"},
+        {"label": "Expand macros", "code": "cargo install cargo-expand\ncargo expand          # show expanded macro output", "note": "See what macros generate; great for debugging derive macros"},
+        {"label": "Watch for changes", "code": "cargo install cargo-watch\ncargo watch -x check\ncargo watch -x 'test -- --nocapture'", "note": "Re-run commands when source files change"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "id": "pin-and-pitfalls",
+  "title": "Pin, Common Pitfalls, and Best Practices",
+  "order": 7,
+  "content": "Pin is Rust's way of saying 'this value will not move in memory.' Async futures often contain self-referential data (local variables that reference each other across await points), so they cannot be safely moved after being polled.\n\nYou rarely need to use Pin directly -- tokio::spawn and Box::pin handle it for you. But understanding Pin helps when you hit compiler errors about 'value does not implement Unpin.'\n\nCommon async pitfalls:\n1. Holding a MutexGuard across .await -- this can deadlock or block the runtime thread.\n2. Blocking the executor with CPU-heavy work or std::thread::sleep -- use tokio::task::spawn_blocking instead.\n3. Creating futures that are not Send -- spawned tasks must be Send for multi-threaded runtimes.\n4. Forgetting that futures are lazy -- calling an async fn without awaiting does nothing.",
+  "codeExamples": [
+    {
+      "description": "Pin basics: boxing async futures",
+      "code": "use std::pin::Pin;\nuse std::future::Future;\n\n// Returning different async types requires boxing\nfn get_task(fast: bool) -> Pin<Box<dyn Future<Output = String> + Send>> {\n    if fast {\n        Box::pin(async { \"fast result\".to_string() })\n    } else {\n        Box::pin(async {\n            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;\n            \"slow result\".to_string()\n        })\n    }\n}"
+    },
+    {
+      "description": "Pitfall: holding MutexGuard across await",
+      "code": "use tokio::sync::Mutex;\nuse std::sync::Arc;\n\nasync fn bad_example(data: Arc<Mutex<Vec<String>>>) {\n    // BAD: MutexGuard held across await point\n    // let mut lock = data.lock().await;\n    // some_async_operation().await;  // Lock is still held!\n    // lock.push(\"item\".into());\n\n    // GOOD: Drop the lock before awaiting\n    {\n        let mut lock = data.lock().await;\n        lock.push(\"item\".into());\n    }  // Lock dropped here\n    some_async_operation().await;  // Safe!\n}\n\nasync fn some_async_operation() {}"
+    },
+    {
+      "description": "Pitfall: blocking the runtime",
+      "code": "// BAD: blocks the async runtime thread\nasync fn bad_cpu_work() -> u64 {\n    // std::thread::sleep(Duration::from_secs(5)); // NEVER do this!\n    // expensive_computation();  // Blocks other tasks!\n    0\n}\n\n// GOOD: use spawn_blocking for CPU-heavy work\nasync fn good_cpu_work() -> u64 {\n    tokio::task::spawn_blocking(|| {\n        // This runs on a dedicated thread pool\n        expensive_computation()\n    })\n    .await\n    .unwrap()\n}\n\nfn expensive_computation() -> u64 {\n    (0..1_000_000u64).sum()\n}"
+    },
+    {
+      "description": "Pitfall: forgetting Send bounds",
+      "code": "use std::rc::Rc;  // Rc is NOT Send!\n\n// This will NOT compile with tokio::spawn:\n// tokio::spawn(async {\n//     let data = Rc::new(42);  // Rc is not Send\n//     some_await_point().await;\n//     println!(\"{}\", data);\n// });\n\n// Fix: use Arc instead of Rc\nuse std::sync::Arc;\n\nasync fn works() {\n    tokio::spawn(async {\n        let data = Arc::new(42);  // Arc IS Send\n        tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;\n        println!(\"{}\", data);\n    });\n}"
+    }
+  ],
+  "keyPoints": [
+    "Pin prevents moving a value in memory -- needed because async futures can be self-referential",
+    "Most of the time Box::pin() or tokio::spawn handle pinning for you",
+    "Never hold a mutex lock across an .await point",
+    "Never call blocking functions (std::thread::sleep, heavy CPU work) in async context",
+    "Use tokio::task::spawn_blocking() for CPU-bound or blocking operations",
+    "Spawned tasks must be Send -- use Arc instead of Rc, and avoid non-Send types across awaits",
+    "Futures are lazy: always .await or spawn them, or they do nothing"
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "id": "lifetimes",
+  "title": "Lifetimes",
+  "sections": [
+    {
+      "heading": "What Are Lifetimes?",
+      "entries": [
+        {"label": "Lifetime concept", "code": "let r;                // r has no value yet\n{\n    let x = 5;       // x is valid here\n    r = &x;          // ERROR: x doesn't live long enough\n}                     // x is dropped here\n// r would be a dangling reference", "note": "Lifetimes ensure references are always valid; compiler tracks how long data lives"},
+        {"label": "Valid reference", "code": "let x = 5;     // x lives long enough\nlet r = &x;    // r borrows x\nprintln!(\"{r}\"); // OK: x is still alive", "note": "Reference is valid as long as the borrowed data outlives the reference"},
+        {"label": "Why annotations needed", "code": "// Compiler can't determine which input the return references:\nfn longest(x: &str, y: &str) -> &str {\n    // ERROR: missing lifetime specifier\n    if x.len() > y.len() { x } else { y }\n}\n// Need to tell compiler the relationship:\nfn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}", "note": "Annotations describe relationships; they don't change how long values live"}
+      ]
+    },
+    {
+      "heading": "Function Lifetime Annotations",
+      "entries": [
+        {"label": "Basic annotation", "code": "fn first_word<'a>(s: &'a str) -> &'a str {\n    s.split_whitespace().next().unwrap_or(\"\")\n}", "note": "Return value lives at least as long as input; 'a is a generic lifetime parameter"},
+        {"label": "Multiple inputs, same lifetime", "code": "fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}", "note": "Both inputs and output share lifetime 'a; result valid while both inputs valid"},
+        {"label": "Multiple lifetimes", "code": "fn first_of_second<'a, 'b>(x: &'a str, y: &'b str) -> &'a str {\n    x\n}", "note": "Different lifetime parameters when inputs have independent lifetimes"},
+        {"label": "One input determines output", "code": "fn with_prefix<'a>(s: &'a str, prefix: &str) -> &'a str {\n    if s.starts_with(prefix) { s } else { s }\n}\n// prefix doesn't need 'a because return doesn't reference it", "note": "Only annotate the lifetime relationships that actually exist"},
+        {"label": "Returning owned data (no lifetime needed)", "code": "fn create_greeting(name: &str) -> String {\n    format!(\"Hello, {name}!\")\n}", "note": "Returning owned data needs no lifetime; the caller owns the result"},
+        {"label": "Cannot return local reference", "code": "fn bad_function() -> &str {\n    let s = String::from(\"hello\");\n    &s // ERROR: s is dropped at end of function\n    // Return String instead to transfer ownership\n}", "note": "Cannot return a reference to a value created inside the function"}
+      ]
+    },
+    {
+      "heading": "Struct Lifetime Annotations",
+      "entries": [
+        {"label": "Struct holding reference", "code": "struct Excerpt<'a> {\n    text: &'a str,\n}\n\nlet novel = String::from(\"Call me Ishmael. Some years ago...\");\nlet first_sentence = novel.split('.').next().unwrap();\nlet excerpt = Excerpt { text: first_sentence };", "note": "Struct cannot outlive the reference it holds; 'a ties struct lifetime to data"},
+        {"label": "Multiple references", "code": "struct Pair<'a, 'b> {\n    first: &'a str,\n    second: &'b str,\n}", "note": "Different lifetime parameters when references may have different lifetimes"},
+        {"label": "Methods on structs with lifetimes", "code": "impl<'a> Excerpt<'a> {\n    fn text(&self) -> &str {\n        self.text\n    }\n    fn with_announcement(&self, announcement: &str) -> &str {\n        println!(\"Attention: {announcement}\");\n        self.text\n    }\n}", "note": "impl block must declare lifetime parameters; elision often applies to methods"},
+        {"label": "Struct with owned and borrowed", "code": "struct Config<'a> {\n    name: String,       // owned, no lifetime needed\n    description: &'a str, // borrowed, needs lifetime\n}", "note": "Mix owned and borrowed fields; only borrowed fields need lifetime parameters"},
+        {"label": "Enum with lifetime", "code": "enum Token<'a> {\n    Word(&'a str),\n    Number(i64),\n    Symbol(char),\n}\nlet input = String::from(\"hello 42 +\");\nlet token = Token::Word(&input[0..5]);", "note": "Enum variants with references also need lifetime annotations"}
+      ]
+    },
+    {
+      "heading": "Lifetime Elision Rules",
+      "entries": [
+        {"label": "Rule 1: Each input gets its own", "code": "fn foo(x: &str, y: &str) -> ...\n// Compiler assigns:\nfn foo<'a, 'b>(x: &'a str, y: &'b str) -> ...", "note": "Each reference parameter gets its own lifetime parameter"},
+        {"label": "Rule 2: Single input = output", "code": "fn first_word(s: &str) -> &str { ... }\n// Compiler infers:\nfn first_word<'a>(s: &'a str) -> &'a str { ... }", "note": "If there's exactly one input lifetime, it's assigned to all outputs"},
+        {"label": "Rule 3: &self determines output", "code": "impl MyStruct {\n    fn method(&self, other: &str) -> &str { ... }\n    // Compiler infers:\n    // fn method<'a, 'b>(&'a self, other: &'b str) -> &'a str\n}", "note": "In methods, the lifetime of &self is assigned to all output lifetimes"},
+        {"label": "When elision fails", "code": "// Two inputs, no &self: compiler can't determine output lifetime\nfn longest(x: &str, y: &str) -> &str { ... } // ERROR\n// Must annotate explicitly:\nfn longest<'a>(x: &'a str, y: &'a str) -> &'a str { ... }", "note": "If rules don't resolve all output lifetimes, you must annotate manually"},
+        {"label": "Common elided patterns", "code": "fn trim(s: &str) -> &str { ... }           // Rule 2\nfn as_bytes(s: &str) -> &[u8] { ... }      // Rule 2\nimpl Foo {\n    fn name(&self) -> &str { ... }          // Rule 3\n    fn bar(&self, x: &str) -> &str { ... }  // Rule 3\n}", "note": "Most simple functions and methods don't need explicit lifetimes"}
+      ]
+    },
+    {
+      "heading": "'static Lifetime",
+      "entries": [
+        {"label": "String literals", "code": "let s: &'static str = \"I live forever\";\n// String literals are stored in the binary\n// and available for the entire program", "note": "All string literals have 'static lifetime; they're embedded in the binary"},
+        {"label": "Static variables", "code": "static GREETING: &str = \"Hello\";\nstatic COUNT: std::sync::atomic::AtomicU32 =\n    std::sync::atomic::AtomicU32::new(0);", "note": "static variables live for the entire program; have 'static lifetime"},
+        {"label": "'static in trait bounds", "code": "fn spawn_task(f: impl FnOnce() + Send + 'static) {\n    std::thread::spawn(f);\n}", "note": "T: 'static means T contains no non-static references; can live forever if needed"},
+        {"label": "Owned types are 'static", "code": "// String, Vec<T>, Box<T>, i32, etc. satisfy 'static\n// because they don't borrow from anything\nfn needs_static<T: 'static>(val: T) { ... }\nneeds_static(String::from(\"hello\")); // OK\nneeds_static(42i32);                  // OK", "note": "'static doesn't mean it lives forever; it means it CAN live forever (no borrows)"},
+        {"label": "Box::leak for 'static", "code": "let s: &'static str = Box::leak(String::from(\"leaked\").into_boxed_str());\n// s is now 'static; memory is intentionally leaked", "note": "Convert owned data to 'static reference by leaking; use sparingly"},
+        {"label": "'static misconception", "code": "// WRONG: 'static means the value lives forever\n// RIGHT: 'static means the type has no borrowed references\n//        (or all references it has are also 'static)\n\n// A String is 'static (owns its data)\n// A &'static str is a reference that happens to live forever\n// An &str with any lifetime is NOT 'static", "note": "T: 'static is about what T borrows, not about how long a specific instance lives"}
+      ]
+    },
+    {
+      "heading": "Lifetime Subtyping",
+      "entries": [
+        {"label": "Longer outlives shorter", "code": "fn longest<'a, 'b: 'a>(x: &'a str, y: &'b str) -> &'a str {\n    if x.len() > y.len() { x } else { y }\n}", "note": "'b: 'a means 'b outlives 'a; y lives at least as long as x"},
+        {"label": "Struct with subtyping", "code": "struct Parser<'input, 'alloc: 'input> {\n    input: &'input str,\n    arena: &'alloc [u8],\n}", "note": "'alloc: 'input ensures the arena outlives the input"},
+        {"label": "Covariance", "code": "fn use_short<'short>(s: &'short str) { println!(\"{s}\"); }\n\nlet long: &'static str = \"hello\";\nuse_short(long); // OK: 'static is a subtype of any 'short", "note": "A longer lifetime can always be used where a shorter one is expected"}
+      ]
+    },
+    {
+      "heading": "Higher-Ranked Trait Bounds (HRTB)",
+      "entries": [
+        {"label": "for<'a> syntax", "code": "fn apply_to_ref<F>(f: F)\nwhere\n    F: for<'a> Fn(&'a str) -> &'a str,\n{\n    let owned = String::from(\"hello\");\n    let result = f(&owned);\n    println!(\"{result}\");\n}", "note": "for<'a> means the function works for ANY lifetime; not tied to a specific one"},
+        {"label": "Common in closures", "code": "// This doesn't compile:\n// fn apply<'a, F: Fn(&'a str)>(f: F, s: &'a str) { ... }\n// Because 'a is fixed for the entire function\n\n// HRTB version works:\nfn apply<F: for<'a> Fn(&'a str)>(f: F) {\n    let s = String::from(\"temp\");\n    f(&s); // works because f handles any lifetime\n}", "note": "HRTB needed when the closure must work with references of varying lifetimes"},
+        {"label": "Implicit HRTB", "code": "// These are equivalent:\nfn takes_closure(f: impl Fn(&str) -> &str) { ... }\nfn takes_closure(f: impl for<'a> Fn(&'a str) -> &'a str) { ... }", "note": "Fn(&str) -> &str implicitly uses for<'a>; you rarely need to write it explicitly"},
+        {"label": "With trait objects", "code": "let f: Box<dyn for<'a> Fn(&'a str) -> &'a str> = Box::new(|s| s);\nlet result = f(\"hello\");", "note": "HRTB works with trait objects for maximum flexibility"}
+      ]
+    },
+    {
+      "heading": "Common Lifetime Patterns",
+      "entries": [
+        {"label": "Split borrow", "code": "struct Data {\n    header: String,\n    body: String,\n}\nimpl Data {\n    fn header(&self) -> &str { &self.header }\n    fn body(&self) -> &str { &self.body }\n    // Can call both: different parts of the struct\n}\nlet d = Data { header: \"H\".into(), body: \"B\".into() };\nlet h = d.header();\nlet b = d.body();\nprintln!(\"{h} {b}\");", "note": "Borrowing different fields is fine; Rust tracks borrows per-field"},
+        {"label": "Lifetime bound on generic", "code": "fn print_ref<'a, T: 'a + std::fmt::Display>(val: &'a T) {\n    println!(\"{val}\");\n}", "note": "T: 'a means T does not contain references shorter than 'a"},
+        {"label": "Anonymous lifetime '_", "code": "impl Excerpt<'_> {\n    fn text(&self) -> &str {\n        self.text\n    }\n}\n\nfn process(data: &[Excerpt<'_>]) { ... }", "note": "'_ tells compiler to infer the lifetime; reduces annotation noise"},
+        {"label": "Lifetime in type aliases", "code": "type ParseResult<'a> = Result<&'a str, ParseError>;\n\nfn parse<'a>(input: &'a str) -> ParseResult<'a> {\n    Ok(&input[..5])\n}", "note": "Type aliases can include lifetime parameters"}
+      ]
+    }
+  ]
+}

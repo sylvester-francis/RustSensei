@@ -1,0 +1,20 @@
+{
+  "code": "E0277",
+  "title": "Trait bound not satisfied",
+  "severity": "common",
+  "explanation": "This error occurs when a value does not implement a required trait. It often happens when calling generic functions, using trait objects, or when the compiler needs a specific capability (like Display for printing or Clone for cloning).",
+  "example_bad": "struct Point {\n    x: f64,\n    y: f64,\n}\n\nfn main() {\n    let p = Point { x: 1.0, y: 2.0 };\n    println!(\"{}\", p); // Error: `Point` doesn't implement `Display`\n}",
+  "error_message": "error[E0277]: `Point` doesn't implement `std::fmt::Display`",
+  "fixes": [
+    {
+      "description": "Derive the required trait",
+      "code": "#[derive(Debug)]\nstruct Point {\n    x: f64,\n    y: f64,\n}\n\nfn main() {\n    let p = Point { x: 1.0, y: 2.0 };\n    println!(\"{:?}\", p); // Use Debug formatting\n}"
+    },
+    {
+      "description": "Implement the trait manually",
+      "code": "use std::fmt;\n\nimpl fmt::Display for Point {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        write!(f, \"({}, {})\", self.x, self.y)\n    }\n}"
+    }
+  ],
+  "related": ["E0308", "E0599"],
+  "tip": "Check which trait is missing. Many common traits (Debug, Clone, Copy, PartialEq) can be automatically derived with #[derive(...)]."
+}

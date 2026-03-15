@@ -1,0 +1,20 @@
+{
+  "code": "E0369",
+  "title": "Binary operation not implemented",
+  "severity": "frequent",
+  "explanation": "This error occurs when you try to use a binary operator (like +, -, ==, <) on types that do not support that operation. In Rust, operators are backed by traits, and custom types need to implement these traits explicitly.",
+  "example_bad": "struct Money {\n    amount: f64,\n}\n\nfn main() {\n    let a = Money { amount: 10.0 };\n    let b = Money { amount: 20.0 };\n    let total = a + b; // Error: cannot add `Money` to `Money`\n}",
+  "error_message": "error[E0369]: binary operation `+` cannot be applied to type `Money`",
+  "fixes": [
+    {
+      "description": "Implement the operator trait",
+      "code": "use std::ops::Add;\n\nimpl Add for Money {\n    type Output = Money;\n    fn add(self, other: Money) -> Money {\n        Money { amount: self.amount + other.amount }\n    }\n}"
+    },
+    {
+      "description": "Derive PartialEq for comparison operators",
+      "code": "#[derive(PartialEq, PartialOrd)]\nstruct Money {\n    amount: f64,\n}"
+    }
+  ],
+  "related": ["E0277", "E0308"],
+  "tip": "Common operator traits: Add (+), Sub (-), Mul (*), Div (/), PartialEq (==, !=), PartialOrd (<, >, <=, >=). Many can be derived."
+}

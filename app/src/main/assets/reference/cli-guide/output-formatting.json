@@ -1,0 +1,32 @@
+{
+  "id": "output-formatting",
+  "title": "Output Formatting and Colors",
+  "order": 5,
+  "content": "Well-formatted output makes CLI tools pleasant to use. Support multiple output formats (human-readable tables, JSON for machine consumption) and use colors judiciously.\n\nThe convention: if stdout is a terminal, use colors and pretty formatting. If piped, output plain text. Rust crates like colored, console, and tabled help with this.\n\nAlways output data to stdout and status/errors to stderr. This lets users pipe data while still seeing progress.",
+  "codeExamples": [
+    {
+      "description": "Formatted table output",
+      "code": "struct Row {\n    name: String,\n    size: u64,\n    modified: String,\n}\n\nfn print_table(rows: &[Row]) {\n    let name_width = rows.iter().map(|r| r.name.len()).max().unwrap_or(4).max(4);\n\n    println!(\"{:<width$}  {:>10}  {}\",\n        \"Name\", \"Size\", \"Modified\", width = name_width);\n    println!(\"{}\", \"-\".repeat(name_width + 24));\n\n    for row in rows {\n        println!(\"{:<width$}  {:>10}  {}\",\n            row.name, format_size(row.size), row.modified,\n            width = name_width);\n    }\n}\n\nfn format_size(bytes: u64) -> String {\n    if bytes < 1024 {\n        format!(\"{} B\", bytes)\n    } else if bytes < 1024 * 1024 {\n        format!(\"{:.1} KB\", bytes as f64 / 1024.0)\n    } else {\n        format!(\"{:.1} MB\", bytes as f64 / (1024.0 * 1024.0))\n    }\n}"
+    },
+    {
+      "description": "JSON output for machine consumption",
+      "code": "use serde::Serialize;\n\n#[derive(Serialize)]\nstruct Output {\n    files: Vec<FileInfo>,\n    total_size: u64,\n}\n\n#[derive(Serialize)]\nstruct FileInfo {\n    path: String,\n    size: u64,\n}\n\nfn output_json(data: &Output) -> anyhow::Result<()> {\n    let json = serde_json::to_string_pretty(data)?;\n    println!(\"{}\", json);\n    Ok(())\n}"
+    },
+    {
+      "description": "Progress indicators to stderr",
+      "code": "use std::io::{self, Write};\n\nfn process_with_progress(items: &[String]) {\n    let total = items.len();\n    for (i, item) in items.iter().enumerate() {\n        // Progress to stderr (visible even when stdout is piped)\n        eprint!(\"\\rProcessing {}/{}...\", i + 1, total);\n        io::stderr().flush().unwrap();\n\n        // Actual output to stdout\n        println!(\"{}\", item.to_uppercase());\n    }\n    eprintln!(\"\\rDone! Processed {} items.\", total);\n}"
+    },
+    {
+      "description": "Conditional formatting based on output target",
+      "code": "use std::io::IsTerminal;\n\nfn format_entry(name: &str, status: &str) -> String {\n    if std::io::stdout().is_terminal() {\n        // Terminal: use formatting\n        format!(\"  * {} -- {}\", name, status)\n    } else {\n        // Pipe: plain tab-separated\n        format!(\"{}\\t{}\", name, status)\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "Data goes to stdout, status/errors to stderr",
+    "Support both human-readable and machine-readable (JSON) output",
+    "Check is_terminal() to decide whether to use colors/formatting",
+    "Use format specifiers for aligned output: {:<width$}, {:>width$}",
+    "Print progress to stderr so it does not corrupt piped output",
+    "eprint!/eprintln! write to stderr"
+  ]
+}

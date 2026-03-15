@@ -1,0 +1,28 @@
+{
+  "id": "ffi",
+  "title": "FFI: Calling C from Rust",
+  "order": 4,
+  "content": "Foreign Function Interface (FFI) lets Rust call C libraries and lets C call Rust functions. This is one of the most common uses of unsafe: the compiler cannot verify the safety of foreign code.\n\nUse extern \"C\" to declare C functions, #[repr(C)] for C-compatible struct layouts, and handle C strings with CStr/CString. The bindgen tool can automatically generate Rust bindings from C headers.",
+  "codeExamples": [
+    {
+      "description": "Calling C standard library functions",
+      "code": "use std::ffi::{CStr, CString};\nuse std::os::raw::{c_char, c_int, c_double};\n\n// Declare C functions\nextern \"C\" {\n    fn strlen(s: *const c_char) -> usize;\n    fn abs(n: c_int) -> c_int;\n    fn sqrt(n: c_double) -> c_double;\n}\n\nfn safe_strlen(s: &str) -> usize {\n    let c_str = CString::new(s).expect(\"String contains null byte\");\n    unsafe { strlen(c_str.as_ptr()) }\n}\n\nfn main() {\n    // strlen\n    let len = safe_strlen(\"Hello, FFI!\");\n    println!(\"strlen: {}\", len);\n\n    // abs\n    let result = unsafe { abs(-42) };\n    println!(\"abs(-42) = {}\", result);\n\n    // sqrt\n    let root = unsafe { sqrt(144.0) };\n    println!(\"sqrt(144) = {}\", root);\n}"
+    },
+    {
+      "description": "C-compatible structs with #[repr(C)]",
+      "code": "use std::os::raw::c_int;\n\n// Ensure same memory layout as C\n#[repr(C)]\nstruct Point {\n    x: c_int,\n    y: c_int,\n}\n\n#[repr(C)]\nstruct Rect {\n    origin: Point,\n    size: Point,\n}\n\n// Expose Rust function to C\n#[no_mangle]\npub extern \"C\" fn rect_area(rect: &Rect) -> c_int {\n    rect.size.x * rect.size.y\n}\n\nfn main() {\n    let rect = Rect {\n        origin: Point { x: 0, y: 0 },\n        size: Point { x: 10, y: 20 },\n    };\n    println!(\"Area: {}\", rect_area(&rect));\n}"
+    },
+    {
+      "description": "Working with C strings safely",
+      "code": "use std::ffi::{CStr, CString};\nuse std::os::raw::c_char;\n\n// Simulating receiving a C string from foreign code\nfn receive_c_string(ptr: *const c_char) -> Option<String> {\n    if ptr.is_null() {\n        return None;\n    }\n    unsafe {\n        let c_str = CStr::from_ptr(ptr);\n        Some(c_str.to_string_lossy().into_owned())\n    }\n}\n\n// Passing a Rust string to C\nfn send_to_c(s: &str) -> *const c_char {\n    let c_string = CString::new(s).expect(\"null byte in string\");\n    // IMPORTANT: caller must not use this pointer after c_string is dropped!\n    // In real code, you'd need to manage the CString's lifetime carefully.\n    c_string.into_raw()  // Transfers ownership to C\n}\n\n// C must call this to free the string when done\n#[no_mangle]\npub unsafe extern \"C\" fn free_rust_string(ptr: *mut c_char) {\n    if !ptr.is_null() {\n        let _ = CString::from_raw(ptr);\n        // CString is dropped here, freeing the memory\n    }\n}\n\nfn main() {\n    let greeting = \"Hello from Rust!\";\n    let c_ptr = send_to_c(greeting);\n\n    // Simulate receiving it back\n    let received = receive_c_string(c_ptr);\n    println!(\"Received: {:?}\", received);\n\n    // Free the memory\n    unsafe { free_rust_string(c_ptr as *mut c_char); }\n}"
+    }
+  ],
+  "keyPoints": [
+    "extern \"C\" declares or defines functions using the C calling convention",
+    "#[repr(C)] ensures struct layout matches C's layout rules",
+    "CString owns a C-compatible string; CStr borrows one",
+    "#[no_mangle] prevents name mangling so C can find the function",
+    "Always check for null pointers when receiving from C",
+    "Use bindgen to auto-generate bindings from C header files"
+  ]
+}

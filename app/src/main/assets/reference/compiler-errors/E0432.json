@@ -1,0 +1,24 @@
+{
+  "code": "E0432",
+  "title": "Unresolved import",
+  "severity": "frequent",
+  "explanation": "This error occurs when a use statement refers to a module, type, or item that does not exist at the specified path. Common causes include typos, missing crate dependencies, or incorrect module structure.",
+  "example_bad": "use std::collection::HashMap; // Error: typo in 'collections'\nuse serde::Serialize; // Error if serde not in Cargo.toml\nuse crate::models::User; // Error if module doesn't exist",
+  "error_message": "error[E0432]: unresolved import `std::collection`",
+  "fixes": [
+    {
+      "description": "Fix the import path",
+      "code": "use std::collections::HashMap; // Fix: 'collections' not 'collection'"
+    },
+    {
+      "description": "Add the dependency to Cargo.toml",
+      "code": "# Cargo.toml\n[dependencies]\nserde = { version = \"1.0\", features = [\"derive\"] }\n\n# Then the import works:\nuse serde::Serialize;"
+    },
+    {
+      "description": "Ensure the module is declared",
+      "code": "// In lib.rs or main.rs:\nmod models;\n\n// Then you can use:\nuse crate::models::User;"
+    }
+  ],
+  "related": ["E0433", "E0425"],
+  "tip": "Check spelling carefully. Use `cargo doc --open` to browse available items in your dependencies."
+}

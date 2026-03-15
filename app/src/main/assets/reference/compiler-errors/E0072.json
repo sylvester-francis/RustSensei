@@ -1,0 +1,24 @@
+{
+  "code": "E0072",
+  "title": "Recursive type has infinite size",
+  "severity": "frequent",
+  "explanation": "This error occurs when a type directly or indirectly contains itself, making its size infinite and impossible to allocate on the stack. This commonly happens with tree or list data structures.",
+  "example_bad": "enum List {\n    Cons(i32, List), // Error: recursive without indirection\n    Nil,\n}\n\nstruct Tree {\n    value: i32,\n    left: Tree, // Error: infinite size\n    right: Tree,\n}",
+  "error_message": "error[E0072]: recursive type `List` has infinite size",
+  "fixes": [
+    {
+      "description": "Use Box to add indirection",
+      "code": "enum List {\n    Cons(i32, Box<List>), // Box has a known size (pointer)\n    Nil,\n}"
+    },
+    {
+      "description": "Use Box for recursive struct fields",
+      "code": "struct Tree {\n    value: i32,\n    left: Option<Box<Tree>>,\n    right: Option<Box<Tree>>,\n}"
+    },
+    {
+      "description": "Use Rc for shared ownership",
+      "code": "use std::rc::Rc;\n\nenum List {\n    Cons(i32, Rc<List>),\n    Nil,\n}"
+    }
+  ],
+  "related": ["E0277", "E0308"],
+  "tip": "Box<T> is a heap-allocated pointer with a known size. Wrap the recursive field in Box, Rc, or Arc to break the infinite size cycle."
+}

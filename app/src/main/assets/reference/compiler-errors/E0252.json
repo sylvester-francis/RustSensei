@@ -1,0 +1,20 @@
+{
+  "code": "E0252",
+  "title": "Name already defined or imported",
+  "severity": "occasional",
+  "explanation": "This error occurs when you import two items with the same name into the same scope. Rust does not allow name collisions in imports.",
+  "example_bad": "use std::fmt::Result;\nuse std::io::Result; // Error: `Result` already imported",
+  "error_message": "error[E0252]: the name `Result` is defined multiple times",
+  "fixes": [
+    {
+      "description": "Use aliases with the as keyword",
+      "code": "use std::fmt::Result as FmtResult;\nuse std::io::Result as IoResult;"
+    },
+    {
+      "description": "Import the parent module instead",
+      "code": "use std::fmt;\nuse std::io;\n\nfn display() -> fmt::Result { Ok(()) }\nfn read() -> io::Result<()> { Ok(()) }"
+    }
+  ],
+  "related": ["E0255", "E0432"],
+  "tip": "The `as` keyword in use statements lets you rename imports to avoid conflicts. This is a common pattern with Result types."
+}

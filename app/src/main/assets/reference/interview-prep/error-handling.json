@@ -1,0 +1,38 @@
+{
+  "id": "error-handling",
+  "title": "Error Handling",
+  "order": 3,
+  "description": "Questions about Rust's approach to handling errors and the Result/Option types.",
+  "questions": [
+    {
+      "question": "How does Rust handle errors? Compare with exceptions in other languages.",
+      "answer": "Rust uses Result<T, E> for recoverable errors and panic! for unrecoverable errors. There are no exceptions.\n\nResult<T, E> is an enum: Ok(T) for success, Err(E) for failure. Errors are values, not control flow exceptions. The caller MUST handle the Result (the compiler warns on unused Results).\n\nCompared to exceptions:\n- Errors are explicit in the type signature (Result<T, E>) -- you always know what can fail\n- No hidden control flow (exceptions can jump up the call stack unexpectedly)\n- The ? operator provides ergonomic propagation without try/catch boilerplate\n- No runtime cost for the 'happy path' (unlike exception unwinding tables)\n- Pattern matching ensures all error cases are handled\n\npanic! is for bugs (logic errors, violated invariants), not expected errors. It unwinds the stack and terminates the thread (or aborts the process).",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "Explain the ? operator. What does it do under the hood?",
+      "answer": "The ? operator is syntactic sugar for early return on Err. When applied to a Result:\n\nlet value = operation()?;\n\nIs equivalent to:\nlet value = match operation() {\n    Ok(v) => v,\n    Err(e) => return Err(From::from(e)),\n};\n\nKey points:\n1. If Ok, it unwraps the value\n2. If Err, it converts the error using From::from() and returns early\n3. The From conversion allows different error types to be used seamlessly\n4. It also works with Option: None becomes an early return of None\n\nThe ? operator can only be used in functions that return Result or Option (or types implementing the Try trait).",
+      "difficulty": "beginner"
+    },
+    {
+      "question": "When should you use panic! vs. Result? Give examples of each.",
+      "answer": "Use panic! for:\n- Bugs in your code: assert!, unreachable!()\n- Violated invariants that indicate logic errors\n- Prototype/example code where error handling is not the focus\n- When continuing would cause worse problems (corrupted state)\n\nExamples: index out of bounds, unwrap() on a value you 'know' is Some/Ok, failed assert.\n\nUse Result for:\n- Expected failure conditions (file not found, network timeout, parse error)\n- User input validation\n- Any error the caller might want to handle or recover from\n- Library code (let the caller decide how to handle the error)\n\nExamples: file I/O, network requests, parsing, database queries.\n\nRule of thumb: if the error could happen in normal operation, use Result. If it indicates a bug, panic.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is the difference between anyhow and thiserror? When would you use each?",
+      "answer": "thiserror is for libraries. It helps you define custom error types with derive macros:\n\n#[derive(thiserror::Error, Debug)]\nenum MyError {\n    #[error(\"IO error: {0}\")]\n    Io(#[from] std::io::Error),\n    #[error(\"Not found: {0}\")]\n    NotFound(String),\n}\n\nCallers can match on specific error variants.\n\nanyhow is for applications. It provides a single anyhow::Error type that wraps any error:\n\nfn main() -> anyhow::Result<()> {\n    let data = std::fs::read_to_string(\"config.toml\")\n        .context(\"Failed to read config\")?;\n    Ok(())\n}\n\nYou cannot match on specific errors easily (though you can downcast).\n\nUse thiserror when consumers need to programmatically handle specific errors. Use anyhow when you just want to propagate errors with good context messages (CLI tools, services).",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "How do you create a custom error type in Rust?",
+      "answer": "A custom error type typically:\n1. Is an enum with a variant per error kind\n2. Implements std::fmt::Display for human-readable messages\n3. Implements std::error::Error for integration with the error ecosystem\n4. Implements From<T> for each wrapped error type (enables ? operator)\n\nManual implementation:\nenum AppError {\n    Io(std::io::Error),\n    Parse(std::num::ParseIntError),\n    Custom(String),\n}\nimpl std::fmt::Display for AppError { ... }\nimpl std::error::Error for AppError { ... }\nimpl From<std::io::Error> for AppError { ... }\n\nWith thiserror (preferred):\n#[derive(thiserror::Error, Debug)]\nenum AppError {\n    #[error(\"IO error\")] Io(#[from] std::io::Error),\n    #[error(\"Parse error\")] Parse(#[from] std::num::ParseIntError),\n    #[error(\"{0}\")] Custom(String),\n}\n\nthiserror generates all the Display, Error, and From implementations from the attributes.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What are the differences between unwrap(), expect(), and the ? operator?",
+      "answer": "unwrap(): Extracts the Ok/Some value or panics with a generic message. Use only when you are certain the value is Ok/Some, or in quick prototypes.\n\nlet value = result.unwrap();  // Panics: 'called unwrap on Err'\n\nexpect(msg): Like unwrap but with a custom panic message. Better for debugging because you know which operation failed.\n\nlet value = result.expect(\"database connection failed\");\n\n? operator: Propagates the error to the caller instead of panicking. The caller can then handle it. This is the idiomatic choice for production code.\n\nlet value = result?;  // Returns Err to caller if error\n\nHierarchy:\n- Production code: use ?\n- Known-safe unwrapping: use expect() with an explanation\n- Prototyping only: use unwrap()\n\nAdditional methods: unwrap_or(default), unwrap_or_else(|| compute()), unwrap_or_default().",
+      "difficulty": "beginner"
+    }
+  ]
+}

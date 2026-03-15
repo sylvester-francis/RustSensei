@@ -1,0 +1,24 @@
+{
+  "code": "E0133",
+  "title": "Use of unsafe operation in safe context",
+  "severity": "frequent",
+  "explanation": "This error occurs when you perform an unsafe operation (like dereferencing a raw pointer, calling an unsafe function, or accessing a mutable static) without wrapping it in an unsafe block. Rust requires you to explicitly opt into unsafe operations.",
+  "example_bad": "fn main() {\n    let ptr: *const i32 = &42;\n    let val = *ptr; // Error: dereference of raw pointer requires unsafe\n    \n    libc::exit(0); // Error: call to unsafe function requires unsafe\n}",
+  "error_message": "error[E0133]: dereference of raw pointer is unsafe and requires unsafe function or block",
+  "fixes": [
+    {
+      "description": "Wrap the operation in an unsafe block",
+      "code": "let ptr: *const i32 = &42;\nlet val = unsafe { *ptr }; // Explicitly opt into unsafe"
+    },
+    {
+      "description": "Wrap unsafe function calls",
+      "code": "unsafe {\n    libc::exit(0);\n}"
+    },
+    {
+      "description": "Create a safe wrapper function",
+      "code": "fn safe_deref(ptr: *const i32) -> Option<i32> {\n    if ptr.is_null() {\n        None\n    } else {\n        Some(unsafe { *ptr })\n    }\n}"
+    }
+  ],
+  "related": ["E0382"],
+  "tip": "Keep unsafe blocks as small as possible. Wrap them in safe functions that validate invariants. Document why the unsafe operation is actually safe with a // SAFETY: comment."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "runtimes",
+  "title": "Async Runtimes: Tokio and Others",
+  "order": 2,
+  "content": "Rust does not include a built-in async runtime. The standard library provides the Future trait and async/await syntax, but you need an external runtime to actually execute futures.\n\nA runtime provides: an executor (polls futures to completion), a reactor (monitors I/O events), and task spawning (run multiple futures concurrently).\n\nTokio is the dominant runtime, used by most production Rust services. It provides a multi-threaded work-stealing executor, timers, I/O drivers, synchronization primitives, and channels.\n\nThe #[tokio::main] attribute macro transforms your main function into an async entry point, setting up the runtime automatically.",
+  "codeExamples": [
+    {
+      "description": "Using tokio as the runtime",
+      "code": "// Cargo.toml: tokio = { version = \"1\", features = [\"full\"] }\n\n#[tokio::main]\nasync fn main() {\n    println!(\"Running on tokio!\");\n    let result = do_work().await;\n    println!(\"Result: {}\", result);\n}\n\nasync fn do_work() -> u32 {\n    42\n}"
+    },
+    {
+      "description": "Manual runtime construction",
+      "code": "use tokio::runtime::Runtime;\n\nfn main() {\n    let rt = Runtime::new().unwrap();\n\n    rt.block_on(async {\n        println!(\"Running inside manually created runtime\");\n        let value = async_computation().await;\n        println!(\"Got: {}\", value);\n    });\n}\n\nasync fn async_computation() -> String {\n    \"computed\".to_string()\n}"
+    },
+    {
+      "description": "Single-threaded runtime (useful for testing)",
+      "code": "#[tokio::main(flavor = \"current_thread\")]\nasync fn main() {\n    // Runs everything on a single thread\n    // Good for: testing, embedded, WASM\n    println!(\"Single-threaded runtime\");\n}"
+    },
+    {
+      "description": "Choosing runtime features",
+      "code": "// Minimal: only what you need\n// tokio = { version = \"1\", features = [\"rt\", \"macros\"] }\n\n// Common: add timers and I/O\n// tokio = { version = \"1\", features = [\"rt-multi-thread\", \"macros\", \"time\", \"io-util\"] }\n\n// Everything:\n// tokio = { version = \"1\", features = [\"full\"] }"
+    }
+  ],
+  "keyPoints": [
+    "Rust has no built-in async runtime -- you choose one",
+    "Tokio is the most popular runtime with the largest ecosystem",
+    "#[tokio::main] sets up the runtime and makes main() async",
+    "Runtimes provide executors, I/O drivers, timers, and task spawning",
+    "Use current_thread flavor for simpler single-threaded scenarios",
+    "Libraries should be runtime-agnostic when possible"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "id": "strategy",
+  "title": "Strategy Pattern with Traits",
+  "order": 5,
+  "description": "Define a family of interchangeable algorithms behind a trait. Callers program against the trait, and concrete implementations can be swapped at compile time (generics) or runtime (trait objects). This is Rust's version of the classic Strategy/Dependency Injection pattern.",
+  "whenToUse": [
+    "When you need pluggable algorithms (sorting, compression, hashing)",
+    "Dependency injection for testing (mock implementations)",
+    "Supporting multiple backends (storage, transport, rendering)",
+    "When you want to decouple behavior from the code that uses it"
+  ],
+  "codeExample": "trait Compressor {\n    fn compress(&self, data: &[u8]) -> Vec<u8>;\n    fn name(&self) -> &str;\n}\n\nstruct NoCompression;\nimpl Compressor for NoCompression {\n    fn compress(&self, data: &[u8]) -> Vec<u8> {\n        data.to_vec()\n    }\n    fn name(&self) -> &str { \"none\" }\n}\n\nstruct RunLengthEncoding;\nimpl Compressor for RunLengthEncoding {\n    fn compress(&self, data: &[u8]) -> Vec<u8> {\n        let mut result = Vec::new();\n        let mut i = 0;\n        while i < data.len() {\n            let byte = data[i];\n            let mut count: u8 = 1;\n            while i + (count as usize) < data.len()\n                && data[i + count as usize] == byte\n                && count < 255\n            {\n                count += 1;\n            }\n            result.push(count);\n            result.push(byte);\n            i += count as usize;\n        }\n        result\n    }\n    fn name(&self) -> &str { \"RLE\" }\n}\n\n// Static dispatch (generics) -- zero cost, monomorphized\nfn save_with_compression<C: Compressor>(data: &[u8], compressor: &C) {\n    let compressed = compressor.compress(data);\n    println!(\"[{}] {} bytes -> {} bytes\",\n        compressor.name(), data.len(), compressed.len());\n}\n\n// Dynamic dispatch (trait objects) -- flexible, runtime selection\nfn get_compressor(name: &str) -> Box<dyn Compressor> {\n    match name {\n        \"rle\" => Box::new(RunLengthEncoding),\n        _ => Box::new(NoCompression),\n    }\n}\n\nfn main() {\n    let data = b\"AAABBBCCCCDDDD\";\n\n    // Static dispatch\n    save_with_compression(data, &RunLengthEncoding);\n    save_with_compression(data, &NoCompression);\n\n    // Dynamic dispatch\n    let compressor = get_compressor(\"rle\");\n    save_with_compression(data, compressor.as_ref());\n}",
+  "realWorldUse": "std::io::Read/Write traits (any I/O source), serde's Serializer/Deserializer, tower::Service (HTTP middleware), Iterator trait itself. Virtually every trait in Rust is a strategy pattern."
+}

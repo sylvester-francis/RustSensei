@@ -1,0 +1,14 @@
+{
+  "id": "interior-mutability",
+  "title": "Interior Mutability Pattern",
+  "order": 6,
+  "description": "Mutate data even when you only have a shared (&T) reference. Normally, shared references in Rust are immutable. Interior mutability types like Cell, RefCell, Mutex, and RwLock move borrow checking from compile time to runtime, enabling mutation through shared references. This is essential for shared state, caches, and reference-counted data.",
+  "whenToUse": [
+    "Caching computed values (lazy initialization)",
+    "Shared mutable state behind Rc or Arc",
+    "When the borrow checker is too conservative for your access pattern",
+    "Counters, loggers, or observers that need to mutate through shared refs"
+  ],
+  "codeExample": "use std::cell::{Cell, RefCell};\n\n// Cell<T>: for Copy types, get/set without borrowing\nstruct CallCounter {\n    count: Cell<u32>,\n}\n\nimpl CallCounter {\n    fn new() -> Self {\n        CallCounter { count: Cell::new(0) }\n    }\n\n    fn increment(&self) {  // Note: &self, not &mut self\n        self.count.set(self.count.get() + 1);\n    }\n\n    fn get(&self) -> u32 {\n        self.count.get()\n    }\n}\n\n// RefCell<T>: for non-Copy types, borrow-checked at runtime\nstruct Logger {\n    messages: RefCell<Vec<String>>,\n}\n\nimpl Logger {\n    fn new() -> Self {\n        Logger { messages: RefCell::new(Vec::new()) }\n    }\n\n    fn log(&self, msg: &str) {  // &self, not &mut self\n        self.messages.borrow_mut().push(msg.to_string());\n    }\n\n    fn dump(&self) {\n        for msg in self.messages.borrow().iter() {\n            println!(\"  LOG: {}\", msg);\n        }\n    }\n}\n\n// Thread-safe version with Arc + Mutex\nuse std::sync::{Arc, Mutex};\n\nfn threaded_counter() {\n    let counter = Arc::new(Mutex::new(0u64));\n    let mut handles = vec![];\n\n    for _ in 0..5 {\n        let counter = Arc::clone(&counter);\n        handles.push(std::thread::spawn(move || {\n            let mut num = counter.lock().unwrap();\n            *num += 1;\n        }));\n    }\n\n    for h in handles { h.join().unwrap(); }\n    println!(\"Counter: {}\", *counter.lock().unwrap());\n}\n\nfn main() {\n    let counter = CallCounter::new();\n    counter.increment();\n    counter.increment();\n    println!(\"Calls: {}\", counter.get());\n\n    let logger = Logger::new();\n    logger.log(\"Started\");\n    logger.log(\"Processing\");\n    logger.dump();\n\n    threaded_counter();\n}",
+  "realWorldUse": "Rc<RefCell<T>> for shared mutable data in single-threaded code. Arc<Mutex<T>> for shared mutable data across threads. OnceLock/LazyLock for lazy initialization. std::cell::OnceCell for single-assignment values."
+}

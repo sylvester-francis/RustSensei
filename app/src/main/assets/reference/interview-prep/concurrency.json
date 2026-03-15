@@ -1,0 +1,43 @@
+{
+  "id": "concurrency",
+  "title": "Concurrency and Async",
+  "order": 4,
+  "description": "Questions about threads, async/await, and concurrent programming in Rust.",
+  "questions": [
+    {
+      "question": "How does Rust prevent data races at compile time?",
+      "answer": "Rust prevents data races through the ownership and borrowing system combined with the Send and Sync traits.\n\nA data race requires three conditions: (1) two or more threads access the same memory, (2) at least one is writing, and (3) no synchronization. Rust makes condition 2+3 impossible:\n\n- The borrow checker enforces 'one writer XOR multiple readers' even across threads.\n- Send trait: a type can be transferred to another thread. Non-Send types (like Rc) cannot be sent across thread boundaries.\n- Sync trait: a type can be shared between threads via references. Non-Sync types (like Cell, RefCell) cannot be shared.\n\nTo share mutable state across threads, you must use synchronization primitives like Mutex<T> or atomic types, which are both Send and Sync. The compiler rejects any program that could have a data race.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is the difference between std::thread and tokio::spawn?",
+      "answer": "std::thread::spawn creates an OS thread. Each thread has its own stack (typically 2-8 MB), and the OS schedules them. Good for CPU-bound work. Creating thousands of threads is expensive.\n\nstd::thread::spawn(|| {\n    // Runs on a separate OS thread\n    heavy_computation();\n});\n\ntokio::spawn creates an async task. Tasks are lightweight (a few hundred bytes of state) and are multiplexed onto a thread pool by the tokio runtime. Good for I/O-bound work. You can spawn millions of tasks.\n\ntokio::spawn(async {\n    // Runs on tokio's thread pool\n    network_request().await;\n});\n\nKey differences:\n- Threads: preemptive scheduling by OS, expensive, good for CPU work\n- Tasks: cooperative scheduling by runtime, cheap, good for I/O work\n- Threads can block freely; tasks must not block (use spawn_blocking)",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "Explain the difference between Mutex and RwLock. When would you use each?",
+      "answer": "Mutex (mutual exclusion): one thread at a time, whether reading or writing. Simple and efficient for short critical sections.\n\nlet data = Mutex::new(vec![1, 2, 3]);\nlet mut guard = data.lock().unwrap();\nguard.push(4); // exclusive access\n\nRwLock (read-write lock): allows multiple concurrent readers OR one exclusive writer. Better when reads greatly outnumber writes.\n\nlet data = RwLock::new(config);\nlet guard = data.read().unwrap();  // Multiple readers allowed\n// OR\nlet mut guard = data.write().unwrap();  // Exclusive writer\n\nUse Mutex when:\n- Critical sections are short\n- Read and write frequency is similar\n- Simplicity is preferred\n\nUse RwLock when:\n- Many readers, few writers\n- Read operations are slow (holding the lock longer)\n\nCaveat: RwLock has higher overhead than Mutex. For quick operations, Mutex may be faster even with many readers.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What does 'async fn returns a Future' mean? Why are Futures lazy in Rust?",
+      "answer": "When you write async fn foo() -> String, the function does not actually return a String. It returns an impl Future<Output = String> -- a state machine that will produce a String when polled to completion.\n\nFutures are lazy: calling an async function does nothing. It just creates the Future value. The computation only starts when you .await it (which polls the future).\n\nThis is different from JavaScript Promises (which start immediately) or Go goroutines (which run immediately).\n\nWhy lazy? It gives you control:\n- You decide when to start the work\n- You can compose futures before executing them\n- No wasted work if you decide not to await\n- The runtime can batch and schedule more efficiently\n\nlet future = fetch_data(); // Nothing happens yet\n// ... can do other setup ...\nlet result = future.await; // NOW it runs",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What are Send and Sync? Give examples of types that are NOT Send or Sync.",
+      "answer": "Send: a type can be moved (transferred) to another thread. If T: Send, you can pass it to std::thread::spawn or tokio::spawn.\n\nSync: a type can be shared between threads via references. If T: Sync, then &T is Send. Multiple threads can read the value simultaneously.\n\nRelationship: T is Sync if and only if &T is Send.\n\nNot Send:\n- Rc<T>: reference count is not atomic, would cause data races\n- Raw pointers (*const T, *mut T): no safety guarantees\n\nNot Sync:\n- Cell<T>, RefCell<T>: interior mutability without synchronization\n- Rc<T>: not thread-safe\n\nBoth Send and Sync:\n- Arc<T>: atomic reference counting\n- Mutex<T>: synchronizes access\n- All primitive types (i32, bool, etc.)\n\nThe compiler auto-derives Send and Sync when all fields are Send/Sync. You manually implement them (unsafe impl) for custom synchronization types.",
+      "difficulty": "advanced"
+    },
+    {
+      "question": "How would you share state between multiple async tasks?",
+      "answer": "The standard pattern is Arc<Mutex<T>> or Arc<RwLock<T>>:\n\nuse std::sync::Arc;\nuse tokio::sync::Mutex;\n\nlet state = Arc::new(Mutex::new(HashMap::new()));\n\nfor i in 0..10 {\n    let state = Arc::clone(&state);\n    tokio::spawn(async move {\n        let mut guard = state.lock().await;\n        guard.insert(i, i * 10);\n    });\n}\n\nAlternatives depending on the use case:\n- tokio::sync::Mutex: async-aware, can hold lock across .await points\n- std::sync::Mutex: lighter, but holding across .await can block runtime threads\n- DashMap: concurrent HashMap without explicit locking\n- Channels (mpsc): message-passing instead of shared state\n- watch channel: for a single value that changes over time\n\nBest practice: prefer channels (message passing) over shared mutable state when possible. It is easier to reason about and less prone to deadlocks.",
+      "difficulty": "intermediate"
+    },
+    {
+      "question": "What is tokio::task::spawn_blocking and when do you need it?",
+      "answer": "spawn_blocking runs a synchronous (blocking) closure on a dedicated thread pool, separate from tokio's async worker threads.\n\nYou need it when:\n- Calling synchronous I/O (std::fs, blocking database drivers)\n- Running CPU-intensive computations\n- Using libraries that block (e.g., some C FFI calls)\n\nlet result = tokio::task::spawn_blocking(|| {\n    std::thread::sleep(Duration::from_secs(5)); // OK here!\n    expensive_computation()\n}).await.unwrap();\n\nWhy it matters: tokio's async threads use cooperative scheduling. If you block an async thread (with CPU work or blocking I/O), ALL tasks on that thread stall. spawn_blocking moves the work off the async threads.\n\nRule: never do blocking work directly in an async fn. Either use async I/O (tokio::fs, async database drivers) or spawn_blocking for synchronous operations.",
+      "difficulty": "intermediate"
+    }
+  ]
+}

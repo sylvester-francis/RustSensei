@@ -1,0 +1,127 @@
+{
+  "id": "rust-vs-typescript",
+  "title": "Rust vs TypeScript",
+  "description": "Side-by-side comparison for TypeScript developers learning Rust",
+  "comparisons": [
+    {
+      "concept": "const / let",
+      "typescript": "const x = 5;    // Immutable binding\nlet y = 10;      // Mutable binding\nvar z = 15;      // Function-scoped (avoid)",
+      "rust": "let x = 5;          // Immutable by default\nlet mut y = 10;      // Mutable binding\nconst Z: i32 = 15;  // Compile-time constant",
+      "note": "Rust's `let` is like TS `const`. Rust's `const` is for compile-time constants only (not just immutable bindings)."
+    },
+    {
+      "concept": "Functions",
+      "typescript": "function add(a: number, b: number): number {\n    return a + b;\n}\nconst add = (a: number, b: number) => a + b;",
+      "rust": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\nlet add = |a: i32, b: i32| a + b;",
+      "note": "Rust has distinct numeric types (i32, f64, etc.) instead of a single `number` type. Closures use || syntax."
+    },
+    {
+      "concept": "Interfaces / Traits",
+      "typescript": "interface Printable {\n    toString(): string;\n}\n\nclass User implements Printable {\n    toString() { return this.name; }\n}",
+      "rust": "trait Printable {\n    fn to_string(&self) -> String;\n}\n\nimpl Printable for User {\n    fn to_string(&self) -> String {\n        self.name.clone()\n    }\n}",
+      "note": "Rust traits are like interfaces but can also provide default implementations and are used for operator overloading."
+    },
+    {
+      "concept": "Classes / Structs",
+      "typescript": "class User {\n    constructor(\n        public name: string,\n        public age: number\n    ) {}\n    \n    greet(): string {\n        return `Hello, ${this.name}`;\n    }\n}",
+      "rust": "struct User {\n    name: String,\n    age: u32,\n}\n\nimpl User {\n    fn new(name: String, age: u32) -> Self {\n        Self { name, age }\n    }\n    fn greet(&self) -> String {\n        format!(\"Hello, {}\", self.name)\n    }\n}",
+      "note": "Rust separates data (struct) from behavior (impl). No inheritance — use traits and composition instead."
+    },
+    {
+      "concept": "Generics",
+      "typescript": "function identity<T>(value: T): T {\n    return value;\n}\n\nfunction print<T extends Printable>(val: T) {\n    console.log(val.toString());\n}",
+      "rust": "fn identity<T>(value: T) -> T {\n    value\n}\n\nfn print<T: Display>(val: T) {\n    println!(\"{}\", val);\n}",
+      "note": "TS generics are erased at runtime. Rust generics are monomorphized (specialized code generated per type) — zero runtime cost."
+    },
+    {
+      "concept": "Enums",
+      "typescript": "enum Direction {\n    Up,\n    Down,\n    Left,\n    Right,\n}\n\n// or string union:\ntype Direction = \"up\" | \"down\" | \"left\" | \"right\";",
+      "rust": "enum Direction {\n    Up,\n    Down,\n    Left,\n    Right,\n}\n\n// Enums can hold data:\nenum Message {\n    Text(String),\n    Image { url: String, width: u32 },\n    Quit,\n}",
+      "note": "Rust enums are algebraic data types — each variant can carry different data. They are much more powerful than TS enums."
+    },
+    {
+      "concept": "Error Handling",
+      "typescript": "try {\n    const data = await fetchData();\n} catch (error) {\n    console.error(error);\n}",
+      "rust": "match fetch_data().await {\n    Ok(data) => println!(\"{}\", data),\n    Err(e) => eprintln!(\"{}\", e),\n}\n// or with ? operator:\nlet data = fetch_data().await?;",
+      "note": "Rust has no exceptions. Result<T, E> makes errors part of the type system, so you cannot accidentally ignore them."
+    },
+    {
+      "concept": "Promise / Future",
+      "typescript": "async function fetchData(): Promise<string> {\n    const resp = await fetch(url);\n    return resp.text();\n}",
+      "rust": "async fn fetch_data() -> Result<String, Error> {\n    let resp = reqwest::get(url).await?;\n    resp.text().await\n}",
+      "note": "Rust Futures are lazy — they do nothing until polled. JS Promises start executing immediately. Note .await comes after the expression."
+    },
+    {
+      "concept": "Array / Vec",
+      "typescript": "const arr: number[] = [1, 2, 3];\narr.push(4);\nconst first = arr[0];",
+      "rust": "let mut v: Vec<i32> = vec![1, 2, 3];\nv.push(4);\nlet first = v[0]; // Panics if empty",
+      "note": "Rust also has fixed-size arrays: `let arr: [i32; 3] = [1, 2, 3]`. Vec is heap-allocated and growable like JS arrays."
+    },
+    {
+      "concept": "Map / HashMap",
+      "typescript": "const map = new Map<string, number>();\nmap.set(\"a\", 1);\nconst val = map.get(\"a\"); // number | undefined",
+      "rust": "use std::collections::HashMap;\nlet mut map = HashMap::new();\nmap.insert(\"a\", 1);\nlet val = map.get(\"a\"); // Option<&i32>",
+      "note": "Both return an optional type for lookups. Rust uses Option<&V> instead of T | undefined."
+    },
+    {
+      "concept": "String Types",
+      "typescript": "const s: string = \"hello\";\nconst template = `Hello, ${name}!`;",
+      "rust": "let s: &str = \"hello\";           // Borrowed string slice\nlet s: String = String::from(\"hello\"); // Owned string\nlet msg = format!(\"Hello, {name}!\");",
+      "note": "Rust has two main string types: &str (borrowed, like a view) and String (owned, heap-allocated). TS has only one string type."
+    },
+    {
+      "concept": "Union Types / Enums",
+      "typescript": "type Shape = \n    | { kind: \"circle\"; radius: number }\n    | { kind: \"rect\"; width: number; height: number };",
+      "rust": "enum Shape {\n    Circle { radius: f64 },\n    Rect { width: f64, height: f64 },\n}",
+      "note": "Rust enums serve the same purpose as TS discriminated unions but are more ergonomic and enforced by the compiler."
+    },
+    {
+      "concept": "Optional Chaining / Option",
+      "typescript": "const name = user?.profile?.name ?? \"Unknown\";",
+      "rust": "let name = user\n    .as_ref()\n    .and_then(|u| u.profile.as_ref())\n    .map(|p| p.name.as_str())\n    .unwrap_or(\"Unknown\");",
+      "note": "Rust uses Option combinators instead of ?. chaining. It is more verbose but prevents any null-related runtime errors."
+    },
+    {
+      "concept": "Type Narrowing / Pattern Matching",
+      "typescript": "function area(shape: Shape): number {\n    switch (shape.kind) {\n        case \"circle\":\n            return Math.PI * shape.radius ** 2;\n        case \"rect\":\n            return shape.width * shape.height;\n    }\n}",
+      "rust": "fn area(shape: &Shape) -> f64 {\n    match shape {\n        Shape::Circle { radius } => \n            std::f64::consts::PI * radius * radius,\n        Shape::Rect { width, height } => \n            width * height,\n    }\n}",
+      "note": "Rust match is exhaustive — the compiler errors if you miss a variant. TS narrowing is more manual."
+    },
+    {
+      "concept": "Modules",
+      "typescript": "// math.ts\nexport function add(a: number, b: number) { return a + b; }\n\n// main.ts\nimport { add } from './math';",
+      "rust": "// math.rs\npub fn add(a: i32, b: i32) -> i32 { a + b }\n\n// main.rs\nmod math;\nuse math::add;",
+      "note": "Rust uses `mod` to declare modules and `pub` for visibility. File structure maps to module hierarchy."
+    },
+    {
+      "concept": "Async / Await",
+      "typescript": "async function process() {\n    const a = await taskA();\n    const b = await taskB();\n    return a + b;\n}",
+      "rust": "async fn process() -> Result<i32, Error> {\n    let a = task_a().await?;\n    let b = task_b().await?;\n    Ok(a + b)\n}",
+      "note": "Rust async functions return impl Future. You need a runtime (tokio) to execute them. TS uses the built-in event loop."
+    },
+    {
+      "concept": "Testing",
+      "typescript": "describe('add', () => {\n    it('should add two numbers', () => {\n        expect(add(2, 3)).toBe(5);\n    });\n});",
+      "rust": "#[cfg(test)]\nmod tests {\n    use super::*;\n    \n    #[test]\n    fn test_add() {\n        assert_eq!(add(2, 3), 5);\n    }\n}",
+      "note": "Rust has built-in testing with #[test]. No external test runner needed. Run with `cargo test`."
+    },
+    {
+      "concept": "null / undefined / Option",
+      "typescript": "let x: string | null = null;\nlet y: string | undefined = undefined;\nif (x !== null) { console.log(x); }",
+      "rust": "let x: Option<String> = None;\nif let Some(val) = x {\n    println!(\"{}\", val);\n}",
+      "note": "Rust has no null or undefined. Option<T> is either Some(value) or None. The compiler forces you to handle both cases."
+    },
+    {
+      "concept": "Destructuring",
+      "typescript": "const { name, age } = user;\nconst [first, ...rest] = items;\nconst { x, y, ...other } = point;",
+      "rust": "let User { name, age, .. } = user;\nlet [first, ref rest @ ..] = items[..];\nlet Point { x, y, .. } = point;",
+      "note": "Both languages support destructuring. Rust uses `..` to ignore remaining fields and `@` for binding sub-patterns."
+    },
+    {
+      "concept": "Iterators",
+      "typescript": "const doubled = nums.map(x => x * 2);\nconst sum = nums.reduce((a, b) => a + b, 0);\nconst evens = nums.filter(x => x % 2 === 0);",
+      "rust": "let doubled: Vec<_> = nums.iter().map(|x| x * 2).collect();\nlet sum: i32 = nums.iter().sum();\nlet evens: Vec<_> = nums.iter().filter(|&&x| x % 2 == 0).collect();",
+      "note": "Rust iterators are lazy — they do nothing until consumed (with collect, sum, etc.). JS array methods execute eagerly."
+    }
+  ]
+}

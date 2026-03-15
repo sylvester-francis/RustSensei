@@ -1,0 +1,20 @@
+{
+  "code": "E0117",
+  "title": "Only traits defined in the current crate can be implemented for types defined outside the crate",
+  "severity": "frequent",
+  "explanation": "This error enforces the orphan rule: you can only implement a trait for a type if either the trait or the type is defined in your crate. This prevents conflicting implementations across different crates.",
+  "example_bad": "impl std::fmt::Display for Vec<i32> { // Error: orphan rule\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"my vec\")\n    }\n}",
+  "error_message": "error[E0117]: only traits defined in the current crate can be implemented for types defined outside of the crate",
+  "fixes": [
+    {
+      "description": "Use the newtype pattern",
+      "code": "struct MyVec(Vec<i32>);\n\nimpl std::fmt::Display for MyVec {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n        write!(f, \"{:?}\", self.0)\n    }\n}"
+    },
+    {
+      "description": "Define your own trait instead",
+      "code": "trait PrettyPrint {\n    fn pretty_print(&self) -> String;\n}\n\nimpl PrettyPrint for Vec<i32> {\n    fn pretty_print(&self) -> String {\n        format!(\"{:?}\", self)\n    }\n}"
+    }
+  ],
+  "related": ["E0119", "E0277"],
+  "tip": "The newtype pattern (wrapping a type in a single-field tuple struct) is the standard workaround. You can implement Deref on the wrapper for ergonomic access."
+}

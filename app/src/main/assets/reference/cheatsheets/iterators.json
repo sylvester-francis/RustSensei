@@ -1,0 +1,87 @@
+{
+  "id": "iterators",
+  "title": "Iterators",
+  "sections": [
+    {
+      "heading": "Creating Iterators",
+      "entries": [
+        {"label": "From collections", "code": "let v = vec![1, 2, 3];\nlet iter = v.iter();       // yields &T\nlet iter = v.iter_mut();   // yields &mut T\nlet iter = v.into_iter();  // yields T (consumes v)", "note": "iter() borrows; iter_mut() borrows mutably; into_iter() takes ownership"},
+        {"label": "Range", "code": "let r = 0..5;     // 0, 1, 2, 3, 4\nlet r = 0..=5;    // 0, 1, 2, 3, 4, 5\nlet r = (0..10).step_by(2); // 0, 2, 4, 6, 8", "note": ".. is exclusive end; ..= is inclusive end"},
+        {"label": "Repeat and once", "code": "use std::iter;\nlet ones = iter::repeat(1).take(5);   // [1, 1, 1, 1, 1]\nlet single = iter::once(42);           // [42]\nlet empty = iter::empty::<i32>();       // []", "note": "Create iterators from values; repeat is infinite so use .take()"},
+        {"label": "From function", "code": "let mut count = 0;\nlet counter = std::iter::from_fn(move || {\n    count += 1;\n    if count <= 5 { Some(count) } else { None }\n});", "note": "Create an iterator from a closure that returns Option"},
+        {"label": "successors", "code": "let powers_of_2 = std::iter::successors(Some(1u64), |&n| {\n    n.checked_mul(2)\n});\nlet v: Vec<_> = powers_of_2.take(10).collect();", "note": "Generate sequence where each element depends on the previous"},
+        {"label": "Chars and lines", "code": "let chars = \"hello\".chars();         // iterator of char\nlet bytes = \"hello\".bytes();         // iterator of u8\nlet lines = \"a\\nb\\nc\".lines();       // iterator of &str", "note": "String types provide multiple iterators"}
+      ]
+    },
+    {
+      "heading": "Transforming (Adaptor Methods)",
+      "entries": [
+        {"label": "map", "code": "let doubled: Vec<i32> = vec![1, 2, 3]\n    .iter()\n    .map(|x| x * 2)\n    .collect();\n// [2, 4, 6]", "note": "Transform each element; lazy until consumed"},
+        {"label": "filter", "code": "let evens: Vec<&i32> = vec![1, 2, 3, 4]\n    .iter()\n    .filter(|&&x| x % 2 == 0)\n    .collect();\n// [&2, &4]", "note": "Keep elements matching predicate; closure receives &&T for iter()"},
+        {"label": "filter_map", "code": "let parsed: Vec<i32> = vec![\"1\", \"abc\", \"3\"]\n    .iter()\n    .filter_map(|s| s.parse().ok())\n    .collect();\n// [1, 3]", "note": "Map + filter in one step; keep only Some values"},
+        {"label": "flat_map", "code": "let words: Vec<&str> = vec![\"hello world\", \"foo bar\"]\n    .iter()\n    .flat_map(|s| s.split_whitespace())\n    .collect();\n// [\"hello\", \"world\", \"foo\", \"bar\"]", "note": "Map each element to an iterator, then flatten"},
+        {"label": "flatten", "code": "let flat: Vec<i32> = vec![vec![1, 2], vec![3, 4]]\n    .into_iter()\n    .flatten()\n    .collect();\n// [1, 2, 3, 4]", "note": "Flatten one level of nesting; works on iterators of iterators"},
+        {"label": "inspect", "code": "let sum: i32 = (1..=5)\n    .inspect(|x| println!(\"about to process: {x}\"))\n    .map(|x| x * 2)\n    .inspect(|x| println!(\"after doubling: {x}\"))\n    .sum();", "note": "Peek at values as they pass through; great for debugging"},
+        {"label": "scan", "code": "let running_sum: Vec<i32> = vec![1, 2, 3, 4]\n    .iter()\n    .scan(0, |state, &x| {\n        *state += x;\n        Some(*state)\n    })\n    .collect();\n// [1, 3, 6, 10]", "note": "Like fold but yields intermediate results"}
+      ]
+    },
+    {
+      "heading": "Combining Iterators",
+      "entries": [
+        {"label": "chain", "code": "let combined: Vec<i32> = vec![1, 2]\n    .into_iter()\n    .chain(vec![3, 4])\n    .collect();\n// [1, 2, 3, 4]", "note": "Concatenate two iterators end to end"},
+        {"label": "zip", "code": "let names = vec![\"Alice\", \"Bob\"];\nlet ages = vec![30, 25];\nlet people: Vec<_> = names.iter().zip(ages.iter()).collect();\n// [(&\"Alice\", &30), (&\"Bob\", &25)]", "note": "Pair elements from two iterators; stops at shorter one"},
+        {"label": "enumerate", "code": "for (index, value) in vec![\"a\", \"b\", \"c\"].iter().enumerate() {\n    println!(\"{index}: {value}\");\n}\n// 0: a, 1: b, 2: c", "note": "Yields (index, value) tuples starting from 0"},
+        {"label": "interleave (itertools)", "code": "use itertools::Itertools;\nlet a = vec![1, 3, 5];\nlet b = vec![2, 4, 6];\nlet interleaved: Vec<_> = a.into_iter()\n    .interleave(b)\n    .collect();\n// [1, 2, 3, 4, 5, 6]", "note": "From itertools crate; alternates elements from two iterators"},
+        {"label": "unzip", "code": "let (names, ages): (Vec<&str>, Vec<i32>) = vec![\n    (\"Alice\", 30),\n    (\"Bob\", 25),\n].into_iter().unzip();", "note": "Split an iterator of pairs into two collections"}
+      ]
+    },
+    {
+      "heading": "Filtering & Selecting",
+      "entries": [
+        {"label": "take and skip", "code": "let first3: Vec<i32> = (0..10).take(3).collect();     // [0, 1, 2]\nlet after3: Vec<i32> = (0..10).skip(3).collect();     // [3, 4, ..., 9]", "note": "take yields first n elements; skip drops first n"},
+        {"label": "take_while / skip_while", "code": "let small: Vec<i32> = vec![1, 2, 5, 1]\n    .into_iter()\n    .take_while(|&x| x < 4)\n    .collect();\n// [1, 2]", "note": "take_while stops at first false; skip_while drops until first true"},
+        {"label": "peekable", "code": "let mut iter = vec![1, 2, 3].into_iter().peekable();\nassert_eq!(iter.peek(), Some(&1));\nassert_eq!(iter.next(), Some(1));", "note": "Look ahead without consuming; useful for parsers"},
+        {"label": "dedup (itertools)", "code": "use itertools::Itertools;\nlet v: Vec<i32> = vec![1, 1, 2, 3, 3, 2]\n    .into_iter()\n    .dedup()\n    .collect();\n// [1, 2, 3, 2]", "note": "Remove consecutive duplicates; from itertools crate"},
+        {"label": "unique (itertools)", "code": "use itertools::Itertools;\nlet v: Vec<i32> = vec![3, 1, 2, 1, 3]\n    .into_iter()\n    .unique()\n    .collect();\n// [3, 1, 2]", "note": "Remove all duplicates preserving first occurrence; from itertools"}
+      ]
+    },
+    {
+      "heading": "Consuming (Terminal Methods)",
+      "entries": [
+        {"label": "collect", "code": "let v: Vec<i32> = (0..5).collect();\nlet s: String = vec!['h', 'i'].into_iter().collect();\nlet m: HashMap<&str, i32> = vec![(\"a\", 1)].into_iter().collect();\nlet result: Result<Vec<i32>, _> = vec![Ok(1), Ok(2)].into_iter().collect();", "note": "Collects into any type implementing FromIterator; turbofish for type hint"},
+        {"label": "sum and product", "code": "let total: i32 = (1..=10).sum();     // 55\nlet factorial: u64 = (1..=10).product(); // 3628800", "note": "Requires Sum/Product trait; type annotation often needed"},
+        {"label": "fold", "code": "let sum = vec![1, 2, 3, 4].iter()\n    .fold(0, |acc, &x| acc + x);\n// 10\nlet csv = vec![\"a\", \"b\", \"c\"].iter()\n    .fold(String::new(), |acc, &s| {\n        if acc.is_empty() { s.to_string() }\n        else { format!(\"{acc},{s}\") }\n    });", "note": "Reduce with initial accumulator; most flexible consumer"},
+        {"label": "reduce", "code": "let max = vec![3, 1, 4, 1, 5]\n    .into_iter()\n    .reduce(|a, b| if a > b { a } else { b });\n// Some(5)", "note": "Like fold but uses first element as initial value; returns Option"},
+        {"label": "for_each", "code": "vec![1, 2, 3].iter().for_each(|x| {\n    println!(\"{x}\");\n});", "note": "Apply a side effect to each element; like a for loop"},
+        {"label": "count and last", "code": "let n = (0..100).count();                    // 100\nlet last = vec![1, 2, 3].into_iter().last(); // Some(3)", "note": "count consumes the entire iterator; last gets the final element"}
+      ]
+    },
+    {
+      "heading": "Searching & Testing",
+      "entries": [
+        {"label": "find", "code": "let first_even = vec![1, 3, 4, 5]\n    .iter()\n    .find(|&&x| x % 2 == 0);\n// Some(&4)", "note": "Returns first match as Option; short-circuits"},
+        {"label": "position", "code": "let pos = vec![10, 20, 30]\n    .iter()\n    .position(|&x| x == 20);\n// Some(1)", "note": "Returns index of first match; useful for searching"},
+        {"label": "any and all", "code": "let has_even = vec![1, 2, 3].iter().any(|&x| x % 2 == 0);  // true\nlet all_pos = vec![1, 2, 3].iter().all(|&x| x > 0);         // true", "note": "Short-circuit boolean tests over elements"},
+        {"label": "min and max", "code": "let min = vec![3, 1, 4].iter().min();  // Some(&1)\nlet max = vec![3, 1, 4].iter().max();  // Some(&4)\nlet max_by = vec![\"hi\", \"hello\"].iter()\n    .max_by_key(|s| s.len()); // Some(&\"hello\")", "note": "Returns Option; min_by/max_by for custom comparisons"},
+        {"label": "find_map", "code": "let first_parsed: Option<i32> = vec![\"foo\", \"42\", \"bar\"]\n    .iter()\n    .find_map(|s| s.parse().ok());\n// Some(42)", "note": "Find + map in one step; returns first Some result"}
+      ]
+    },
+    {
+      "heading": "Sorting & Ordering",
+      "entries": [
+        {"label": "sorted (itertools)", "code": "use itertools::Itertools;\nlet v: Vec<i32> = vec![3, 1, 2].into_iter().sorted().collect();\n// [1, 2, 3]", "note": "From itertools; standard iterators don't have sort (use Vec::sort)"},
+        {"label": "rev", "code": "let reversed: Vec<i32> = (0..5).rev().collect();\n// [4, 3, 2, 1, 0]", "note": "Reverse a double-ended iterator"},
+        {"label": "min/max by key", "code": "let shortest = vec![\"hi\", \"hello\", \"hey\"]\n    .into_iter()\n    .min_by_key(|s| s.len());\n// Some(\"hi\")", "note": "Find min/max by a derived key rather than element value"}
+      ]
+    },
+    {
+      "heading": "Advanced Patterns",
+      "entries": [
+        {"label": "Iterator trait impl", "code": "struct Fibonacci { a: u64, b: u64 }\nimpl Iterator for Fibonacci {\n    type Item = u64;\n    fn next(&mut self) -> Option<Self::Item> {\n        let next = self.a;\n        self.a = self.b;\n        self.b = next + self.b;\n        Some(next)\n    }\n}\nlet fibs: Vec<u64> = Fibonacci { a: 0, b: 1 }\n    .take(10)\n    .collect();", "note": "Implement Iterator for custom lazy sequences"},
+        {"label": "Partition", "code": "let (evens, odds): (Vec<i32>, Vec<i32>) = (0..10)\n    .partition(|x| x % 2 == 0);\n// evens = [0,2,4,6,8], odds = [1,3,5,7,9]", "note": "Split into two collections based on predicate"},
+        {"label": "Windows and chunks", "code": "let v = vec![1, 2, 3, 4, 5];\nfor window in v.windows(3) {\n    println!(\"{window:?}\"); // [1,2,3], [2,3,4], [3,4,5]\n}\nfor chunk in v.chunks(2) {\n    println!(\"{chunk:?}\"); // [1,2], [3,4], [5]\n}", "note": "Sliding windows vs non-overlapping chunks (on slices)"},
+        {"label": "Group by (itertools)", "code": "use itertools::Itertools;\nlet data = vec![1, 1, 2, 2, 3];\nfor (key, group) in &data.into_iter().group_by(|&x| x) {\n    let items: Vec<_> = group.collect();\n    println!(\"{key}: {items:?}\");\n}", "note": "Group consecutive equal elements; from itertools crate"}
+      ]
+    }
+  ]
+}

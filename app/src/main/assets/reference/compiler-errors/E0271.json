@@ -1,0 +1,24 @@
+{
+  "code": "E0271",
+  "title": "Type mismatch resolving associated type",
+  "severity": "frequent",
+  "explanation": "This error occurs when an associated type in a trait implementation does not match the expected type. This commonly happens with Iterator::Item, Future::Output, or custom trait associated types.",
+  "example_bad": "fn sum_iter(iter: impl Iterator<Item = i32>) -> i32 {\n    iter.sum()\n}\n\nfn main() {\n    let v = vec![\"a\", \"b\", \"c\"];\n    sum_iter(v.into_iter()); // Error: expected i32, found &str\n}",
+  "error_message": "error[E0271]: type mismatch resolving `<std::vec::IntoIter<&str> as Iterator>::Item == i32`",
+  "fixes": [
+    {
+      "description": "Pass an iterator with the correct Item type",
+      "code": "let v = vec![1, 2, 3];\nsum_iter(v.into_iter()); // Vec<i32> gives Item = i32"
+    },
+    {
+      "description": "Transform the iterator to the expected type",
+      "code": "let v = vec![\"1\", \"2\", \"3\"];\nlet nums = v.iter().map(|s| s.parse::<i32>().unwrap());\nsum_iter(nums);"
+    },
+    {
+      "description": "Change the function to accept the correct type",
+      "code": "fn join_iter(iter: impl Iterator<Item = &'static str>) -> String {\n    iter.collect::<Vec<_>>().join(\", \")\n}"
+    }
+  ],
+  "related": ["E0277", "E0308"],
+  "tip": "Associated types are like generic parameters fixed by the implementation. Iterator<Item = i32> means the iterator yields i32 values. Check what Item type your iterator produces."
+}

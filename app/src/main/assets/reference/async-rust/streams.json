@@ -1,0 +1,32 @@
+{
+  "id": "streams",
+  "title": "Streams: Async Iterators",
+  "order": 6,
+  "content": "A Stream is the async version of Iterator. Where Iterator::next() returns Option<T> synchronously, Stream::poll_next() returns Poll<Option<T>> and can await between items.\n\nStreams are used for: reading lines from a file asynchronously, receiving messages from a channel, handling server-sent events, processing database result sets, or any sequence of async values.\n\ntokio-stream and futures::stream provide combinators like map, filter, take, merge, and more -- just like Iterator adapters but async.\n\nThe while let Some(item) = stream.next().await pattern is the standard way to consume streams.",
+  "codeExamples": [
+    {
+      "description": "Creating and consuming a stream",
+      "code": "use tokio_stream::{self as stream, StreamExt};\n\n#[tokio::main]\nasync fn main() {\n    // Create a stream from an iterator\n    let mut s = stream::iter(vec![1, 2, 3, 4, 5]);\n\n    // Consume with while let\n    while let Some(value) = s.next().await {\n        println!(\"Got: {}\", value);\n    }\n}"
+    },
+    {
+      "description": "Stream combinators (map, filter, take)",
+      "code": "use tokio_stream::{self as stream, StreamExt};\n\n#[tokio::main]\nasync fn main() {\n    let s = stream::iter(1..=20);\n\n    let results: Vec<i32> = s\n        .filter(|x| *x % 2 == 0)    // keep even numbers\n        .map(|x| x * x)              // square them\n        .take(5)                      // take first 5\n        .collect()\n        .await;\n\n    println!(\"{:?}\", results);  // [4, 16, 36, 64, 100]\n}"
+    },
+    {
+      "description": "Channel receiver as a stream",
+      "code": "use tokio::sync::mpsc;\nuse tokio_stream::wrappers::ReceiverStream;\nuse tokio_stream::StreamExt;\n\n#[tokio::main]\nasync fn main() {\n    let (tx, rx) = mpsc::channel(32);\n\n    tokio::spawn(async move {\n        for i in 0..5 {\n            tx.send(i).await.unwrap();\n        }\n    });\n\n    let mut stream = ReceiverStream::new(rx);\n    while let Some(value) = stream.next().await {\n        println!(\"Received: {}\", value);\n    }\n}"
+    },
+    {
+      "description": "Interval stream (periodic ticks)",
+      "code": "use tokio::time::{interval, Duration};\nuse tokio_stream::wrappers::IntervalStream;\nuse tokio_stream::StreamExt;\n\n#[tokio::main]\nasync fn main() {\n    let interval = interval(Duration::from_millis(500));\n    let mut stream = IntervalStream::new(interval).take(5);\n\n    while let Some(instant) = stream.next().await {\n        println!(\"Tick at {:?}\", instant);\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "Stream is the async equivalent of Iterator",
+    "Use while let Some(item) = stream.next().await to consume",
+    "tokio-stream provides adapters: map, filter, take, merge, throttle",
+    "Channel receivers can be wrapped as streams with ReceiverStream",
+    "Streams support backpressure naturally through async polling",
+    "Use StreamExt trait to get combinator methods on streams"
+  ]
+}

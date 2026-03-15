@@ -1,0 +1,20 @@
+{
+  "code": "E0428",
+  "title": "Name defined multiple times in the same scope",
+  "severity": "frequent",
+  "explanation": "This error occurs when you define two items with the same name in the same scope. Rust does not allow duplicate definitions for types, functions, modules, or other named items (though variable shadowing with `let` is allowed).",
+  "example_bad": "struct User {\n    name: String,\n}\n\nstruct User { // Error: name `User` defined multiple times\n    name: String,\n    email: String,\n}",
+  "error_message": "error[E0428]: the name `User` is defined multiple times",
+  "fixes": [
+    {
+      "description": "Remove the duplicate definition",
+      "code": "struct User {\n    name: String,\n    email: String,\n}"
+    },
+    {
+      "description": "Use different names",
+      "code": "struct BasicUser {\n    name: String,\n}\n\nstruct DetailedUser {\n    name: String,\n    email: String,\n}"
+    }
+  ],
+  "related": ["E0252", "E0255"],
+  "tip": "Note that `let` bindings can shadow each other (redeclare the same name), but type, function, and module definitions cannot be duplicated in the same scope."
+}

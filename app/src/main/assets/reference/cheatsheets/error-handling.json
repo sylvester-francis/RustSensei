@@ -1,0 +1,80 @@
+{
+  "id": "error-handling",
+  "title": "Error Handling",
+  "sections": [
+    {
+      "heading": "Result<T, E>",
+      "entries": [
+        {"label": "Basic Result", "code": "fn divide(a: f64, b: f64) -> Result<f64, String> {\n    if b == 0.0 {\n        Err(String::from(\"division by zero\"))\n    } else {\n        Ok(a / b)\n    }\n}", "note": "Result has two variants: Ok(value) and Err(error)"},
+        {"label": "Match on Result", "code": "match divide(10.0, 3.0) {\n    Ok(result) => println!(\"Result: {result}\"),\n    Err(e) => println!(\"Error: {e}\"),\n}", "note": "Exhaustive handling of both success and failure"},
+        {"label": "unwrap and expect", "code": "let val = divide(10.0, 2.0).unwrap();       // panics on Err\nlet val = divide(10.0, 2.0).expect(\"oops\"); // panics with message", "note": "Quick and dirty; panics on error. Use in tests or when you are certain"},
+        {"label": "unwrap_or variants", "code": "let val = result.unwrap_or(0.0);\nlet val = result.unwrap_or_default();\nlet val = result.unwrap_or_else(|e| {\n    eprintln!(\"Error: {e}\");\n    0.0\n});", "note": "Provide a fallback value instead of panicking"},
+        {"label": "is_ok / is_err", "code": "let result = divide(10.0, 0.0);\nif result.is_ok() {\n    println!(\"Success\");\n}\nif result.is_err() {\n    println!(\"Failed\");\n}", "note": "Check variant without consuming the Result"}
+      ]
+    },
+    {
+      "heading": "The ? Operator",
+      "entries": [
+        {"label": "Propagate errors", "code": "fn read_number(path: &str) -> Result<i32, Box<dyn std::error::Error>> {\n    let content = std::fs::read_to_string(path)?;\n    let num = content.trim().parse::<i32>()?;\n    Ok(num)\n}", "note": "? returns early with Err; unwraps Ok. Function must return Result"},
+        {"label": "? with Option", "code": "fn first_even(nums: &[i32]) -> Option<i32> {\n    let first = nums.first()?;\n    if first % 2 == 0 {\n        Some(*first)\n    } else {\n        None\n    }\n}", "note": "? works with Option too; returns None early"},
+        {"label": "? in main", "code": "fn main() -> Result<(), Box<dyn std::error::Error>> {\n    let content = std::fs::read_to_string(\"file.txt\")?;\n    println!(\"{content}\");\n    Ok(())\n}", "note": "main can return Result for using ? at the top level"},
+        {"label": "Chaining with ?", "code": "fn get_config_value() -> Result<String, Box<dyn std::error::Error>> {\n    let config = std::fs::read_to_string(\"config.toml\")?;\n    let value = config\n        .lines()\n        .find(|l| l.starts_with(\"key\"))\n        .ok_or(\"key not found\")?;\n    Ok(value.to_string())\n}", "note": "Chain multiple fallible operations cleanly"}
+      ]
+    },
+    {
+      "heading": "Option<T>",
+      "entries": [
+        {"label": "Basic Option", "code": "fn find_user(id: u64) -> Option<String> {\n    if id == 1 {\n        Some(String::from(\"Alice\"))\n    } else {\n        None\n    }\n}", "note": "Option represents a value that may or may not exist"},
+        {"label": "Pattern matching", "code": "match find_user(1) {\n    Some(name) => println!(\"Found: {name}\"),\n    None => println!(\"Not found\"),\n}", "note": "Handle both Some and None variants"},
+        {"label": "if let", "code": "if let Some(name) = find_user(1) {\n    println!(\"Hello, {name}\");\n}", "note": "Shorthand when you only care about the Some case"},
+        {"label": "unwrap_or variants", "code": "let name = find_user(99).unwrap_or(String::from(\"guest\"));\nlet name = find_user(99).unwrap_or_default(); // empty String\nlet name = find_user(99).unwrap_or_else(|| generate_name());", "note": "Provide defaults for None"},
+        {"label": "Convert Option to Result", "code": "let name = find_user(99)\n    .ok_or(\"user not found\")?;\nlet name = find_user(99)\n    .ok_or_else(|| format!(\"user {} not found\", 99))?;", "note": "ok_or converts None to Err; useful with ? operator"}
+      ]
+    },
+    {
+      "heading": "Combinators on Result & Option",
+      "entries": [
+        {"label": "map", "code": "let result: Result<i32, String> = Ok(5);\nlet doubled = result.map(|x| x * 2); // Ok(10)\n\nlet opt: Option<i32> = Some(5);\nlet doubled = opt.map(|x| x * 2); // Some(10)", "note": "Transform the success/some value; error/none passes through"},
+        {"label": "and_then (flatmap)", "code": "fn parse_and_double(s: &str) -> Result<i32, std::num::ParseIntError> {\n    s.parse::<i32>().and_then(|n| Ok(n * 2))\n}\n\nfn safe_div(a: f64, b: f64) -> Option<f64> {\n    if b == 0.0 { None } else { Some(a / b) }\n}\nlet result = Some(10.0).and_then(|x| safe_div(x, 3.0));", "note": "Chain operations that themselves return Result/Option"},
+        {"label": "map_err", "code": "let result: Result<i32, String> = Err(\"oops\".into());\nlet mapped = result.map_err(|e| format!(\"Error: {e}\"));", "note": "Transform the error value; Ok passes through"},
+        {"label": "or_else", "code": "let result: Result<i32, String> = Err(\"fail\".into());\nlet fallback = result.or_else(|_| Ok(0));", "note": "Provide an alternative Result/Option on failure"},
+        {"label": "filter (Option)", "code": "let even = Some(4).filter(|x| x % 2 == 0); // Some(4)\nlet odd = Some(3).filter(|x| x % 2 == 0);  // None", "note": "Keep Some only if predicate is true"},
+        {"label": "flatten", "code": "let nested: Option<Option<i32>> = Some(Some(42));\nlet flat: Option<i32> = nested.flatten(); // Some(42)\n\nlet nested: Result<Result<i32, String>, String> = Ok(Ok(42));\nlet flat: Result<i32, String> = nested.flatten(); // Ok(42)", "note": "Remove one level of nesting"},
+        {"label": "zip (Option)", "code": "let a = Some(1);\nlet b = Some(\"hello\");\nlet zipped = a.zip(b); // Some((1, \"hello\"))", "note": "Combine two Options into a tuple; None if either is None"}
+      ]
+    },
+    {
+      "heading": "Custom Error Types",
+      "entries": [
+        {"label": "Simple custom error", "code": "use std::fmt;\n\n#[derive(Debug)]\nenum AppError {\n    NotFound(String),\n    ParseError(String),\n    IoError(std::io::Error),\n}\n\nimpl fmt::Display for AppError {\n    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {\n        match self {\n            AppError::NotFound(msg) => write!(f, \"Not found: {msg}\"),\n            AppError::ParseError(msg) => write!(f, \"Parse error: {msg}\"),\n            AppError::IoError(e) => write!(f, \"IO error: {e}\"),\n        }\n    }\n}\n\nimpl std::error::Error for AppError {}", "note": "Implement Display and Error trait for custom errors"},
+        {"label": "From for error conversion", "code": "impl From<std::io::Error> for AppError {\n    fn from(e: std::io::Error) -> Self {\n        AppError::IoError(e)\n    }\n}\n// Now ? auto-converts io::Error to AppError", "note": "Implement From to enable automatic conversion with ?"},
+        {"label": "Box<dyn Error>", "code": "type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;\n\nfn do_stuff() -> Result<()> {\n    let _content = std::fs::read_to_string(\"file.txt\")?;\n    let _num: i32 = \"42\".parse()?;\n    Ok(())\n}", "note": "Easiest approach; accepts any error type. Less type information."}
+      ]
+    },
+    {
+      "heading": "thiserror Crate",
+      "entries": [
+        {"label": "Define errors", "code": "use thiserror::Error;\n\n#[derive(Error, Debug)]\nenum DataError {\n    #[error(\"file not found: {path}\")]\n    NotFound { path: String },\n\n    #[error(\"parse error on line {line}\")]\n    Parse { line: usize },\n\n    #[error(transparent)]\n    Io(#[from] std::io::Error),\n}", "note": "Derive macro generates Display and Error impls"},
+        {"label": "Source chain", "code": "#[derive(Error, Debug)]\n#[error(\"database error\")]\nstruct DbError {\n    #[source]\n    inner: sqlx::Error,\n}", "note": "#[source] sets the error source for chaining"},
+        {"label": "#[from] for auto-conversion", "code": "#[derive(Error, Debug)]\nenum AppError {\n    #[error(\"IO error\")]\n    Io(#[from] std::io::Error),\n    #[error(\"parse error\")]\n    Parse(#[from] std::num::ParseIntError),\n}\n// ? now auto-converts io::Error and ParseIntError", "note": "#[from] generates From impl for automatic conversion"}
+      ]
+    },
+    {
+      "heading": "anyhow Crate",
+      "entries": [
+        {"label": "Basic usage", "code": "use anyhow::{Result, Context};\n\nfn read_config() -> Result<String> {\n    let content = std::fs::read_to_string(\"config.toml\")\n        .context(\"failed to read config file\")?;\n    Ok(content)\n}", "note": "anyhow::Result<T> = Result<T, anyhow::Error>; accepts any error"},
+        {"label": "Add context", "code": "let val: i32 = content.trim().parse()\n    .context(\"config value must be a number\")?;\nlet data = fetch_data()\n    .with_context(|| format!(\"failed to fetch from {url}\"))?;", "note": "context/with_context add human-readable messages to error chain"},
+        {"label": "anyhow! and bail!", "code": "use anyhow::{anyhow, bail, ensure};\n\nfn validate(x: i32) -> Result<()> {\n    ensure!(x > 0, \"value must be positive, got {x}\");\n    if x > 1000 {\n        bail!(\"value too large: {x}\");\n    }\n    Err(anyhow!(\"unexpected value: {x}\"))\n}", "note": "anyhow! creates error; bail! returns early; ensure! is like assert"},
+        {"label": "Downcast", "code": "let result = do_stuff();\nif let Err(e) = &result {\n    if let Some(io_err) = e.downcast_ref::<std::io::Error>() {\n        println!(\"IO error: {io_err}\");\n    }\n}", "note": "Recover the original error type when needed"}
+      ]
+    },
+    {
+      "heading": "Panic & Recovery",
+      "entries": [
+        {"label": "panic!", "code": "panic!(\"something went terribly wrong\");", "note": "Unrecoverable error; unwinds the stack and terminates"},
+        {"label": "catch_unwind", "code": "use std::panic;\nlet result = panic::catch_unwind(|| {\n    panic!(\"oh no!\");\n});\nassert!(result.is_err());", "note": "Catches panics; returns Result. Not for normal error handling"},
+        {"label": "When to panic", "code": "// Panic for:\n// - Invariant violations (bugs)\n// - Unrecoverable states\n// - Prototype/example code\n\n// Use Result for:\n// - Expected failures (file not found, parse errors)\n// - User input validation\n// - Network errors", "note": "Rule of thumb: panic for bugs, Result for expected failures"}
+      ]
+    }
+  ]
+}

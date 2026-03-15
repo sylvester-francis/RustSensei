@@ -1,0 +1,20 @@
+{
+  "code": "E0283",
+  "title": "Ambiguous type",
+  "severity": "occasional",
+  "explanation": "This error occurs when multiple trait implementations could apply, and the compiler cannot determine which one to use. This typically happens with methods that are defined on multiple traits that a type implements.",
+  "example_bad": "trait Greet {\n    fn hello(&self);\n}\n\ntrait Meet {\n    fn hello(&self);\n}\n\nstruct Person;\nimpl Greet for Person {\n    fn hello(&self) { println!(\"Hi!\"); }\n}\nimpl Meet for Person {\n    fn hello(&self) { println!(\"Nice to meet you!\"); }\n}\n\nfn main() {\n    let p = Person;\n    p.hello(); // Error: multiple applicable items\n}",
+  "error_message": "error[E0283]: type annotations needed — cannot resolve ambiguity",
+  "fixes": [
+    {
+      "description": "Use fully qualified syntax to disambiguate",
+      "code": "Greet::hello(&p);  // Calls Greet's hello\nMeet::hello(&p);   // Calls Meet's hello"
+    },
+    {
+      "description": "Use angle bracket syntax for full disambiguation",
+      "code": "<Person as Greet>::hello(&p);\n<Person as Meet>::hello(&p);"
+    }
+  ],
+  "related": ["E0282", "E0277"],
+  "tip": "Fully qualified syntax <Type as Trait>::method() is the universal way to resolve any method ambiguity in Rust."
+}

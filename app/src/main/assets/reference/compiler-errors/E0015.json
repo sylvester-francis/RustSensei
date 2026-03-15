@@ -1,0 +1,24 @@
+{
+  "code": "E0015",
+  "title": "Cannot call non-const function in const context",
+  "severity": "occasional",
+  "explanation": "This error occurs when you try to call a function that is not marked as `const` in a context that requires constant evaluation, such as array sizes, const variables, or static initializers.",
+  "example_bad": "fn compute() -> usize { 42 }\n\nconst SIZE: usize = compute(); // Error: not a const fn\n\nfn main() {\n    let arr = [0; compute()]; // Error: not a const fn\n}",
+  "error_message": "error[E0015]: calls in constants are limited to constant functions, tuple structs and tuple variants",
+  "fixes": [
+    {
+      "description": "Make the function const",
+      "code": "const fn compute() -> usize { 42 }\n\nconst SIZE: usize = compute(); // Works!\nlet arr = [0; compute()]; // Works!"
+    },
+    {
+      "description": "Use a literal value",
+      "code": "const SIZE: usize = 42;\nlet arr = [0; 42];"
+    },
+    {
+      "description": "Use a Vec for runtime-determined sizes",
+      "code": "fn compute() -> usize { 42 }\n\nfn main() {\n    let size = compute();\n    let v = vec![0; size]; // Vec works with runtime sizes\n}"
+    }
+  ],
+  "related": ["E0080"],
+  "tip": "The `const fn` feature has been expanded significantly. Many standard library functions are now const. Check the docs to see if the function you need has a const version."
+}

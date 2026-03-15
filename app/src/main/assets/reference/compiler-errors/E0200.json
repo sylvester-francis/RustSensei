@@ -1,0 +1,20 @@
+{
+  "code": "E0200",
+  "title": "Trait method return type doesn't match declaration",
+  "severity": "occasional",
+  "explanation": "This error occurs when the return type of a trait method implementation does not match what the trait declared. All method signatures in an impl block must exactly match the trait definition.",
+  "example_bad": "trait Builder {\n    fn build(&self) -> String;\n}\n\nstruct HtmlBuilder;\n\nimpl Builder for HtmlBuilder {\n    fn build(&self) -> &str { // Error: return type mismatch\n        \"<html></html>\"\n    }\n}",
+  "error_message": "error[E0053]: method `build` has an incompatible type for trait",
+  "fixes": [
+    {
+      "description": "Match the trait's return type",
+      "code": "impl Builder for HtmlBuilder {\n    fn build(&self) -> String {\n        String::from(\"<html></html>\")\n    }\n}"
+    },
+    {
+      "description": "Use associated types for flexible return types",
+      "code": "trait Builder {\n    type Output;\n    fn build(&self) -> Self::Output;\n}\n\nimpl Builder for HtmlBuilder {\n    type Output = String;\n    fn build(&self) -> String {\n        String::from(\"<html></html>\")\n    }\n}"
+    }
+  ],
+  "related": ["E0053", "E0195"],
+  "tip": "If you need different return types for different implementations, use associated types in the trait definition."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "async-testing",
+  "title": "Testing Async Code",
+  "order": 6,
+  "content": "Async functions need a runtime to execute, even in tests. The #[tokio::test] macro sets up a tokio runtime for each test function, letting you use .await directly in test bodies.\n\nKey patterns: test with timeouts to prevent hanging tests, mock async dependencies with async traits, use tokio::sync for test synchronization, and test cancellation behavior.",
+  "codeExamples": [
+    {
+      "description": "Basic async test with tokio",
+      "code": "// Cargo.toml: [dev-dependencies] tokio = { version = \"1\", features = [\"full\", \"test-util\"] }\n\nasync fn fetch_data(id: u64) -> Result<String, String> {\n    // Simulated async work\n    tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;\n    if id == 0 {\n        Err(\"Invalid ID\".to_string())\n    } else {\n        Ok(format!(\"data_{}\", id))\n    }\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[tokio::test]\n    async fn test_fetch_success() {\n        let result = fetch_data(42).await;\n        assert_eq!(result.unwrap(), \"data_42\");\n    }\n\n    #[tokio::test]\n    async fn test_fetch_invalid_id() {\n        let result = fetch_data(0).await;\n        assert!(result.is_err());\n        assert_eq!(result.unwrap_err(), \"Invalid ID\");\n    }\n}"
+    },
+    {
+      "description": "Testing with timeouts",
+      "code": "use tokio::time::{timeout, Duration};\n\nasync fn slow_operation() -> String {\n    tokio::time::sleep(Duration::from_secs(60)).await;\n    \"done\".to_string()\n}\n\n#[tokio::test]\nasync fn test_with_timeout() {\n    let result = timeout(Duration::from_millis(100), slow_operation()).await;\n    assert!(result.is_err(), \"Should have timed out\");\n}\n\n#[tokio::test]\nasync fn test_fast_operation() {\n    let result = timeout(Duration::from_secs(5), fetch_data(1)).await;\n    assert!(result.is_ok(), \"Should not have timed out\");\n}\n\nasync fn fetch_data(id: u64) -> String {\n    tokio::time::sleep(Duration::from_millis(10)).await;\n    format!(\"data_{}\", id)\n}"
+    },
+    {
+      "description": "Mocking async traits",
+      "code": "use std::future::Future;\n\ntrait AsyncRepository {\n    fn find(&self, id: u64) -> impl Future<Output = Option<String>> + Send;\n    fn save(&self, id: u64, data: &str) -> impl Future<Output = Result<(), String>> + Send;\n}\n\nstruct MockRepository {\n    data: std::collections::HashMap<u64, String>,\n}\n\nimpl MockRepository {\n    fn with_data(data: Vec<(u64, &str)>) -> Self {\n        MockRepository {\n            data: data.into_iter().map(|(k, v)| (k, v.to_string())).collect(),\n        }\n    }\n}\n\nimpl AsyncRepository for MockRepository {\n    async fn find(&self, id: u64) -> Option<String> {\n        self.data.get(&id).cloned()\n    }\n\n    async fn save(&self, _id: u64, _data: &str) -> Result<(), String> {\n        Ok(())\n    }\n}\n\nasync fn get_or_default(repo: &impl AsyncRepository, id: u64) -> String {\n    repo.find(id).await.unwrap_or_else(|| \"default\".to_string())\n}\n\n#[tokio::test]\nasync fn test_get_existing() {\n    let repo = MockRepository::with_data(vec![(1, \"Alice\")]);\n    let result = get_or_default(&repo, 1).await;\n    assert_eq!(result, \"Alice\");\n}\n\n#[tokio::test]\nasync fn test_get_missing() {\n    let repo = MockRepository::with_data(vec![]);\n    let result = get_or_default(&repo, 99).await;\n    assert_eq!(result, \"default\");\n}"
+    },
+    {
+      "description": "Testing concurrent behavior",
+      "code": "use tokio::sync::mpsc;\nuse std::sync::Arc;\nuse tokio::sync::Mutex;\n\nasync fn producer(tx: mpsc::Sender<i32>, items: Vec<i32>) {\n    for item in items {\n        tx.send(item).await.unwrap();\n    }\n}\n\nasync fn consumer(mut rx: mpsc::Receiver<i32>) -> Vec<i32> {\n    let mut received = Vec::new();\n    while let Some(item) = rx.recv().await {\n        received.push(item);\n    }\n    received\n}\n\n#[tokio::test]\nasync fn test_producer_consumer() {\n    let (tx, rx) = mpsc::channel(10);\n\n    let producer_handle = tokio::spawn(producer(tx, vec![1, 2, 3, 4, 5]));\n    let consumer_handle = tokio::spawn(consumer(rx));\n\n    producer_handle.await.unwrap();\n    let received = consumer_handle.await.unwrap();\n\n    assert_eq!(received, vec![1, 2, 3, 4, 5]);\n}"
+    }
+  ],
+  "keyPoints": [
+    "#[tokio::test] provides an async runtime for each test",
+    "Always use timeouts in async tests to prevent hanging",
+    "Mock async traits by implementing them with simple return values",
+    "Use channels to test producer-consumer patterns",
+    "tokio test-util feature provides time manipulation for deterministic tests",
+    "Tests run concurrently by default -- use shared state carefully"
+  ]
+}

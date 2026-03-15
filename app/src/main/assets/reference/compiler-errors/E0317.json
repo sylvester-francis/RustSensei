@@ -1,0 +1,24 @@
+{
+  "code": "E0317",
+  "title": "if/else have incompatible types",
+  "severity": "frequent",
+  "explanation": "This error occurs when the branches of an if/else expression return different types. In Rust, if/else is an expression and all branches must evaluate to the same type.",
+  "example_bad": "fn main() {\n    let x = if true {\n        42        // i32\n    } else {\n        \"hello\"   // &str — Error: incompatible types\n    };\n}",
+  "error_message": "error[E0308]: `if` and `else` have incompatible types — expected `i32`, found `&str`",
+  "fixes": [
+    {
+      "description": "Make both branches return the same type",
+      "code": "let x = if true {\n    42\n} else {\n    0  // Both branches return i32\n};"
+    },
+    {
+      "description": "Use an enum to hold different types",
+      "code": "enum Value {\n    Number(i32),\n    Text(String),\n}\n\nlet x = if true {\n    Value::Number(42)\n} else {\n    Value::Text(\"hello\".into())\n};"
+    },
+    {
+      "description": "Use a trait object for dynamic dispatch",
+      "code": "let x: Box<dyn std::fmt::Display> = if true {\n    Box::new(42)\n} else {\n    Box::new(\"hello\")\n};"
+    }
+  ],
+  "related": ["E0308", "E0277"],
+  "tip": "In Rust, if/else is an expression that produces a value. Both branches must return the same type, just like a function with multiple return paths."
+}

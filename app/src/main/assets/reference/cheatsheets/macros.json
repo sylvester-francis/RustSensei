@@ -1,0 +1,81 @@
+{
+  "id": "macros",
+  "title": "Macros",
+  "sections": [
+    {
+      "heading": "Common Standard Macros",
+      "entries": [
+        {"label": "println! / print!", "code": "println!(\"Hello, {}!\", name);\nprintln!(\"debug: {:?}\", value);\nprintln!(\"padded: {:>10}\", \"right\");\nprint!(\"no newline\");\neprintln!(\"to stderr: {}\", error);", "note": "Print to stdout/stderr; supports formatting specifiers"},
+        {"label": "format!", "code": "let s = format!(\"x={}, y={}\", 1, 2);\nlet s = format!(\"{name} is {age}\");\nlet s = format!(\"{:.2}\", 3.14159);", "note": "Like println! but returns a String instead of printing"},
+        {"label": "vec!", "code": "let v = vec![1, 2, 3];\nlet v = vec![0; 100];   // 100 zeros\nlet v: Vec<String> = vec![];", "note": "Create a Vec with literal values or repeated value"},
+        {"label": "assert macros", "code": "assert!(condition);\nassert_eq!(left, right);\nassert_ne!(left, right);\nassert!(x > 0, \"x must be positive, got {x}\");", "note": "Panics if assertion fails; optional message as last argument"},
+        {"label": "debug_assert!", "code": "debug_assert!(expensive_check());\ndebug_assert_eq!(a, b);", "note": "Only checked in debug builds; compiled out in release"},
+        {"label": "todo! / unimplemented!", "code": "fn future_feature() -> i32 {\n    todo!(\"implement this later\")\n}\nfn not_supported() {\n    unimplemented!(\"this platform is not supported\")\n}", "note": "Placeholder macros that panic; todo! for planned work, unimplemented! for deliberate gaps"},
+        {"label": "dbg!", "code": "let x = 42;\ndbg!(x);             // prints [file:line] x = 42\nlet y = dbg!(x * 2); // prints and returns the value", "note": "Debug printing that shows file, line, expression, and value; returns the value"},
+        {"label": "cfg! / env!", "code": "if cfg!(target_os = \"windows\") {\n    println!(\"Running on Windows\");\n}\nlet version = env!(\"CARGO_PKG_VERSION\");\nlet opt = option_env!(\"MY_VAR\"); // Option<&str>", "note": "cfg! checks configuration at compile time; env! reads environment variables at compile time"}
+      ]
+    },
+    {
+      "heading": "macro_rules! Basics",
+      "entries": [
+        {"label": "Simple macro", "code": "macro_rules! say_hello {\n    () => {\n        println!(\"Hello!\");\n    };\n}\nsay_hello!();", "note": "Define with macro_rules!; invoke with ! suffix"},
+        {"label": "With parameters", "code": "macro_rules! create_function {\n    ($name:ident) => {\n        fn $name() {\n            println!(\"called: {}\", stringify!($name));\n        }\n    };\n}\ncreate_function!(foo);\nfoo(); // prints \"called: foo\"", "note": "$name:ident captures an identifier; other fragment types available"},
+        {"label": "Expression parameter", "code": "macro_rules! double {\n    ($e:expr) => {\n        $e * 2\n    };\n}\nassert_eq!(double!(5), 10);\nassert_eq!(double!(1 + 2), 6);", "note": "$e:expr captures any Rust expression"},
+        {"label": "Multiple arms", "code": "macro_rules! log {\n    ($msg:expr) => {\n        println!(\"[LOG] {}\", $msg);\n    };\n    ($fmt:expr, $($arg:tt)*) => {\n        println!(concat!(\"[LOG] \", $fmt), $($arg)*);\n    };\n}\nlog!(\"simple message\");\nlog!(\"value: {}\", 42);", "note": "Macros can have multiple patterns, matched top to bottom"}
+      ]
+    },
+    {
+      "heading": "macro_rules! Fragment Types",
+      "entries": [
+        {"label": "Fragment specifiers", "code": "macro_rules! example {\n    ($i:ident) => {};     // identifier: foo, x, MyType\n    ($e:expr) => {};      // expression: 1+2, foo()\n    ($t:ty) => {};        // type: i32, Vec<String>\n    ($p:pat) => {};       // pattern: Some(x), 1..=5\n    ($s:stmt) => {};      // statement: let x = 5;\n    ($b:block) => {};     // block: { ... }\n    ($l:literal) => {};   // literal: 42, \"hello\", true\n    ($tt:tt) => {};       // token tree: any single token or (...)\n    ($path:path) => {};   // path: std::io::Error\n    ($vis:vis) => {};     // visibility: pub, pub(crate), (empty)\n}", "note": "Each fragment type constrains what can be matched"},
+        {"label": "Token trees", "code": "macro_rules! pass_through {\n    ($($tt:tt)*) => {\n        $($tt)*\n    };\n}\npass_through! {\n    fn hello() { println!(\"works!\"); }\n}\nhello();", "note": "tt matches any token; $($tt:tt)* matches everything"},
+        {"label": "Type parameter", "code": "macro_rules! new_map {\n    ($key:ty, $val:ty) => {\n        std::collections::HashMap::<$key, $val>::new()\n    };\n}\nlet m = new_map!(String, i32);", "note": "$t:ty captures type expressions"}
+      ]
+    },
+    {
+      "heading": "Repetition in Macros",
+      "entries": [
+        {"label": "Zero or more", "code": "macro_rules! make_vec {\n    ($($elem:expr),*) => {\n        {\n            let mut v = Vec::new();\n            $( v.push($elem); )*\n            v\n        }\n    };\n}\nlet v = make_vec![1, 2, 3];", "note": "$(...),* repeats zero or more times with comma separator"},
+        {"label": "One or more", "code": "macro_rules! min {\n    ($x:expr) => ($x);\n    ($x:expr, $($rest:expr),+) => {\n        std::cmp::min($x, min!($($rest),+))\n    };\n}\nassert_eq!(min!(5, 3, 7, 1), 1);", "note": "$(...),+ repeats one or more times; recursive pattern for variadic"},
+        {"label": "Optional", "code": "macro_rules! with_default {\n    ($val:expr) => { $val };\n    ($val:expr, default: $def:expr) => {\n        if $val == 0 { $def } else { $val }\n    };\n}\nlet x = with_default!(0, default: 42);", "note": "Multiple arms with different arities simulate optional parameters"},
+        {"label": "Nested repetition", "code": "macro_rules! matrix {\n    ($([$($elem:expr),*]),*) => {\n        vec![\n            $(vec![$($elem),*]),*\n        ]\n    };\n}\nlet m = matrix![\n    [1, 2, 3],\n    [4, 5, 6]\n];", "note": "Nested $(...) for multi-dimensional patterns"}
+      ]
+    },
+    {
+      "heading": "Derive Macros",
+      "entries": [
+        {"label": "Common derives", "code": "#[derive(Debug, Clone, PartialEq, Eq, Hash)]\nstruct User {\n    name: String,\n    age: u32,\n}", "note": "Auto-generate trait implementations; most common Rust metaprogramming"},
+        {"label": "Serde derive", "code": "use serde::{Serialize, Deserialize};\n\n#[derive(Serialize, Deserialize, Debug)]\nstruct Config {\n    #[serde(default)]\n    name: String,\n    #[serde(rename = \"max_retries\")]\n    retries: u32,\n}", "note": "serde derives for JSON/TOML/etc serialization; most popular derive macro"},
+        {"label": "Available standard derives", "code": "// Formatting: Debug\n// Comparison: PartialEq, Eq, PartialOrd, Ord\n// Cloning:    Clone, Copy\n// Hashing:    Hash\n// Default:    Default", "note": "Standard library derive macros; all fields must implement the trait"},
+        {"label": "Custom derive (usage)", "code": "// From the thiserror crate:\n#[derive(thiserror::Error, Debug)]\nenum MyError {\n    #[error(\"not found: {0}\")]\n    NotFound(String),\n    #[error(\"io error\")]\n    Io(#[from] std::io::Error),\n}", "note": "Third-party crates provide custom derive macros via procedural macros"}
+      ]
+    },
+    {
+      "heading": "Procedural Macros Overview",
+      "entries": [
+        {"label": "Three kinds", "code": "// 1. Derive macros:    #[derive(MyTrait)]\n// 2. Attribute macros:  #[my_attribute]\n// 3. Function-like:     my_macro!(...)", "note": "Procedural macros are Rust functions that transform token streams"},
+        {"label": "Derive macro skeleton", "code": "// In a separate crate with proc-macro = true:\nuse proc_macro::TokenStream;\nuse quote::quote;\nuse syn::{parse_macro_input, DeriveInput};\n\n#[proc_macro_derive(MyTrait)]\npub fn my_trait_derive(input: TokenStream) -> TokenStream {\n    let input = parse_macro_input!(input as DeriveInput);\n    let name = input.ident;\n    let expanded = quote! {\n        impl MyTrait for #name {\n            fn hello(&self) -> String {\n                format!(\"Hello from {}\", stringify!(#name))\n            }\n        }\n    };\n    TokenStream::from(expanded)\n}", "note": "Uses syn to parse and quote to generate code; must be in a separate crate"},
+        {"label": "Attribute macro skeleton", "code": "#[proc_macro_attribute]\npub fn route(\n    attr: TokenStream,\n    item: TokenStream,\n) -> TokenStream {\n    // attr contains the attribute arguments\n    // item contains the annotated item\n    // return modified item\n    item\n}", "note": "Takes attribute args and the annotated item; returns modified code"},
+        {"label": "Function-like macro", "code": "#[proc_macro]\npub fn sql(input: TokenStream) -> TokenStream {\n    // Parse SQL string and generate Rust code\n    let query = input.to_string();\n    // ... generate code ...\n    TokenStream::new()\n}", "note": "Called like sql!(...); can take arbitrary token input"}
+      ]
+    },
+    {
+      "heading": "Useful Macro Patterns",
+      "entries": [
+        {"label": "HashMap literal", "code": "macro_rules! hashmap {\n    ($($key:expr => $val:expr),* $(,)?) => {\n        {\n            let mut map = std::collections::HashMap::new();\n            $( map.insert($key, $val); )*\n            map\n        }\n    };\n}\nlet m = hashmap! {\n    \"one\" => 1,\n    \"two\" => 2,\n};", "note": "Common utility macro; $(,)? allows trailing comma"},
+        {"label": "Implement for multiple types", "code": "macro_rules! impl_display {\n    ($($t:ty),*) => {\n        $(\n            impl std::fmt::Display for $t {\n                fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {\n                    write!(f, \"{:?}\", self)\n                }\n            }\n        )*\n    };\n}\nimpl_display!(MyType, OtherType, ThirdType);", "note": "Reduce boilerplate by implementing traits for multiple types at once"},
+        {"label": "Builder pattern macro", "code": "macro_rules! builder {\n    ($name:ident { $($field:ident: $t:ty),* $(,)? }) => {\n        struct $name { $($field: $t),* }\n        impl $name {\n            fn builder() -> paste::paste!{[<$name Builder>]} {\n                paste::paste!{[<$name Builder>]::default()}\n            }\n        }\n    };\n}", "note": "Generate builder structs; real-world versions use proc macros"},
+        {"label": "stringify! and concat!", "code": "let name = stringify!(my_variable); // \"my_variable\"\nlet combined = concat!(\"hello\", \" \", \"world\"); // \"hello world\"\nlet path = concat!(env!(\"HOME\"), \"/.config\");", "note": "stringify! converts tokens to string literal; concat! joins string literals at compile time"},
+        {"label": "include_str! / include_bytes!", "code": "const SQL: &str = include_str!(\"../schema.sql\");\nconst ICON: &[u8] = include_bytes!(\"../icon.png\");", "note": "Embed file contents at compile time; path relative to source file"}
+      ]
+    },
+    {
+      "heading": "Macro Hygiene & Scope",
+      "entries": [
+        {"label": "Hygiene", "code": "macro_rules! make_var {\n    () => {\n        let x = 42; // This x doesn't leak out\n    };\n}\nlet x = 0;\nmake_var!();\nassert_eq!(x, 0); // x is still 0", "note": "macro_rules! macros are partially hygienic; local vars don't leak"},
+        {"label": "Exporting macros", "code": "#[macro_export]\nmacro_rules! my_macro {\n    () => { println!(\"exported!\"); };\n}\n// In another file/crate:\n// use my_crate::my_macro;", "note": "#[macro_export] makes macro available to other crates"},
+        {"label": "Macro use in modules", "code": "// Macros must be defined before use in the same file\n// Or use #[macro_use] on the module:\n#[macro_use]\nmod macros;\n// Now macros from that module are available", "note": "macro_rules! macros have textual scope; must be defined before use"}
+      ]
+    }
+  ]
+}

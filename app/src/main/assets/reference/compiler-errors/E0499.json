@@ -1,0 +1,20 @@
+{
+  "code": "E0499",
+  "title": "Cannot borrow as mutable more than once",
+  "severity": "common",
+  "explanation": "This error occurs when you try to create two or more mutable references to the same value at the same time. Rust only allows one mutable reference at a time to prevent data races.",
+  "example_bad": "fn main() {\n    let mut s = String::from(\"hello\");\n    let r1 = &mut s;\n    let r2 = &mut s; // Error: second mutable borrow\n    println!(\"{}, {}\", r1, r2);\n}",
+  "error_message": "error[E0499]: cannot borrow `s` as mutable more than once at a time",
+  "fixes": [
+    {
+      "description": "Use scopes to limit borrow lifetimes",
+      "code": "let mut s = String::from(\"hello\");\n{\n    let r1 = &mut s;\n    r1.push_str(\" world\");\n} // r1 goes out of scope\nlet r2 = &mut s; // Now this works"
+    },
+    {
+      "description": "Finish using the first reference before creating the second",
+      "code": "let mut s = String::from(\"hello\");\nlet r1 = &mut s;\nr1.push_str(\" world\"); // Last use of r1\nlet r2 = &mut s; // Works because r1 is no longer used\nprintln!(\"{}\", r2);"
+    }
+  ],
+  "related": ["E0502", "E0382"],
+  "tip": "Rust uses Non-Lexical Lifetimes (NLL) — a borrow ends at its last usage, not at the end of the scope."
+}

@@ -1,0 +1,24 @@
+{
+  "code": "E0433",
+  "title": "Cannot find path in this scope",
+  "severity": "common",
+  "explanation": "This error occurs when you use a module path or type path that the compiler cannot resolve. This usually means a missing use statement, a typo in the path, or a missing dependency in Cargo.toml.",
+  "example_bad": "fn main() {\n    let map = HashMap::new(); // Error: cannot find `HashMap`\n    let path = path::Path::new(\"/tmp\"); // Error: cannot find `path`\n}",
+  "error_message": "error[E0433]: failed to resolve: use of undeclared type `HashMap`",
+  "fixes": [
+    {
+      "description": "Add the correct use statement",
+      "code": "use std::collections::HashMap;\n\nfn main() {\n    let map = HashMap::new();\n}"
+    },
+    {
+      "description": "Use the full path inline",
+      "code": "fn main() {\n    let map = std::collections::HashMap::<String, i32>::new();\n}"
+    },
+    {
+      "description": "Add missing dependency to Cargo.toml",
+      "code": "# In Cargo.toml:\n[dependencies]\nserde = \"1.0\"\n\n# Then in your code:\nuse serde::Serialize;"
+    }
+  ],
+  "related": ["E0425", "E0432"],
+  "tip": "Use your IDE's auto-import feature or check the docs for the correct path. Standard library types like HashMap, BTreeMap, etc. need explicit imports."
+}

@@ -1,0 +1,33 @@
+{
+  "id": "distribution",
+  "title": "Building and Distributing CLI Tools",
+  "order": 7,
+  "content": "Rust produces static binaries with no runtime dependencies, making distribution simple. Users just need the binary.\n\nFor distribution: publish to crates.io for `cargo install` support, create GitHub releases with cross-compiled binaries, or package for system package managers.\n\nCross-compilation lets you build for Linux, macOS, and Windows from a single machine. The cross tool makes this easy. Use cargo build --release for optimized production binaries.",
+  "codeExamples": [
+    {
+      "description": "Release build with optimizations",
+      "code": "# Cargo.toml\n# [profile.release]\n# opt-level = 3\n# lto = true          # Link-time optimization\n# codegen-units = 1   # Better optimization, slower compile\n# strip = true        # Strip debug symbols\n# panic = \"abort\"     # Smaller binary (no unwinding)\n\n# Build:\n# cargo build --release\n# Binary is at: target/release/my-tool"
+    },
+    {
+      "description": "Publishing to crates.io",
+      "code": "# Cargo.toml metadata for publishing\n# [package]\n# name = \"my-tool\"\n# version = \"1.0.0\"\n# edition = \"2021\"\n# authors = [\"Your Name <you@example.com>\"]\n# description = \"A useful command-line tool\"\n# license = \"MIT\"\n# repository = \"https://github.com/you/my-tool\"\n# keywords = [\"cli\", \"tool\"]\n# categories = [\"command-line-utilities\"]\n#\n# Then:\n# cargo login <your-api-token>\n# cargo publish\n#\n# Users install with:\n# cargo install my-tool"
+    },
+    {
+      "description": "Cross-compilation with cross",
+      "code": "# Install cross: cargo install cross\n# Build for different targets:\n\n# Linux (x86_64, musl for static linking)\n# cross build --release --target x86_64-unknown-linux-musl\n\n# macOS (Intel)\n# cross build --release --target x86_64-apple-darwin\n\n# macOS (Apple Silicon)\n# cross build --release --target aarch64-apple-darwin\n\n# Windows\n# cross build --release --target x86_64-pc-windows-gnu"
+    },
+    {
+      "description": "Version information at compile time",
+      "code": "use clap::Parser;\n\n#[derive(Parser)]\n#[command(\n    version = env!(\"CARGO_PKG_VERSION\"),\n    about = \"My Tool\",\n    long_about = None,\n)]\nstruct Cli {\n    #[command(subcommand)]\n    command: Commands,\n}\n\n// For detailed version info:\nfn version_info() -> String {\n    format!(\n        \"{} v{}\\nBuilt with Rust {}\\nTarget: {}\",\n        env!(\"CARGO_PKG_NAME\"),\n        env!(\"CARGO_PKG_VERSION\"),\n        env!(\"CARGO_PKG_RUST_VERSION\"),\n        env!(\"TARGET\"),  // Set via build script\n    )\n}"
+    }
+  ],
+  "keyPoints": [
+    "cargo build --release produces optimized binaries",
+    "Enable LTO and strip symbols for smaller binaries",
+    "cargo install my-tool installs from crates.io",
+    "Use cross for easy cross-compilation to other platforms",
+    "musl target on Linux produces fully static binaries",
+    "GitHub Actions can automate cross-platform builds and releases",
+    "Include version, license, and description in Cargo.toml for publishing"
+  ]
+}

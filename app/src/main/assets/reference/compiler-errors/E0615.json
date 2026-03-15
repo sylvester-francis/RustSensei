@@ -1,0 +1,20 @@
+{
+  "code": "E0615",
+  "title": "Attempted to access private field",
+  "severity": "occasional",
+  "explanation": "This error occurs when you try to access a struct field that is private. In Rust, struct fields are private by default and can only be accessed from within the same module unless marked as pub.",
+  "example_bad": "mod shapes {\n    pub struct Circle {\n        radius: f64, // private field\n    }\n    impl Circle {\n        pub fn new(r: f64) -> Circle {\n            Circle { radius: r }\n        }\n    }\n}\n\nfn main() {\n    let c = shapes::Circle::new(5.0);\n    println!(\"{}\", c.radius); // Error: field `radius` is private\n}",
+  "error_message": "error[E0616]: field `radius` of struct `Circle` is private",
+  "fixes": [
+    {
+      "description": "Make the field public",
+      "code": "pub struct Circle {\n    pub radius: f64, // Now accessible outside the module\n}"
+    },
+    {
+      "description": "Add a getter method",
+      "code": "impl Circle {\n    pub fn radius(&self) -> f64 {\n        self.radius\n    }\n}\n\n// Usage:\nprintln!(\"{}\", c.radius());"
+    }
+  ],
+  "related": ["E0609", "E0599"],
+  "tip": "Prefer getter methods over public fields for better encapsulation. This lets you change the internal representation without breaking external code."
+}

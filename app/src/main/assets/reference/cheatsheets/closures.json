@@ -1,0 +1,70 @@
+{
+  "id": "closures",
+  "title": "Closures",
+  "sections": [
+    {
+      "heading": "Closure Syntax",
+      "entries": [
+        {"label": "Basic closure", "code": "let add = |a, b| a + b;\nlet result = add(2, 3); // 5", "note": "Parameters in |...|; types usually inferred"},
+        {"label": "With type annotations", "code": "let add = |a: i32, b: i32| -> i32 { a + b };", "note": "Explicit types optional but helpful for clarity"},
+        {"label": "No parameters", "code": "let greet = || println!(\"hello\");\ngreet();", "note": "Empty || for closures with no parameters"},
+        {"label": "Multi-line body", "code": "let process = |x: i32| {\n    let doubled = x * 2;\n    let result = doubled + 1;\n    result\n};\nassert_eq!(process(5), 11);", "note": "Use braces for multiple statements; last expression is return value"},
+        {"label": "Single expression", "code": "let square = |x: i32| x * x;\nlet is_even = |x: &i32| x % 2 == 0;", "note": "Braces optional for single expression closures"},
+        {"label": "Closure captures variables", "code": "let name = String::from(\"Rust\");\nlet greet = || println!(\"Hello, {name}!\");\ngreet();\nprintln!(\"name is still: {name}\");", "note": "Closures capture variables from their enclosing scope by reference"}
+      ]
+    },
+    {
+      "heading": "Capture Modes",
+      "entries": [
+        {"label": "Capture by reference (&T)", "code": "let text = String::from(\"hello\");\nlet print_text = || println!(\"{text}\");\nprint_text();\nprintln!(\"{text}\"); // text still available", "note": "Default for immutable access; borrows from environment"},
+        {"label": "Capture by mutable reference (&mut T)", "code": "let mut count = 0;\nlet mut increment = || { count += 1; };\nincrement();\nincrement();\nprintln!(\"{count}\"); // 2", "note": "Default when closure mutates the captured variable"},
+        {"label": "Capture by value (move)", "code": "let name = String::from(\"Alice\");\nlet greet = move || println!(\"Hello, {name}!\");\ngreet();\n// name has been moved into the closure; cannot use here", "note": "move keyword forces ownership transfer; required for thread::spawn"},
+        {"label": "Move with Copy types", "code": "let x = 42;\nlet closure = move || println!(\"{x}\");\nclosure();\nprintln!(\"{x}\"); // x is still available (Copy type)", "note": "move copies Copy types; moves non-Copy types"},
+        {"label": "Selective capture", "code": "let mut data = vec![1, 2, 3];\nlet first = &data[0];\n// Closure captures first by reference, not data\nlet print_first = || println!(\"{first}\");\nprint_first();\ndata.push(4); // data is not borrowed by the closure", "note": "Closures capture the smallest amount needed; capture specific references"},
+        {"label": "Move closure for threads", "code": "use std::thread;\nlet data = vec![1, 2, 3];\nlet handle = thread::spawn(move || {\n    println!(\"{:?}\", data);\n});\nhandle.join().unwrap();", "note": "move required for spawn because closure must be 'static (own all data)"}
+      ]
+    },
+    {
+      "heading": "Fn, FnMut, FnOnce Traits",
+      "entries": [
+        {"label": "Fn (immutable borrow)", "code": "fn call_twice(f: impl Fn()) {\n    f();\n    f();\n}\nlet msg = \"hello\";\ncall_twice(|| println!(\"{msg}\"));", "note": "Fn: can be called multiple times; captures by &T; most restrictive"},
+        {"label": "FnMut (mutable borrow)", "code": "fn call_twice_mut(mut f: impl FnMut()) {\n    f();\n    f();\n}\nlet mut count = 0;\ncall_twice_mut(|| { count += 1; });\nassert_eq!(count, 2);", "note": "FnMut: can be called multiple times; captures by &mut T"},
+        {"label": "FnOnce (take ownership)", "code": "fn call_once(f: impl FnOnce() -> String) -> String {\n    f()\n}\nlet name = String::from(\"Rust\");\nlet result = call_once(move || {\n    format!(\"Hello, {name}\") // consumes name\n});", "note": "FnOnce: can only be called once; captures by value; least restrictive bound"},
+        {"label": "Trait hierarchy", "code": "// FnOnce is the supertrait:\n//   FnOnce (all closures)\n//     |-- FnMut (can be called multiple times)\n//           |-- Fn (can be called without mutation)\n\n// If you accept FnOnce, any closure works\n// If you accept Fn, only non-mutating closures work", "note": "Fn: FnMut: FnOnce -- every Fn is FnMut, every FnMut is FnOnce"},
+        {"label": "Choosing the right bound", "code": "// Use Fn when you call the closure multiple times without mutation\nfn filter<F: Fn(&i32) -> bool>(data: &[i32], f: F) -> Vec<&i32> { ... }\n\n// Use FnMut when the closure needs to mutate state\nfn for_each<F: FnMut(i32)>(data: &[i32], mut f: F) { ... }\n\n// Use FnOnce when you call the closure exactly once\nfn setup<F: FnOnce() -> Config>(f: F) -> Config { f() }", "note": "Accept the least restrictive bound your function needs"}
+      ]
+    },
+    {
+      "heading": "Closures as Function Parameters",
+      "entries": [
+        {"label": "impl Fn syntax", "code": "fn apply(value: i32, f: impl Fn(i32) -> i32) -> i32 {\n    f(value)\n}\nlet result = apply(5, |x| x * 2);", "note": "Most common way; monomorphized at compile time"},
+        {"label": "Generic bound", "code": "fn apply<F: Fn(i32) -> i32>(value: i32, f: F) -> i32 {\n    f(value)\n}", "note": "Equivalent to impl Fn; needed when same bound used multiple times"},
+        {"label": "Where clause", "code": "fn apply<F>(value: i32, f: F) -> i32\nwhere\n    F: Fn(i32) -> i32,\n{\n    f(value)\n}", "note": "Cleaner for complex bounds"},
+        {"label": "dyn Fn (trait object)", "code": "fn apply(value: i32, f: &dyn Fn(i32) -> i32) -> i32 {\n    f(value)\n}", "note": "Dynamic dispatch; use when you need to store different closures uniformly"},
+        {"label": "Function pointer", "code": "fn apply(value: i32, f: fn(i32) -> i32) -> i32 {\n    f(value)\n}\nfn double(x: i32) -> i32 { x * 2 }\nlet result = apply(5, double);", "note": "fn() type for plain functions (not closures that capture environment)"},
+        {"label": "Closure vs function pointer", "code": "let multiplier = 3;\n// fn pointer: cannot capture environment\nlet fp: fn(i32) -> i32 = |x| x * 2; // OK, no capture\n// let fp: fn(i32) -> i32 = |x| x * multiplier; // ERROR\n\n// Fn trait: can capture environment\nlet closure: Box<dyn Fn(i32) -> i32> = Box::new(|x| x * multiplier);", "note": "fn pointers are for closures without captures; Fn traits for all closures"}
+      ]
+    },
+    {
+      "heading": "Returning Closures",
+      "entries": [
+        {"label": "Return impl Fn", "code": "fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |y| x + y\n}\nlet add5 = make_adder(5);\nassert_eq!(add5(3), 8);", "note": "Return opaque closure type; single concrete type only"},
+        {"label": "Return Box<dyn Fn>", "code": "fn make_greeting(formal: bool) -> Box<dyn Fn(&str) -> String> {\n    if formal {\n        Box::new(|name| format!(\"Good day, {name}.\"))\n    } else {\n        Box::new(|name| format!(\"Hey {name}!\"))\n    }\n}", "note": "Box<dyn Fn> when returning different closures based on logic"},
+        {"label": "Returning FnMut", "code": "fn counter() -> impl FnMut() -> i32 {\n    let mut count = 0;\n    move || {\n        count += 1;\n        count\n    }\n}\nlet mut c = counter();\nassert_eq!(c(), 1);\nassert_eq!(c(), 2);", "note": "Return a stateful closure that mutates its captured state"},
+        {"label": "Closure in struct", "code": "struct Callback<F: Fn(i32) -> i32> {\n    func: F,\n}\nimpl<F: Fn(i32) -> i32> Callback<F> {\n    fn call(&self, x: i32) -> i32 {\n        (self.func)(x)\n    }\n}", "note": "Store closure in a struct with generic parameter"},
+        {"label": "Boxed closure in struct", "code": "struct Handler {\n    callback: Box<dyn Fn(String) -> String>,\n}\nimpl Handler {\n    fn new(f: impl Fn(String) -> String + 'static) -> Self {\n        Handler { callback: Box::new(f) }\n    }\n    fn handle(&self, input: String) -> String {\n        (self.callback)(input)\n    }\n}", "note": "Use Box<dyn Fn> when struct must hold different closure types"}
+      ]
+    },
+    {
+      "heading": "Common Closure Patterns",
+      "entries": [
+        {"label": "Iterator adaptors", "code": "let v = vec![1, 2, 3, 4, 5];\nlet evens: Vec<_> = v.iter().filter(|&&x| x % 2 == 0).collect();\nlet doubled: Vec<_> = v.iter().map(|&x| x * 2).collect();\nlet sum: i32 = v.iter().fold(0, |acc, &x| acc + x);", "note": "Closures are the backbone of iterator chains"},
+        {"label": "Sort with closure", "code": "let mut names = vec![\"Charlie\", \"Alice\", \"Bob\"];\nnames.sort_by(|a, b| a.cmp(b));\nnames.sort_by_key(|name| name.len());", "note": "Custom sorting logic via closures"},
+        {"label": "Lazy initialization", "code": "let expensive = std::cell::OnceCell::new();\nlet value = expensive.get_or_init(|| {\n    // computed only on first access\n    heavy_computation()\n});", "note": "Closure called once lazily; result cached"},
+        {"label": "Error handling with closures", "code": "let result = std::fs::read_to_string(\"file.txt\")\n    .map(|content| content.trim().to_string())\n    .map_err(|e| format!(\"Failed to read: {e}\"))\n    .unwrap_or_else(|e| {\n        eprintln!(\"{e}\");\n        String::new()\n    });", "note": "Closures power Result and Option combinator chains"},
+        {"label": "Thread::spawn with closure", "code": "let data = vec![1, 2, 3];\nlet handle = std::thread::spawn(move || {\n    data.iter().sum::<i32>()\n});\nlet total = handle.join().unwrap();\nassert_eq!(total, 6);", "note": "Closures with move for transferring data to threads"},
+        {"label": "Immediately invoked", "code": "let config = (|| {\n    let mut c = Config::default();\n    c.debug = true;\n    c.retries = 3;\n    c\n})();\n// config is the result of the immediately invoked closure", "note": "IIFE pattern: define and call a closure in one expression"}
+      ]
+    }
+  ]
+}

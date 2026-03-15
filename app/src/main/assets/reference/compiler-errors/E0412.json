@@ -1,0 +1,20 @@
+{
+  "code": "E0412",
+  "title": "Cannot find type in this scope",
+  "severity": "frequent",
+  "explanation": "This error occurs when you reference a type that has not been defined or imported in the current scope. This is similar to E0425 but specifically for types rather than values.",
+  "example_bad": "fn process(data: Vec<Datum>) -> Result { // Error: cannot find type `Datum`, `Result` needs type args\n    todo!()\n}\n\nstruct Config {\n    db: DatabaseConnection, // Error: cannot find type\n}",
+  "error_message": "error[E0412]: cannot find type `Datum` in this scope",
+  "fixes": [
+    {
+      "description": "Import the type",
+      "code": "use crate::models::Datum;\n\nfn process(data: Vec<Datum>) -> Result<(), String> {\n    todo!()\n}"
+    },
+    {
+      "description": "Define the type",
+      "code": "struct Datum {\n    value: f64,\n    label: String,\n}\n\nfn process(data: Vec<Datum>) -> Result<(), String> {\n    todo!()\n}"
+    }
+  ],
+  "related": ["E0425", "E0433"],
+  "tip": "Remember that Result and Option need their type parameters. Write Result<T, E> not just Result."
+}

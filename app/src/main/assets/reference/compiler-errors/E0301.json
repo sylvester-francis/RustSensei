@@ -1,0 +1,20 @@
+{
+  "code": "E0301",
+  "title": "Cannot mutably borrow in a match guard",
+  "severity": "occasional",
+  "explanation": "This error occurs when you try to mutably borrow a value inside a match guard (the `if` condition in a match arm). Match guards must not mutate the value being matched, as this could invalidate the match.",
+  "example_bad": "fn main() {\n    let mut v = vec![1, 2, 3];\n    match v.as_slice() {\n        [first, ..] if { v.push(4); true } => { // Error\n            println!(\"{}\", first);\n        }\n        _ => {}\n    }\n}",
+  "error_message": "error[E0301]: cannot mutably borrow in a pattern guard",
+  "fixes": [
+    {
+      "description": "Move the mutation outside the match",
+      "code": "let mut v = vec![1, 2, 3];\nlet should_extend = true;\nif should_extend {\n    v.push(4);\n}\nmatch v.as_slice() {\n    [first, ..] => println!(\"{}\", first),\n    _ => {}\n}"
+    },
+    {
+      "description": "Use only immutable operations in the guard",
+      "code": "let v = vec![1, 2, 3];\nmatch v.as_slice() {\n    [first, ..] if v.len() > 2 => { // len() is &self, OK\n        println!(\"{}\", first);\n    }\n    _ => {}\n}"
+    }
+  ],
+  "related": ["E0502", "E0499"],
+  "tip": "Match guards should be pure conditions. Do any mutations before or after the match expression, not inside guards."
+}

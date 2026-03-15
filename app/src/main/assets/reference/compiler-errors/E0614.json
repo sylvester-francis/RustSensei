@@ -1,0 +1,24 @@
+{
+  "code": "E0614",
+  "title": "Cannot dereference type",
+  "severity": "frequent",
+  "explanation": "This error occurs when you try to use the dereference operator (*) on a type that does not implement the Deref trait. Only types like references, Box, Rc, Arc, and other smart pointers can be dereferenced.",
+  "example_bad": "fn main() {\n    let x: i32 = 42;\n    let y = *x; // Error: cannot dereference `i32`\n}",
+  "error_message": "error[E0614]: type `i32` cannot be dereferenced",
+  "fixes": [
+    {
+      "description": "Remove the unnecessary dereference",
+      "code": "let x: i32 = 42;\nlet y = x; // i32 implements Copy, no dereference needed"
+    },
+    {
+      "description": "Dereference a reference, not the value itself",
+      "code": "let x: i32 = 42;\nlet r = &x;\nlet y = *r; // Dereference the reference"
+    },
+    {
+      "description": "Implement Deref for custom smart pointer types",
+      "code": "use std::ops::Deref;\n\nstruct MyBox<T>(T);\n\nimpl<T> Deref for MyBox<T> {\n    type Target = T;\n    fn deref(&self) -> &T {\n        &self.0\n    }\n}"
+    }
+  ],
+  "related": ["E0507", "E0599"],
+  "tip": "The * operator calls the deref() method. Rust also has automatic dereferencing (deref coercion) which handles most cases for you."
+}

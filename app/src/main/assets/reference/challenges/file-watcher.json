@@ -1,0 +1,24 @@
+{
+  "id": "file-watcher",
+  "title": "Directory File Watcher",
+  "difficulty": "intermediate",
+  "estimatedTime": "60 min",
+  "description": "Build a program that monitors a directory for file changes (created, modified, deleted) by polling the filesystem and reporting changes.",
+  "concepts": ["file system", "HashMap", "SystemTime", "loops", "thread::sleep"],
+  "requirements": [
+    "Scan a directory and record all files with their modification times",
+    "Periodically re-scan and detect new, modified, and deleted files",
+    "Print a report of changes each scan cycle",
+    "Run continuously until interrupted",
+    "Handle directories that do not exist gracefully"
+  ],
+  "starterCode": "use std::collections::HashMap;\nuse std::fs;\nuse std::path::PathBuf;\nuse std::time::{Duration, SystemTime};\nuse std::thread;\n\n#[derive(Debug)]\nenum FileEvent {\n    Created(PathBuf),\n    Modified(PathBuf),\n    Deleted(PathBuf),\n}\n\nfn scan_directory(path: &str) -> Result<HashMap<PathBuf, SystemTime>, String> {\n    // TODO: Return a map of file paths to their last modification time\n    Err(\"Not implemented\".to_string())\n}\n\nfn detect_changes(\n    old: &HashMap<PathBuf, SystemTime>,\n    new: &HashMap<PathBuf, SystemTime>,\n) -> Vec<FileEvent> {\n    // TODO: Compare old and new snapshots, return list of events\n    vec![]\n}\n\nfn main() {\n    let watch_path = \".\";\n    println!(\"Watching directory: {}\", watch_path);\n    // TODO: Implement the watch loop\n}",
+  "solution": "use std::collections::HashMap;\nuse std::fs;\nuse std::path::PathBuf;\nuse std::time::{Duration, SystemTime};\nuse std::thread;\n\n#[derive(Debug)]\nenum FileEvent {\n    Created(PathBuf),\n    Modified(PathBuf),\n    Deleted(PathBuf),\n}\n\nfn scan_directory(path: &str) -> Result<HashMap<PathBuf, SystemTime>, String> {\n    let mut files = HashMap::new();\n    let entries = fs::read_dir(path)\n        .map_err(|e| format!(\"Cannot read directory: {}\", e))?;\n\n    for entry in entries {\n        let entry = entry.map_err(|e| format!(\"Error reading entry: {}\", e))?;\n        let path = entry.path();\n        if path.is_file() {\n            if let Ok(metadata) = fs::metadata(&path) {\n                if let Ok(modified) = metadata.modified() {\n                    files.insert(path, modified);\n                }\n            }\n        }\n    }\n    Ok(files)\n}\n\nfn detect_changes(\n    old: &HashMap<PathBuf, SystemTime>,\n    new: &HashMap<PathBuf, SystemTime>,\n) -> Vec<FileEvent> {\n    let mut events = Vec::new();\n\n    for (path, new_time) in new {\n        match old.get(path) {\n            None => events.push(FileEvent::Created(path.clone())),\n            Some(old_time) if old_time != new_time => {\n                events.push(FileEvent::Modified(path.clone()))\n            }\n            _ => {}\n        }\n    }\n\n    for path in old.keys() {\n        if !new.contains_key(path) {\n            events.push(FileEvent::Deleted(path.clone()));\n        }\n    }\n\n    events\n}\n\nfn main() {\n    let watch_path = \".\";\n    println!(\"Watching directory: {}\", watch_path);\n\n    let mut snapshot = match scan_directory(watch_path) {\n        Ok(s) => s,\n        Err(e) => {\n            eprintln!(\"Error: {}\", e);\n            return;\n        }\n    };\n    println!(\"Initial scan: {} files found\", snapshot.len());\n\n    loop {\n        thread::sleep(Duration::from_secs(2));\n\n        let new_snapshot = match scan_directory(watch_path) {\n            Ok(s) => s,\n            Err(e) => {\n                eprintln!(\"Scan error: {}\", e);\n                continue;\n            }\n        };\n\n        let events = detect_changes(&snapshot, &new_snapshot);\n        if !events.is_empty() {\n            for event in &events {\n                match event {\n                    FileEvent::Created(p) => println!(\"[CREATED] {:?}\", p),\n                    FileEvent::Modified(p) => println!(\"[MODIFIED] {:?}\", p),\n                    FileEvent::Deleted(p) => println!(\"[DELETED] {:?}\", p),\n                }\n            }\n        }\n\n        snapshot = new_snapshot;\n    }\n}",
+  "hints": [
+    "fs::read_dir() returns an iterator of DirEntry items",
+    "metadata.modified() gives you the last modification time as SystemTime",
+    "Compare two HashMaps: keys in new but not old are created, keys in old but not new are deleted",
+    "thread::sleep(Duration::from_secs(2)) creates a polling interval"
+  ],
+  "bonusChallenge": "Add recursive directory watching. Use the notify crate for proper filesystem events instead of polling. Add file content hashing to detect modifications more reliably."
+}

@@ -1,0 +1,74 @@
+{
+  "id": "operators",
+  "title": "Operators",
+  "sections": [
+    {
+      "heading": "Arithmetic Operators",
+      "entries": [
+        {"label": "Basic math", "code": "let sum = 5 + 3;      // 8\nlet diff = 10 - 4;    // 6\nlet product = 3 * 7;  // 21\nlet quotient = 10 / 3; // 3 (integer division)\nlet remainder = 10 % 3; // 1", "note": "Standard arithmetic; integer division truncates"},
+        {"label": "Float arithmetic", "code": "let sum = 5.0 + 3.2;      // 8.2\nlet quotient = 10.0 / 3.0; // 3.3333...\nlet remainder = 10.0 % 3.0; // 1.0", "note": "Float division gives decimal results"},
+        {"label": "Compound assignment", "code": "let mut x = 10;\nx += 5;  // x = 15\nx -= 3;  // x = 12\nx *= 2;  // x = 24\nx /= 4;  // x = 6\nx %= 4;  // x = 2", "note": "Modify in place with op= operators"},
+        {"label": "Overflow handling", "code": "let a: u8 = 255;\n// a + 1 would panic in debug, wrap in release\nlet b = a.wrapping_add(1);  // 0\nlet c = a.saturating_add(1); // 255\nlet (d, overflowed) = a.overflowing_add(1); // (0, true)\nlet e = a.checked_add(1);   // None", "note": "Four strategies: wrapping, saturating, overflowing, checked"},
+        {"label": "Operator traits", "code": "use std::ops::Add;\nstruct Vec2 { x: f64, y: f64 }\nimpl Add for Vec2 {\n    type Output = Self;\n    fn add(self, other: Self) -> Self {\n        Vec2 { x: self.x + other.x, y: self.y + other.y }\n    }\n}", "note": "Implement operator traits from std::ops to overload operators"}
+      ]
+    },
+    {
+      "heading": "Comparison Operators",
+      "entries": [
+        {"label": "Equality", "code": "5 == 5   // true\n5 != 3   // true\n\"hello\" == \"hello\"  // true", "note": "== and != require PartialEq trait"},
+        {"label": "Ordering", "code": "3 < 5    // true\n5 > 3    // true\n3 <= 3   // true\n5 >= 6   // false", "note": "Comparison operators require PartialOrd trait"},
+        {"label": "Chained comparisons", "code": "// Rust does NOT support chained comparisons like Python\n// Use && instead:\nlet x = 5;\nlet in_range = x >= 1 && x <= 10;", "note": "No chaining; use logical AND to combine comparisons"},
+        {"label": "Custom comparison", "code": "#[derive(PartialEq, PartialOrd)]\nstruct Score(f64);\nassert!(Score(3.5) > Score(2.0));", "note": "Derive or manually implement PartialOrd for custom ordering"}
+      ]
+    },
+    {
+      "heading": "Logical Operators",
+      "entries": [
+        {"label": "Boolean logic", "code": "let a = true;\nlet b = false;\nlet and = a && b;  // false (short-circuits)\nlet or = a || b;   // true  (short-circuits)\nlet not = !a;      // false", "note": "&& and || are short-circuit: right side not evaluated if left determines result"},
+        {"label": "Short-circuit examples", "code": "let v = vec![1, 2, 3];\nif !v.is_empty() && v[0] > 0 {\n    // Safe: v[0] only evaluated if v is not empty\n    println!(\"first is positive\");\n}", "note": "Short-circuiting prevents panics from invalid access"}
+      ]
+    },
+    {
+      "heading": "Bitwise Operators",
+      "entries": [
+        {"label": "Bitwise operations", "code": "let a: u8 = 0b1100;\nlet b: u8 = 0b1010;\nlet and = a & b;    // 0b1000 (8)\nlet or  = a | b;    // 0b1110 (14)\nlet xor = a ^ b;    // 0b0110 (6)\nlet not = !a;       // 0b11110011 (243 for u8)", "note": "Work on integer types; useful for flags and bit manipulation"},
+        {"label": "Shift operations", "code": "let x: u8 = 1;\nlet left  = x << 3;  // 8  (multiply by 2^3)\nlet right = 16 >> 2; // 4  (divide by 2^2)", "note": "Left shift multiplies by power of 2; right shift divides"},
+        {"label": "Compound bitwise", "code": "let mut flags: u8 = 0;\nflags |= 0b0001;  // set bit 0\nflags |= 0b0100;  // set bit 2\nflags &= !0b0001; // clear bit 0\nlet has_bit2 = flags & 0b0100 != 0; // check bit 2", "note": "Common pattern for bit flags: set with |=, clear with &= !, test with &"}
+      ]
+    },
+    {
+      "heading": "Reference & Dereference",
+      "entries": [
+        {"label": "Reference", "code": "let x = 5;\nlet r = &x;     // immutable reference\nlet mut y = 5;\nlet mr = &mut y; // mutable reference", "note": "& borrows immutably; &mut borrows mutably"},
+        {"label": "Dereference", "code": "let x = 5;\nlet r = &x;\nassert_eq!(*r, 5); // dereference to get value\n\nlet mut y = 5;\nlet mr = &mut y;\n*mr = 10; // modify through mutable reference", "note": "* dereferences a reference to access the inner value"},
+        {"label": "Auto-deref", "code": "let s = String::from(\"hello\");\n// These are equivalent:\nlet len1 = (&s).len();\nlet len2 = s.len(); // auto-deref", "note": "Rust auto-dereferences for method calls; no need for explicit *"},
+        {"label": "Deref coercion", "code": "fn greet(name: &str) { println!(\"Hello, {name}\"); }\nlet s = String::from(\"world\");\ngreet(&s); // &String coerces to &str", "note": "Rust automatically applies Deref chain: &String -> &str, &Vec<T> -> &[T]"}
+      ]
+    },
+    {
+      "heading": "Range Operators",
+      "entries": [
+        {"label": "Range types", "code": "let r = 0..5;     // Range: 0, 1, 2, 3, 4\nlet r = 0..=5;    // RangeInclusive: 0, 1, 2, 3, 4, 5\nlet r = ..5;      // RangeTo: ..5\nlet r = 5..;      // RangeFrom: 5, 6, 7, ...\nlet r = ..;       // RangeFull", "note": "Used for slicing, iteration, and pattern matching"},
+        {"label": "In for loops", "code": "for i in 0..5 { println!(\"{i}\"); }\nfor i in (0..5).rev() { println!(\"{i}\"); }\nfor c in 'a'..='z' { print!(\"{c} \"); }", "note": "Ranges implement Iterator; work with chars too"},
+        {"label": "In slicing", "code": "let v = vec![1, 2, 3, 4, 5];\nlet slice = &v[1..3]; // [2, 3]\nlet from = &v[2..];   // [3, 4, 5]\nlet to = &v[..3];     // [1, 2, 3]\nlet all = &v[..];     // [1, 2, 3, 4, 5]", "note": "Ranges used as indices for slicing arrays, Vecs, and strings"},
+        {"label": "contains", "code": "let range = 1..=10;\nassert!(range.contains(&5));\nassert!(!(1..5).contains(&5)); // exclusive end", "note": "Check if a value is within a range"}
+      ]
+    },
+    {
+      "heading": "The ? Operator",
+      "entries": [
+        {"label": "Error propagation", "code": "fn read_file() -> Result<String, std::io::Error> {\n    let content = std::fs::read_to_string(\"file.txt\")?;\n    Ok(content)\n}", "note": "? unwraps Ok/Some or returns early with Err/None"},
+        {"label": "With Option", "code": "fn get_first(v: &[i32]) -> Option<i32> {\n    let first = v.first()?;\n    Some(*first * 2)\n}", "note": "? on Option returns None if None; unwraps Some"},
+        {"label": "Chaining", "code": "fn parse_header(data: &str) -> Result<u32, Box<dyn std::error::Error>> {\n    let header = data.lines().next().ok_or(\"empty\")?;\n    let value = header.trim().parse::<u32>()?;\n    Ok(value)\n}", "note": "Chain multiple ? operators for clean error propagation"}
+      ]
+    },
+    {
+      "heading": "Type Casting & as",
+      "entries": [
+        {"label": "Numeric casting", "code": "let x: i32 = 42;\nlet y: f64 = x as f64;\nlet z: u8 = 255;\nlet w: i8 = z as i8; // wraps: -1", "note": "as for primitive type conversions; may truncate or wrap"},
+        {"label": "Pointer casting", "code": "let x: i32 = 42;\nlet ptr = &x as *const i32;\nlet addr = ptr as usize;", "note": "Cast references to raw pointers and to usize addresses"},
+        {"label": "Casting gotchas", "code": "let big: u32 = 300;\nlet small: u8 = big as u8; // 44 (truncated!)\nlet neg: i32 = -1;\nlet pos: u32 = neg as u32; // 4294967295 (wraps!)", "note": "as casts can silently lose data; use TryFrom for safe conversion"}
+      ]
+    }
+  ]
+}

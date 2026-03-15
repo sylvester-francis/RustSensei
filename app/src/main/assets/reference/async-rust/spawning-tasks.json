@@ -1,0 +1,32 @@
+{
+  "id": "spawning-tasks",
+  "title": "Spawning and Managing Tasks",
+  "order": 3,
+  "content": "tokio::spawn() creates a new async task that runs concurrently with other tasks. A spawned task is like a lightweight thread managed by the runtime. Tasks are multiplexed onto a thread pool.\n\nSpawned tasks return a JoinHandle that you can .await to get the task's result. If a task panics, the JoinHandle returns an error rather than crashing the whole program.\n\nImportant constraint: spawned tasks must be 'static -- they cannot borrow data from the spawning scope. This is because the task may outlive the scope that spawned it. Use Arc for shared ownership or clone data into the task.\n\nFor structured concurrency (waiting on multiple tasks), use tokio::join!, tokio::try_join!, or JoinSet.",
+  "codeExamples": [
+    {
+      "description": "Spawning concurrent tasks",
+      "code": "use tokio::time::{sleep, Duration};\n\n#[tokio::main]\nasync fn main() {\n    let handle1 = tokio::spawn(async {\n        sleep(Duration::from_millis(100)).await;\n        \"task 1 done\"\n    });\n\n    let handle2 = tokio::spawn(async {\n        sleep(Duration::from_millis(50)).await;\n        \"task 2 done\"\n    });\n\n    // Both tasks run concurrently\n    let result1 = handle1.await.unwrap();\n    let result2 = handle2.await.unwrap();\n    println!(\"{}, {}\", result1, result2);\n}"
+    },
+    {
+      "description": "join! for structured concurrency",
+      "code": "use tokio::time::{sleep, Duration};\n\nasync fn fetch_user() -> String {\n    sleep(Duration::from_millis(100)).await;\n    \"Alice\".to_string()\n}\n\nasync fn fetch_orders() -> Vec<String> {\n    sleep(Duration::from_millis(150)).await;\n    vec![\"order-1\".to_string(), \"order-2\".to_string()]\n}\n\n#[tokio::main]\nasync fn main() {\n    // Run both concurrently, wait for both to complete\n    let (user, orders) = tokio::join!(fetch_user(), fetch_orders());\n    println!(\"User: {}, Orders: {:?}\", user, orders);\n}"
+    },
+    {
+      "description": "Sharing data with Arc",
+      "code": "use std::sync::Arc;\nuse tokio::sync::Mutex;\n\n#[tokio::main]\nasync fn main() {\n    let counter = Arc::new(Mutex::new(0u64));\n    let mut handles = vec![];\n\n    for i in 0..5 {\n        let counter = Arc::clone(&counter);\n        handles.push(tokio::spawn(async move {\n            let mut lock = counter.lock().await;\n            *lock += 1;\n            println!(\"Task {} incremented counter to {}\", i, *lock);\n        }));\n    }\n\n    for handle in handles {\n        handle.await.unwrap();\n    }\n\n    println!(\"Final: {}\", *counter.lock().await);\n}"
+    },
+    {
+      "description": "JoinSet for dynamic task management",
+      "code": "use tokio::task::JoinSet;\n\n#[tokio::main]\nasync fn main() {\n    let mut set = JoinSet::new();\n\n    for i in 0..5 {\n        set.spawn(async move {\n            tokio::time::sleep(tokio::time::Duration::from_millis(i * 50)).await;\n            i * 10\n        });\n    }\n\n    while let Some(result) = set.join_next().await {\n        match result {\n            Ok(value) => println!(\"Task returned: {}\", value),\n            Err(e) => println!(\"Task failed: {}\", e),\n        }\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "tokio::spawn() creates a concurrent task on the runtime's thread pool",
+    "Spawned tasks must be 'static -- use Arc or move data in",
+    "JoinHandle lets you await a task's result or detect panics",
+    "tokio::join! runs multiple futures concurrently and waits for all",
+    "JoinSet manages a dynamic collection of spawned tasks",
+    "Tasks are much lighter than OS threads -- spawn thousands without issue"
+  ]
+}

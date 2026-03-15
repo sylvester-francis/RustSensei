@@ -1,0 +1,23 @@
+{
+  "id": "project-setup",
+  "title": "Setting Up a Rust CLI Project",
+  "order": 1,
+  "content": "Rust is an excellent choice for CLI tools: fast startup, small binaries, no runtime dependencies, and great argument parsing libraries.\n\nStart with `cargo new my-tool` and add clap for argument parsing plus anyhow for error handling. These two crates form the foundation of nearly every Rust CLI.\n\nOrganize your project with main.rs as a thin entry point that parses args and calls into lib.rs where the logic lives. This separation makes testing easier and allows your CLI logic to be used as a library.",
+  "codeExamples": [
+    {
+      "description": "Basic CLI project structure",
+      "code": "// Cargo.toml\n// [package]\n// name = \"my-tool\"\n// version = \"0.1.0\"\n// edition = \"2021\"\n//\n// [dependencies]\n// clap = { version = \"4\", features = [\"derive\"] }\n// anyhow = \"1\"\n\n// src/main.rs\nuse clap::Parser;\nuse anyhow::Result;\n\n#[derive(Parser)]\n#[command(name = \"my-tool\", version, about = \"A useful CLI tool\")]\nstruct Cli {\n    /// Input file to process\n    input: String,\n\n    /// Enable verbose output\n    #[arg(short, long)]\n    verbose: bool,\n}\n\nfn main() -> Result<()> {\n    let cli = Cli::parse();\n\n    if cli.verbose {\n        println!(\"Processing: {}\", cli.input);\n    }\n\n    my_tool::run(&cli.input)?;\n    Ok(())\n}"
+    },
+    {
+      "description": "Library separation (src/lib.rs)",
+      "code": "// src/lib.rs\nuse anyhow::{Context, Result};\nuse std::fs;\n\npub fn run(input_path: &str) -> Result<()> {\n    let content = fs::read_to_string(input_path)\n        .with_context(|| format!(\"Could not read file: {}\", input_path))?;\n\n    let line_count = content.lines().count();\n    let word_count = content.split_whitespace().count();\n\n    println!(\"Lines: {}\", line_count);\n    println!(\"Words: {}\", word_count);\n\n    Ok(())\n}"
+    }
+  ],
+  "keyPoints": [
+    "Use `cargo new` to create a new CLI project",
+    "clap + anyhow are the standard foundation for Rust CLIs",
+    "Separate main.rs (arg parsing) from lib.rs (logic) for testability",
+    "Return Result from main() for clean error output",
+    "#[command] and #[arg] attributes configure clap's behavior"
+  ]
+}

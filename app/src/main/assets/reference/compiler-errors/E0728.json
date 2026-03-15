@@ -1,0 +1,20 @@
+{
+  "code": "E0728",
+  "title": "`await` used in non-async function",
+  "severity": "frequent",
+  "explanation": "This error occurs when you use the .await syntax inside a function that is not marked as async. The await keyword can only be used inside async functions or async blocks.",
+  "example_bad": "fn fetch_data() -> String {\n    let data = reqwest::get(\"https://api.example.com\")\n        .await // Error: `await` is only allowed in `async` functions\n        .unwrap();\n    data.text().await.unwrap()\n}",
+  "error_message": "error[E0728]: `await` is only allowed inside `async` functions and blocks",
+  "fixes": [
+    {
+      "description": "Make the function async",
+      "code": "async fn fetch_data() -> String {\n    let resp = reqwest::get(\"https://api.example.com\")\n        .await\n        .unwrap();\n    resp.text().await.unwrap()\n}"
+    },
+    {
+      "description": "Use an async block inside a sync function",
+      "code": "fn fetch_data() -> String {\n    let rt = tokio::runtime::Runtime::new().unwrap();\n    rt.block_on(async {\n        let resp = reqwest::get(\"https://api.example.com\")\n            .await\n            .unwrap();\n        resp.text().await.unwrap()\n    })\n}"
+    }
+  ],
+  "related": ["E0277"],
+  "tip": "Remember that async functions return a Future that must be awaited or spawned. The entire call chain up to the runtime entry point needs to be async."
+}

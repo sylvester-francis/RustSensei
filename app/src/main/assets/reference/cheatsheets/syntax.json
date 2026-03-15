@@ -1,0 +1,117 @@
+{
+  "id": "syntax",
+  "title": "Rust Syntax Quick Reference",
+  "sections": [
+    {
+      "heading": "Variables & Constants",
+      "entries": [
+        {"label": "Immutable binding", "code": "let x = 5;", "note": "Cannot be reassigned after initialization"},
+        {"label": "Mutable binding", "code": "let mut x = 5;\nx = 10;", "note": "Use mut keyword to allow reassignment"},
+        {"label": "Type annotation", "code": "let x: i32 = 5;", "note": "Explicit type after colon"},
+        {"label": "Shadowing", "code": "let x = 5;\nlet x = x + 1;\nlet x = \"hello\";", "note": "Re-declare with let; can change type"},
+        {"label": "Constant", "code": "const MAX_POINTS: u32 = 100_000;", "note": "Must have type annotation; evaluated at compile time"},
+        {"label": "Static variable", "code": "static GREETING: &str = \"Hello\";", "note": "Fixed memory address; lives for entire program"},
+        {"label": "Destructuring let", "code": "let (x, y, z) = (1, 2.0, \"three\");", "note": "Unpack tuples into separate bindings"},
+        {"label": "Unused variable", "code": "let _unused = 42;", "note": "Prefix with _ to suppress unused warnings"}
+      ]
+    },
+    {
+      "heading": "Primitive Types",
+      "entries": [
+        {"label": "Integers", "code": "let a: i8 = -1;\nlet b: u8 = 255;\nlet c: i32 = 42;\nlet d: u64 = 1_000_000;\nlet e: i128 = -99;\nlet f: usize = 10;", "note": "Signed: i8, i16, i32, i64, i128, isize. Unsigned: u8, u16, u32, u64, u128, usize"},
+        {"label": "Floats", "code": "let x: f32 = 3.14;\nlet y: f64 = 2.718281828;", "note": "f64 is the default; f32 for less precision"},
+        {"label": "Boolean", "code": "let t: bool = true;\nlet f = false;", "note": "true or false; 1 byte in size"},
+        {"label": "Character", "code": "let c: char = 'z';\nlet heart = '\\u{2764}';", "note": "4 bytes; represents a Unicode scalar value"},
+        {"label": "Unit type", "code": "let unit: () = ();", "note": "Empty tuple; returned by functions with no return value"},
+        {"label": "Tuple", "code": "let tup: (i32, f64, bool) = (500, 6.4, true);\nlet five_hundred = tup.0;", "note": "Fixed-length collection of different types; access by index"},
+        {"label": "Array", "code": "let arr: [i32; 5] = [1, 2, 3, 4, 5];\nlet zeros = [0; 10];", "note": "Fixed-length, same type; [value; count] for repeated values"},
+        {"label": "Never type", "code": "fn diverge() -> ! {\n    panic!(\"This never returns\");\n}", "note": "! indicates a function never returns"}
+      ]
+    },
+    {
+      "heading": "Functions",
+      "entries": [
+        {"label": "Basic function", "code": "fn greet(name: &str) {\n    println!(\"Hello, {name}!\");\n}", "note": "Parameters must have type annotations"},
+        {"label": "Return value", "code": "fn add(a: i32, b: i32) -> i32 {\n    a + b\n}", "note": "Last expression without semicolon is the return value"},
+        {"label": "Early return", "code": "fn check(x: i32) -> &'static str {\n    if x > 0 {\n        return \"positive\";\n    }\n    \"non-positive\"\n}", "note": "Use return keyword for early exit"},
+        {"label": "Generic function", "code": "fn largest<T: PartialOrd>(list: &[T]) -> &T {\n    let mut largest = &list[0];\n    for item in &list[1..] {\n        if item > largest {\n            largest = item;\n        }\n    }\n    largest\n}", "note": "Type parameter T with trait bound"},
+        {"label": "Multiple return values", "code": "fn swap(a: i32, b: i32) -> (i32, i32) {\n    (b, a)\n}\nlet (x, y) = swap(1, 2);", "note": "Return a tuple and destructure at call site"},
+        {"label": "Function pointer", "code": "fn apply(f: fn(i32) -> i32, x: i32) -> i32 {\n    f(x)\n}\nlet result = apply(|x| x * 2, 5);", "note": "fn(...) -> ... type for function pointers"}
+      ]
+    },
+    {
+      "heading": "Control Flow",
+      "entries": [
+        {"label": "if / else", "code": "if x > 5 {\n    println!(\"big\");\n} else if x > 0 {\n    println!(\"small\");\n} else {\n    println!(\"non-positive\");\n}", "note": "Condition must be bool; no parentheses required"},
+        {"label": "if as expression", "code": "let val = if condition { \"yes\" } else { \"no\" };", "note": "Both branches must return the same type"},
+        {"label": "loop", "code": "let mut count = 0;\nlet result = loop {\n    count += 1;\n    if count == 10 {\n        break count * 2;\n    }\n};", "note": "Infinite loop; break can return a value"},
+        {"label": "while loop", "code": "let mut n = 5;\nwhile n > 0 {\n    println!(\"{n}\");\n    n -= 1;\n}", "note": "Loop while condition is true"},
+        {"label": "for loop", "code": "for i in 0..5 {\n    println!(\"{i}\");\n}\nfor item in &vec![1, 2, 3] {\n    println!(\"{item}\");\n}", "note": "Iterate over any type implementing IntoIterator"},
+        {"label": "Loop labels", "code": "'outer: for i in 0..10 {\n    'inner: for j in 0..10 {\n        if i + j == 15 {\n            break 'outer;\n        }\n    }\n}", "note": "Label loops to break/continue outer loops"},
+        {"label": "while let", "code": "let mut stack = vec![1, 2, 3];\nwhile let Some(top) = stack.pop() {\n    println!(\"{top}\");\n}", "note": "Loop while pattern matches; great for Option/Result"}
+      ]
+    },
+    {
+      "heading": "Structs",
+      "entries": [
+        {"label": "Define struct", "code": "struct Point {\n    x: f64,\n    y: f64,\n}", "note": "Named fields with types"},
+        {"label": "Create instance", "code": "let p = Point { x: 1.0, y: 2.0 };", "note": "All fields must be initialized"},
+        {"label": "Field init shorthand", "code": "let x = 1.0;\nlet y = 2.0;\nlet p = Point { x, y };", "note": "When variable name matches field name"},
+        {"label": "Struct update syntax", "code": "let p2 = Point { x: 5.0, ..p };", "note": "Copy remaining fields from another instance"},
+        {"label": "Tuple struct", "code": "struct Color(u8, u8, u8);\nlet red = Color(255, 0, 0);", "note": "Named tuple; fields accessed by index (red.0)"},
+        {"label": "Unit struct", "code": "struct Marker;\nlet m = Marker;", "note": "No fields; useful for trait implementations"},
+        {"label": "Impl block", "code": "impl Point {\n    fn new(x: f64, y: f64) -> Self {\n        Self { x, y }\n    }\n    fn distance(&self, other: &Point) -> f64 {\n        ((self.x - other.x).powi(2)\n            + (self.y - other.y).powi(2)).sqrt()\n    }\n}", "note": "Methods and associated functions defined in impl blocks"}
+      ]
+    },
+    {
+      "heading": "Enums",
+      "entries": [
+        {"label": "Simple enum", "code": "enum Direction {\n    North,\n    South,\n    East,\n    West,\n}", "note": "Variants are namespaced under the enum name"},
+        {"label": "Enum with data", "code": "enum Message {\n    Quit,\n    Move { x: i32, y: i32 },\n    Write(String),\n    Color(u8, u8, u8),\n}", "note": "Variants can hold different data types"},
+        {"label": "Using enum", "code": "let msg = Message::Write(String::from(\"hello\"));\nlet dir = Direction::North;", "note": "Access variants with :: syntax"},
+        {"label": "Impl on enum", "code": "impl Message {\n    fn call(&self) {\n        match self {\n            Message::Quit => println!(\"quit\"),\n            Message::Write(text) => println!(\"{text}\"),\n            _ => println!(\"other\"),\n        }\n    }\n}", "note": "Enums can have methods just like structs"},
+        {"label": "Option enum", "code": "let some_val: Option<i32> = Some(42);\nlet no_val: Option<i32> = None;", "note": "Rust's replacement for null; in the standard library"},
+        {"label": "Result enum", "code": "let ok: Result<i32, String> = Ok(42);\nlet err: Result<i32, String> = Err(\"fail\".into());", "note": "For operations that may fail; in the standard library"}
+      ]
+    },
+    {
+      "heading": "Match Expressions",
+      "entries": [
+        {"label": "Basic match", "code": "match x {\n    1 => println!(\"one\"),\n    2 => println!(\"two\"),\n    3..=5 => println!(\"three to five\"),\n    _ => println!(\"other\"),\n}", "note": "Must be exhaustive; _ is a catch-all wildcard"},
+        {"label": "Match with binding", "code": "match msg {\n    Message::Write(text) => println!(\"{text}\"),\n    Message::Move { x, y } => println!(\"{x}, {y}\"),\n    _ => {}\n}", "note": "Destructure enum variants in match arms"},
+        {"label": "Match guard", "code": "match num {\n    n if n < 0 => println!(\"negative\"),\n    0 => println!(\"zero\"),\n    n => println!(\"positive: {n}\"),\n}", "note": "Extra condition with if after the pattern"},
+        {"label": "Multiple patterns", "code": "match x {\n    1 | 2 | 3 => println!(\"small\"),\n    _ => println!(\"other\"),\n}", "note": "Use | to match any of several patterns"},
+        {"label": "if let", "code": "if let Some(value) = optional {\n    println!(\"Got: {value}\");\n}", "note": "Sugar for match with one arm + wildcard"},
+        {"label": "let else", "code": "let Some(value) = optional else {\n    return;\n};\nprintln!(\"Got: {value}\");", "note": "Irrefutable pattern or diverge; available since Rust 1.65"}
+      ]
+    },
+    {
+      "heading": "Modules & Visibility",
+      "entries": [
+        {"label": "Define module", "code": "mod math {\n    pub fn add(a: i32, b: i32) -> i32 {\n        a + b\n    }\n    fn private_helper() -> i32 {\n        42\n    }\n}", "note": "Items are private by default; pub makes them public"},
+        {"label": "Use statement", "code": "use std::collections::HashMap;\nuse std::io::{self, Read, Write};", "note": "Bring items into scope; group with braces"},
+        {"label": "Re-export", "code": "pub use self::inner::MyType;", "note": "Make item available from this module's namespace"},
+        {"label": "File as module", "code": "// In main.rs or lib.rs:\nmod my_module;\n// Rust looks for my_module.rs or my_module/mod.rs", "note": "Declare module; compiler looks for the file"},
+        {"label": "Crate root", "code": "use crate::utils::helper;\nuse super::parent_module;", "note": "crate:: for absolute path; super:: for parent module"},
+        {"label": "Pub(crate)", "code": "pub(crate) fn internal_fn() {}\npub(super) fn parent_visible() {}", "note": "Restrict visibility to crate or parent module"}
+      ]
+    },
+    {
+      "heading": "Type Aliases & Newtypes",
+      "entries": [
+        {"label": "Type alias", "code": "type Kilometers = i32;\ntype Result<T> = std::result::Result<T, MyError>;", "note": "Creates a synonym; not a distinct type"},
+        {"label": "Newtype pattern", "code": "struct Meters(f64);\nstruct Seconds(f64);", "note": "Wrapper struct for type safety; prevents mixing units"},
+        {"label": "Generic type alias", "code": "type Pair<T> = (T, T);\nlet p: Pair<i32> = (1, 2);", "note": "Type aliases can be generic"}
+      ]
+    },
+    {
+      "heading": "Comments & Documentation",
+      "entries": [
+        {"label": "Line comment", "code": "// This is a comment", "note": "Single line comment"},
+        {"label": "Block comment", "code": "/* This is a\n   block comment */", "note": "Multi-line comment"},
+        {"label": "Doc comment", "code": "/// Adds two numbers together.\n///\n/// # Examples\n/// ```\n/// assert_eq!(add(2, 3), 5);\n/// ```\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}", "note": "/// generates documentation; supports Markdown; doc tests run with cargo test"},
+        {"label": "Module doc comment", "code": "//! This module provides math utilities.\n//! Use it for basic arithmetic.", "note": "//! documents the enclosing item (module or crate)"}
+      ]
+    }
+  ]
+}

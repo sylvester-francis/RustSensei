@@ -1,0 +1,24 @@
+{
+  "id": "property-testing",
+  "title": "Property-Based Testing",
+  "order": 5,
+  "content": "Property-based testing generates random inputs and verifies that certain properties always hold. Instead of writing specific test cases, you describe invariants that should be true for all inputs. This finds edge cases you would never think to test manually.\n\nThe proptest crate is the most popular choice. It generates random values, runs your test many times, and if it finds a failure, it automatically shrinks the input to the smallest failing case.",
+  "codeExamples": [
+    {
+      "description": "Basic property tests with proptest",
+      "code": "// Cargo.toml: [dev-dependencies] proptest = \"1\"\n\nfn reverse(s: &str) -> String {\n    s.chars().rev().collect()\n}\n\nfn sort_vec(mut v: Vec<i32>) -> Vec<i32> {\n    v.sort();\n    v\n}\n\n#[cfg(test)]\nmod tests {\n    use super::*;\n    use proptest::prelude::*;\n\n    proptest! {\n        // Reversing twice gives back the original\n        #[test]\n        fn test_double_reverse(s in \".*\") {\n            assert_eq!(reverse(&reverse(&s)), s);\n        }\n\n        // Reversed string has the same length\n        #[test]\n        fn test_reverse_length(s in \"[a-zA-Z0-9 ]{0,100}\") {\n            assert_eq!(reverse(&s).len(), s.len());\n        }\n\n        // Sorted output has same length as input\n        #[test]\n        fn test_sort_preserves_length(v in prop::collection::vec(-1000..1000i32, 0..100)) {\n            let sorted = sort_vec(v.clone());\n            assert_eq!(sorted.len(), v.len());\n        }\n\n        // Sorted output is actually sorted\n        #[test]\n        fn test_sort_is_sorted(v in prop::collection::vec(-1000..1000i32, 0..100)) {\n            let sorted = sort_vec(v);\n            for window in sorted.windows(2) {\n                assert!(window[0] <= window[1]);\n            }\n        }\n\n        // Sorted output contains the same elements\n        #[test]\n        fn test_sort_preserves_elements(v in prop::collection::vec(-100..100i32, 0..50)) {\n            let mut expected = v.clone();\n            expected.sort();\n            assert_eq!(sort_vec(v), expected);\n        }\n    }\n}"
+    },
+    {
+      "description": "Custom strategies for complex types",
+      "code": "use proptest::prelude::*;\n\n#[derive(Debug, Clone)]\nstruct Money {\n    cents: u64,\n}\n\nimpl Money {\n    fn new(cents: u64) -> Self {\n        Money { cents }\n    }\n\n    fn add(&self, other: &Money) -> Money {\n        Money { cents: self.cents + other.cents }\n    }\n}\n\nprop_compose! {\n    fn money_strategy()(cents in 0..1_000_000u64) -> Money {\n        Money::new(cents)\n    }\n}\n\nproptest! {\n    #[test]\n    fn test_addition_is_commutative(\n        a in money_strategy(),\n        b in money_strategy()\n    ) {\n        assert_eq!(a.add(&b).cents, b.add(&a).cents);\n    }\n\n    #[test]\n    fn test_addition_is_associative(\n        a in money_strategy(),\n        b in money_strategy(),\n        c in money_strategy()\n    ) {\n        let left = a.add(&b).add(&c);\n        let right = a.add(&b.add(&c));\n        assert_eq!(left.cents, right.cents);\n    }\n}"
+    }
+  ],
+  "keyPoints": [
+    "Property tests verify invariants across randomly generated inputs",
+    "proptest automatically shrinks failing inputs to minimal cases",
+    "Use regex-like patterns to generate strings: \"[a-z]{1,20}\"",
+    "prop::collection::vec generates vectors of random elements",
+    "Custom strategies with prop_compose! for complex types",
+    "Think about properties: commutativity, associativity, round-tripping, idempotency"
+  ]
+}
