@@ -95,7 +95,7 @@ fun SettingsScreen(
                         .fillMaxWidth()
                         .clickable {
                             if (isDownloaded && !isLoaded) {
-                                modelViewModel.switchModel(model.id, chatViewModel.llamaEngine)
+                                modelViewModel.switchModel(model.id, chatViewModel.llamaEngine, chatViewModel.liteRtEngine)
                             } else if (!isDownloaded) {
                                 modelViewModel.selectModel(model.id)
                                 modelViewModel.startDownload()
@@ -217,8 +217,13 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            val formatInfo = if (true) {
+                "Quantization: Q8  |  Format: LiteRT (TFLite)  |  GPU-accelerated"
+            } else {
+                "Quantization: Q4_K_M  |  Format: GGUF"
+            }
             Text(
-                text = "Quantization: Q4_K_M  |  Format: GGUF",
+                text = formatInfo,
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

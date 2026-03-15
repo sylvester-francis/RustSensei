@@ -8,7 +8,6 @@ plugins {
 android {
     namespace = "com.sylvester.rustsensei"
     compileSdk = 35
-    ndkVersion = "26.1.10909125"
 
     defaultConfig {
         applicationId = "com.sylvester.rustsensei"
@@ -18,15 +17,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters += listOf("arm64-v8a")
-        }
     }
 
     buildTypes {
         release {
-            // P1 Fix #6: enable R8 for production (proguard-rules.pro has @Keep rules)
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -47,12 +41,6 @@ android {
 
     buildFeatures {
         compose = true
-    }
-
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-        }
     }
 }
 
@@ -88,6 +76,9 @@ dependencies {
     // Network (model download)
     implementation(libs.okhttp)
     implementation(libs.work.runtime.ktx)
+
+    // MediaPipe LLM Inference (LiteRT/GPU backend)
+    implementation(libs.mediapipe.genai)
 
     // Testing
     testImplementation(libs.junit)

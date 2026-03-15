@@ -37,7 +37,7 @@ data class ModelInfo(
     val description: String,
     val ramRequired: String,
     val minDeviceMemoryGb: Float = 0f,
-    val sha256: String = "" // empty = skip verification
+    val sha256: String = ""
 )
 
 class ModelManager(private val context: Context) {
@@ -47,48 +47,26 @@ class ModelManager(private val context: Context) {
 
         val AVAILABLE_MODELS = listOf(
             ModelInfo(
-                id = "qwen3-0.6b",
+                id = "litert-0.6b",
                 displayName = "Rust Mentor 0.6B",
                 parameterSize = "0.6B",
-                filename = "qwen3-0.6b.Q4_K_M.gguf",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-GGUF/resolve/main/qwen3-0.6b.Q4_K_M.gguf",
-                expectedSizeBytes = 530_000_000L,
-                description = "Ultra-fast, instant responses. Great for quick hints and code checks.",
-                ramRequired = "~1 GB RAM",
+                filename = "rust_mentor_0_6b_q8_ekv2048.tflite",
+                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-LiteRT/resolve/main/rust_mentor_0_6b_q8_ekv2048.tflite",
+                expectedSizeBytes = 700_000_000L,
+                description = "GPU-accelerated. Fastest inference. Recommended.",
+                ramRequired = "~2 GB RAM",
                 minDeviceMemoryGb = 2f
             ),
             ModelInfo(
-                id = "qwen3-1.7b",
+                id = "litert-1.7b",
                 displayName = "Rust Mentor 1.7B",
                 parameterSize = "1.7B",
-                filename = "qwen3-1.7b.Q4_K_M.gguf",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-GGUF/resolve/main/qwen3-1.7b.Q4_K_M.gguf",
-                expectedSizeBytes = 1_130_000_000L,
-                description = "Fast and lightweight. Best balance for most phones.",
-                ramRequired = "~2 GB RAM",
-                minDeviceMemoryGb = 3f
-            ),
-            ModelInfo(
-                id = "qwen3-4b",
-                displayName = "Rust Mentor 4B",
-                parameterSize = "4B",
-                filename = "qwen3-4b.Q4_K_M.gguf",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-4b-GGUF/resolve/main/qwen3-4b.Q4_K_M.gguf",
-                expectedSizeBytes = 2_497_280_832L,
-                description = "Detailed explanations. Needs a flagship phone.",
+                filename = "rust_mentor_1_7b_q8_ekv2048.tflite",
+                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-LiteRT/resolve/main/rust_mentor_1_7b_q8_ekv2048.tflite",
+                expectedSizeBytes = 1_800_000_000L,
+                description = "GPU-accelerated. Best quality with fast inference.",
                 ramRequired = "~4 GB RAM",
-                minDeviceMemoryGb = 6f
-            ),
-            ModelInfo(
-                id = "qwen3-8b",
-                displayName = "Rust Mentor 8B",
-                parameterSize = "8B",
-                filename = "qwen3-8b.Q4_K_M.gguf",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-8b-GGUF/resolve/main/qwen3-8b.Q4_K_M.gguf",
-                expectedSizeBytes = 5_030_000_000L,
-                description = "Most capable. Needs 12+ GB RAM device.",
-                ramRequired = "~8 GB RAM",
-                minDeviceMemoryGb = 10f
+                minDeviceMemoryGb = 4f
             )
         )
 

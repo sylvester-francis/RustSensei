@@ -18,6 +18,7 @@ okhttp = "4.12.0"
 workManager = "2.10.0"
 securityCrypto = "1.1.0-alpha06"
 composeRichtext = "1.0.0-alpha01"
+mediapipeGenai = "0.10.22"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +55,9 @@ security-crypto = { group = "androidx.security", name = "security-crypto", versi
 # Network (for model download only)
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+
+# MediaPipe LLM Inference (LiteRT backend)
+mediapipe-genai = { group = "com.google.mediapipe", name = "tasks-genai", version.ref = "mediapipeGenai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

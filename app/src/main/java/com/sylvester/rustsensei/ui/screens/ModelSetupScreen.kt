@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
@@ -62,6 +63,7 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 fun ModelSetupScreen(
     modelViewModel: ModelViewModel,
     llamaEngine: LlamaEngine,
+    liteRtEngine: LiteRtEngine,
     onNavigateToChat: () -> Unit
 ) {
     val uiState by modelViewModel.uiState.collectAsState()
@@ -90,7 +92,7 @@ fun ModelSetupScreen(
 
     LaunchedEffect(uiState.modelState) {
         if (uiState.modelState == ModelState.DOWNLOADED) {
-            modelViewModel.loadModel(llamaEngine)
+            modelViewModel.loadModel(llamaEngine, liteRtEngine)
         }
     }
 
@@ -330,7 +332,7 @@ fun ModelSetupScreen(
                 Button(
                     onClick = {
                         if (modelViewModel.isModelDownloaded()) {
-                            modelViewModel.loadModel(llamaEngine)
+                            modelViewModel.loadModel(llamaEngine, liteRtEngine)
                         } else {
                             modelViewModel.startDownload()
                         }

@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.llm.DownloadState
 import com.sylvester.rustsensei.llm.InferenceConfig
+import com.sylvester.rustsensei.llm.InferenceEngine
+import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
@@ -38,7 +40,7 @@ data class ModelUiState(
     val errorMessage: String? = null,
     val modelSizeMB: Long = 0,
     val availableModels: List<ModelInfo> = ModelManager.AVAILABLE_MODELS,
-    val selectedModelId: String = "qwen3-4b",
+    val selectedModelId: String = "litert-0.6b",
     val loadedModelId: String? = null,
     val downloadedModelIds: Set<String> = emptySet()
 )
@@ -134,7 +136,7 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun loadModel(llamaEngine: LlamaEngine) {
+    fun loadModel(llamaEngine: LlamaEngine, liteRtEngine: LiteRtEngine) {
         if (_uiState.value.modelState == ModelState.LOADING) return
 
         val modelInfo = getSelectedModelInfo()
@@ -144,12 +146,19 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                 // Unload current model first if a different one is loaded
                 val currentLoaded = _uiState.value.loadedModelId
                 if (currentLoaded != null && currentLoaded != modelInfo.id) {
-                    llamaEngine.unloadModel()
+                    // Unload the previously active engine
+                    val previousModel = ModelManager.getModelById(currentLoaded)
+                    if (true) { // LiteRT only
+                        liteRtEngine.unloadModel()
+                    } else {
+                        llamaEngine.unloadModel()
+                    }
                 }
 
                 val modelPath = modelManager.getModelFile(modelInfo).absolutePath
                 val contextSize = InferenceConfig.forModel(modelInfo.id).contextLength
-                val success = llamaEngine.loadModel(modelPath, contextSize)
+                val activeEngine: InferenceEngine = liteRtEngine
+                val success = activeEngine.loadModel(modelPath, contextSize)
                 if (success) {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.READY,
@@ -160,7 +169,7 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                 } else {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.ERROR,
-                        errorMessage = "Failed to load ${modelInfo.displayName}. The file may be corrupted — try deleting and re-downloading."
+                        errorMessage = "Failed to load ${modelInfo.displayName}. The file may be corrupted \u2014 try deleting and re-downloading."
                     )
                 }
             } catch (e: Exception) {
@@ -172,11 +181,11 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun switchModel(modelId: String, llamaEngine: LlamaEngine) {
+    fun switchModel(modelId: String, llamaEngine: LlamaEngine, liteRtEngine: LiteRtEngine) {
         selectModel(modelId)
         val modelInfo = getSelectedModelInfo()
         if (modelManager.isModelDownloaded(modelInfo)) {
-            loadModel(llamaEngine)
+            loadModel(llamaEngine, liteRtEngine)
         }
         // If not downloaded, the UI will show the download button
     }

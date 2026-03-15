@@ -8,6 +8,8 @@ import com.sylvester.rustsensei.data.ChatMessage
 import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
+import com.sylvester.rustsensei.llm.InferenceEngine
+import com.sylvester.rustsensei.llm.ModelManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +43,17 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: ChatRepository = app.repository
 
     val llamaEngine = app.llamaEngine
+    val liteRtEngine = app.liteRtEngine
+
+    private fun getActiveEngine(): InferenceEngine {
+        val modelId = app.preferencesManager.getSelectedModelId()
+        val model = ModelManager.getModelById(modelId)
+        return liteRtEngine
+    }
+
+    fun isAnyModelLoaded(): Boolean {
+        return llamaEngine.isModelLoaded() || liteRtEngine.isModelLoaded()
+    }
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -84,7 +97,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun startNewConversation() {
         viewModelScope.launch {
             messagesJob?.cancel()
-            llamaEngine.clearCache()
+            getActiveEngine().clearCache()
             val convId = repository.createConversation()
             _uiState.value = ChatUiState(currentConversationId = convId)
             _chatContext.value = ChatContext.General
@@ -95,7 +108,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun loadConversation(conversationId: Long) {
         viewModelScope.launch {
             messagesJob?.cancel()
-            llamaEngine.clearCache()
+            getActiveEngine().clearCache()
             _uiState.value = _uiState.value.copy(currentConversationId = conversationId)
             observeMessages(conversationId)
         }
@@ -163,7 +176,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             val tokenBuffer = StringBuilder()
 
             generationJob = viewModelScope.launch {
-                llamaEngine.generate(
+                getActiveEngine().generate(
                     prompt,
                     _config.value,
                     onStats = { prefillTokPerSec, decodeTokPerSec, prefillMs ->
@@ -209,7 +222,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun stopGeneration() {
-        llamaEngine.stopGeneration()
+        getActiveEngine().stopGeneration()
         generationJob?.cancel()
     }
 
@@ -233,6 +246,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        llamaEngine.stopGeneration()
+        getActiveEngine().stopGeneration()
     }
 }

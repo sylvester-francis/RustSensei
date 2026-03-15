@@ -43,7 +43,7 @@ fun RustSenseiApp() {
         val currentRoute = navController.currentBackStackEntry?.destination?.route
         if (currentRoute == Screen.Main.route &&
             modelState.modelState != ModelState.READY &&
-            !chatViewModel.llamaEngine.isModelLoaded()
+            !chatViewModel.isAnyModelLoaded()
         ) {
             // Model was lost (process death). Redirect to setup to reload.
             modelViewModel.checkModelStatus()
@@ -61,6 +61,7 @@ fun RustSenseiApp() {
             ModelSetupScreen(
                 modelViewModel = modelViewModel,
                 llamaEngine = chatViewModel.llamaEngine,
+                liteRtEngine = chatViewModel.liteRtEngine,
                 onNavigateToChat = {
                     navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Setup.route) { inclusive = true }
@@ -71,7 +72,7 @@ fun RustSenseiApp() {
 
         composable(Screen.Main.route) {
             // P0 Fix #1: double-check model is loaded before showing main screen
-            if (!chatViewModel.llamaEngine.isModelLoaded()) {
+            if (!chatViewModel.isAnyModelLoaded()) {
                 LaunchedEffect(Unit) {
                     modelViewModel.checkModelStatus()
                     navController.navigate(Screen.Setup.route) {

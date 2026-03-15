@@ -9,6 +9,8 @@ import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
 import com.sylvester.rustsensei.llm.InferenceConfig
+import com.sylvester.rustsensei.llm.InferenceEngine
+import com.sylvester.rustsensei.llm.ModelManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +48,13 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
     private val contentRepo = app.contentRepository
     private val progressRepo = app.progressRepository
     private val llamaEngine = app.llamaEngine
+    private val liteRtEngine = app.liteRtEngine
+
+    private fun getActiveEngine(): InferenceEngine {
+        val modelId = app.preferencesManager.getSelectedModelId()
+        val model = ModelManager.getModelById(modelId)
+        return liteRtEngine
+    }
 
     private var validationJob: Job? = null
 
@@ -222,7 +231,8 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val userCode = _uiState.value.userCode.trim()
 
         if (_uiState.value.isValidating) return
-        if (!llamaEngine.isModelLoaded()) return
+        val activeEngine = getActiveEngine()
+        if (!activeEngine.isModelLoaded()) return
 
         validationJob?.cancel()
 
@@ -248,7 +258,7 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val tokenBuffer = StringBuilder()
 
         validationJob = viewModelScope.launch {
-            llamaEngine.generate(prompt, config)
+            activeEngine.generate(prompt, config)
                 .catch { e ->
                     _uiState.value = _uiState.value.copy(
                         isValidating = false,

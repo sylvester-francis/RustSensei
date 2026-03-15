@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.withContext
 
 @Keep // P1 Fix #6: prevent R8 from renaming this class (JNI references it by name)
-class LlamaEngine {
+class LlamaEngine : InferenceEngine {
 
     companion object {
         init {
@@ -49,16 +49,16 @@ class LlamaEngine {
         statsCallback?.invoke(prefillTokPerSec, decodeTokPerSec, prefillMs)
     }
 
-    suspend fun loadModel(modelPath: String, contextSize: Int = 2048): Boolean {
+    override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
             loadModelNative(modelPath, contextSize)
         }
     }
 
-    fun generate(
+    override fun generate(
         prompt: String,
-        config: InferenceConfig = InferenceConfig(),
-        onStats: ((prefillTokPerSec: Float, decodeTokPerSec: Float, prefillMs: Float) -> Unit)? = null
+        config: InferenceConfig,
+        onStats: ((Float, Float, Float) -> Unit)?
     ): Flow<String> = callbackFlow {
         tokenCallback = { token ->
             // P2 Fix #12: trySend can drop tokens if buffer is full.
@@ -91,21 +91,21 @@ class LlamaEngine {
         }
     }.buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND) // P2 Fix #12: buffer tokens
 
-    fun stopGeneration() {
+    override fun stopGeneration() {
         stopGenerationNative()
     }
 
-    fun clearCache() {
+    override fun clearCache() {
         clearCacheNative()
     }
 
-    suspend fun unloadModel() {
+    override suspend fun unloadModel() {
         withContext(Dispatchers.IO) {
             unloadModelNative()
         }
     }
 
-    fun isModelLoaded(): Boolean = isModelLoadedNative()
+    override fun isModelLoaded(): Boolean = isModelLoadedNative()
 
     // Native methods
     private external fun loadModelNative(modelPath: String, contextSize: Int): Boolean
