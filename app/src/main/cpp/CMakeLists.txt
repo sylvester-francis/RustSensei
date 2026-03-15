@@ -14,7 +14,7 @@ set(GGML_OPENMP OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
     llama_cpp
     GIT_REPOSITORY https://github.com/ggerganov/llama.cpp.git
-    GIT_TAG b4568
+    GIT_TAG b5097
 )
 
 FetchContent_MakeAvailable(llama_cpp)

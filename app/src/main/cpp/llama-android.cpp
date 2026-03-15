@@ -131,7 +131,7 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_generateNative(
     tokens.resize(n_tokens);
 
     // Clear the KV cache
-    llama_kv_cache_clear(ctx);
+    llama_kv_self_clear(ctx);
 
     // Process prompt tokens in batch
     llama_batch batch = llama_batch_init(512, 0, 1);
