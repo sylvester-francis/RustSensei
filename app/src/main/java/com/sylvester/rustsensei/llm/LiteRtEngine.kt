@@ -2,14 +2,18 @@ package com.sylvester.rustsensei.llm
 
 import android.content.Context
 import android.util.Log
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
+import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.SamplerConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class LiteRtEngine(private val context: Context) : InferenceEngine {
@@ -18,26 +22,47 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         private const val TAG = "LiteRtEngine"
     }
 
-    private var llmInference: LlmInference? = null
+    private var engine: Engine? = null
+    private var conversation: Conversation? = null
     private var isLoaded = false
 
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                llmInference?.close()
-                val options = LlmInference.LlmInferenceOptions.builder()
-                    .setModelPath(modelPath)
-                    .setMaxTokens(contextSize)
-                    .setMaxTopK(64)
-                    .build()
-                llmInference = LlmInference.createFromOptions(context, options)
+                engine?.close()
+                conversation?.close()
+
+                val config = EngineConfig(
+                    modelPath = modelPath,
+                    backend = Backend.GPU(),
+                    cacheDir = context.cacheDir.absolutePath
+                )
+                val newEngine = Engine(config)
+                newEngine.initialize()
+                engine = newEngine
                 isLoaded = true
-                Log.i(TAG, "Model loaded: $modelPath (maxTokens=$contextSize)")
+                Log.i(TAG, "Model loaded: $modelPath (GPU)")
                 true
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to load model: ${e.message}", e)
-                isLoaded = false
-                false
+                Log.e(TAG, "GPU failed, trying CPU: ${e.message}")
+                // Fallback to CPU if GPU fails
+                try {
+                    val cpuConfig = EngineConfig(
+                        modelPath = modelPath,
+                        backend = Backend.CPU(),
+                        cacheDir = context.cacheDir.absolutePath
+                    )
+                    val newEngine = Engine(cpuConfig)
+                    newEngine.initialize()
+                    engine = newEngine
+                    isLoaded = true
+                    Log.i(TAG, "Model loaded: $modelPath (CPU fallback)")
+                    true
+                } catch (e2: Exception) {
+                    Log.e(TAG, "Failed to load model: ${e2.message}", e2)
+                    isLoaded = false
+                    false
+                }
             }
         }
     }
@@ -46,76 +71,66 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         prompt: String,
         config: InferenceConfig,
         onStats: ((Float, Float, Float) -> Unit)?
-    ): Flow<String> = callbackFlow {
-        val inference = llmInference ?: run {
-            close(RuntimeException("Model not loaded"))
-            return@callbackFlow
+    ): Flow<String> {
+        val currentEngine = engine ?: return flow {
+            throw RuntimeException("Model not loaded")
         }
 
         val startTime = System.currentTimeMillis()
         var firstTokenTime: Long? = null
         var tokenCount = 0
 
-        try {
-            // Create a session with temperature/topK/topP
-            val sessionOptions = LlmInferenceSession.LlmInferenceSessionOptions.builder()
-                .setTemperature(config.temperature)
-                .setTopK(40)
-                .setTopP(config.topP)
-                .build()
+        val samplerConfig = SamplerConfig(
+            topK = 40,
+            topP = config.topP.toDouble(),
+            temperature = config.temperature.toDouble(),
+            seed = 0
+        )
+        val convConfig = ConversationConfig(
+            samplerConfig = samplerConfig
+        )
+        val conv = currentEngine.createConversation(convConfig)
+        conversation = conv
 
-            val session = LlmInferenceSession.createFromOptions(inference, sessionOptions)
-
-            // Add the prompt
-            session.addQueryChunk(prompt)
-
-            // Generate with streaming via ProgressListener
-            session.generateResponseAsync { partialResult, done ->
-                if (firstTokenTime == null && partialResult.isNotEmpty()) {
+        return conv.sendMessageAsync(prompt)
+            .map { message ->
+                if (firstTokenTime == null) {
                     firstTokenTime = System.currentTimeMillis()
                     Log.i(TAG, "TTFT: ${firstTokenTime!! - startTime} ms")
                 }
-
-                if (partialResult.isNotEmpty()) {
-                    tokenCount++
-                    trySend(partialResult)
-                }
-
-                if (done) {
-                    val ftTime = firstTokenTime ?: startTime
-                    val genMs = System.currentTimeMillis() - ftTime
-                    val tokPerSec = if (genMs > 0) tokenCount * 1000f / genMs else 0f
-                    val prefillMs = (ftTime - startTime).toFloat()
-                    Log.i(TAG, "Generation: $tokenCount tokens in ${genMs}ms (${"%.1f".format(tokPerSec)} tok/s)")
-                    onStats?.invoke(0f, tokPerSec, prefillMs)
-                    session.close()
-                    close()
-                }
+                tokenCount++
+                message.contents.toString()
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Generation failed: ${e.message}", e)
-            close(RuntimeException("Generation failed: ${e.message}"))
-        }
-
-        awaitClose { }
-    }.buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND)
+            .buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND)
+    }
 
     override fun stopGeneration() {
-        // MediaPipe sessions close on completion; no mid-stream cancel
+        try {
+            conversation?.cancelProcess()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error cancelling: ${e.message}")
+        }
     }
 
     override fun clearCache() {
-        // MediaPipe manages KV cache internally per session
+        try {
+            conversation?.close()
+            conversation = null
+        } catch (e: Exception) {
+            Log.w(TAG, "Error clearing: ${e.message}")
+        }
     }
 
     override suspend fun unloadModel() {
         withContext(Dispatchers.IO) {
             try {
-                llmInference?.close()
+                conversation?.close()
+                engine?.close()
             } catch (e: Exception) {
-                Log.w(TAG, "Error closing model: ${e.message}")
+                Log.w(TAG, "Error unloading: ${e.message}")
             }
-            llmInference = null
+            conversation = null
+            engine = null
             isLoaded = false
         }
     }

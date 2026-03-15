@@ -77,8 +77,8 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.work.runtime.ktx)
 
-    // MediaPipe LLM Inference (LiteRT/GPU backend)
-    implementation(libs.mediapipe.genai)
+    // LiteRT LM (GPU-accelerated LLM inference)
+    implementation(libs.litertlm)
 
     // Testing
     testImplementation(libs.junit)
