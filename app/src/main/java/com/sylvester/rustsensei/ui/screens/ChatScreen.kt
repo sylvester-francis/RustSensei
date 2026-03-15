@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -353,8 +354,9 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     labelColor = MaterialTheme.colorScheme.onSurface
                 ),
-                border = AssistChipDefaults.assistChipBorder(
-                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
             )
         }

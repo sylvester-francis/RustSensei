@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -66,8 +67,9 @@ fun QuickPromptChips(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                     labelColor = MaterialTheme.colorScheme.onSurface
                 ),
-                border = AssistChipDefaults.assistChipBorder(
-                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
             )
         }
