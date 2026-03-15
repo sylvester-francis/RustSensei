@@ -101,37 +101,20 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_loadModelNative(
     ctx_params.n_threads_batch = n_threads_batch;  // PERF: more threads for prefill
     ctx_params.flash_attn = true;
 
-    // PERF CRITICAL: quantize KV cache from f16 to q8_0
-    // This ~2-3x inference speed with minimal quality loss.
-    // q8_0 is safer than q4_0 (less quality degradation) while still halving KV memory.
+    // KV cache quantization: q8_0 halves memory, minimal quality loss
     ctx_params.type_k = GGML_TYPE_Q8_0;
     ctx_params.type_v = GGML_TYPE_Q8_0;
 
-    LOG_I("Attempting context creation with flash_attn=true, KV cache=q8_0...");
+    // NOTE: flash_attn on ARM CPU can be SLOWER than standard attention on some SoCs
+    // (Tensor G3, older Snapdragon). Disable by default for CPU-only inference.
+    ctx_params.flash_attn = false;
+
+    LOG_I("Creating context: KV cache=q8_0, flash_attn=off...");
     ctx = llama_init_from_model(model, ctx_params);
 
     if (!ctx) {
-        // Flash attention might not work with quantized KV on all builds
-        LOG_I("Flash attention + quantized KV failed, trying flash_attn only...");
-        ctx_params.flash_attn = true;
-        ctx_params.type_k = GGML_TYPE_F16;
-        ctx_params.type_v = GGML_TYPE_F16;
-        ctx = llama_init_from_model(model, ctx_params);
-    }
-
-    if (!ctx) {
-        // Fall back to quantized KV without flash attention
-        LOG_I("Trying quantized KV without flash attention...");
-        ctx_params.flash_attn = false;
-        ctx_params.type_k = GGML_TYPE_Q8_0;
-        ctx_params.type_v = GGML_TYPE_Q8_0;
-        ctx = llama_init_from_model(model, ctx_params);
-    }
-
-    if (!ctx) {
-        // Final fallback: no flash attention, no KV quantization
-        LOG_I("All optimizations failed, using default f16 KV cache...");
-        ctx_params.flash_attn = false;
+        // Fall back to f16 KV cache
+        LOG_I("q8_0 KV failed, falling back to f16...");
         ctx_params.type_k = GGML_TYPE_F16;
         ctx_params.type_v = GGML_TYPE_F16;
         ctx = llama_init_from_model(model, ctx_params);
@@ -149,12 +132,9 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_loadModelNative(
     llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.7f));
     llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
-    // Log what configuration actually worked
-    bool has_flash = ctx_params.flash_attn;
     bool has_kv_quant = (ctx_params.type_k != GGML_TYPE_F16);
-    LOG_I("Model loaded: ctx=%d, batch=2048, gen_t=%d, batch_t=%d, flash=%s, kv=%s",
+    LOG_I("Model loaded: ctx=%d, batch=2048, gen_t=%d, batch_t=%d, kv=%s",
           context_size, n_threads_gen, n_threads_batch,
-          has_flash ? "yes" : "no",
           has_kv_quant ? "q8_0" : "f16");
     return JNI_TRUE;
 }
