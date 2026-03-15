@@ -209,7 +209,10 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
             val context = getApplication<Application>()
             val intent = Intent(context, ModelForegroundService::class.java)
             context.startForegroundService(intent)
-        } catch (_: Exception) {}
+        } catch (e: Exception) {
+            // ForegroundServiceStartNotAllowedException on Android 12+ when app is in background
+            android.util.Log.w("ModelViewModel", "Could not start foreground service: ${e.message}")
+        }
     }
 
     private fun stopModelService() {

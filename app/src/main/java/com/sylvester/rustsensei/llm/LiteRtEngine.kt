@@ -7,12 +7,13 @@ import com.google.ai.edge.litertlm.Conversation
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
-import com.google.ai.edge.litertlm.SamplerConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -32,21 +33,19 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 engine?.close()
                 conversation?.close()
 
-                val config = EngineConfig(
+                // Try GPU first, fall back to CPU
+                val gpuConfig = EngineConfig(
                     modelPath = modelPath,
                     backend = Backend.GPU(),
                     cacheDir = context.cacheDir.absolutePath
                 )
-                val newEngine = Engine(config)
-                newEngine.initialize()
-                engine = newEngine
-                isLoaded = true
-                Log.i(TAG, "Model loaded: $modelPath (GPU)")
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "GPU failed, trying CPU: ${e.message}")
-                // Fallback to CPU if GPU fails
                 try {
+                    val newEngine = Engine(gpuConfig)
+                    newEngine.initialize()
+                    engine = newEngine
+                    Log.i(TAG, "Model loaded (GPU): $modelPath")
+                } catch (gpuError: Exception) {
+                    Log.w(TAG, "GPU failed: ${gpuError.message}, trying CPU...")
                     val cpuConfig = EngineConfig(
                         modelPath = modelPath,
                         backend = Backend.CPU(),
@@ -55,14 +54,15 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                     val newEngine = Engine(cpuConfig)
                     newEngine.initialize()
                     engine = newEngine
-                    isLoaded = true
-                    Log.i(TAG, "Model loaded: $modelPath (CPU fallback)")
-                    true
-                } catch (e2: Exception) {
-                    Log.e(TAG, "Failed to load model: ${e2.message}", e2)
-                    isLoaded = false
-                    false
+                    Log.i(TAG, "Model loaded (CPU): $modelPath")
                 }
+
+                isLoaded = true
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load model: ${e.message}", e)
+                isLoaded = false
+                false
             }
         }
     }
@@ -76,31 +76,46 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
             throw RuntimeException("Model not loaded")
         }
 
-        val startTime = System.currentTimeMillis()
-        var firstTokenTime: Long? = null
-        var tokenCount = 0
+        return flow {
+            val startTime = System.currentTimeMillis()
+            var firstTokenTime: Long? = null
+            var tokenCount = 0
 
-        val samplerConfig = SamplerConfig(
-            topK = 40,
-            topP = config.topP.toDouble(),
-            temperature = config.temperature.toDouble(),
-            seed = 0
-        )
-        val convConfig = ConversationConfig(
-            samplerConfig = samplerConfig
-        )
-        val conv = currentEngine.createConversation(convConfig)
-        conversation = conv
-
-        return conv.sendMessageAsync(prompt)
-            .map { message ->
-                if (firstTokenTime == null) {
-                    firstTokenTime = System.currentTimeMillis()
-                    Log.i(TAG, "TTFT: ${firstTokenTime!! - startTime} ms")
-                }
-                tokenCount++
-                message.contents.toString()
+            // Create conversation with default config (no custom sampler to avoid native crashes)
+            val conv = try {
+                currentEngine.createConversation(ConversationConfig())
+            } catch (e: Exception) {
+                Log.e(TAG, "createConversation failed: ${e.message}", e)
+                throw RuntimeException("Failed to create conversation: ${e.message}")
             }
+            conversation = conv
+
+            try {
+                // Use the synchronous sendMessage and emit the result
+                // This avoids potential issues with the async Flow API
+                val response = conv.sendMessage(prompt)
+                val text = response.contents.toString()
+
+                firstTokenTime = System.currentTimeMillis()
+                tokenCount = 1
+
+                // Emit the full response
+                emit(text)
+
+                val totalMs = System.currentTimeMillis() - startTime
+                val prefillMs = (firstTokenTime - startTime).toFloat()
+                Log.i(TAG, "Response: ${text.length} chars in ${totalMs}ms")
+                onStats?.invoke(0f, 0f, prefillMs)
+            } catch (e: Exception) {
+                Log.e(TAG, "Generation failed: ${e.message}", e)
+                throw RuntimeException("Generation failed: ${e.message}")
+            } finally {
+                try { conv.close() } catch (_: Exception) {}
+                conversation = null
+            }
+        }
+            .catch { e -> throw e }
+            .flowOn(Dispatchers.IO)
             .buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND)
     }
 
