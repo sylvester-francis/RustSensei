@@ -19,11 +19,13 @@ class PreferencesManager(context: Context) {
     }
 
     fun loadInferenceConfig(): InferenceConfig {
+        val modelId = getSelectedModelId()
+        val defaults = InferenceConfig.forModel(modelId)
         return InferenceConfig(
-            temperature = prefs.getFloat("temperature", 0.7f),
-            topP = prefs.getFloat("top_p", 0.9f),
-            maxTokens = prefs.getInt("max_tokens", 512),
-            contextLength = prefs.getInt("context_length", 4096)
+            temperature = prefs.getFloat("temperature", defaults.temperature),
+            topP = prefs.getFloat("top_p", defaults.topP),
+            maxTokens = prefs.getInt("max_tokens", defaults.maxTokens),
+            contextLength = prefs.getInt("context_length", defaults.contextLength)
         )
     }
 

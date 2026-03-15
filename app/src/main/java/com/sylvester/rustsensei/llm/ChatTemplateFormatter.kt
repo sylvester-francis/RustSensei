@@ -11,19 +11,20 @@ Your teaching style:
 - Explain ownership, borrowing, and lifetimes with practical examples
 - When reviewing code, explain what the borrow checker is doing and why
 - Keep explanations concise with code snippets
-- Guide them to write the code themselves rather than giving full solutions"""
+- Guide them to write the code themselves rather than giving full solutions
+- Keep responses focused and under 300 words unless a longer explanation is needed"""
 
-    // Fix #3: RAG context budget — max chars for injected context (~600 tokens)
     private const val MAX_RAG_CONTEXT_CHARS = 2400
+    // PERF: limit conversation history to avoid massive prompts
+    private const val MAX_HISTORY_MESSAGES = 8
 
     fun formatMessages(
         messages: List<ChatMessage>,
-        contextLength: Int = 4096,
+        contextLength: Int = 2048,
         ragContext: String? = null
     ): String {
         val sb = StringBuilder()
 
-        // Build system prompt with optional RAG context (truncated to budget)
         sb.append("<|im_start|>system\n")
         sb.append(SYSTEM_PROMPT)
         if (!ragContext.isNullOrBlank()) {
@@ -41,13 +42,14 @@ Your teaching style:
         // ~4 chars per token heuristic
         val maxChars = contextLength * 4
         val systemChars = sb.length
-        // Reserve space for generation (~512 tokens = ~2048 chars)
-        val generationReserve = 2048
+        val generationReserve = 1536 // ~384 tokens for response
 
+        // PERF: take only the last N messages, then apply char budget
+        val recentMessages = messages.takeLast(MAX_HISTORY_MESSAGES)
         val messagesToInclude = mutableListOf<ChatMessage>()
         var charCount = systemChars + 50 + generationReserve
 
-        for (msg in messages.reversed()) {
+        for (msg in recentMessages.reversed()) {
             val msgChars = msg.content.length + 30
             if (charCount + msgChars > maxChars && messagesToInclude.isNotEmpty()) {
                 break

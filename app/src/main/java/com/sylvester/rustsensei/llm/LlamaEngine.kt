@@ -42,7 +42,7 @@ class LlamaEngine {
         errorCallback?.invoke(error)
     }
 
-    suspend fun loadModel(modelPath: String, contextSize: Int = 4096): Boolean {
+    suspend fun loadModel(modelPath: String, contextSize: Int = 2048): Boolean {
         return withContext(Dispatchers.IO) {
             loadModelNative(modelPath, contextSize)
         }

@@ -59,6 +59,18 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         prefsManager.saveInferenceConfig(config)
     }
 
+    fun applyModelDefaults(modelId: String) {
+        val defaults = InferenceConfig.forModel(modelId)
+        // Preserve user's temperature/topP but apply model-specific context and max tokens
+        val current = _config.value
+        val updated = current.copy(
+            contextLength = defaults.contextLength,
+            maxTokens = defaults.maxTokens
+        )
+        _config.value = updated
+        prefsManager.saveInferenceConfig(updated)
+    }
+
     fun setChatContext(context: ChatContext) {
         _chatContext.value = context
     }

@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.llm.DownloadState
+import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.LlamaEngine
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
@@ -143,7 +144,8 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 val modelPath = modelManager.getModelFile(modelInfo).absolutePath
-                val success = llamaEngine.loadModel(modelPath)
+                val contextSize = InferenceConfig.forModel(modelInfo.id).contextLength
+                val success = llamaEngine.loadModel(modelPath, contextSize)
                 if (success) {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.READY,
