@@ -101,24 +101,13 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_loadModelNative(
     ctx_params.n_threads_batch = n_threads_batch;  // PERF: more threads for prefill
     ctx_params.flash_attn = true;
 
-    // KV cache quantization: q8_0 halves memory, minimal quality loss
-    ctx_params.type_k = GGML_TYPE_Q8_0;
-    ctx_params.type_v = GGML_TYPE_Q8_0;
-
-    // NOTE: flash_attn on ARM CPU can be SLOWER than standard attention on some SoCs
-    // (Tensor G3, older Snapdragon). Disable by default for CPU-only inference.
+    // KV cache: use f16 (q8_0 not supported in all builds)
+    ctx_params.type_k = GGML_TYPE_F16;
+    ctx_params.type_v = GGML_TYPE_F16;
     ctx_params.flash_attn = false;
 
-    LOG_I("Creating context: KV cache=q8_0, flash_attn=off...");
+    LOG_I("Creating context: KV=f16, flash_attn=off...");
     ctx = llama_init_from_model(model, ctx_params);
-
-    if (!ctx) {
-        // Fall back to f16 KV cache
-        LOG_I("q8_0 KV failed, falling back to f16...");
-        ctx_params.type_k = GGML_TYPE_F16;
-        ctx_params.type_v = GGML_TYPE_F16;
-        ctx = llama_init_from_model(model, ctx_params);
-    }
 
     if (!ctx) {
         LOG_E("Failed to create context with any configuration");
@@ -132,10 +121,8 @@ Java_com_sylvester_rustsensei_llm_LlamaEngine_loadModelNative(
     llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.7f));
     llama_sampler_chain_add(smpl, llama_sampler_init_dist(LLAMA_DEFAULT_SEED));
 
-    bool has_kv_quant = (ctx_params.type_k != GGML_TYPE_F16);
-    LOG_I("Model loaded: ctx=%d, batch=2048, gen_t=%d, batch_t=%d, kv=%s",
-          context_size, n_threads_gen, n_threads_batch,
-          has_kv_quant ? "q8_0" : "f16");
+    LOG_I("Model loaded: ctx=%d, batch=2048, gen_t=%d, batch_t=%d",
+          context_size, n_threads_gen, n_threads_batch);
     return JNI_TRUE;
 }
 
