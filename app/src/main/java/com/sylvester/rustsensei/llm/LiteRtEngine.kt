@@ -7,13 +7,15 @@ import com.google.ai.edge.litertlm.Conversation
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
 import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.ExperimentalApi
+import com.google.ai.edge.litertlm.ExperimentalFlags
 import com.google.ai.edge.litertlm.Message
+import com.google.ai.edge.litertlm.SamplerConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -27,45 +29,56 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
     private var conversation: Conversation? = null
     private var isLoaded = false
 
+    @OptIn(ExperimentalApi::class)
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 engine?.close()
                 conversation?.close()
 
+                // Use GPU backend — same as Google's AI Edge Gallery.
+                // On Tensor G3 / Mali-G715, this uses WebGPU/Vulkan (not OpenCL).
+                // The "Cannot find OpenCL" warning is non-fatal.
+                val config = EngineConfig(
+                    modelPath = modelPath,
+                    backend = Backend.GPU(),
+                    cacheDir = context.cacheDir.absolutePath
+                )
+                val newEngine = Engine(config)
+                newEngine.initialize()
+                engine = newEngine
+
+                // Match Google Gallery's pattern: disable constrained decoding
+                ExperimentalFlags.enableConversationConstrainedDecoding = false
+
+                isLoaded = true
+                Log.i(TAG, "Model loaded (GPU): $modelPath")
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "GPU load failed, trying CPU: ${e.message}")
                 try {
-                    val config = EngineConfig(
-                        modelPath = modelPath,
-                        backend = Backend.GPU(),
-                        cacheDir = context.cacheDir.absolutePath
-                    )
-                    val newEngine = Engine(config)
-                    newEngine.initialize()
-                    engine = newEngine
-                    Log.i(TAG, "Model loaded (GPU): $modelPath")
-                } catch (gpuError: Exception) {
-                    Log.w(TAG, "GPU failed: ${gpuError.message}, trying CPU...")
-                    val config = EngineConfig(
+                    val cpuConfig = EngineConfig(
                         modelPath = modelPath,
                         backend = Backend.CPU(),
                         cacheDir = context.cacheDir.absolutePath
                     )
-                    val newEngine = Engine(config)
+                    val newEngine = Engine(cpuConfig)
                     newEngine.initialize()
                     engine = newEngine
+                    ExperimentalFlags.enableConversationConstrainedDecoding = false
+                    isLoaded = true
                     Log.i(TAG, "Model loaded (CPU): $modelPath")
+                    true
+                } catch (e2: Exception) {
+                    Log.e(TAG, "Failed to load model: ${e2.message}", e2)
+                    isLoaded = false
+                    false
                 }
-
-                isLoaded = true
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load model: ${e.message}", e)
-                isLoaded = false
-                false
             }
         }
     }
 
+    @OptIn(ExperimentalApi::class)
     override fun generate(
         prompt: String,
         config: InferenceConfig,
@@ -79,16 +92,25 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         var firstTokenTime: Long? = null
         var tokenCount = 0
 
-        // Create a fresh conversation for each generation
+        // Create conversation with SamplerConfig — matches Google Gallery's pattern exactly
         val conv = try {
-            currentEngine.createConversation(ConversationConfig())
+            ExperimentalFlags.enableConversationConstrainedDecoding = false
+            currentEngine.createConversation(
+                ConversationConfig(
+                    samplerConfig = SamplerConfig(
+                        topK = 40,
+                        topP = config.topP.toDouble(),
+                        temperature = config.temperature.toDouble()
+                    )
+                )
+            )
         } catch (e: Exception) {
             Log.e(TAG, "createConversation failed: ${e.message}", e)
             return flow { throw RuntimeException("Failed to create conversation: ${e.message}") }
         }
         conversation = conv
 
-        // sendMessageAsync(String) returns Flow<Message> — stream tokens
+        // sendMessageAsync(String) returns Flow<Message>
         return conv.sendMessageAsync(prompt)
             .map { message: Message ->
                 if (firstTokenTime == null) {
