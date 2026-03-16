@@ -59,6 +59,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -171,12 +173,13 @@ private fun CategoriesView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(16.dp)
+                            .semantics { contentDescription = "Continue exercise: $lastExerciseId" },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             Icons.Default.PlayArrow,
-                            contentDescription = null,
+                            contentDescription = "Continue exercise",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
                         )
@@ -226,7 +229,7 @@ private fun CategoriesView(
                 ) {
                     Icon(
                         Icons.Default.Quiz,
-                        contentDescription = null,
+                        contentDescription = "Topic Quizzes",
                         tint = MaterialTheme.colorScheme.tertiary,
                         modifier = Modifier.size(28.dp)
                     )
@@ -291,7 +294,7 @@ private fun CategoriesView(
                     }
                     Icon(
                         Icons.Default.ExpandMore,
-                        contentDescription = null,
+                        contentDescription = if (isExpanded) "Collapse category" else "Expand category",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .size(20.dp)
@@ -643,7 +646,7 @@ private fun ExerciseDetailView(
                                             color = MaterialTheme.colorScheme.onPrimary
                                         )
                                     } else {
-                                        Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Default.CheckCircle, contentDescription = "Verify with AI", modifier = Modifier.size(16.dp))
                                     }
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text(
@@ -656,7 +659,7 @@ private fun ExerciseDetailView(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Default.CheckCircle, contentDescription = "Mark correct", modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
                                     Text("Mark Correct", style = MaterialTheme.typography.labelMedium)
                                 }
@@ -747,7 +750,7 @@ private fun ExerciseDetailView(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Check solution", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Check", style = MaterialTheme.typography.labelLarge)
                 }
@@ -759,7 +762,7 @@ private fun ExerciseDetailView(
                     enabled = uiState.hintsRevealed < exercise.hints.size,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(Icons.Default.Lightbulb, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Lightbulb, contentDescription = "Reveal hint", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Hint (${uiState.hintsRevealed}/${exercise.hints.size})", style = MaterialTheme.typography.labelLarge)
                 }
@@ -794,7 +797,7 @@ private fun ExerciseDetailView(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Icon(Icons.Default.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Default.Visibility, contentDescription = "Show solution", modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Show Solution", style = MaterialTheme.typography.labelLarge)
                 }
@@ -829,7 +832,7 @@ private fun ExerciseDetailView(
                     .height(48.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Chat, contentDescription = "Ask Sensei for help", modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Ask Sensei", style = MaterialTheme.typography.labelLarge)
             }

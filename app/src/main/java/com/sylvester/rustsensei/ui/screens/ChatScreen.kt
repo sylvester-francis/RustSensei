@@ -1,6 +1,9 @@
 package com.sylvester.rustsensei.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,14 +13,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
@@ -42,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -51,6 +60,7 @@ import com.sylvester.rustsensei.data.Conversation
 import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
 import com.sylvester.rustsensei.ui.components.StreamingIndicator
+import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import kotlinx.coroutines.launch
 
@@ -64,19 +74,25 @@ fun ChatScreen(
     val modelLoaded = viewModel.isAnyModelLoaded()
 
     val uiState by viewModel.uiState.collectAsState()
+    val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val context = LocalContext.current
 
     // Auto-scroll to bottom on new messages
-    LaunchedEffect(uiState.messages.size, uiState.streamingText) {
+    LaunchedEffect(uiState.messages.size, uiState.streamingText, uiState.followUpSuggestions) {
         if (uiState.messages.isNotEmpty() || uiState.streamingText.isNotEmpty()) {
-            val targetIndex = uiState.messages.size +
+            val hasBanner = chatContext !is ChatContext.General
+            val targetIndex = (if (hasBanner) 1 else 0) +
+                    uiState.messages.size +
                     (if (uiState.streamingText.isNotEmpty()) 1 else 0) +
                     (if (uiState.isGenerating && uiState.streamingText.isEmpty()) 1 else 0) +
-                    (if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) 1 else 0)
+                    (if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) 1 else 0) +
+                    (if (!uiState.isGenerating && uiState.followUpSuggestions.isNotEmpty() &&
+                        uiState.messages.isNotEmpty() && uiState.messages.last().role == "assistant") 1 else 0)
             if (targetIndex > 0) {
                 listState.animateScrollToItem(targetIndex - 1)
             }
@@ -130,6 +146,24 @@ fun ChatScreen(
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                if (uiState.messages.isNotEmpty()) {
+                    IconButton(onClick = {
+                        val shareText = viewModel.exportConversation()
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, "Share conversation")
+                        context.startActivity(shareIntent)
+                    }) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = "Share conversation",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 IconButton(onClick = { viewModel.startNewConversation() }) {
                     Icon(
                         Icons.Default.Add,
@@ -145,6 +179,27 @@ fun ChatScreen(
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
             ) {
+                // Context indicator banner
+                when (val ctx = chatContext) {
+                    is ChatContext.BookSection -> {
+                        item(key = "context_banner") {
+                            ContextBanner(
+                                text = "\uD83D\uDCD6 Answering with context from: ${ctx.sectionId}",
+                                onDismiss = { viewModel.clearChatContext() }
+                            )
+                        }
+                    }
+                    is ChatContext.Exercise -> {
+                        item(key = "context_banner") {
+                            ContextBanner(
+                                text = "\uD83D\uDCBB Helping with exercise: ${ctx.exerciseId}",
+                                onDismiss = { viewModel.clearChatContext() }
+                            )
+                        }
+                    }
+                    is ChatContext.General -> { /* no banner for general context */ }
+                }
+
                 if (!modelLoaded) {
                     // No model — show download prompt
                     item {
@@ -209,6 +264,41 @@ fun ChatScreen(
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
                             modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                         )
+                    }
+                }
+
+                // Follow-up suggestion chips
+                if (!uiState.isGenerating && uiState.followUpSuggestions.isNotEmpty() &&
+                    uiState.messages.isNotEmpty() && uiState.messages.last().role == "assistant"
+                ) {
+                    item(key = "follow_ups") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp, bottom = 4.dp)
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            uiState.followUpSuggestions.forEach { suggestion ->
+                                AssistChip(
+                                    onClick = {
+                                        viewModel.sendMessage(suggestion)
+                                    },
+                                    label = {
+                                        Text(
+                                            text = suggestion,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontSize = 12.sp
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(8.dp),
+                                    border = BorderStroke(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -331,7 +421,7 @@ private fun NoModelState(onDownload: () -> Unit) {
         ) {
             Icon(
                 Icons.Default.Download,
-                contentDescription = null,
+                contentDescription = "Download model",
                 modifier = Modifier.padding(end = 8.dp)
             )
             Text(
@@ -339,6 +429,41 @@ private fun NoModelState(onDownload: () -> Unit) {
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContextBanner(
+    text: String,
+    onDismiss: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontFamily = FontFamily.Monospace,
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+        )
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.padding(0.dp)
+        ) {
+            Icon(
+                Icons.Default.Close,
+                contentDescription = "Dismiss context",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(0.dp)
             )
         }
     }
@@ -364,7 +489,7 @@ private fun ConversationDrawer(
             label = { Text("New Conversation", style = MaterialTheme.typography.bodyLarge) },
             selected = false,
             onClick = onNewConversation,
-            icon = { Icon(Icons.Default.Add, contentDescription = null) },
+            icon = { Icon(Icons.Default.Add, contentDescription = "New conversation") },
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         HorizontalDivider(

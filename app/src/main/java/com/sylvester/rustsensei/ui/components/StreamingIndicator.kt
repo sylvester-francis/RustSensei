@@ -18,6 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -52,7 +54,8 @@ fun StreamingIndicator(modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
+            .padding(start = 4.dp, top = 8.dp, bottom = 8.dp)
+            .semantics { contentDescription = "Generating response" },
         contentAlignment = Alignment.CenterStart
     ) {
         Box(

@@ -37,7 +37,8 @@ data class ChatUiState(
     val inferenceTimeMs: Long = 0,
     val lastPrefillTokPerSec: Float = 0f,
     val lastDecodeTokPerSec: Float = 0f,
-    val lastTimeToFirstTokenMs: Long = 0
+    val lastTimeToFirstTokenMs: Long = 0,
+    val followUpSuggestions: List<String> = emptyList()
 )
 
 @HiltViewModel
@@ -105,6 +106,8 @@ class ChatViewModel @Inject constructor(
     fun clearChatContext() {
         _chatContext.value = ChatContext.General
     }
+
+    fun getContentVersion(): Int = prefsManager.getContentVersion()
 
     fun startNewConversation() {
         viewModelScope.launch {
@@ -240,10 +243,12 @@ class ChatViewModel @Inject constructor(
                             if (finalText.isNotEmpty()) {
                                 repository.addMessage(convId, "assistant", finalText)
                             }
+                            val followUps = if (finalText.isNotEmpty()) generateFollowUps(finalText) else emptyList()
                             _uiState.value = _uiState.value.copy(
                                 isGenerating = false,
                                 streamingText = "",
-                                inferenceTimeMs = elapsed
+                                inferenceTimeMs = elapsed,
+                                followUpSuggestions = followUps
                             )
                             // Bug 6: release the gate so the next message can be sent
                             sendingGate.set(false)
@@ -275,6 +280,41 @@ class ChatViewModel @Inject constructor(
         generationJob?.cancel()
         // Bug 6: release the gate when generation is manually stopped
         sendingGate.set(false)
+    }
+
+    fun exportConversation(): String {
+        return buildString {
+            appendLine("# RustSensei Chat")
+            appendLine()
+            for (msg in _uiState.value.messages) {
+                if (msg.role == "user") appendLine("**You:** ${msg.content}")
+                else appendLine("**RustSensei:** ${msg.content}")
+                appendLine()
+            }
+        }
+    }
+
+    private fun generateFollowUps(lastResponse: String): List<String> {
+        val followUps = mutableListOf<String>()
+        val lowerResponse = lastResponse.lowercase()
+
+        if ("ownership" in lowerResponse && "borrow" !in lowerResponse) followUps.add("How does borrowing work?")
+        if ("borrow" in lowerResponse && "lifetime" !in lowerResponse) followUps.add("Explain lifetimes")
+        if ("struct" in lowerResponse) followUps.add("Show me struct methods")
+        if ("enum" in lowerResponse) followUps.add("How does match work with enums?")
+        if ("result" in lowerResponse || "error" in lowerResponse) followUps.add("What's the ? operator?")
+        if ("vec" in lowerResponse || "vector" in lowerResponse) followUps.add("How do I iterate over a Vec?")
+        if ("trait" in lowerResponse) followUps.add("Show me trait bounds")
+        if ("async" in lowerResponse) followUps.add("How does async/await work?")
+        if ("closure" in lowerResponse) followUps.add("What are Fn, FnMut, FnOnce?")
+
+        // Always have at least one follow-up
+        if (followUps.isEmpty()) {
+            followUps.add("Show me a code example")
+            followUps.add("How is this different from Python?")
+        }
+
+        return followUps.take(3)
     }
 
     fun getConversations() = repository.getConversations()

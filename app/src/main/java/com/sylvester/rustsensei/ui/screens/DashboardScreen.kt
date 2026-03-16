@@ -44,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -317,7 +319,7 @@ fun DashboardScreen(
                 ) {
                     Icon(
                         Icons.Default.AutoStories,
-                        contentDescription = null,
+                        contentDescription = "Learning paths",
                         modifier = Modifier.size(28.dp),
                         tint = MaterialTheme.colorScheme.secondary
                     )
@@ -582,7 +584,7 @@ fun DashboardScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.Edit,
-                                        contentDescription = null,
+                                        contentDescription = "Note",
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                     )
@@ -665,10 +667,11 @@ private fun StatCard(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .padding(16.dp)
+            .semantics { contentDescription = "$title: $value $subtitle" }
     ) {
         Icon(
             icon,
-            contentDescription = null,
+            contentDescription = title,
             modifier = Modifier.size(20.dp),
             tint = accentColor
         )

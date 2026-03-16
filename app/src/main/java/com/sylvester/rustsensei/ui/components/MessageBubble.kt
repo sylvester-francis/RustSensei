@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -42,7 +44,9 @@ fun MessageBubble(
 
     if (isUser) {
         Row(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics { contentDescription = "You said: $content" },
             horizontalArrangement = Arrangement.End
         ) {
             Box(
@@ -75,6 +79,7 @@ fun MessageBubble(
         Column(
             modifier = modifier
                 .fillMaxWidth()
+                .semantics { contentDescription = "RustSensei said: $content" }
                 .then(
                     if (showBorder) {
                         Modifier.drawBehind {

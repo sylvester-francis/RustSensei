@@ -56,6 +56,10 @@ class PreferencesManager(context: Context) {
         return prefs.getString("selected_model_id", "litert-1b-gemma") ?: "litert-1b-gemma"
     }
 
+    // Content Versioning
+    fun getContentVersion(): Int = prefs.getInt("content_version", 1)
+    fun setContentVersion(version: Int) = prefs.edit().putInt("content_version", version).apply()
+
     // Recent Searches
     fun saveRecentSearches(searches: List<String>) {
         prefs.edit().putString("recent_searches", searches.take(10).joinToString(",")).apply()

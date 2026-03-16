@@ -9,6 +9,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.LearningStats
 
@@ -22,7 +24,19 @@ fun ActivityChart(
     val surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
     val onSurfaceColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    Canvas(modifier = modifier.fillMaxSize()) {
+    val chartDescription = if (stats.isEmpty()) {
+        "Weekly activity chart, no data"
+    } else {
+        val sortedStats = stats.sortedBy { it.date }.takeLast(7)
+        val totalSections = sortedStats.sumOf { it.sectionsRead }
+        val totalExercises = sortedStats.sumOf { it.exercisesCompleted }
+        "Weekly activity chart: $totalSections sections read, $totalExercises exercises completed over ${sortedStats.size} days"
+    }
+
+    Canvas(modifier = modifier
+        .fillMaxSize()
+        .semantics { contentDescription = chartDescription }
+    ) {
         if (stats.isEmpty()) {
             // Draw empty state
             drawRect(

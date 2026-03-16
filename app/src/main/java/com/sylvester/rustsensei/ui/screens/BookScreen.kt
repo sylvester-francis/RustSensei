@@ -71,6 +71,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -199,7 +201,8 @@ private fun BookIndexView(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(16.dp)
+                            .semantics { contentDescription = "Continue reading: ${lastSectionId.replace("-", " ")}" },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -250,7 +253,8 @@ private fun BookIndexView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.openChapter(chapter.id) }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .semantics { contentDescription = "Chapter ${index + 1}: ${chapter.title}, ${chapter.sectionIds.size} sections" },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Chapter number in primary, monospace, labelLarge
@@ -308,12 +312,13 @@ private fun BookIndexView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onOpenReference(section.id) }
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .semantics { contentDescription = "${section.title}, ${section.items.size} items" },
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     referenceSectionIcon(section.id),
-                    contentDescription = null,
+                    contentDescription = section.title,
                     modifier = Modifier.size(22.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -676,7 +681,7 @@ private fun SectionView(
             TextButton(onClick = { viewModel.navigateToPreviousSection() }) {
                 Icon(
                     Icons.AutoMirrored.Filled.NavigateBefore,
-                    contentDescription = null,
+                    contentDescription = "Previous section",
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
@@ -685,7 +690,7 @@ private fun SectionView(
             TextButton(onClick = { showNotesSheet = true }) {
                 Icon(
                     Icons.Default.Edit,
-                    contentDescription = null,
+                    contentDescription = "Open notes",
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
@@ -694,7 +699,7 @@ private fun SectionView(
             TextButton(onClick = { onAskSensei(section.content, "") }) {
                 Icon(
                     Icons.Default.Chat,
-                    contentDescription = null,
+                    contentDescription = "Ask Sensei about this section",
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(2.dp))
@@ -705,7 +710,7 @@ private fun SectionView(
                 Spacer(modifier = Modifier.width(2.dp))
                 Icon(
                     Icons.AutoMirrored.Filled.NavigateNext,
-                    contentDescription = null,
+                    contentDescription = "Next section",
                     modifier = Modifier.size(20.dp)
                 )
             }
