@@ -49,22 +49,47 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
     private val _modelLoaded = MutableStateFlow(false)
     val modelLoaded: StateFlow<Boolean> = _modelLoaded.asStateFlow()
 
+    private val _isModelLoading = MutableStateFlow(false)
+    val isModelLoading: StateFlow<Boolean> = _isModelLoading.asStateFlow()
+
+    @Volatile private var activeBackend: String = "GPU"
+
+    fun getActiveBackend(): String = activeBackend
+
     @OptIn(ExperimentalApi::class)
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
             try {
+                _isModelLoading.value = true
                 engine?.close()
                 conversation?.close()
 
-                // Use GPU backend — WebGPU/Vulkan on Tensor G3
-                val config = EngineConfig(
-                    modelPath = modelPath,
-                    backend = Backend.GPU(),
-                    cacheDir = context.cacheDir.absolutePath
-                )
+                // Try GPU first (fast, Tensor/Adreno), fall back to CPU (universal)
+                val newEngine = try {
+                    val gpuConfig = EngineConfig(
+                        modelPath = modelPath,
+                        backend = Backend.GPU(),
+                        cacheDir = context.cacheDir.absolutePath
+                    )
+                    val eng = Engine(gpuConfig)
+                    eng.initialize()
+                    activeBackend = "GPU"
+                    Log.i(TAG, "Using GPU backend")
+                    eng
+                } catch (gpuError: Exception) {
+                    Log.w(TAG, "GPU backend failed: ${gpuError.message}, falling back to CPU")
+                    val cpuConfig = EngineConfig(
+                        modelPath = modelPath,
+                        backend = Backend.CPU(),
+                        cacheDir = context.cacheDir.absolutePath
+                    )
+                    val eng = Engine(cpuConfig)
+                    eng.initialize()
+                    activeBackend = "CPU"
+                    Log.i(TAG, "Using CPU backend (slower, but universal)")
+                    eng
+                }
 
-                val newEngine = Engine(config)
-                newEngine.initialize()
                 engine = newEngine
 
                 // Create initial conversation — exact Google pattern
@@ -78,11 +103,13 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 conversation = conv
 
                 _modelLoaded.value = true
+                _isModelLoading.value = false
                 Log.i(TAG, "Model loaded: $modelPath")
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load: ${e.message}", e)
                 _modelLoaded.value = false
+                _isModelLoading.value = false
                 false
             }
         }
@@ -118,8 +145,18 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                             try {
                                 val text = message.toString()
 
-                                // Skip control tokens (Google does this)
-                                if (text.startsWith("<ctrl")) return
+                                // Skip only exact special tokens — preserve spaces and content
+                                if (text == "<pad>" ||
+                                    text == "</s>" ||
+                                    text == "<eos>" ||
+                                    text == "<bos>" ||
+                                    text == "<unk>" ||
+                                    text == "<|im_end|>" ||
+                                    text == "<|im_start|>" ||
+                                    text == "<|endoftext|>" ||
+                                    text == "<end_of_turn>" ||
+                                    text.startsWith("<ctrl")
+                                ) return
 
                                 if (firstTokenTime == null && text.isNotEmpty()) {
                                     val now = System.currentTimeMillis()

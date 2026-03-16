@@ -12,7 +12,6 @@ import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +20,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 
 sealed class ChatContext {
     data object General : ChatContext()
@@ -38,11 +38,11 @@ data class ChatUiState(
     val lastPrefillTokPerSec: Float = 0f,
     val lastDecodeTokPerSec: Float = 0f,
     val lastTimeToFirstTokenMs: Long = 0,
-    val followUpSuggestions: List<String> = emptyList()
+    val followUpSuggestions: List<String> = emptyList(),
+    val errorMessage: String? = null
 )
 
-@HiltViewModel
-class ChatViewModel @Inject constructor(
+class ChatViewModel(
     private val repository: ChatRepository,
     val liteRtEngine: LiteRtEngine,
     private val ragRetriever: RagRetriever,
@@ -60,6 +60,10 @@ class ChatViewModel @Inject constructor(
         val model = ModelManager.getModelById(modelId)
         return liteRtEngine
     }
+
+    // Reactive model-loaded state — ChatScreen observes this via collectAsState()
+    val modelLoaded: StateFlow<Boolean> = liteRtEngine.modelLoaded
+    val isModelLoading: StateFlow<Boolean> = liteRtEngine.isModelLoading
 
     fun isAnyModelLoaded(): Boolean {
         return liteRtEngine.isModelLoaded()
@@ -120,6 +124,9 @@ class ChatViewModel @Inject constructor(
                 observeMessages(convId)
             } catch (e: Exception) {
                 Log.e(TAG, "Error in startNewConversation: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to create conversation. Please try again."
+                )
             }
         }
     }
@@ -204,6 +211,12 @@ class ChatViewModel @Inject constructor(
                     ragContext = ragContext
                 )
 
+                // Reset the LiteRT conversation before each message — we manage
+                // the full chat history in our prompt, so the Conversation object
+                // must not accumulate its own internal context (which would double
+                // the token count and overflow after ~3 exchanges).
+                getActiveEngine().clearCache()
+
                 _uiState.value = _uiState.value.copy(
                     isGenerating = true,
                     streamingText = "",
@@ -267,7 +280,8 @@ class ChatViewModel @Inject constructor(
                 Log.e(TAG, "Error in sendMessage: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
                     isGenerating = false,
-                    streamingText = ""
+                    streamingText = "",
+                    errorMessage = "Failed to generate response. Please try again."
                 )
                 // Bug 6: release the gate on error so user is not permanently locked out
                 sendingGate.set(false)
@@ -280,6 +294,7 @@ class ChatViewModel @Inject constructor(
         generationJob?.cancel()
         // Bug 6: release the gate when generation is manually stopped
         sendingGate.set(false)
+        _uiState.value = _uiState.value.copy(isGenerating = false, streamingText = "")
     }
 
     fun exportConversation(): String {
@@ -330,6 +345,10 @@ class ChatViewModel @Inject constructor(
                 Log.e(TAG, "Error in deleteConversation: ${e.message}", e)
             }
         }
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
     fun clearAllConversations() {

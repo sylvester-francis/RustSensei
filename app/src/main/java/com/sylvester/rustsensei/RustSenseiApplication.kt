@@ -1,12 +1,13 @@
 package com.sylvester.rustsensei
 
 import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp
 class RustSenseiApplication : Application() {
+    lateinit var container: AppContainer
+
     override fun onCreate() {
         super.onCreate()
+        container = AppContainer(this)
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler())
     }
 }

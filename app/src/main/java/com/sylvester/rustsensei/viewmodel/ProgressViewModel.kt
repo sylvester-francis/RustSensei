@@ -7,13 +7,11 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningStats
 import com.sylvester.rustsensei.data.ProgressRepository
 import com.sylvester.rustsensei.data.UserNote
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class Achievement(
     val id: String,
@@ -48,8 +46,7 @@ data class ProgressUiState(
     val recentNotes: List<UserNote> = emptyList()
 )
 
-@HiltViewModel
-class ProgressViewModel @Inject constructor(
+class ProgressViewModel(
     private val progressRepo: ProgressRepository,
     private val contentRepo: ContentRepository
 ) : ViewModel() {

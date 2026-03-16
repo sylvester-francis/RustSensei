@@ -132,6 +132,7 @@ fun ReviewScreen(
                 }
 
                 uiState.currentCard != null -> {
+                    val card = uiState.currentCard ?: return@Box
                     val totalCards = uiState.cardsReviewed + uiState.cardsRemaining
                     Column(
                         modifier = Modifier
@@ -151,7 +152,7 @@ fun ReviewScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = uiState.currentCard!!.category,
+                                text = card.category,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontFamily = FontFamily.Monospace,
                                 color = RustOrange.copy(alpha = 0.7f)
@@ -177,8 +178,8 @@ fun ReviewScreen(
 
                         // Flash card
                         FlashCardView(
-                            front = uiState.currentCard!!.front,
-                            back = uiState.currentCard!!.back,
+                            front = card.front,
+                            back = card.back,
                             isFlipped = uiState.isFlipped,
                             onFlip = { viewModel.flipCard() },
                             modifier = Modifier.weight(1f)
@@ -219,6 +220,28 @@ fun ReviewScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
                             }
+                        }
+                    }
+                }
+
+                // Fallback: no card, not loading, not complete
+                else -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "No cards to review right now",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Come back after studying new material",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            )
                         }
                     }
                 }

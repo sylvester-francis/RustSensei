@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
@@ -79,6 +80,7 @@ fun ChatScreen(
     onNavigateBack: (() -> Unit)? = null
 ) {
     val modelLoaded by viewModel.modelLoaded.collectAsState()
+    val isModelLoading by viewModel.isModelLoading.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
@@ -231,7 +233,12 @@ fun ChatScreen(
                     is ChatContext.General -> { /* no banner for general context */ }
                 }
 
-                if (!modelLoaded) {
+                if (!modelLoaded && isModelLoading) {
+                    // Model is loading in background — show loading state
+                    item(key = "model_loading") {
+                        ModelLoadingState()
+                    }
+                } else if (!modelLoaded) {
                     // No model -- show download prompt
                     item(key = "no_model") {
                         NoModelState(onDownload = onNavigateToSetup)
@@ -337,6 +344,36 @@ fun ChatScreen(
                 }
             }
 
+            // Error banner
+            uiState.errorMessage?.let { error ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(
+                        onClick = { viewModel.clearError() },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Dismiss",
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+
             // Input bar -- only show when model is loaded
             if (modelLoaded) {
                 InputBar(
@@ -344,6 +381,7 @@ fun ChatScreen(
                     onValueChange = { inputText = it },
                     onSend = {
                         if (inputText.isNotBlank()) {
+                            viewModel.clearError()
                             viewModel.sendMessage(inputText)
                             inputText = ""
                         }
@@ -471,7 +509,17 @@ private fun NoModelState(onDownload: () -> Unit) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Best on Pixel 6+ \u00B7 CPU fallback on other devices",
+            style = MaterialTheme.typography.labelSmall,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Primary filled, full-width, 56dp pill shape
         Button(
@@ -496,6 +544,41 @@ private fun NoModelState(onDownload: () -> Unit) {
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
+    }
+}
+
+/**
+ * State shown when the AI model is loading in the background on app startup.
+ */
+@Composable
+private fun ModelLoadingState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Loading your tutor...",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        CircularProgressIndicator(
+            modifier = Modifier.size(32.dp),
+            strokeWidth = 3.dp,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Initializing on-device AI model",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
     }
 }
 

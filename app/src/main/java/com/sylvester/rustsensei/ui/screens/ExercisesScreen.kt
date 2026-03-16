@@ -346,6 +346,36 @@ private fun CategoriesView(
             }
         }
 
+        // -- Empty state --
+        if (uiState.categories.isEmpty()) {
+            item(key = "empty-exercises") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Code,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = SecondaryText.copy(alpha = 0.3f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No exercises available",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = "Content may still be loading",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryText.copy(alpha = 0.4f)
+                    )
+                }
+            }
+        }
+
         // -- Category list --
         items(uiState.categories, key = { it.id }) { category ->
             val isExpanded = uiState.expandedCategory == category.id

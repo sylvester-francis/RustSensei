@@ -201,6 +201,27 @@ fun MainScreen(
                     learningPathViewModel = learningPathViewModel,
                     onNavigateToReview = onNavigateToReview,
                     onNavigateToLearningPaths = onNavigateToLearningPaths,
+                    onNavigateToQuiz = onNavigateToQuiz,
+                    onNavigateToLearn = {
+                        tabNavController.navigate(Tab.Learn.route) {
+                            popUpTo(tabNavController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        selectedTabIndex = tabs.indexOf(Tab.Learn)
+                    },
+                    onNavigateToExercises = {
+                        tabNavController.navigate(Tab.Practice.route) {
+                            popUpTo(tabNavController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        selectedTabIndex = tabs.indexOf(Tab.Practice)
+                    },
                     onContinueReading = { chapterId, sectionId ->
                         bookViewModel.openChapter(chapterId)
                         bookViewModel.openSection(chapterId, sectionId)

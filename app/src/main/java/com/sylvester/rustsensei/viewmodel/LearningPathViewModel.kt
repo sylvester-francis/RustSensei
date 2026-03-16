@@ -7,12 +7,10 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathProgress
 import com.sylvester.rustsensei.data.ProgressDao
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class PathMode { LIST, DETAIL }
 
@@ -23,8 +21,7 @@ data class PathUiState(
     val mode: PathMode = PathMode.LIST
 )
 
-@HiltViewModel
-class LearningPathViewModel @Inject constructor(
+class LearningPathViewModel(
     private val contentRepo: ContentRepository,
     private val progressDao: ProgressDao
 ) : ViewModel() {

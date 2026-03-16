@@ -13,7 +13,6 @@ import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class ModelState {
     NOT_DOWNLOADED,
@@ -49,11 +47,11 @@ data class ModelUiState(
     val downloadedModelIds: Set<String> = emptySet()
 )
 
-@HiltViewModel
-class ModelViewModel @Inject constructor(
+class ModelViewModel(
     application: Application,
     val modelManager: ModelManager,
-    private val prefsManager: PreferencesManager
+    private val prefsManager: PreferencesManager,
+    private val liteRtEngine: LiteRtEngine
 ) : AndroidViewModel(application) {
 
     companion object {
@@ -70,6 +68,11 @@ class ModelViewModel @Inject constructor(
         val savedModelId = prefsManager.getSelectedModelId()
         _uiState.value = _uiState.value.copy(selectedModelId = savedModelId)
         checkModelStatus()
+
+        // Auto-load model in background if file exists and engine isn't loaded yet
+        if (_uiState.value.modelState == ModelState.DOWNLOADED && !liteRtEngine.isModelLoaded()) {
+            loadModel(liteRtEngine)
+        }
     }
 
     fun checkModelStatus() {
@@ -190,13 +193,15 @@ class ModelViewModel @Inject constructor(
                 } else {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.ERROR,
-                        errorMessage = "Failed to load ${modelInfo.displayName}. The file may be corrupted \u2014 try deleting and re-downloading."
+                        errorMessage = "Failed to initialize ${modelInfo.displayName}. " +
+                                "The model file may be corrupted \u2014 try deleting and re-downloading."
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     modelState = ModelState.ERROR,
-                    errorMessage = "Load error: ${e.message}"
+                    errorMessage = "Load error: ${e.message ?: "Unknown error"}. " +
+                            "Try deleting and re-downloading the model."
                 )
             }
         }

@@ -108,6 +108,14 @@ class ModelManager(private val context: Context) {
 
     fun deleteModel(): Boolean = deleteModel(AVAILABLE_MODELS[0])
 
+    /** Clean up any orphaned .tmp files from failed downloads. */
+    fun cleanupOrphanedTempFiles() {
+        modelsDir.listFiles()?.filter { it.name.endsWith(".tmp") }?.forEach { tmpFile ->
+            Log.i("ModelManager", "Cleaning up orphaned temp file: ${tmpFile.name} (${tmpFile.length() / (1024 * 1024)} MB)")
+            tmpFile.delete()
+        }
+    }
+
     fun downloadModel(modelInfo: ModelInfo): Flow<DownloadState> = flow {
         emit(DownloadState.Downloading(0f, 0, 0))
 
@@ -190,6 +198,7 @@ class ModelManager(private val context: Context) {
             }
 
             if (tempFile.length() < 1_000_000) {
+                tempFile.delete()
                 emit(DownloadState.Error("Download appears incomplete (${tempFile.length()} bytes)"))
                 return@flow
             }
@@ -212,6 +221,15 @@ class ModelManager(private val context: Context) {
             emit(DownloadState.Completed)
 
         } catch (e: Exception) {
+            // Clean up partial download on non-resumable errors
+            val tempFile = getTempFile(modelInfo)
+            if (e is java.net.UnknownHostException || e is java.net.ConnectException) {
+                // Network errors: keep temp file for resume
+                Log.w("ModelManager", "Network error, keeping temp file for resume: ${e.message}")
+            } else {
+                // Other errors: clean up to avoid orphaned files
+                tempFile.delete()
+            }
             emit(DownloadState.Error(e.message ?: "Unknown download error"))
         }
     }.flowOn(Dispatchers.IO)

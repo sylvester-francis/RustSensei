@@ -84,6 +84,9 @@ fun DashboardScreen(
     learningPathViewModel: LearningPathViewModel,
     onNavigateToReview: () -> Unit = {},
     onNavigateToLearningPaths: () -> Unit = {},
+    onNavigateToQuiz: () -> Unit = {},
+    onNavigateToLearn: () -> Unit = {},
+    onNavigateToExercises: () -> Unit = {},
     onContinueReading: ((chapterId: String, sectionId: String) -> Unit)? = null,
     onContinueExercise: ((exerciseId: String) -> Unit)? = null
 ) {
@@ -353,6 +356,9 @@ fun DashboardScreen(
                             val target = uiState.continueTarget
                             if (target != null && target.type == "section" && target.parentId != null) {
                                 onContinueReading?.invoke(target.parentId, target.id)
+                            } else {
+                                // No continue target — just navigate to Learn tab
+                                onNavigateToLearn()
                             }
                         }
                     )
@@ -368,6 +374,9 @@ fun DashboardScreen(
                             val target = uiState.continueTarget
                             if (target != null && target.type == "exercise") {
                                 onContinueExercise?.invoke(target.id)
+                            } else {
+                                // No exercise target — just navigate to Practice tab
+                                onNavigateToExercises()
                             }
                         }
                     )
@@ -379,7 +388,7 @@ fun DashboardScreen(
                         icon = Icons.Default.Quiz,
                         accentColor = WarningAmber,
                         cardBackground = cardBackground,
-                        onClick = { /* Quiz navigation handled by parent */ }
+                        onClick = { onNavigateToQuiz() }
                     )
                 }
             }

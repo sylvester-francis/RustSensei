@@ -519,6 +519,36 @@ private fun BookIndexView(
                     }
                 }
 
+                // Empty state if no chapters loaded
+                if (uiState.chapters.isEmpty()) {
+                    item(key = "empty-chapters") {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 48.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.MenuBook,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No chapters available",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                            Text(
+                                text = "Content may still be loading",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+                }
+
                 // Chapter list
                 itemsIndexed(uiState.chapters, key = { _, ch -> ch.id }) { index, chapter ->
                     Card(
@@ -866,7 +896,7 @@ private fun SectionView(
                 if (sectionId != null && noteText.isNotBlank()) {
                     viewModel.saveNote(sectionId, noteText, currentNoteId)
                 } else if (sectionId != null && noteText.isBlank() && currentNoteId != null) {
-                    viewModel.deleteNote(currentNoteId!!)
+                    currentNoteId?.let { viewModel.deleteNote(it) }
                     currentNoteId = null
                 }
                 showNotesSheet = false
@@ -928,7 +958,7 @@ private fun SectionView(
                     if (currentNoteId != null) {
                         TextButton(
                             onClick = {
-                                viewModel.deleteNote(currentNoteId!!)
+                                currentNoteId?.let { viewModel.deleteNote(it) }
                                 noteText = ""
                                 currentNoteId = null
                                 scope.launch {

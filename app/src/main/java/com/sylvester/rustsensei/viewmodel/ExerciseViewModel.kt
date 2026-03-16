@@ -14,7 +14,6 @@ import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class ExerciseScreenMode {
     CATEGORIES,
@@ -42,11 +40,11 @@ data class ExerciseUiState(
     val categoryProgress: Map<String, List<ExerciseProgress>> = emptyMap(),
     val lastIncompleteExerciseId: String? = null,
     val llmValidationResult: String = "",
-    val isValidating: Boolean = false
+    val isValidating: Boolean = false,
+    val errorMessage: String? = null
 )
 
-@HiltViewModel
-class ExerciseViewModel @Inject constructor(
+class ExerciseViewModel(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository,
     private val liteRtEngine: LiteRtEngine,
@@ -84,6 +82,9 @@ class ExerciseViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(categories = categories)
             } catch (e: Exception) {
                 Log.e(TAG, "Error in loadCategories: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to load exercises: ${e.message}"
+                )
             }
         }
     }
@@ -161,6 +162,9 @@ class ExerciseViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error in openExercise: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to load exercise: ${e.message}"
+                )
             }
         }
     }

@@ -10,13 +10,11 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.BookProgress
 import com.sylvester.rustsensei.data.ProgressRepository
 import com.sylvester.rustsensei.data.UserNote
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class BookScreenMode {
     INDEX,
@@ -39,8 +37,7 @@ data class BookUiState(
     val errorMessage: String? = null
 )
 
-@HiltViewModel
-class BookViewModel @Inject constructor(
+class BookViewModel(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository
 ) : ViewModel() {

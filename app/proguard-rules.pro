@@ -31,6 +31,12 @@
 # LiteRT LLM engine (uses reflection)
 -keep class com.google.ai.edge.litertlm.** { *; }
 
+# OkHttp (used for model downloads — reflection on interceptors & platform detection)
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
 # Keep line numbers for crash reporting
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile

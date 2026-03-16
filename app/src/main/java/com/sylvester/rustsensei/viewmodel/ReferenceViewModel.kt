@@ -5,13 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ReferenceSectionInfo
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import javax.inject.Inject
 
 enum class ReferenceScreenMode {
     INDEX,
@@ -28,8 +26,7 @@ data class ReferenceUiState(
     val errorMessage: String? = null
 )
 
-@HiltViewModel
-class ReferenceViewModel @Inject constructor(
+class ReferenceViewModel(
     private val contentRepo: ContentRepository
 ) : ViewModel() {
 

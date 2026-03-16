@@ -9,12 +9,10 @@ import com.sylvester.rustsensei.data.QuizIndexEntry
 import com.sylvester.rustsensei.data.QuizQuestion
 import com.sylvester.rustsensei.data.QuizResult
 import com.sylvester.rustsensei.data.ProgressRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 enum class QuizScreenMode {
     LIST,
@@ -35,8 +33,7 @@ data class QuizUiState(
     val codeInput: String = ""
 )
 
-@HiltViewModel
-class QuizViewModel @Inject constructor(
+class QuizViewModel(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository
 ) : ViewModel() {

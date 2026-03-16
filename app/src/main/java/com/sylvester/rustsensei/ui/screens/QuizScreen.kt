@@ -133,6 +133,35 @@ private fun QuizListView(viewModel: QuizViewModel) {
             }
         }
 
+        if (uiState.quizzes.isEmpty()) {
+            item(key = "empty-quizzes") {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 48.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.EmojiEvents,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = SecondaryText.copy(alpha = 0.3f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "No quizzes available",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
+                    Text(
+                        text = "Quizzes couldn't be loaded",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryText.copy(alpha = 0.4f)
+                    )
+                }
+            }
+        }
+
         items(uiState.quizzes, key = { it.id }) { quiz ->
             val bestResult = uiState.bestScores[quiz.id]
             val percent = bestResult?.let {
@@ -263,7 +292,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                                     text = "Best: ${bestResult.score}/${bestResult.totalQuestions}",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontFamily = FontFamily.Monospace,
-                                    color = scoreColor(percent!!).copy(alpha = 0.8f)
+                                    color = scoreColor(percent ?: 0).copy(alpha = 0.8f)
                                 )
                             }
                         }

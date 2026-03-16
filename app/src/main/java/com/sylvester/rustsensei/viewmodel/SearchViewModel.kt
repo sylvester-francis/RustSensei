@@ -6,14 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.data.ProgressRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class SearchResult(
     val title: String,
@@ -30,8 +28,7 @@ data class SearchUiState(
     val recentSearches: List<String> = emptyList()
 )
 
-@HiltViewModel
-class SearchViewModel @Inject constructor(
+class SearchViewModel(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository,
     private val preferencesManager: PreferencesManager
@@ -257,5 +254,10 @@ class SearchViewModel @Inject constructor(
     fun clearRecentSearches() {
         preferencesManager.saveRecentSearches(emptyList())
         _uiState.value = _uiState.value.copy(recentSearches = emptyList())
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        searchJob?.cancel()
     }
 }
