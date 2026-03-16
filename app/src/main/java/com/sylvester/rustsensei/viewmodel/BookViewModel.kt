@@ -10,13 +10,11 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.BookProgress
 import com.sylvester.rustsensei.data.ProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class BookScreenMode {
@@ -67,9 +65,7 @@ class BookViewModel @Inject constructor(
     private fun loadBookIndex() {
         viewModelScope.launch {
             try {
-                val index = withContext(Dispatchers.IO) {
-                    contentRepo.getBookIndex()
-                }
+                val index = contentRepo.getBookIndex()
                 _uiState.value = _uiState.value.copy(chapters = index.chapters)
             } catch (e: Exception) {
                 Log.e(TAG, "Error in loadBookIndex: ${e.message}", e)
@@ -97,9 +93,7 @@ class BookViewModel @Inject constructor(
     fun openChapter(chapterId: String) {
         viewModelScope.launch {
             try {
-                val chapter = withContext(Dispatchers.IO) {
-                    contentRepo.getChapter(chapterId)
-                }
+                val chapter = contentRepo.getChapter(chapterId)
                 if (chapter == null) {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "Failed to load chapter. The content may be corrupted."
@@ -127,9 +121,7 @@ class BookViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val section = withContext(Dispatchers.IO) {
-                    contentRepo.getSection(chapterId, sectionId)
-                }
+                val section = contentRepo.getSection(chapterId, sectionId)
                 if (section == null) {
                     _uiState.value = _uiState.value.copy(
                         errorMessage = "Failed to load section content."

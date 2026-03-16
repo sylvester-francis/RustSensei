@@ -15,7 +15,6 @@ import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 enum class ExerciseScreenMode {
@@ -82,9 +80,7 @@ class ExerciseViewModel @Inject constructor(
     private fun loadCategories() {
         viewModelScope.launch {
             try {
-                val categories = withContext(Dispatchers.IO) {
-                    contentRepo.getExerciseCategories()
-                }
+                val categories = contentRepo.getExerciseCategories()
                 _uiState.value = _uiState.value.copy(categories = categories)
             } catch (e: Exception) {
                 Log.e(TAG, "Error in loadCategories: ${e.message}", e)
@@ -147,9 +143,7 @@ class ExerciseViewModel @Inject constructor(
     fun openExercise(exerciseId: String) {
         viewModelScope.launch {
             try {
-                val exercise = withContext(Dispatchers.IO) {
-                    contentRepo.getExercise(exerciseId)
-                }
+                val exercise = contentRepo.getExercise(exerciseId)
                 val progress = progressRepo.getExerciseProgress(exerciseId)
                 if (exercise != null) {
                     validationJob?.cancel()

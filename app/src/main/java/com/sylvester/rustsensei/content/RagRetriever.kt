@@ -2,6 +2,8 @@ package com.sylvester.rustsensei.content
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class RagRetriever(private val context: Context) {
@@ -58,14 +60,14 @@ class RagRetriever(private val context: Context) {
         }
     }
 
-    fun retrieveContext(query: String, topK: Int = 3): String? {
-        return try {
+    suspend fun retrieveContext(query: String, topK: Int = 3): String? = withContext(Dispatchers.IO) {
+        try {
             ensureLoaded()
 
-            val allChunks = chunks ?: return null
-            val index = keywordIndex ?: return null
+            val allChunks = chunks ?: return@withContext null
+            val index = keywordIndex ?: return@withContext null
 
-            if (allChunks.isEmpty()) return null
+            if (allChunks.isEmpty()) return@withContext null
 
             // Extract query keywords
             val queryWords = query.lowercase()
@@ -91,7 +93,7 @@ class RagRetriever(private val context: Context) {
                 }
             }
 
-            if (chunkScores.isEmpty()) return null
+            if (chunkScores.isEmpty()) return@withContext null
 
             // Get top-K chunks by score
             val topChunkIds = chunkScores.entries
@@ -102,7 +104,7 @@ class RagRetriever(private val context: Context) {
             val chunkMap = allChunks.associateBy { it.id }
             val topChunks = topChunkIds.mapNotNull { chunkMap[it] }
 
-            if (topChunks.isEmpty()) return null
+            if (topChunks.isEmpty()) return@withContext null
 
             topChunks.joinToString("\n\n---\n\n") { chunk ->
                 "From: ${chunk.sourceTitle}\n${chunk.text}"

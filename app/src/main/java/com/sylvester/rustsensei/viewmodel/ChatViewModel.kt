@@ -13,7 +13,6 @@ import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
@@ -174,9 +172,7 @@ class ChatViewModel @Inject constructor(
                 // Build RAG context based on current chat context
                 val ragContext = when (val ctx = _chatContext.value) {
                     is ChatContext.General -> {
-                        withContext(Dispatchers.IO) {
-                            ragRetriever.retrieveContext(message)
-                        }
+                        ragRetriever.retrieveContext(message)
                     }
                     is ChatContext.BookSection -> {
                         ctx.content

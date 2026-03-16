@@ -6,12 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ReferenceSectionInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import javax.inject.Inject
 
@@ -49,9 +47,7 @@ class ReferenceViewModel @Inject constructor(
     private fun loadIndex() {
         viewModelScope.launch {
             try {
-                val index = withContext(Dispatchers.IO) {
-                    contentRepo.getReferenceIndex()
-                }
+                val index = contentRepo.getReferenceIndex()
                 _uiState.value = _uiState.value.copy(sections = index.sections)
             } catch (e: Exception) {
                 Log.e(TAG, "Error in loadIndex: ${e.message}", e)
@@ -71,9 +67,7 @@ class ReferenceViewModel @Inject constructor(
     fun openItem(sectionId: String, itemId: String) {
         viewModelScope.launch {
             try {
-                val json = withContext(Dispatchers.IO) {
-                    contentRepo.getReferenceItem(sectionId, itemId)
-                }
+                val json = contentRepo.getReferenceItem(sectionId, itemId)
                 if (json != null) {
                     _uiState.value = _uiState.value.copy(
                         mode = ReferenceScreenMode.ITEM_DETAIL,

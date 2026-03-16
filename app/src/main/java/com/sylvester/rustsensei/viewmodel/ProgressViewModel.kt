@@ -7,12 +7,10 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningStats
 import com.sylvester.rustsensei.data.ProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 data class ContinueTarget(
@@ -52,8 +50,8 @@ class ProgressViewModel @Inject constructor(
     private fun loadProgress() {
         viewModelScope.launch {
             try {
-                val totalSections = withContext(Dispatchers.IO) { contentRepo.getTotalSectionsCount() }
-                val totalExercises = withContext(Dispatchers.IO) { contentRepo.getTotalExercisesCount() }
+                val totalSections = contentRepo.getTotalSectionsCount()
+                val totalExercises = contentRepo.getTotalExercisesCount()
 
                 _uiState.value = _uiState.value.copy(
                     totalSections = totalSections,

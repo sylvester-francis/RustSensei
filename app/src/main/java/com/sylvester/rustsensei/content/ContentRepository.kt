@@ -3,6 +3,8 @@ package com.sylvester.rustsensei.content
 import android.content.Context
 import android.util.Log
 import android.util.LruCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -82,7 +84,7 @@ class ContentRepository(private val context: Context) {
     private var bookIndex: BookIndex? = null
     private var exerciseCategories: List<ExerciseCategory>? = null
 
-    fun getBookIndex(): BookIndex {
+    suspend fun getBookIndex(): BookIndex {
         bookIndex?.let { return it }
 
         return try {
@@ -117,7 +119,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getChapter(chapterId: String): BookChapter? {
+    suspend fun getChapter(chapterId: String): BookChapter? {
         chapterCache.get(chapterId)?.let { return it }
 
         return try {
@@ -130,12 +132,12 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getSection(chapterId: String, sectionId: String): BookSection? {
+    suspend fun getSection(chapterId: String, sectionId: String): BookSection? {
         val chapter = getChapter(chapterId) ?: return null
         return chapter.sections.find { it.id == sectionId }
     }
 
-    fun getExerciseCategories(): List<ExerciseCategory> {
+    suspend fun getExerciseCategories(): List<ExerciseCategory> {
         exerciseCategories?.let { return it }
 
         return try {
@@ -166,7 +168,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getExercise(exerciseId: String): ExerciseData? {
+    suspend fun getExercise(exerciseId: String): ExerciseData? {
         exerciseCache.get(exerciseId)?.let { return it }
 
         return try {
@@ -182,7 +184,7 @@ class ContentRepository(private val context: Context) {
     // Reference content
     private var referenceIndex: ReferenceIndex? = null
 
-    fun getReferenceIndex(): ReferenceIndex {
+    suspend fun getReferenceIndex(): ReferenceIndex {
         referenceIndex?.let { return it }
 
         return try {
@@ -209,7 +211,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
+    suspend fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
         return try {
             loadAssetJson("reference/$sectionId/$itemId.json")
         } catch (e: Exception) {
@@ -217,7 +219,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getTotalSectionsCount(): Int {
+    suspend fun getTotalSectionsCount(): Int {
         return try {
             getBookIndex().chapters.sumOf { it.sectionIds.size }
         } catch (e: Exception) {
@@ -226,7 +228,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    fun getTotalExercisesCount(): Int {
+    suspend fun getTotalExercisesCount(): Int {
         return try {
             getExerciseCategories().sumOf { it.exercises.size }
         } catch (e: Exception) {
@@ -299,9 +301,9 @@ class ContentRepository(private val context: Context) {
         return list
     }
 
-    private fun loadAssetJson(path: String): JSONObject {
+    private suspend fun loadAssetJson(path: String): JSONObject = withContext(Dispatchers.IO) {
         val inputStream = context.assets.open(path)
         val jsonString = inputStream.bufferedReader().use { it.readText() }
-        return JSONObject(jsonString)
+        JSONObject(jsonString)
     }
 }
