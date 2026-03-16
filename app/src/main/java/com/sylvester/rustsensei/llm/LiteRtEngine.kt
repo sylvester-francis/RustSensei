@@ -57,9 +57,9 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 val conv = newEngine.createConversation(
                     ConversationConfig(
                         samplerConfig = SamplerConfig(
-                            topK = 1,
-                            topP = 1.0,
-                            temperature = 0.0
+                            topK = 40,
+                            topP = 0.95,
+                            temperature = 0.7
                         )
                     )
                 )
