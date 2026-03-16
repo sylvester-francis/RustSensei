@@ -83,9 +83,12 @@ fun ChatScreen(
         }
     }
 
-    // Start a new conversation if none exists
-    LaunchedEffect(Unit) {
-        if (uiState.currentConversationId == null) {
+    // Start a new conversation ONLY if none has ever been created.
+    // Key on currentConversationId so this only fires once when it's null,
+    // not every time the Chat tab is re-entered.
+    val convId = uiState.currentConversationId
+    LaunchedEffect(convId) {
+        if (convId == null) {
             viewModel.startNewConversation()
         }
     }
