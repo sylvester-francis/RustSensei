@@ -193,7 +193,7 @@ private fun BookIndexView(
                             viewModel.openChapter(lastChapterId)
                             viewModel.openSection(lastChapterId, lastSectionId)
                         },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     )
@@ -253,7 +253,7 @@ private fun BookIndexView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.openChapter(chapter.id) }
-                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
                     .semantics { contentDescription = "Chapter ${index + 1}: ${chapter.title}, ${chapter.sectionIds.size} sections" },
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -345,7 +345,7 @@ private fun BookIndexView(
             HorizontalDivider(
                 thickness = 0.5.dp,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                modifier = Modifier.padding(start = 54.dp)
+                modifier = Modifier.padding(start = 48.dp)
             )
         }
 
@@ -394,7 +394,7 @@ private fun ChapterView(viewModel: BookViewModel) {
                         .clickable {
                             chapterId?.let { viewModel.openSection(it, section.id) }
                         }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (isCompleted) {
@@ -421,13 +421,13 @@ private fun ChapterView(viewModel: BookViewModel) {
                             fontWeight = FontWeight.Medium
                         )
                         if (progress != null && !isCompleted && progress.readPercent > 0f) {
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             LinearProgressIndicator(
                                 progress = { progress.readPercent },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(4.dp)
-                                    .clip(RoundedCornerShape(2.dp)),
+                                    .clip(RoundedCornerShape(8.dp)),
                                 strokeCap = StrokeCap.Round,
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -439,7 +439,7 @@ private fun ChapterView(viewModel: BookViewModel) {
                 HorizontalDivider(
                     thickness = 0.5.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                    modifier = Modifier.padding(start = 50.dp)
+                    modifier = Modifier.padding(start = 48.dp)
                 )
             }
         }

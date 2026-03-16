@@ -175,7 +175,7 @@ fun SearchScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { viewModel.selectRecentSearch(search) }
-                                .padding(vertical = 10.dp, horizontal = 8.dp),
+                                .padding(vertical = 12.dp, horizontal = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -266,7 +266,7 @@ fun SearchScreen(
                         HorizontalDivider(
                             thickness = 0.5.dp,
                             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f),
-                            modifier = Modifier.padding(start = 40.dp)
+                            modifier = Modifier.padding(start = 48.dp)
                         )
                     }
                 }
@@ -284,7 +284,7 @@ private fun SearchResultRow(result: SearchResult) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { /* navigation can be added later */ }
-            .padding(vertical = 10.dp, horizontal = 8.dp),
+            .padding(vertical = 12.dp, horizontal = 8.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(

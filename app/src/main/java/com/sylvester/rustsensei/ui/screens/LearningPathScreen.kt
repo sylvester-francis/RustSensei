@@ -186,7 +186,7 @@ private fun PathCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
@@ -279,7 +279,7 @@ private fun PathCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
+                    .clip(RoundedCornerShape(8.dp)),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 strokeCap = StrokeCap.Butt
@@ -328,7 +328,7 @@ private fun PathDetailContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
+                        .clip(RoundedCornerShape(8.dp)),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     strokeCap = StrokeCap.Butt
@@ -448,7 +448,7 @@ private fun TimelineStepItem(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = if (isLastStep) 0.dp else 28.dp)
+                .padding(bottom = if (isLastStep) 0.dp else 32.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -465,7 +465,7 @@ private fun TimelineStepItem(
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     }
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = step.type.replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.labelSmall,

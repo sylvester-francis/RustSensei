@@ -136,7 +136,7 @@ fun DashboardScreen(
                 if (uiState.weekActivity.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         uiState.weekActivity.forEach { day ->
@@ -146,7 +146,7 @@ fun DashboardScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(24.dp)
-                                        .clip(RoundedCornerShape(4.dp))
+                                        .clip(RoundedCornerShape(8.dp))
                                         .background(
                                             when (day.level) {
                                                 2 -> MaterialTheme.colorScheme.primary
@@ -173,7 +173,7 @@ fun DashboardScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
                 )
@@ -241,7 +241,7 @@ fun DashboardScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
                 )
@@ -306,7 +306,7 @@ fun DashboardScreen(
             Card(
                 onClick = onNavigateToLearningPaths,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.06f)
                 )
@@ -588,7 +588,7 @@ fun DashboardScreen(
                                         modifier = Modifier.size(14.dp),
                                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
                                     )
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = note.sectionId.replace("-", " "),
                                         style = MaterialTheme.typography.labelSmall,
@@ -675,7 +675,7 @@ private fun StatCard(
             modifier = Modifier.size(20.dp),
             tint = accentColor
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         Row(
             verticalAlignment = Alignment.Bottom
         ) {
@@ -707,7 +707,7 @@ private fun StatCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
+                    .clip(RoundedCornerShape(8.dp)),
                 color = accentColor,
                 trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 strokeCap = StrokeCap.Butt
@@ -733,19 +733,19 @@ private fun AchievementBadge(achievement: Achievement) {
     Column(
         modifier = Modifier
             .width(80.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(16.dp))
             .then(
                 if (achievement.isUnlocked) {
                     Modifier.shadow(
                         elevation = 4.dp,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(16.dp),
                         ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                         spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     )
                 } else Modifier
             )
             .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

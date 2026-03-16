@@ -127,7 +127,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.openSection(section.id) }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -160,7 +160,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
             HorizontalDivider(
                 thickness = 0.5.dp,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                modifier = Modifier.padding(start = 54.dp)
+                modifier = Modifier.padding(start = 48.dp)
             )
         }
     }
@@ -198,7 +198,7 @@ private fun SectionListView(viewModel: ReferenceViewModel) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { viewModel.openItem(section.id, itemId) }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -516,7 +516,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = "\u2022 ${points.getString(i)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 lineHeight = 22.sp,
-                                modifier = Modifier.padding(vertical = 3.dp)
+                                modifier = Modifier.padding(vertical = 4.dp)
                             )
                         }
                         Spacer(modifier = Modifier.height(24.dp))
@@ -548,7 +548,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(start = 8.dp, top = 6.dp)
+                                        modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                                     )
                                 }
                             }

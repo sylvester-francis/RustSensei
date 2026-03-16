@@ -158,12 +158,12 @@ fun ReviewScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(3.dp)
-                                .clip(RoundedCornerShape(2.dp)),
+                                .clip(RoundedCornerShape(8.dp)),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             strokeCap = StrokeCap.Butt
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Flash card
                         FlashCardView(
@@ -202,7 +202,7 @@ fun ReviewScreen(
                                     modifier = Modifier.size(16.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                                 )
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "Tap card to reveal answer",
                                     style = MaterialTheme.typography.bodySmall,
@@ -229,7 +229,7 @@ private fun FlashCardView(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onFlip),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),

@@ -135,7 +135,7 @@ fun ChatScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 6.dp),
+                    .padding(horizontal = 4.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -330,13 +330,13 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
             .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Large 80sp crab emoji
+        // 48sp crab emoji
         Text(
             text = "\uD83E\uDD80",
-            fontSize = 80.sp
+            fontSize = 48.sp
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // headlineSmall (monospace via theme)
         Text(
@@ -352,6 +352,16 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
             text = "I'll explain things like you're coming from Python",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Offline \u00B7 Private \u00B7 On-device AI",
+            style = MaterialTheme.typography.labelSmall,
+            fontFamily = FontFamily.Monospace,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
             textAlign = TextAlign.Center
         )
 
@@ -393,8 +403,8 @@ private fun NoModelState(onDownload: () -> Unit) {
             .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "\uD83E\uDD80", fontSize = 80.sp)
-        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "\uD83E\uDD80", fontSize = 48.sp)
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "Your tutor needs a brain",
             style = MaterialTheme.typography.headlineSmall,

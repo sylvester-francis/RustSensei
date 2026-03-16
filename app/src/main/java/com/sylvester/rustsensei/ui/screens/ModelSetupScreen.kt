@@ -145,7 +145,7 @@ fun ModelSetupScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp)
+                .padding(horizontal = 48.dp)
                 .height(1.dp)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.30f))
         )
@@ -203,7 +203,7 @@ fun ModelSetupScreen(
                         contentDescription = null,
                         modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         "Download ${modelViewModel.getSelectedModelInfo().displayName}",
                         style = MaterialTheme.typography.titleSmall,
@@ -235,8 +235,8 @@ fun ModelSetupScreen(
                         progress = { uiState.downloadProgress },
                         modifier = Modifier
                             .weight(1f)
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp)),
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(8.dp)),
                         strokeCap = StrokeCap.Butt,
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -401,7 +401,7 @@ private fun NeonPulsingLine() {
         modifier = Modifier
             .fillMaxWidth(0.5f)
             .height(3.dp)
-            .clip(RoundedCornerShape(1.5.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.primary.copy(alpha = alpha))
     )
 }

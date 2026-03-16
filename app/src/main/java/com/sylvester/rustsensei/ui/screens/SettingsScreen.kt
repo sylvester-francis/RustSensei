@@ -101,7 +101,7 @@ fun SettingsScreen(
                                 modelViewModel.startDownload()
                             }
                         }
-                        .padding(vertical = 14.dp, horizontal = 4.dp),
+                        .padding(vertical = 16.dp, horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -189,6 +189,27 @@ fun SettingsScreen(
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedButton(
+                onClick = {
+                    chatViewModel.updateConfig(
+                        config.copy(
+                            temperature = 0.7f,
+                            maxTokens = 384
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
+            ) {
+                Text(
+                    "Reset to Defaults",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             // Active Model Info — model name prominently
             SectionHeader("Active Model Info")

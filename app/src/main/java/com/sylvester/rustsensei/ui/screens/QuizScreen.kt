@@ -104,7 +104,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
                     .clickable { viewModel.startQuiz(quiz.id) },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
@@ -215,7 +215,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 .fillMaxWidth()
                 .height(4.dp)
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(2.dp)),
+                .clip(RoundedCornerShape(8.dp)),
             color = MaterialTheme.colorScheme.primary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round
@@ -240,7 +240,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
@@ -255,7 +255,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 lineHeight = 26.sp
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Answer area based on question type
             when (question) {
@@ -470,7 +470,7 @@ private fun TrueFalseAnswers(
                     )
                     .background(bgColor)
                     .clickable(enabled = !answered) { onSelect(value) }
-                    .padding(vertical = 20.dp),
+                    .padding(vertical = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -675,13 +675,13 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
+                .clip(RoundedCornerShape(8.dp)),
             color = resultColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
             strokeCap = StrokeCap.Round
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
         // Actions
         Button(

@@ -165,7 +165,7 @@ private fun CategoriesView(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                         .clickable { viewModel.openExercise(lastExerciseId) },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     )
@@ -216,7 +216,7 @@ private fun CategoriesView(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
                     .clickable { onNavigateToQuiz() },
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
                 )
@@ -275,7 +275,7 @@ private fun CategoriesView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { viewModel.toggleCategory(category.id) }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -313,7 +313,7 @@ private fun CategoriesView(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable { viewModel.openExercise(exerciseId) }
-                                    .padding(vertical = 10.dp),
+                                    .padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 if (isCompleted) {
@@ -334,7 +334,7 @@ private fun CategoriesView(
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
                                 Text(
                                     text = exerciseId,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -628,7 +628,7 @@ private fun ExerciseDetailView(
                         )
                         // Design Concern #1: LLM fallback — offer inline AI validation or self-mark
                         if (result == "uncertain") {
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -714,7 +714,7 @@ private fun ExerciseDetailView(
                                         )
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(6.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
                                     style = MaterialTheme.typography.bodyMedium,
@@ -833,7 +833,7 @@ private fun ExerciseDetailView(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Icon(Icons.Default.Chat, contentDescription = "Ask Sensei for help", modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text("Ask Sensei", style = MaterialTheme.typography.labelLarge)
             }
 
