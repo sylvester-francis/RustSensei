@@ -51,9 +51,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import com.sylvester.rustsensei.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.llm.ModelManager
@@ -512,28 +514,42 @@ fun SettingsScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    data class SocialLink(val label: String, val url: String, val iconRes: Int)
+
                     val links = listOf(
-                        "GitHub" to "https://github.com/sylvester-francis",
-                        "Hugging Face" to "https://huggingface.co/sylvester-francis",
-                        "LinkedIn" to "https://www.linkedin.com/in/sylvesterranjith/",
-                        "Substack" to "https://techwithsyl.substack.com/",
-                        "Medium" to "https://medium.com/@sylvesterranjithfrancis"
+                        SocialLink("GitHub", "https://github.com/sylvester-francis", R.drawable.ic_github),
+                        SocialLink("Hugging Face", "https://huggingface.co/sylvester-francis", R.drawable.ic_huggingface),
+                        SocialLink("LinkedIn", "https://www.linkedin.com/in/sylvesterranjith/", R.drawable.ic_linkedin),
+                        SocialLink("Substack", "https://techwithsyl.substack.com/", R.drawable.ic_substack),
+                        SocialLink("Medium", "https://medium.com/@sylvesterranjithfrancis", R.drawable.ic_medium),
+                        SocialLink("Instagram", "https://www.instagram.com/techwithsyl", R.drawable.ic_instagram)
                     )
 
-                    links.forEach { (label, url) ->
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = NeonCyan,
-                            fontFamily = FontFamily.Monospace,
-                            textDecoration = TextDecoration.Underline,
+                    links.forEach { link ->
+                        Row(
                             modifier = Modifier
+                                .fillMaxWidth()
                                 .clickable {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
                                     aboutContext.startActivity(intent)
                                 }
-                                .padding(vertical = 6.dp)
-                        )
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = link.iconRes),
+                                contentDescription = link.label,
+                                modifier = Modifier.size(20.dp),
+                                tint = NeonCyan
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = link.label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = NeonCyan,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
                     }
                 }
             }

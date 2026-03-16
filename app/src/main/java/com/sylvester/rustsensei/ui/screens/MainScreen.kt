@@ -103,38 +103,37 @@ fun MainScreen(
     // Track selected index for the nav bar pill highlight
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
-    // Hide the global top bar when Chat tab is active (Chat has its own)
-    val hideTopBar = currentDestination?.route == Tab.Chat.route ||
-            currentDestination?.route == Tab.Profile.route
+    // Hide chrome when Chat is active (it has its own top bar and needs full screen)
+    val isChatActive = currentDestination?.route == Tab.Chat.route
+    val hideTopBar = isChatActive || currentDestination?.route == Tab.Profile.route
 
     Scaffold(
         topBar = {
             if (!hideTopBar) {
                 Column {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                "RustSensei",
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                        },
-                        actions = {
-                            IconButton(onClick = onNavigateToSearch) {
-                                Icon(
-                                    Icons.Default.Search,
-                                    contentDescription = "Search",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "RustSensei",
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(1f)
                         )
-                    )
-                    // 1dp neon bottom border
+                        IconButton(onClick = onNavigateToSearch) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -145,28 +144,30 @@ fun MainScreen(
             }
         },
         bottomBar = {
-            Column {
-                // 1dp neon top border
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
-                )
-                RustSenseiNavigationBar(
-                    tabs = tabs,
-                    onTabSelected = { index, tab ->
-                        selectedTabIndex = index
-                        tabNavController.navigate(tab.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
+            if (!isChatActive) {
+                Column {
+                    // 1dp neon top border
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
+                    )
+                    RustSenseiNavigationBar(
+                        tabs = tabs,
+                        onTabSelected = { index, tab ->
+                            selectedTabIndex = index
+                            tabNavController.navigate(tab.route) {
+                                popUpTo(tabNavController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                    currentDestination = currentDestination
-                )
+                        },
+                        currentDestination = currentDestination
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -252,7 +253,17 @@ fun MainScreen(
                 ChatScreen(
                     viewModel = chatViewModel,
                     onNavigateToSettings = onNavigateToSettings,
-                    onNavigateToSetup = onNavigateToSetup
+                    onNavigateToSetup = onNavigateToSetup,
+                    onNavigateBack = {
+                        tabNavController.navigate(Tab.Home.route) {
+                            popUpTo(tabNavController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        selectedTabIndex = 0
+                    }
                 )
             }
             composable(Tab.Practice.route) {
@@ -308,13 +319,12 @@ private fun RustSenseiNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(56.dp)
             .background(containerColor)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp),
+                .fillMaxSize(),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -323,12 +333,10 @@ private fun RustSenseiNavigationBar(
                     it.route == tab.route
                 } == true
 
-                val indicatorWidth = 56.dp
-
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(64.dp)
+                        .height(56.dp)
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
@@ -344,8 +352,8 @@ private fun RustSenseiNavigationBar(
                         // Pill background behind icon when selected
                         Box(
                             modifier = Modifier
-                                .size(width = indicatorWidth, height = 32.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(width = 48.dp, height = 26.dp)
+                                .clip(RoundedCornerShape(13.dp))
                                 .then(
                                     if (isSelected) {
                                         Modifier.background(primaryColor)
@@ -358,17 +366,17 @@ private fun RustSenseiNavigationBar(
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = tab.title,
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(18.dp),
                                 tint = if (isSelected) activeIconColor else inactiveColor
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
 
                         Text(
                             text = tab.title,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             color = if (isSelected) primaryColor else inactiveColor
                         )
