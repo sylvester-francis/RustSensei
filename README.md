@@ -105,6 +105,10 @@ app/src/main/java/com/sylvester/rustsensei/
 - [Medium](https://medium.com/@sylvesterranjithfrancis)
 - [Instagram](https://www.instagram.com/techwithsyl)
 
+## Privacy
+
+RustSensei collects no data. Everything runs on-device. See [Privacy Policy](PRIVACY_POLICY.md).
+
 ## License
 
 Apache License 2.0 — see [LICENSE](LICENSE) for details.
