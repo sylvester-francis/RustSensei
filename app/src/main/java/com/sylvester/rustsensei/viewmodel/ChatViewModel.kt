@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
@@ -38,6 +39,10 @@ data class ChatUiState(
 )
 
 class ChatViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        private const val TAG = "ChatViewModel"
+    }
 
     private val app = application as RustSenseiApplication
     private val repository: ChatRepository = app.repository
@@ -95,28 +100,40 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun startNewConversation() {
         viewModelScope.launch {
-            messagesJob?.cancel()
-            getActiveEngine().clearCache()
-            val convId = repository.createConversation()
-            _uiState.value = ChatUiState(currentConversationId = convId)
-            _chatContext.value = ChatContext.General
-            observeMessages(convId)
+            try {
+                messagesJob?.cancel()
+                getActiveEngine().clearCache()
+                val convId = repository.createConversation()
+                _uiState.value = ChatUiState(currentConversationId = convId)
+                _chatContext.value = ChatContext.General
+                observeMessages(convId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in startNewConversation: ${e.message}", e)
+            }
         }
     }
 
     fun loadConversation(conversationId: Long) {
         viewModelScope.launch {
-            messagesJob?.cancel()
-            getActiveEngine().clearCache()
-            _uiState.value = _uiState.value.copy(currentConversationId = conversationId)
-            observeMessages(conversationId)
+            try {
+                messagesJob?.cancel()
+                getActiveEngine().clearCache()
+                _uiState.value = _uiState.value.copy(currentConversationId = conversationId)
+                observeMessages(conversationId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadConversation: ${e.message}", e)
+            }
         }
     }
 
     private fun observeMessages(conversationId: Long) {
         messagesJob = viewModelScope.launch {
-            repository.getMessages(conversationId).collect { messages ->
-                _uiState.value = _uiState.value.copy(messages = messages)
+            try {
+                repository.getMessages(conversationId).collect { messages ->
+                    _uiState.value = _uiState.value.copy(messages = messages)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in observeMessages: ${e.message}", e)
             }
         }
     }
@@ -126,96 +143,104 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (text.isBlank() || _uiState.value.isGenerating) return
 
         viewModelScope.launch {
-            repository.addMessage(convId, "user", text)
+            try {
+                repository.addMessage(convId, "user", text)
 
-            // Build RAG context based on current chat context
-            val ragContext = when (val ctx = _chatContext.value) {
-                is ChatContext.General -> {
-                    withContext(Dispatchers.IO) {
-                        app.ragRetriever.retrieveContext(text)
-                    }
-                }
-                is ChatContext.BookSection -> {
-                    ctx.content
-                }
-                is ChatContext.Exercise -> {
-                    buildString {
-                        appendLine("Exercise: ${ctx.description}")
-                        appendLine("\nStudent's code:")
-                        appendLine("```rust")
-                        appendLine(ctx.userCode)
-                        appendLine("```")
-                    }
-                }
-            }
-
-            // Fix #7: clear context after using it for the first message
-            // so subsequent messages in the same conversation don't re-inject stale context
-            if (_chatContext.value !is ChatContext.General) {
-                _chatContext.value = ChatContext.General
-            }
-
-            val allMessages = repository.getMessagesOnce(convId)
-            val prompt = ChatTemplateFormatter.formatMessages(
-                allMessages,
-                _config.value.contextLength,
-                ragContext = ragContext
-            )
-
-            _uiState.value = _uiState.value.copy(
-                isGenerating = true,
-                streamingText = "",
-                inferenceTimeMs = 0,
-                lastPrefillTokPerSec = 0f,
-                lastDecodeTokPerSec = 0f,
-                lastTimeToFirstTokenMs = 0
-            )
-
-            val startTime = System.currentTimeMillis()
-            val tokenBuffer = StringBuilder()
-
-            generationJob = viewModelScope.launch {
-                getActiveEngine().generate(
-                    prompt,
-                    _config.value,
-                    onStats = { prefillTokPerSec, decodeTokPerSec, prefillMs ->
-                        _uiState.value = _uiState.value.copy(
-                            lastPrefillTokPerSec = prefillTokPerSec,
-                            lastDecodeTokPerSec = decodeTokPerSec,
-                            lastTimeToFirstTokenMs = prefillMs.toLong()
-                        )
-                    }
-                )
-                    .catch { e ->
-                        _uiState.value = _uiState.value.copy(
-                            isGenerating = false,
-                            streamingText = ""
-                        )
-                        repository.addMessage(convId, "assistant", "Error: ${e.message}")
-                    }
-                    .onCompletion {
-                        val elapsed = System.currentTimeMillis() - startTime
-                        val finalText = ChatTemplateFormatter.stripThinkTags(
-                            tokenBuffer.toString()
-                        ).trim()
-                        if (finalText.isNotEmpty()) {
-                            repository.addMessage(convId, "assistant", finalText)
+                // Build RAG context based on current chat context
+                val ragContext = when (val ctx = _chatContext.value) {
+                    is ChatContext.General -> {
+                        withContext(Dispatchers.IO) {
+                            app.ragRetriever.retrieveContext(text)
                         }
-                        _uiState.value = _uiState.value.copy(
-                            isGenerating = false,
-                            streamingText = "",
-                            inferenceTimeMs = elapsed
-                        )
                     }
-                    .collect { token ->
-                        tokenBuffer.append(token)
-                        val displayText = ChatTemplateFormatter.stripThinkTags(
-                            tokenBuffer.toString()
-                        )
-                        _uiState.value = _uiState.value.copy(
-                            streamingText = displayText
-                        )
+                    is ChatContext.BookSection -> {
+                        ctx.content
                     }
+                    is ChatContext.Exercise -> {
+                        buildString {
+                            appendLine("Exercise: ${ctx.description}")
+                            appendLine("\nStudent's code:")
+                            appendLine("```rust")
+                            appendLine(ctx.userCode)
+                            appendLine("```")
+                        }
+                    }
+                }
+
+                // Fix #7: clear context after using it for the first message
+                // so subsequent messages in the same conversation don't re-inject stale context
+                if (_chatContext.value !is ChatContext.General) {
+                    _chatContext.value = ChatContext.General
+                }
+
+                val allMessages = repository.getMessagesOnce(convId)
+                val prompt = ChatTemplateFormatter.formatMessages(
+                    allMessages,
+                    _config.value.contextLength,
+                    ragContext = ragContext
+                )
+
+                _uiState.value = _uiState.value.copy(
+                    isGenerating = true,
+                    streamingText = "",
+                    inferenceTimeMs = 0,
+                    lastPrefillTokPerSec = 0f,
+                    lastDecodeTokPerSec = 0f,
+                    lastTimeToFirstTokenMs = 0
+                )
+
+                val startTime = System.currentTimeMillis()
+                val tokenBuffer = StringBuilder()
+
+                generationJob = viewModelScope.launch {
+                    getActiveEngine().generate(
+                        prompt,
+                        _config.value,
+                        onStats = { prefillTokPerSec, decodeTokPerSec, prefillMs ->
+                            _uiState.value = _uiState.value.copy(
+                                lastPrefillTokPerSec = prefillTokPerSec,
+                                lastDecodeTokPerSec = decodeTokPerSec,
+                                lastTimeToFirstTokenMs = prefillMs.toLong()
+                            )
+                        }
+                    )
+                        .catch { e ->
+                            _uiState.value = _uiState.value.copy(
+                                isGenerating = false,
+                                streamingText = ""
+                            )
+                            repository.addMessage(convId, "assistant", "Error: ${e.message}")
+                        }
+                        .onCompletion {
+                            val elapsed = System.currentTimeMillis() - startTime
+                            val finalText = ChatTemplateFormatter.stripThinkTags(
+                                tokenBuffer.toString()
+                            ).trim()
+                            if (finalText.isNotEmpty()) {
+                                repository.addMessage(convId, "assistant", finalText)
+                            }
+                            _uiState.value = _uiState.value.copy(
+                                isGenerating = false,
+                                streamingText = "",
+                                inferenceTimeMs = elapsed
+                            )
+                        }
+                        .collect { token ->
+                            tokenBuffer.append(token)
+                            val displayText = ChatTemplateFormatter.stripThinkTags(
+                                tokenBuffer.toString()
+                            )
+                            _uiState.value = _uiState.value.copy(
+                                streamingText = displayText
+                            )
+                        }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in sendMessage: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    isGenerating = false,
+                    streamingText = ""
+                )
             }
         }
     }
@@ -229,17 +254,25 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteConversation(conversationId: Long) {
         viewModelScope.launch {
-            repository.deleteConversation(conversationId)
-            if (_uiState.value.currentConversationId == conversationId) {
-                startNewConversation()
+            try {
+                repository.deleteConversation(conversationId)
+                if (_uiState.value.currentConversationId == conversationId) {
+                    startNewConversation()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in deleteConversation: ${e.message}", e)
             }
         }
     }
 
     fun clearAllConversations() {
         viewModelScope.launch {
-            repository.clearAllData()
-            startNewConversation()
+            try {
+                repository.clearAllData()
+                startNewConversation()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in clearAllConversations: ${e.message}", e)
+            }
         }
     }
 

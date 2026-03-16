@@ -42,6 +42,8 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -68,6 +70,36 @@ import com.sylvester.rustsensei.ui.components.CodeBlock
 import com.sylvester.rustsensei.viewmodel.ExerciseScreenMode
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 
+// Python parallel descriptions for exercise categories
+private fun pythonParallel(categoryTitle: String): String {
+    val title = categoryTitle.lowercase()
+    return when {
+        title.contains("variable") -> "Variables (like Python's variables, but immutable by default)"
+        title.contains("function") -> "Functions (like Python's def, but with type annotations)"
+        title.contains("if") || title.contains("control") -> "Control Flow (similar to Python's if/else)"
+        title.contains("primitive") || title.contains("type") -> "Primitive Types (like Python's int/float/str, but fixed-size)"
+        title.contains("string") -> "Strings (like Python's str, but with ownership)"
+        title.contains("vector") || title.contains("vec") -> "Vectors (like Python's list)"
+        title.contains("struct") -> "Structs (like Python's dataclass)"
+        title.contains("enum") -> "Enums (like Python's Enum, but much more powerful)"
+        title.contains("module") -> "Modules (like Python's import system)"
+        title.contains("hash") || title.contains("map") -> "HashMaps (like Python's dict)"
+        title.contains("option") -> "Options (like Python's Optional type hint)"
+        title.contains("error") -> "Error Handling (like Python's try/except, but compile-time)"
+        title.contains("generic") -> "Generics (like Python's TypeVar)"
+        title.contains("trait") -> "Traits (like Python's abstract base classes)"
+        title.contains("lifetime") -> "Lifetimes (no Python equivalent -- this is new!)"
+        title.contains("thread") -> "Threads (like Python's threading, but safe)"
+        title.contains("iterator") -> "Iterators (like Python's iterators and generators)"
+        title.contains("smart_pointer") || title.contains("pointer") -> "Smart Pointers (no direct Python equivalent)"
+        title.contains("macro") -> "Macros (like Python's decorators, but at compile-time)"
+        title.contains("closure") -> "Closures (like Python's lambda, but more powerful)"
+        title.contains("move") || title.contains("ownership") -> "Ownership (no Python equivalent -- core Rust concept)"
+        title.contains("borrow") || title.contains("reference") -> "References (like Python's object references, but checked)"
+        else -> categoryTitle
+    }
+}
+
 @Composable
 fun ExercisesScreen(
     viewModel: ExerciseViewModel,
@@ -92,6 +124,9 @@ fun ExercisesScreen(
 private fun CategoriesView(viewModel: ExerciseViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Calculate total exercise count
+    val totalExercises = uiState.categories.sumOf { it.exercises.size }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
@@ -102,42 +137,65 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                 text = "Practice",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 4.dp)
             )
+            Text(
+                text = "$totalExercises exercises from Rustlings",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Continue card
-        if (uiState.lastIncompleteExerciseId != null) {
+        // Continue card — more visual weight
+        val lastExerciseId = uiState.lastIncompleteExerciseId
+        if (lastExerciseId != null) {
             item {
-                Row(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { viewModel.openExercise(uiState.lastIncompleteExerciseId!!) }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        .padding(bottom = 16.dp)
+                        .clickable { viewModel.openExercise(lastExerciseId) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Continue where you left off",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.primary
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
                         )
-                        Text(
-                            text = uiState.lastIncompleteExerciseId!!,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Continue where you left off",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = lastExerciseId,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
             }
         }
 
@@ -162,9 +220,9 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        // Category name in titleSmall
+                        // Category name with Python parallel
                         Text(
-                            text = category.title,
+                            text = pythonParallel(category.title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium
                         )
@@ -359,11 +417,11 @@ private fun ExerciseDetailView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Code editor — dark background, sharp corners (8dp)
+            // Code editor — dark background, sharp corners (8dp), minimum 200dp+ height
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(240.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color(0xFF0D1117))
             ) {
@@ -528,8 +586,13 @@ private fun ExerciseDetailView(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // LLM validation streaming response — AI Review card with primary-colored left border
+            // AI Review section — visually separated with a section divider
             if (uiState.llmValidationResult.isNotEmpty() || uiState.isValidating) {
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -591,16 +654,16 @@ private fun ExerciseDetailView(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Action buttons — sharp 8dp corners, outlined
+            // Action buttons — sharp 8dp corners, outlined, 12dp spacing
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
                     onClick = { viewModel.checkSolution() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp),
+                        .height(48.dp),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -611,7 +674,7 @@ private fun ExerciseDetailView(
                     onClick = { viewModel.revealHint() },
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp),
+                        .height(48.dp),
                     enabled = uiState.hintsRevealed < exercise.hints.size,
                     shape = RoundedCornerShape(8.dp)
                 ) {
@@ -677,10 +740,12 @@ private fun ExerciseDetailView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ask Sensei button — sharp 8dp corners
+            // Ask Sensei button — sharp 8dp corners, 48dp touch target
             OutlinedButton(
                 onClick = { onAskSensei(exercise.description, uiState.userCode) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(18.dp))

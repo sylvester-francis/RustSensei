@@ -11,6 +11,11 @@ import com.sylvester.rustsensei.llm.LiteRtEngine
 
 class RustSenseiApplication : Application() {
 
+    override fun onCreate() {
+        super.onCreate()
+        Thread.setDefaultUncaughtExceptionHandler(CrashHandler())
+    }
+
     val database: AppDatabase by lazy { AppDatabase.getDatabase(this) }
     val repository: ChatRepository by lazy { ChatRepository(database.chatDao()) }
     val progressRepository: ProgressRepository by lazy { ProgressRepository(database.progressDao()) }

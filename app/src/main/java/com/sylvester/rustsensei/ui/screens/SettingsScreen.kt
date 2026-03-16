@@ -82,9 +82,9 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Model Selection — section header: labelLarge, primary, monospace
+            // Model Selection — section header with 32dp top margin
             SectionHeader("Model")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             ModelManager.AVAILABLE_MODELS.forEach { model ->
                 val isLoaded = modelState.loadedModelId == model.id
@@ -101,7 +101,7 @@ fun SettingsScreen(
                                 modelViewModel.startDownload()
                             }
                         }
-                        .padding(vertical = 12.dp, horizontal = 4.dp),
+                        .padding(vertical = 14.dp, horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -158,10 +158,9 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Inference Settings
+            // Inference Settings — 32dp top margin
             SectionHeader("Inference Settings")
+            Spacer(modifier = Modifier.height(8.dp))
 
             SettingSlider(
                 label = "Temperature",
@@ -183,7 +182,7 @@ fun SettingsScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = "Context Length: ${config.contextLength} tokens",
                 fontSize = 14.sp,
@@ -191,19 +190,25 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Model Info
+            // Active Model Info — model name prominently
             SectionHeader("Active Model Info")
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             val activeModel = modelState.loadedModelId?.let { ModelManager.getModelById(it) }
             if (activeModel != null) {
                 Text(
-                    text = "${activeModel.displayName} (${activeModel.parameterSize})",
+                    text = activeModel.displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "${activeModel.parameterSize} parameters",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Size on disk: ${modelViewModel.modelManager.getModelSizeMB(activeModel)} MB",
                     fontSize = 14.sp,
@@ -213,10 +218,13 @@ fun SettingsScreen(
             } else {
                 Text(
                     text = "No model loaded",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            @Suppress("KotlinConstantConditions")
             val formatInfo = if (true) {
                 "Quantization: Q8  |  Format: LiteRT (TFLite)  |  GPU-accelerated"
             } else {
@@ -224,16 +232,15 @@ fun SettingsScreen(
             }
             Text(
                 text = formatInfo,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                lineHeight = 18.sp
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Data Management (Danger Zone) — sharp 8dp corners, error-outlined
+            // Danger Zone — 32dp top margin
             SectionHeader("Danger Zone")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedButton(
                 onClick = { showClearDialog = true },
@@ -260,6 +267,24 @@ fun SettingsScreen(
             ) {
                 Text("Delete Active Model")
             }
+
+            // About section
+            SectionHeader("About")
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "RustSensei v1.0",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Your offline Rust tutor",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 
@@ -307,13 +332,13 @@ fun SettingsScreen(
 
 @Composable
 private fun SectionHeader(title: String) {
-    // labelLarge, primary color, monospace font
+    // labelLarge, primary color, monospace font — 32dp top margin
     Text(
         text = title,
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         fontFamily = FontFamily.Monospace,
-        modifier = Modifier.padding(top = 24.dp)
+        modifier = Modifier.padding(top = 32.dp)
     )
 }
 
@@ -325,7 +350,7 @@ private fun SettingSlider(
     valueLabel: String,
     onValueChange: (Float) -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(vertical = 12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -343,6 +368,7 @@ private fun SettingSlider(
                 color = MaterialTheme.colorScheme.primary
             )
         }
+        Spacer(modifier = Modifier.height(4.dp))
         Slider(
             value = value,
             onValueChange = onValueChange,

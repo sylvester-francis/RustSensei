@@ -12,7 +12,7 @@ class ProgressRepository(private val progressDao: ProgressDao) {
         SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
 
-    private fun todayString(): String = dateFormat.get()!!.format(Date())
+    private fun todayString(): String = (dateFormat.get() ?: SimpleDateFormat("yyyy-MM-dd", Locale.US)).format(Date())
 
     // Book Progress
     suspend fun updateReadProgress(sectionId: String, chapterId: String, readPercent: Float) {

@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
@@ -44,6 +45,10 @@ data class ExerciseUiState(
 
 class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
 
+    companion object {
+        private const val TAG = "ExerciseViewModel"
+    }
+
     private val app = application as RustSenseiApplication
     private val contentRepo = app.contentRepository
     private val progressRepo = app.progressRepository
@@ -67,20 +72,28 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     private fun loadCategories() {
         viewModelScope.launch {
-            val categories = withContext(Dispatchers.IO) {
-                contentRepo.getExerciseCategories()
+            try {
+                val categories = withContext(Dispatchers.IO) {
+                    contentRepo.getExerciseCategories()
+                }
+                _uiState.value = _uiState.value.copy(categories = categories)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadCategories: ${e.message}", e)
             }
-            _uiState.value = _uiState.value.copy(categories = categories)
         }
     }
 
     // Design Concern #3: load last incomplete exercise for "Continue" flow
     private fun loadLastIncomplete() {
         viewModelScope.launch {
-            val last = progressRepo.getLastIncompleteExercise()
-            _uiState.value = _uiState.value.copy(
-                lastIncompleteExerciseId = last?.exerciseId
-            )
+            try {
+                val last = progressRepo.getLastIncompleteExercise()
+                _uiState.value = _uiState.value.copy(
+                    lastIncompleteExerciseId = last?.exerciseId
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadLastIncomplete: ${e.message}", e)
+            }
         }
     }
 
@@ -98,10 +111,14 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     private fun loadCategoryProgress(categoryId: String) {
         viewModelScope.launch {
-            progressRepo.getExerciseProgressByCategory(categoryId).collect { progressList ->
-                val currentMap = _uiState.value.categoryProgress.toMutableMap()
-                currentMap[categoryId] = progressList
-                _uiState.value = _uiState.value.copy(categoryProgress = currentMap)
+            try {
+                progressRepo.getExerciseProgressByCategory(categoryId).collect { progressList ->
+                    val currentMap = _uiState.value.categoryProgress.toMutableMap()
+                    currentMap[categoryId] = progressList
+                    _uiState.value = _uiState.value.copy(categoryProgress = currentMap)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadCategoryProgress: ${e.message}", e)
             }
         }
     }
@@ -112,38 +129,46 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val categoryId = exercise.category
         // Re-fetch from DB to update the map
         viewModelScope.launch {
-            val progressList = withContext(Dispatchers.IO) {
-                // Fetch once, not as a flow
-                progressRepo.getExerciseProgressByCategory(categoryId)
-            }
-            // Collect just the first emission to update
-            progressList.collect { list ->
-                val currentMap = _uiState.value.categoryProgress.toMutableMap()
-                currentMap[categoryId] = list
-                _uiState.value = _uiState.value.copy(categoryProgress = currentMap)
+            try {
+                val progressList = withContext(Dispatchers.IO) {
+                    // Fetch once, not as a flow
+                    progressRepo.getExerciseProgressByCategory(categoryId)
+                }
+                // Collect just the first emission to update
+                progressList.collect { list ->
+                    val currentMap = _uiState.value.categoryProgress.toMutableMap()
+                    currentMap[categoryId] = list
+                    _uiState.value = _uiState.value.copy(categoryProgress = currentMap)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in refreshCurrentCategoryProgress: ${e.message}", e)
             }
         }
     }
 
     fun openExercise(exerciseId: String) {
         viewModelScope.launch {
-            val exercise = withContext(Dispatchers.IO) {
-                contentRepo.getExercise(exerciseId)
-            }
-            val progress = progressRepo.getExerciseProgress(exerciseId)
-            if (exercise != null) {
-                validationJob?.cancel()
-                _uiState.value = _uiState.value.copy(
-                    mode = ExerciseScreenMode.DETAIL,
-                    currentExercise = exercise,
-                    currentProgress = progress,
-                    userCode = progress?.userCode?.ifEmpty { exercise.starterCode } ?: exercise.starterCode,
-                    hintsRevealed = progress?.hintsViewed ?: 0,
-                    showSolution = false,
-                    checkResult = null,
-                    llmValidationResult = "",
-                    isValidating = false
-                )
+            try {
+                val exercise = withContext(Dispatchers.IO) {
+                    contentRepo.getExercise(exerciseId)
+                }
+                val progress = progressRepo.getExerciseProgress(exerciseId)
+                if (exercise != null) {
+                    validationJob?.cancel()
+                    _uiState.value = _uiState.value.copy(
+                        mode = ExerciseScreenMode.DETAIL,
+                        currentExercise = exercise,
+                        currentProgress = progress,
+                        userCode = progress?.userCode?.ifEmpty { exercise.starterCode } ?: exercise.starterCode,
+                        hintsRevealed = progress?.hintsViewed ?: 0,
+                        showSolution = false,
+                        checkResult = null,
+                        llmValidationResult = "",
+                        isValidating = false
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in openExercise: ${e.message}", e)
             }
         }
     }
@@ -172,7 +197,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         if (currentHints < exercise.hints.size) {
             _uiState.value = _uiState.value.copy(hintsRevealed = currentHints + 1)
             viewModelScope.launch {
-                progressRepo.revealHint(exercise.id, exercise.category)
+                try {
+                    progressRepo.revealHint(exercise.id, exercise.category)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in revealHint: ${e.message}", e)
+                }
             }
         }
     }
@@ -187,7 +216,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val solutionCode = exercise.solution.trim()
 
         viewModelScope.launch {
-            progressRepo.recordAttempt(exercise.id, exercise.category)
+            try {
+                progressRepo.recordAttempt(exercise.id, exercise.category)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in recordAttempt: ${e.message}", e)
+            }
         }
 
         val normalizedUser = normalizeCode(userCode)
@@ -196,14 +229,22 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         if (normalizedUser == normalizedSolution) {
             _uiState.value = _uiState.value.copy(checkResult = "correct")
             viewModelScope.launch {
-                progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                try {
+                    progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in markExerciseComplete: ${e.message}", e)
+                }
             }
         } else {
             val isLikelyCorrect = checkKeyPatterns(exercise, userCode)
             if (isLikelyCorrect) {
                 _uiState.value = _uiState.value.copy(checkResult = "correct")
                 viewModelScope.launch {
-                    progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                    try {
+                        progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error in markExerciseComplete: ${e.message}", e)
+                    }
                 }
             } else {
                 // Design Concern #1: if user code differs significantly from starter,
@@ -221,7 +262,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val exercise = _uiState.value.currentExercise ?: return
         _uiState.value = _uiState.value.copy(checkResult = "correct")
         viewModelScope.launch {
-            progressRepo.markExerciseComplete(exercise.id, exercise.category)
+            try {
+                progressRepo.markExerciseComplete(exercise.id, exercise.category)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in markCurrentExerciseCorrect: ${e.message}", e)
+            }
         }
     }
 
@@ -257,36 +302,44 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val tokenBuffer = StringBuilder()
 
         validationJob = viewModelScope.launch {
-            activeEngine.generate(prompt, config)
-                .catch { e ->
-                    _uiState.value = _uiState.value.copy(
-                        isValidating = false,
-                        llmValidationResult = "Error: ${e.message}"
-                    )
-                }
-                .onCompletion {
-                    val finalText = ChatTemplateFormatter.stripThinkTags(
-                        tokenBuffer.toString()
-                    ).trim()
-                    _uiState.value = _uiState.value.copy(
-                        isValidating = false,
-                        llmValidationResult = finalText
-                    )
-                    if (finalText.uppercase().startsWith("CORRECT")) {
-                        _uiState.value = _uiState.value.copy(checkResult = "correct")
-                        progressRepo.markExerciseComplete(exercise.id, exercise.category)
-                        refreshCurrentCategoryProgress()
+            try {
+                activeEngine.generate(prompt, config)
+                    .catch { e ->
+                        _uiState.value = _uiState.value.copy(
+                            isValidating = false,
+                            llmValidationResult = "Error: ${e.message}"
+                        )
                     }
-                }
-                .collect { token ->
-                    tokenBuffer.append(token)
-                    val displayText = ChatTemplateFormatter.stripThinkTags(
-                        tokenBuffer.toString()
-                    )
-                    _uiState.value = _uiState.value.copy(
-                        llmValidationResult = displayText
-                    )
-                }
+                    .onCompletion {
+                        val finalText = ChatTemplateFormatter.stripThinkTags(
+                            tokenBuffer.toString()
+                        ).trim()
+                        _uiState.value = _uiState.value.copy(
+                            isValidating = false,
+                            llmValidationResult = finalText
+                        )
+                        if (finalText.uppercase().startsWith("CORRECT")) {
+                            _uiState.value = _uiState.value.copy(checkResult = "correct")
+                            progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                            refreshCurrentCategoryProgress()
+                        }
+                    }
+                    .collect { token ->
+                        tokenBuffer.append(token)
+                        val displayText = ChatTemplateFormatter.stripThinkTags(
+                            tokenBuffer.toString()
+                        )
+                        _uiState.value = _uiState.value.copy(
+                            llmValidationResult = displayText
+                        )
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in validateWithLlm: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    isValidating = false,
+                    llmValidationResult = "Error: ${e.message}"
+                )
+            }
         }
     }
 
@@ -323,7 +376,11 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val exercise = _uiState.value.currentExercise ?: return
         val code = _uiState.value.userCode
         viewModelScope.launch {
-            progressRepo.updateExerciseCode(exercise.id, exercise.category, code)
+            try {
+                progressRepo.updateExerciseCode(exercise.id, exercise.category, code)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in saveCurrentCode: ${e.message}", e)
+            }
         }
     }
 

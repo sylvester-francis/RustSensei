@@ -82,56 +82,74 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         config: InferenceConfig,
         onStats: ((Float, Float, Float) -> Unit)?
     ): Flow<String> {
-        val conv = conversation ?: return flow {
-            throw RuntimeException("Model not loaded")
+        val conv = conversation
+        if (conv == null || engine == null) {
+            return flow {
+                emit("Error: Model not loaded. Please load a model first.")
+            }
         }
 
         // Exact Google Gallery pattern:
         // conversation.sendMessageAsync(Contents.of(contents), MessageCallback)
         return callbackFlow {
-            val startTime = System.currentTimeMillis()
-            var firstTokenTime: Long? = null
-            var tokenCount = 0
+            try {
+                val startTime = System.currentTimeMillis()
+                var firstTokenTime: Long? = null
+                var tokenCount = 0
 
-            val contents = listOf(Content.Text(prompt))
+                val contents = listOf(Content.Text(prompt))
 
-            conv.sendMessageAsync(
-                Contents.of(contents),
-                object : MessageCallback {
-                    override fun onMessage(message: Message) {
-                        val text = message.toString()
+                conv.sendMessageAsync(
+                    Contents.of(contents),
+                    object : MessageCallback {
+                        override fun onMessage(message: Message) {
+                            try {
+                                val text = message.toString()
 
-                        // Skip control tokens (Google does this)
-                        if (text.startsWith("<ctrl")) return
+                                // Skip control tokens (Google does this)
+                                if (text.startsWith("<ctrl")) return
 
-                        if (firstTokenTime == null && text.isNotEmpty()) {
-                            firstTokenTime = System.currentTimeMillis()
-                            Log.i(TAG, "TTFT: ${firstTokenTime!! - startTime} ms")
+                                if (firstTokenTime == null && text.isNotEmpty()) {
+                                    val now = System.currentTimeMillis()
+                                    firstTokenTime = now
+                                    Log.i(TAG, "TTFT: ${now - startTime} ms")
+                                }
+                                tokenCount++
+                                trySend(text)
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error in onMessage: ${e.message}", e)
+                            }
                         }
-                        tokenCount++
-                        trySend(text)
-                    }
 
-                    override fun onDone() {
-                        val ftTime = firstTokenTime ?: startTime
-                        val genMs = System.currentTimeMillis() - ftTime
-                        val tokPerSec = if (genMs > 0) tokenCount * 1000f / genMs else 0f
-                        Log.i(TAG, "Done: $tokenCount tokens, ${"%.1f".format(tokPerSec)} tok/s")
-                        onStats?.invoke(0f, tokPerSec, (ftTime - startTime).toFloat())
-                        close()
-                    }
-
-                    override fun onError(throwable: Throwable) {
-                        if (throwable is CancellationException) {
-                            Log.i(TAG, "Inference cancelled")
+                        override fun onDone() {
+                            try {
+                                val ftTime = firstTokenTime ?: startTime
+                                val genMs = System.currentTimeMillis() - ftTime
+                                val tokPerSec = if (genMs > 0) tokenCount * 1000f / genMs else 0f
+                                Log.i(TAG, "Done: $tokenCount tokens, ${"%.1f".format(tokPerSec)} tok/s")
+                                onStats?.invoke(0f, tokPerSec, (ftTime - startTime).toFloat())
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Error in onDone stats: ${e.message}", e)
+                            }
                             close()
-                        } else {
-                            Log.e(TAG, "Error: ${throwable.message}")
-                            close(RuntimeException(throwable.message))
+                        }
+
+                        override fun onError(throwable: Throwable) {
+                            if (throwable is CancellationException) {
+                                Log.i(TAG, "Inference cancelled")
+                                close()
+                            } else {
+                                Log.e(TAG, "Error: ${throwable.message}")
+                                close(RuntimeException(throwable.message))
+                            }
                         }
                     }
-                }
-            )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Error starting generation: ${e.message}", e)
+                trySend("Error: ${e.message}")
+                close()
+            }
 
             awaitClose {
                 try { conv.cancelProcess() } catch (_: Exception) {}

@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
@@ -30,6 +31,10 @@ data class ReferenceUiState(
 
 class ReferenceViewModel(application: Application) : AndroidViewModel(application) {
 
+    companion object {
+        private const val TAG = "ReferenceViewModel"
+    }
+
     private val app = application as RustSenseiApplication
     private val contentRepo = app.contentRepository
 
@@ -42,10 +47,14 @@ class ReferenceViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun loadIndex() {
         viewModelScope.launch {
-            val index = withContext(Dispatchers.IO) {
-                contentRepo.getReferenceIndex()
+            try {
+                val index = withContext(Dispatchers.IO) {
+                    contentRepo.getReferenceIndex()
+                }
+                _uiState.value = _uiState.value.copy(sections = index.sections)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadIndex: ${e.message}", e)
             }
-            _uiState.value = _uiState.value.copy(sections = index.sections)
         }
     }
 
@@ -60,19 +69,26 @@ class ReferenceViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun openItem(sectionId: String, itemId: String) {
         viewModelScope.launch {
-            val json = withContext(Dispatchers.IO) {
-                contentRepo.getReferenceItem(sectionId, itemId)
-            }
-            if (json != null) {
+            try {
+                val json = withContext(Dispatchers.IO) {
+                    contentRepo.getReferenceItem(sectionId, itemId)
+                }
+                if (json != null) {
+                    _uiState.value = _uiState.value.copy(
+                        mode = ReferenceScreenMode.ITEM_DETAIL,
+                        currentItemId = itemId,
+                        currentItemJson = json,
+                        errorMessage = null
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Content not available yet"
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in openItem: ${e.message}", e)
                 _uiState.value = _uiState.value.copy(
-                    mode = ReferenceScreenMode.ITEM_DETAIL,
-                    currentItemId = itemId,
-                    currentItemJson = json,
-                    errorMessage = null
-                )
-            } else {
-                _uiState.value = _uiState.value.copy(
-                    errorMessage = "Content not available yet"
+                    errorMessage = "Failed to load content: ${e.message}"
                 )
             }
         }

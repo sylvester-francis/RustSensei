@@ -8,6 +8,7 @@ import com.sylvester.rustsensei.content.BookChapter
 import com.sylvester.rustsensei.content.BookIndexEntry
 import com.sylvester.rustsensei.content.BookSection
 import com.sylvester.rustsensei.data.BookProgress
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,10 @@ data class BookUiState(
 
 class BookViewModel(application: Application) : AndroidViewModel(application) {
 
+    companion object {
+        private const val TAG = "BookViewModel"
+    }
+
     private val app = application as RustSenseiApplication
     private val contentRepo = app.contentRepository
     private val progressRepo = app.progressRepository
@@ -59,44 +64,59 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadBookIndex() {
         viewModelScope.launch {
-            val index = withContext(Dispatchers.IO) {
-                contentRepo.getBookIndex()
+            try {
+                val index = withContext(Dispatchers.IO) {
+                    contentRepo.getBookIndex()
+                }
+                _uiState.value = _uiState.value.copy(chapters = index.chapters)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadBookIndex: ${e.message}", e)
             }
-            _uiState.value = _uiState.value.copy(chapters = index.chapters)
         }
     }
 
     // Design Concern #3: load last read section for "Continue Reading" flow
     private fun loadLastRead() {
         viewModelScope.launch {
-            val last = progressRepo.getLastReadSection()
-            if (last != null) {
-                _uiState.value = _uiState.value.copy(
-                    lastReadChapterId = last.chapterId,
-                    lastReadSectionId = last.sectionId
-                )
+            try {
+                val last = progressRepo.getLastReadSection()
+                if (last != null) {
+                    _uiState.value = _uiState.value.copy(
+                        lastReadChapterId = last.chapterId,
+                        lastReadSectionId = last.sectionId
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadLastRead: ${e.message}", e)
             }
         }
     }
 
     fun openChapter(chapterId: String) {
         viewModelScope.launch {
-            val chapter = withContext(Dispatchers.IO) {
-                contentRepo.getChapter(chapterId)
-            }
-            if (chapter == null) {
+            try {
+                val chapter = withContext(Dispatchers.IO) {
+                    contentRepo.getChapter(chapterId)
+                }
+                if (chapter == null) {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Failed to load chapter. The content may be corrupted."
+                    )
+                    return@launch
+                }
                 _uiState.value = _uiState.value.copy(
-                    errorMessage = "Failed to load chapter. The content may be corrupted."
+                    mode = BookScreenMode.CHAPTER,
+                    currentChapter = chapter,
+                    currentChapterId = chapterId,
+                    errorMessage = null
                 )
-                return@launch
+                observeChapterProgress(chapterId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in openChapter: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to load chapter: ${e.message}"
+                )
             }
-            _uiState.value = _uiState.value.copy(
-                mode = BookScreenMode.CHAPTER,
-                currentChapter = chapter,
-                currentChapterId = chapterId,
-                errorMessage = null
-            )
-            observeChapterProgress(chapterId)
         }
     }
 
@@ -104,25 +124,32 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         saveReadTimeForCurrentSection()
 
         viewModelScope.launch {
-            val section = withContext(Dispatchers.IO) {
-                contentRepo.getSection(chapterId, sectionId)
-            }
-            if (section == null) {
+            try {
+                val section = withContext(Dispatchers.IO) {
+                    contentRepo.getSection(chapterId, sectionId)
+                }
+                if (section == null) {
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Failed to load section content."
+                    )
+                    return@launch
+                }
                 _uiState.value = _uiState.value.copy(
-                    errorMessage = "Failed to load section content."
+                    mode = BookScreenMode.SECTION,
+                    currentSection = section,
+                    currentSectionId = sectionId,
+                    currentChapterId = chapterId,
+                    readProgress = 0f,
+                    sectionMarkedComplete = false,
+                    errorMessage = null
                 )
-                return@launch
+                sectionEnteredAt = System.currentTimeMillis()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in openSection: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = "Failed to load section: ${e.message}"
+                )
             }
-            _uiState.value = _uiState.value.copy(
-                mode = BookScreenMode.SECTION,
-                currentSection = section,
-                currentSectionId = sectionId,
-                currentChapterId = chapterId,
-                readProgress = 0f,
-                sectionMarkedComplete = false,
-                errorMessage = null
-            )
-            sectionEnteredAt = System.currentTimeMillis()
         }
     }
 
@@ -159,7 +186,11 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         val chapterId = _uiState.value.currentChapterId ?: return
         _uiState.value = _uiState.value.copy(readProgress = percent)
         viewModelScope.launch {
-            progressRepo.updateReadProgress(sectionId, chapterId, percent)
+            try {
+                progressRepo.updateReadProgress(sectionId, chapterId, percent)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in updateReadProgress: ${e.message}", e)
+            }
         }
     }
 
@@ -170,7 +201,11 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         val chapterId = _uiState.value.currentChapterId ?: return
         _uiState.value = _uiState.value.copy(sectionMarkedComplete = true)
         viewModelScope.launch {
-            progressRepo.markSectionComplete(sectionId, chapterId)
+            try {
+                progressRepo.markSectionComplete(sectionId, chapterId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in markSectionComplete: ${e.message}", e)
+            }
         }
     }
 
@@ -178,27 +213,33 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         val sectionId = _uiState.value.currentSectionId ?: return
         val chapterId = _uiState.value.currentChapterId ?: return
         viewModelScope.launch {
-            progressRepo.toggleBookmark(sectionId, chapterId)
+            try {
+                progressRepo.toggleBookmark(sectionId, chapterId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in toggleBookmark: ${e.message}", e)
+            }
         }
     }
 
     fun navigateToNextSection() {
         val state = _uiState.value
         val chapter = state.currentChapter ?: return
+        val chapterId = state.currentChapterId ?: return
         val currentIdx = chapter.sections.indexOfFirst { it.id == state.currentSectionId }
         if (currentIdx < chapter.sections.lastIndex) {
             val next = chapter.sections[currentIdx + 1]
-            openSection(state.currentChapterId!!, next.id)
+            openSection(chapterId, next.id)
         }
     }
 
     fun navigateToPreviousSection() {
         val state = _uiState.value
         val chapter = state.currentChapter ?: return
+        val chapterId = state.currentChapterId ?: return
         val currentIdx = chapter.sections.indexOfFirst { it.id == state.currentSectionId }
         if (currentIdx > 0) {
             val prev = chapter.sections[currentIdx - 1]
-            openSection(state.currentChapterId!!, prev.id)
+            openSection(chapterId, prev.id)
         }
     }
 
@@ -218,7 +259,11 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         val elapsed = (System.currentTimeMillis() - sectionEnteredAt) / 1000L
         if (elapsed > 2) { // only save if spent more than 2 seconds
             viewModelScope.launch {
-                progressRepo.addReadTime(sectionId, chapterId, elapsed)
+                try {
+                    progressRepo.addReadTime(sectionId, chapterId, elapsed)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in saveReadTime: ${e.message}", e)
+                }
             }
         }
         sectionEnteredAt = 0L
@@ -228,9 +273,13 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
     private fun observeChapterProgress(chapterId: String) {
         chapterProgressJob?.cancel()
         chapterProgressJob = viewModelScope.launch {
-            progressRepo.getChapterProgress(chapterId).collect { progressList ->
-                val progressMap = progressList.associateBy { it.sectionId }
-                _uiState.value = _uiState.value.copy(sectionProgress = progressMap)
+            try {
+                progressRepo.getChapterProgress(chapterId).collect { progressList ->
+                    val progressMap = progressList.associateBy { it.sectionId }
+                    _uiState.value = _uiState.value.copy(sectionProgress = progressMap)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in observeChapterProgress: ${e.message}", e)
             }
         }
     }

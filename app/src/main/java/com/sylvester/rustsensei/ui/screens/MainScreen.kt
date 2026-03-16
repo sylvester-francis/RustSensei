@@ -8,11 +8,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -48,12 +47,11 @@ import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 sealed class Tab(val route: String, val title: String, val icon: ImageVector) {
     data object Learn : Tab("learn", "Learn", Icons.Default.MenuBook)
     data object Practice : Tab("practice", "Practice", Icons.Default.Code)
-    data object Reference : Tab("reference", "Ref", Icons.Default.Book)
     data object Chat : Tab("chat", "Chat", Icons.Default.Chat)
-    data object Progress : Tab("progress", "Progress", Icons.Default.TrendingUp)
+    data object Profile : Tab("profile", "Profile", Icons.Default.Person)
 }
 
-private val tabs = listOf(Tab.Learn, Tab.Practice, Tab.Reference, Tab.Chat, Tab.Progress)
+private val tabs = listOf(Tab.Learn, Tab.Practice, Tab.Chat, Tab.Profile)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,6 +163,10 @@ fun MainScreen(
             composable(Tab.Learn.route) {
                 BookScreen(
                     viewModel = bookViewModel,
+                    referenceViewModel = referenceViewModel,
+                    onOpenReference = { sectionId ->
+                        referenceViewModel.openSection(sectionId)
+                    },
                     // Fix #10: pass actual section ID from the ViewModel
                     onAskSensei = { sectionContent, _ ->
                         chatViewModel.setChatContext(
@@ -193,9 +195,6 @@ fun MainScreen(
                     }
                 )
             }
-            composable(Tab.Reference.route) {
-                ReferenceScreen(viewModel = referenceViewModel)
-            }
             composable(Tab.Chat.route) {
                 ChatScreen(
                     viewModel = chatViewModel,
@@ -203,7 +202,7 @@ fun MainScreen(
                     onNavigateToSetup = onNavigateToSetup
                 )
             }
-            composable(Tab.Progress.route) {
+            composable(Tab.Profile.route) {
                 DashboardScreen(viewModel = progressViewModel)
             }
         }

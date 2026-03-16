@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.content
 
 import android.content.Context
+import android.util.Log
 import android.util.LruCache
 import org.json.JSONArray
 import org.json.JSONObject
@@ -71,6 +72,10 @@ data class BookIndexEntry(
 
 class ContentRepository(private val context: Context) {
 
+    companion object {
+        private const val TAG = "ContentRepository"
+    }
+
     private val chapterCache = LruCache<String, BookChapter>(5)
     private val exerciseCache = LruCache<String, ExerciseData>(10)
 
@@ -80,31 +85,36 @@ class ContentRepository(private val context: Context) {
     fun getBookIndex(): BookIndex {
         bookIndex?.let { return it }
 
-        val json = loadAssetJson("book/index.json")
-        val chapters = mutableListOf<BookIndexEntry>()
+        return try {
+            val json = loadAssetJson("book/index.json")
+            val chapters = mutableListOf<BookIndexEntry>()
 
-        val chaptersArray = json.getJSONArray("chapters")
-        for (i in 0 until chaptersArray.length()) {
-            val ch = chaptersArray.getJSONObject(i)
-            val sectionIds = mutableListOf<String>()
-            val sectionTitles = mutableListOf<String>()
-            val sectionsArray = ch.getJSONArray("sections")
-            for (j in 0 until sectionsArray.length()) {
-                val sec = sectionsArray.getJSONObject(j)
-                sectionIds.add(sec.getString("id"))
-                sectionTitles.add(sec.getString("title"))
+            val chaptersArray = json.getJSONArray("chapters")
+            for (i in 0 until chaptersArray.length()) {
+                val ch = chaptersArray.getJSONObject(i)
+                val sectionIds = mutableListOf<String>()
+                val sectionTitles = mutableListOf<String>()
+                val sectionsArray = ch.getJSONArray("sections")
+                for (j in 0 until sectionsArray.length()) {
+                    val sec = sectionsArray.getJSONObject(j)
+                    sectionIds.add(sec.getString("id"))
+                    sectionTitles.add(sec.getString("title"))
+                }
+                chapters.add(BookIndexEntry(
+                    id = ch.getString("id"),
+                    title = ch.getString("title"),
+                    sectionIds = sectionIds,
+                    sectionTitles = sectionTitles
+                ))
             }
-            chapters.add(BookIndexEntry(
-                id = ch.getString("id"),
-                title = ch.getString("title"),
-                sectionIds = sectionIds,
-                sectionTitles = sectionTitles
-            ))
-        }
 
-        val index = BookIndex(chapters)
-        bookIndex = index
-        return index
+            val index = BookIndex(chapters)
+            bookIndex = index
+            index
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading book index: ${e.message}", e)
+            BookIndex(emptyList())
+        }
     }
 
     fun getChapter(chapterId: String): BookChapter? {
@@ -128,27 +138,32 @@ class ContentRepository(private val context: Context) {
     fun getExerciseCategories(): List<ExerciseCategory> {
         exerciseCategories?.let { return it }
 
-        val json = loadAssetJson("exercises/index.json")
-        val categories = mutableListOf<ExerciseCategory>()
+        return try {
+            val json = loadAssetJson("exercises/index.json")
+            val categories = mutableListOf<ExerciseCategory>()
 
-        val categoriesArray = json.getJSONArray("categories")
-        for (i in 0 until categoriesArray.length()) {
-            val cat = categoriesArray.getJSONObject(i)
-            val exercises = mutableListOf<String>()
-            val exercisesArray = cat.getJSONArray("exercises")
-            for (j in 0 until exercisesArray.length()) {
-                exercises.add(exercisesArray.getString(j))
+            val categoriesArray = json.getJSONArray("categories")
+            for (i in 0 until categoriesArray.length()) {
+                val cat = categoriesArray.getJSONObject(i)
+                val exercises = mutableListOf<String>()
+                val exercisesArray = cat.getJSONArray("exercises")
+                for (j in 0 until exercisesArray.length()) {
+                    exercises.add(exercisesArray.getString(j))
+                }
+                categories.add(ExerciseCategory(
+                    id = cat.getString("id"),
+                    title = cat.getString("title"),
+                    description = cat.getString("description"),
+                    exercises = exercises
+                ))
             }
-            categories.add(ExerciseCategory(
-                id = cat.getString("id"),
-                title = cat.getString("title"),
-                description = cat.getString("description"),
-                exercises = exercises
-            ))
-        }
 
-        exerciseCategories = categories
-        return categories
+            exerciseCategories = categories
+            categories
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading exercise categories: ${e.message}", e)
+            emptyList()
+        }
     }
 
     fun getExercise(exerciseId: String): ExerciseData? {
@@ -170,23 +185,28 @@ class ContentRepository(private val context: Context) {
     fun getReferenceIndex(): ReferenceIndex {
         referenceIndex?.let { return it }
 
-        val json = loadAssetJson("reference/index.json")
-        val sections = mutableListOf<ReferenceSectionInfo>()
+        return try {
+            val json = loadAssetJson("reference/index.json")
+            val sections = mutableListOf<ReferenceSectionInfo>()
 
-        val sectionsArray = json.getJSONArray("sections")
-        for (i in 0 until sectionsArray.length()) {
-            val sec = sectionsArray.getJSONObject(i)
-            sections.add(ReferenceSectionInfo(
-                id = sec.getString("id"),
-                title = sec.getString("title"),
-                description = sec.getString("description"),
-                items = jsonArrayToStringList(sec.getJSONArray("items"))
-            ))
+            val sectionsArray = json.getJSONArray("sections")
+            for (i in 0 until sectionsArray.length()) {
+                val sec = sectionsArray.getJSONObject(i)
+                sections.add(ReferenceSectionInfo(
+                    id = sec.getString("id"),
+                    title = sec.getString("title"),
+                    description = sec.getString("description"),
+                    items = jsonArrayToStringList(sec.getJSONArray("items"))
+                ))
+            }
+
+            val index = ReferenceIndex(sections)
+            referenceIndex = index
+            index
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading reference index: ${e.message}", e)
+            ReferenceIndex(emptyList())
         }
-
-        val index = ReferenceIndex(sections)
-        referenceIndex = index
-        return index
     }
 
     fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
@@ -198,11 +218,21 @@ class ContentRepository(private val context: Context) {
     }
 
     fun getTotalSectionsCount(): Int {
-        return getBookIndex().chapters.sumOf { it.sectionIds.size }
+        return try {
+            getBookIndex().chapters.sumOf { it.sectionIds.size }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting total sections count: ${e.message}", e)
+            0
+        }
     }
 
     fun getTotalExercisesCount(): Int {
-        return getExerciseCategories().sumOf { it.exercises.size }
+        return try {
+            getExerciseCategories().sumOf { it.exercises.size }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting total exercises count: ${e.message}", e)
+            0
+        }
     }
 
     private fun parseChapter(json: JSONObject): BookChapter {

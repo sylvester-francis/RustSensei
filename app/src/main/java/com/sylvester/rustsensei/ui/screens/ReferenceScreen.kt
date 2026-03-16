@@ -257,7 +257,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // Render based on content type
+            // Render based on content type — with 24dp between sections, 12dp between code blocks and text
             when {
                 // Cheat sheet format
                 json.has("sections") && json.optJSONArray("sections") != null -> {
@@ -269,7 +269,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp, bottom = 8.dp)
+                            modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp, bottom = 12.dp)
                         )
                         val entries = sec.getJSONArray("entries")
                         for (j in 0 until entries.length()) {
@@ -280,10 +280,10 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(top = 12.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = entry.getString("code"), language = "rust")
                             if (entry.has("note")) {
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = entry.getString("note"),
                                     style = MaterialTheme.typography.bodySmall,
@@ -303,7 +303,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     Text(
@@ -312,9 +312,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     CodeBlock(code = json.getString("error_message"), language = "text")
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     Text(
                         "Bad code:",
@@ -322,9 +322,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     CodeBlock(code = json.optString("example_bad", ""), language = "rust")
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
                     val fixes = json.optJSONArray("fixes")
                     if (fixes != null && fixes.length() > 0) {
@@ -342,14 +342,14 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = fix.getString("code"), language = "rust")
                         }
                     }
 
                     json.optString("tip", "").let {
                         if (it.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                             Text(
                                 text = "Tip: $it",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -369,7 +369,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(20.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     val comparisons = json.getJSONArray("comparisons")
@@ -380,12 +380,12 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = if (i > 0) 20.dp else 0.dp)
+                            modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
                         )
                         // Show each language's code
                         for (lang in listOf("go", "python", "typescript", "rust")) {
                             if (cmp.has(lang)) {
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = lang.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.labelMedium,
@@ -397,7 +397,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         }
                         cmp.optString("note", "").let {
                             if (it.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
                                     text = it,
                                     style = MaterialTheme.typography.bodySmall,
@@ -418,13 +418,13 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     json.optString("content", "").let {
                         if (it.isNotEmpty()) {
                             BookContentRenderer(content = it)
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     json.optString("quickStart", "").let {
@@ -435,9 +435,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     json.optString("starterCode", "").let {
@@ -448,9 +448,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     json.optString("solution", "").let {
@@ -461,9 +461,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
                     // Code examples array
@@ -476,13 +476,13 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(top = 12.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = ex.getString("code"), language = "rust")
                         }
                     }
                     // Common patterns array
                     json.optJSONArray("commonPatterns")?.let { patterns ->
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             "Common Patterns:",
                             style = MaterialTheme.typography.titleSmall,
@@ -497,10 +497,10 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(top = 12.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             CodeBlock(code = p.getString("code"), language = "rust")
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                     // Key points array
                     json.optJSONArray("keyPoints")?.let { points ->
@@ -510,7 +510,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         for (i in 0 until points.length()) {
                             Text(
                                 text = "\u2022 ${points.getString(i)}",
@@ -519,7 +519,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 modifier = Modifier.padding(vertical = 3.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                     // Mappings array (concepts-mapping)
                     json.optJSONArray("mappings")?.let { mappings ->
@@ -530,7 +530,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = if (i > 0) 16.dp else 0.dp)
+                                modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
                             )
                             for (lang in listOf("go", "python", "typescript", "rust")) {
                                 if (m.has(lang)) {
@@ -562,9 +562,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = t.getString("term"),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(top = if (i > 0) 16.dp else 0.dp)
+                                modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = t.getString("definition"),
                                 style = MaterialTheme.typography.bodyMedium,

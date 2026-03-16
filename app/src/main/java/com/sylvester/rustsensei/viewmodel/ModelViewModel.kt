@@ -2,6 +2,7 @@ package com.sylvester.rustsensei.viewmodel
 
 import android.app.Application
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.RustSenseiApplication
@@ -46,6 +47,10 @@ data class ModelUiState(
 )
 
 class ModelViewModel(application: Application) : AndroidViewModel(application) {
+
+    companion object {
+        private const val TAG = "ModelViewModel"
+    }
 
     private val app = application as RustSenseiApplication
     val modelManager = ModelManager(application)
@@ -98,40 +103,48 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
     fun startDownload() {
         val modelInfo = getSelectedModelInfo()
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(
-                modelState = ModelState.DOWNLOADING,
-                errorMessage = null
-            )
+            try {
+                _uiState.value = _uiState.value.copy(
+                    modelState = ModelState.DOWNLOADING,
+                    errorMessage = null
+                )
 
-            modelManager.downloadModel(modelInfo).collect { state ->
-                when (state) {
-                    is DownloadState.Idle -> {}
-                    is DownloadState.Downloading -> {
-                        _uiState.value = _uiState.value.copy(
-                            modelState = ModelState.DOWNLOADING,
-                            downloadProgress = state.progress,
-                            downloadedMB = state.downloadedMB,
-                            totalMB = state.totalMB,
-                            downloadSpeedMBps = state.speedMBps,
-                            estimatedSecondsLeft = state.estimatedSecondsLeft
-                        )
-                    }
-                    is DownloadState.Completed -> {
-                        val downloadedIds = _uiState.value.downloadedModelIds + modelInfo.id
-                        _uiState.value = _uiState.value.copy(
-                            modelState = ModelState.DOWNLOADED,
-                            downloadProgress = 1f,
-                            modelSizeMB = modelManager.getModelSizeMB(modelInfo),
-                            downloadedModelIds = downloadedIds
-                        )
-                    }
-                    is DownloadState.Error -> {
-                        _uiState.value = _uiState.value.copy(
-                            modelState = ModelState.ERROR,
-                            errorMessage = state.message
-                        )
+                modelManager.downloadModel(modelInfo).collect { state ->
+                    when (state) {
+                        is DownloadState.Idle -> {}
+                        is DownloadState.Downloading -> {
+                            _uiState.value = _uiState.value.copy(
+                                modelState = ModelState.DOWNLOADING,
+                                downloadProgress = state.progress,
+                                downloadedMB = state.downloadedMB,
+                                totalMB = state.totalMB,
+                                downloadSpeedMBps = state.speedMBps,
+                                estimatedSecondsLeft = state.estimatedSecondsLeft
+                            )
+                        }
+                        is DownloadState.Completed -> {
+                            val downloadedIds = _uiState.value.downloadedModelIds + modelInfo.id
+                            _uiState.value = _uiState.value.copy(
+                                modelState = ModelState.DOWNLOADED,
+                                downloadProgress = 1f,
+                                modelSizeMB = modelManager.getModelSizeMB(modelInfo),
+                                downloadedModelIds = downloadedIds
+                            )
+                        }
+                        is DownloadState.Error -> {
+                            _uiState.value = _uiState.value.copy(
+                                modelState = ModelState.ERROR,
+                                errorMessage = state.message
+                            )
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in startDownload: ${e.message}", e)
+                _uiState.value = _uiState.value.copy(
+                    modelState = ModelState.ERROR,
+                    errorMessage = "Download failed: ${e.message}"
+                )
             }
         }
     }

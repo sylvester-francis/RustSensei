@@ -23,11 +23,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -59,6 +65,7 @@ import com.sylvester.rustsensei.ui.components.isMemoryLow
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModelSetupScreen(
     modelViewModel: ModelViewModel,
@@ -96,31 +103,38 @@ fun ModelSetupScreen(
         }
     }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Download AI Model") },
+                navigationIcon = {
+                    IconButton(onClick = onSkip) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
+    ) { padding ->
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(padding)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(64.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Logo area — dramatic 80sp crab
         Text(text = "\uD83E\uDD80", fontSize = 80.sp)
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Title in headlineLarge (monospace via theme)
+        // Subtitle — enable chat with your tutor
         Text(
-            text = "RustSensei",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        // Subtitle
-        Text(
-            text = "Your Offline Rust Tutor",
+            text = "Enable chat with your Rust tutor",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -198,15 +212,6 @@ fun ModelSetupScreen(
                     )
                 }
 
-                // Skip button — allows using the app without AI
-                Spacer(modifier = Modifier.height(12.dp))
-                TextButton(onClick = onSkip) {
-                    Text(
-                        "Skip for now — browse content without AI",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
             }
 
             ModelState.DOWNLOADING -> {
@@ -363,8 +368,18 @@ fun ModelSetupScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // Skip for now — at the very bottom, very subtle
+        Spacer(modifier = Modifier.height(48.dp))
+        TextButton(onClick = onSkip) {
+            Text(
+                "Skip for now",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
+    } // end Scaffold
 }
 
 /**
@@ -439,8 +454,10 @@ private fun ModelCard(
                     }
                 }
                 Spacer(modifier = Modifier.height(2.dp))
+                val sizeMb = model.expectedSizeBytes / (1024 * 1024)
+                val estimatedMinutes = (sizeMb / 10).coerceAtLeast(1) // ~10 MB/s estimate
                 Text(
-                    text = "${model.expectedSizeBytes / (1024 * 1024)} MB  \u2022  ${model.ramRequired}",
+                    text = "${sizeMb} MB  \u2022  ${model.ramRequired}  \u2022  ~${estimatedMinutes}min on Wi-Fi",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontFamily = FontFamily.Monospace

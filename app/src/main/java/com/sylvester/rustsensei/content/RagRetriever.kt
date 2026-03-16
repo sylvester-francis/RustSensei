@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.content
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONObject
 
 class RagRetriever(private val context: Context) {
@@ -58,52 +59,57 @@ class RagRetriever(private val context: Context) {
     }
 
     fun retrieveContext(query: String, topK: Int = 3): String? {
-        ensureLoaded()
+        return try {
+            ensureLoaded()
 
-        val allChunks = chunks ?: return null
-        val index = keywordIndex ?: return null
+            val allChunks = chunks ?: return null
+            val index = keywordIndex ?: return null
 
-        if (allChunks.isEmpty()) return null
+            if (allChunks.isEmpty()) return null
 
-        // Extract query keywords
-        val queryWords = query.lowercase()
-            .replace(Regex("[^a-z0-9\\s]"), " ")
-            .split(Regex("\\s+"))
-            .filter { it.length > 2 }
-            .toSet()
+            // Extract query keywords
+            val queryWords = query.lowercase()
+                .replace(Regex("[^a-z0-9\\s]"), " ")
+                .split(Regex("\\s+"))
+                .filter { it.length > 2 }
+                .toSet()
 
-        // Find matching chunk IDs via keyword index
-        val chunkScores = mutableMapOf<String, Int>()
-        for (word in queryWords) {
-            val matchingChunkIds = index[word] ?: continue
-            for (chunkId in matchingChunkIds) {
-                chunkScores[chunkId] = (chunkScores[chunkId] ?: 0) + 1
+            // Find matching chunk IDs via keyword index
+            val chunkScores = mutableMapOf<String, Int>()
+            for (word in queryWords) {
+                val matchingChunkIds = index[word] ?: continue
+                for (chunkId in matchingChunkIds) {
+                    chunkScores[chunkId] = (chunkScores[chunkId] ?: 0) + 1
+                }
             }
-        }
 
-        // Also do direct keyword matching on chunks
-        for (chunk in allChunks) {
-            val overlap = chunk.keywords.count { it in queryWords }
-            if (overlap > 0) {
-                chunkScores[chunk.id] = (chunkScores[chunk.id] ?: 0) + overlap
+            // Also do direct keyword matching on chunks
+            for (chunk in allChunks) {
+                val overlap = chunk.keywords.count { it in queryWords }
+                if (overlap > 0) {
+                    chunkScores[chunk.id] = (chunkScores[chunk.id] ?: 0) + overlap
+                }
             }
-        }
 
-        if (chunkScores.isEmpty()) return null
+            if (chunkScores.isEmpty()) return null
 
-        // Get top-K chunks by score
-        val topChunkIds = chunkScores.entries
-            .sortedByDescending { it.value }
-            .take(topK)
-            .map { it.key }
+            // Get top-K chunks by score
+            val topChunkIds = chunkScores.entries
+                .sortedByDescending { it.value }
+                .take(topK)
+                .map { it.key }
 
-        val chunkMap = allChunks.associateBy { it.id }
-        val topChunks = topChunkIds.mapNotNull { chunkMap[it] }
+            val chunkMap = allChunks.associateBy { it.id }
+            val topChunks = topChunkIds.mapNotNull { chunkMap[it] }
 
-        if (topChunks.isEmpty()) return null
+            if (topChunks.isEmpty()) return null
 
-        return topChunks.joinToString("\n\n---\n\n") { chunk ->
-            "From: ${chunk.sourceTitle}\n${chunk.text}"
+            topChunks.joinToString("\n\n---\n\n") { chunk ->
+                "From: ${chunk.sourceTitle}\n${chunk.text}"
+            }
+        } catch (e: Exception) {
+            Log.e("RagRetriever", "Error in retrieveContext: ${e.message}", e)
+            null
         }
     }
 }

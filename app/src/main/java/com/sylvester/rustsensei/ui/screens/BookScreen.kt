@@ -27,6 +27,20 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,16 +67,41 @@ import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.BookContentRenderer
 import com.sylvester.rustsensei.viewmodel.BookScreenMode
 import com.sylvester.rustsensei.viewmodel.BookViewModel
+import com.sylvester.rustsensei.viewmodel.ReferenceScreenMode
+import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
+
+private fun referenceSectionIcon(id: String): ImageVector = when (id) {
+    "cheatsheets" -> Icons.Default.Speed
+    "compiler-errors" -> Icons.Default.BugReport
+    "comparisons" -> Icons.Default.CompareArrows
+    "challenges" -> Icons.Default.Code
+    "crates" -> Icons.Default.Extension
+    "async-rust" -> Icons.Default.Speed
+    "cli-guide" -> Icons.Default.Terminal
+    "design-patterns" -> Icons.Default.Psychology
+    "glossary" -> Icons.Default.MenuBook
+    "testing" -> Icons.Default.Lightbulb
+    "unsafe-guide" -> Icons.Default.Security
+    "interview-prep" -> Icons.Default.Quiz
+    else -> Icons.Default.Book
+}
 
 @Composable
 fun BookScreen(
     viewModel: BookViewModel,
+    referenceViewModel: ReferenceViewModel,
+    onOpenReference: (sectionId: String) -> Unit,
     onAskSensei: (String, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val refState by referenceViewModel.uiState.collectAsState()
 
-    BackHandler(enabled = uiState.mode != BookScreenMode.INDEX) {
-        viewModel.navigateBack()
+    BackHandler(enabled = uiState.mode != BookScreenMode.INDEX || refState.mode != ReferenceScreenMode.INDEX) {
+        if (refState.mode != ReferenceScreenMode.INDEX) {
+            referenceViewModel.navigateBack()
+        } else {
+            viewModel.navigateBack()
+        }
     }
 
     // P1 Fix #9: show error snackbar/dialog when content fails to load
@@ -78,8 +118,32 @@ fun BookScreen(
         )
     }
 
+    // Reference error dialog
+    refState.errorMessage?.let { error ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { referenceViewModel.clearError() },
+            title = { Text("Unavailable") },
+            text = { Text(error) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { referenceViewModel.clearError() }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
+    // If reference is navigated into (SECTION_LIST or ITEM_DETAIL), show ReferenceScreen content inline
+    if (refState.mode != ReferenceScreenMode.INDEX) {
+        ReferenceScreen(viewModel = referenceViewModel)
+        return
+    }
+
     when (uiState.mode) {
-        BookScreenMode.INDEX -> BookIndexView(viewModel = viewModel)
+        BookScreenMode.INDEX -> BookIndexView(
+            viewModel = viewModel,
+            referenceViewModel = referenceViewModel,
+            onOpenReference = onOpenReference
+        )
         BookScreenMode.CHAPTER -> ChapterView(viewModel = viewModel)
         BookScreenMode.SECTION -> SectionView(
             viewModel = viewModel,
@@ -89,57 +153,83 @@ fun BookScreen(
 }
 
 @Composable
-private fun BookIndexView(viewModel: BookViewModel) {
+private fun BookIndexView(
+    viewModel: BookViewModel,
+    referenceViewModel: ReferenceViewModel,
+    onOpenReference: (sectionId: String) -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
+    val refState by referenceViewModel.uiState.collectAsState()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
     ) {
+        // Continue Reading card — prominent, at top
+        val lastChapterId = uiState.lastReadChapterId
+        val lastSectionId = uiState.lastReadSectionId
+        if (lastChapterId != null && lastSectionId != null) {
+            item {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp)
+                        .clickable {
+                            viewModel.openChapter(lastChapterId)
+                            viewModel.openSection(lastChapterId, lastSectionId)
+                        },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "\u25B6",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Continue Reading",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = lastSectionId.replace("-", " "),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Section header: "The Rust Book"
         item {
-            // headlineMedium (monospace via theme)
             Text(
-                text = "The Rust Programming Language",
+                text = "The Rust Book",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-        }
-
-        // Continue Reading — terminal-style with ">" prefix
-        if (uiState.lastReadChapterId != null && uiState.lastReadSectionId != null) {
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-                            viewModel.openChapter(uiState.lastReadChapterId!!)
-                            viewModel.openSection(
-                                uiState.lastReadChapterId!!,
-                                uiState.lastReadSectionId!!
-                            )
-                        }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = ">",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = "Continue: ${uiState.lastReadSectionId!!.replace("-", " ")}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-            }
         }
 
         itemsIndexed(uiState.chapters, key = { _, ch -> ch.id }) { index, chapter ->
@@ -187,6 +277,64 @@ private fun BookIndexView(viewModel: BookViewModel) {
                 modifier = Modifier.padding(start = 48.dp)
             )
         }
+
+        // Section header: "Quick Reference" with 32dp top margin
+        item {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                text = "Quick Reference",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+        }
+
+        // Reference categories from ReferenceViewModel
+        items(refState.sections, key = { "ref-${it.id}" }) { section ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenReference(section.id) }
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    referenceSectionIcon(section.id),
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = section.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "${section.items.size} items",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                modifier = Modifier.padding(start = 54.dp)
+            )
+        }
+
+        // Bottom breathing room
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 
@@ -220,12 +368,13 @@ private fun ChapterView(viewModel: BookViewModel) {
             items(chapter.sections, key = { it.id }) { section ->
                 val progress = uiState.sectionProgress[section.id]
                 val isCompleted = progress?.isCompleted == true
+                val chapterId = uiState.currentChapterId
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            viewModel.openSection(uiState.currentChapterId!!, section.id)
+                            chapterId?.let { viewModel.openSection(it, section.id) }
                         }
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically

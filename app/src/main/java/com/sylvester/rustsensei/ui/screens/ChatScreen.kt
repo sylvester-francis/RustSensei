@@ -16,7 +16,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -40,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -108,11 +112,11 @@ fun ChatScreen(
                 .fillMaxSize()
                 .imePadding()
         ) {
-            // Clean top row: hamburger + new conversation — onSurfaceVariant icons
+            // Clean top row: hamburger + new conversation — 12dp vertical padding
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -161,7 +165,7 @@ fun ChatScreen(
                         content = message.content,
                         isUser = isUser,
                         isFirstInGroup = isFirstInGroup,
-                        modifier = Modifier.padding(vertical = 6.dp)
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
 
@@ -172,7 +176,7 @@ fun ChatScreen(
                             content = uiState.streamingText,
                             isUser = false,
                             isFirstInGroup = true,
-                            modifier = Modifier.padding(vertical = 6.dp)
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
                 }
@@ -181,7 +185,7 @@ fun ChatScreen(
                 if (uiState.isGenerating && uiState.streamingText.isEmpty()) {
                     item {
                         StreamingIndicator(
-                            modifier = Modifier.padding(vertical = 6.dp)
+                            modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
                 }
@@ -245,17 +249,26 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
         Text(
             text = "Ask me anything about Rust",
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "I'll explain things like you're coming from Python",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Suggestion buttons — sharp 8dp corners, thin primary border at 20% alpha
+        // Suggestion buttons — Python-specific, sharp 8dp corners, thin primary border at 20% alpha
         val suggestions = listOf(
-            "I'm new to Rust. Where do I start?",
-            "Explain ownership like I'm a Go developer",
-            "Help me understand the borrow checker"
+            "How is Rust's ownership different from Python's GC?",
+            "Show me Rust's match vs Python's match",
+            "What's the Rust equivalent of a Python dict?"
         )
         suggestions.forEach { suggestion ->
             OutlinedButton(
@@ -290,29 +303,39 @@ private fun NoModelState(onDownload: () -> Unit) {
         Text(text = "\uD83E\uDD80", fontSize = 80.sp)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "No model loaded",
+            text = "Your tutor needs a brain",
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Download a model to chat with your Rust tutor.\nAll other features work without it.",
+            text = "Download a small AI model to enable chat.\nAll other features work without it.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(24.dp))
-        OutlinedButton(
+        Button(
             onClick = onDownload,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
             shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
         ) {
+            Icon(
+                Icons.Default.Download,
+                contentDescription = null,
+                modifier = Modifier.padding(end = 8.dp)
+            )
             Text(
                 "Download Model",
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
