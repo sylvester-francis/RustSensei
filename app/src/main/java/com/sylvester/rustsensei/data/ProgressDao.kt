@@ -72,4 +72,17 @@ interface ProgressDao {
 
     @Query("SELECT * FROM path_progress")
     fun observeAllPathProgress(): Flow<List<PathProgress>>
+
+    // Quiz Results
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertQuizResult(result: QuizResult)
+
+    @Query("SELECT * FROM quiz_results WHERE quizId = :quizId ORDER BY score DESC LIMIT 1")
+    suspend fun getBestQuizResult(quizId: String): QuizResult?
+
+    @Query("SELECT * FROM quiz_results WHERE quizId = :quizId ORDER BY completedAt DESC")
+    fun getQuizResults(quizId: String): Flow<List<QuizResult>>
+
+    @Query("SELECT * FROM quiz_results ORDER BY completedAt DESC")
+    fun getAllQuizResults(): Flow<List<QuizResult>>
 }

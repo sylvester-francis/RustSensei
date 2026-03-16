@@ -1,0 +1,69 @@
+{
+  "id": "quiz-ownership",
+  "title": "Ownership & Borrowing Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What happens when you assign a String from one variable to another?",
+      "options": ["The value is copied", "The value is moved", "Both variables point to the same data", "A compile error occurs"],
+      "correctIndex": 1,
+      "explanation": "In Rust, assigning a String moves ownership. The original variable is invalidated."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "You can have multiple mutable references to the same data at the same time.",
+      "correctAnswer": false,
+      "explanation": "Rust's borrowing rules allow either one mutable reference OR any number of immutable references, never both."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Fill in the blank to make this code compile:",
+      "code": "fn main() {\n    let s1 = String::from(\"hello\");\n    let s2 = ___;\n    println!(\"{} {}\", s1, s2);\n}",
+      "correctAnswer": "s1.clone()",
+      "acceptableAnswers": ["s1.clone()", "s1.to_owned()", "s1.to_string()"],
+      "explanation": "clone() creates a deep copy, so both s1 and s2 are valid."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which of these is NOT a valid way to pass a String to a function without transferring ownership?",
+      "options": ["&String", "&str", "String", "&String as &str"],
+      "correctIndex": 2,
+      "explanation": "Passing String directly transfers ownership. References (&String, &str) borrow without taking ownership."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Types that implement the Copy trait are moved instead of copied when assigned.",
+      "correctAnswer": false,
+      "explanation": "Copy types (like i32, bool, char) are automatically copied on assignment, not moved."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "What does the borrow checker prevent?",
+      "options": ["Memory leaks", "Data races at compile time", "Stack overflow", "Integer overflow"],
+      "correctIndex": 1,
+      "explanation": "The borrow checker's primary job is preventing data races by enforcing reference rules at compile time."
+    },
+    {
+      "id": "q7",
+      "type": "code_completion",
+      "question": "Fix this code by adding the correct lifetime annotation:",
+      "code": "fn longest(x: &str, y: &str) -> ___ {\n    if x.len() > y.len() { x } else { y }\n}",
+      "correctAnswer": "&str",
+      "acceptableAnswers": ["&str", "&'a str"],
+      "explanation": "The return type needs a lifetime annotation to tell Rust the reference's validity scope."
+    },
+    {
+      "id": "q8",
+      "type": "true_false",
+      "question": "A slice (&[T]) takes ownership of the data it references.",
+      "correctAnswer": false,
+      "explanation": "Slices are references -- they borrow a contiguous section of a collection without owning it."
+    }
+  ]
+}

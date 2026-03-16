@@ -68,7 +68,8 @@ fun MainScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToSetup: () -> Unit = {},
     onNavigateToReview: () -> Unit = {},
-    onNavigateToLearningPaths: () -> Unit = {}
+    onNavigateToLearningPaths: () -> Unit = {},
+    onNavigateToQuiz: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -198,7 +199,8 @@ fun MainScreen(
                             )
                         )
                         tabNavController.navigate(Tab.Chat.route)
-                    }
+                    },
+                    onNavigateToQuiz = onNavigateToQuiz
                 )
             }
             composable(Tab.Chat.route) {

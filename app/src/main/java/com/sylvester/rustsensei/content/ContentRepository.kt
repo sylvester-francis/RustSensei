@@ -7,6 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathStep
+import com.sylvester.rustsensei.data.Quiz
+import com.sylvester.rustsensei.data.QuizIndexEntry
+import com.sylvester.rustsensei.data.QuizQuestion
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -283,6 +286,94 @@ class ContentRepository(private val context: Context) {
 
     suspend fun getLearningPath(pathId: String): LearningPath? {
         return getLearningPaths().find { it.id == pathId }
+    }
+
+    // Quiz content
+    private var quizIndex: List<QuizIndexEntry>? = null
+
+    suspend fun getQuizIndex(): List<QuizIndexEntry> {
+        quizIndex?.let { return it }
+
+        return try {
+            val json = loadAssetJson("quizzes/index.json")
+            val entries = mutableListOf<QuizIndexEntry>()
+
+            val quizzesArray = json.getJSONArray("quizzes")
+            for (i in 0 until quizzesArray.length()) {
+                val q = quizzesArray.getJSONObject(i)
+                entries.add(QuizIndexEntry(
+                    id = q.getString("id"),
+                    title = q.getString("title"),
+                    chapterId = q.getString("chapterId"),
+                    questionCount = q.getInt("questionCount")
+                ))
+            }
+
+            quizIndex = entries
+            entries
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading quiz index: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getQuiz(quizId: String): Quiz? {
+        return try {
+            val json = loadAssetJson("quizzes/$quizId.json")
+            parseQuiz(json)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading quiz $quizId: ${e.message}", e)
+            null
+        }
+    }
+
+    private fun parseQuiz(json: JSONObject): Quiz {
+        val questions = mutableListOf<QuizQuestion>()
+        val questionsArray = json.getJSONArray("questions")
+
+        for (i in 0 until questionsArray.length()) {
+            val q = questionsArray.getJSONObject(i)
+            val type = q.getString("type")
+            val id = q.getString("id")
+            val question = q.getString("question")
+            val explanation = q.getString("explanation")
+
+            when (type) {
+                "multiple_choice" -> {
+                    questions.add(QuizQuestion.MultipleChoice(
+                        id = id,
+                        question = question,
+                        options = jsonArrayToStringList(q.getJSONArray("options")),
+                        correctIndex = q.getInt("correctIndex"),
+                        explanation = explanation
+                    ))
+                }
+                "true_false" -> {
+                    questions.add(QuizQuestion.TrueFalse(
+                        id = id,
+                        question = question,
+                        correctAnswer = q.getBoolean("correctAnswer"),
+                        explanation = explanation
+                    ))
+                }
+                "code_completion" -> {
+                    questions.add(QuizQuestion.CodeCompletion(
+                        id = id,
+                        question = question,
+                        code = q.getString("code"),
+                        correctAnswer = q.getString("correctAnswer"),
+                        acceptableAnswers = jsonArrayToStringList(q.getJSONArray("acceptableAnswers")),
+                        explanation = explanation
+                    ))
+                }
+            }
+        }
+
+        return Quiz(
+            id = json.getString("id"),
+            title = json.getString("title"),
+            questions = questions
+        )
     }
 
     private fun parseChapter(json: JSONObject): BookChapter {

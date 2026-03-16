@@ -1,0 +1,54 @@
+{
+  "id": "quiz-traits-generics",
+  "title": "Traits & Generics Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is a trait in Rust?",
+      "options": ["A concrete type", "A way to define shared behavior that types can implement", "A module system feature", "A macro"],
+      "correctIndex": 1,
+      "explanation": "Traits define shared behavior (like interfaces) that different types can implement."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "You can implement a trait for a type only if either the trait or the type is defined in your crate.",
+      "correctAnswer": true,
+      "explanation": "This is the orphan rule -- it prevents conflicting implementations and ensures coherence."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add a trait bound to make this function work:",
+      "code": "fn print_it<T: ___>(item: T) {\n    println!(\"{}\", item);\n}",
+      "correctAnswer": "std::fmt::Display",
+      "acceptableAnswers": ["std::fmt::Display", "Display", "fmt::Display"],
+      "explanation": "The Display trait enables formatting with `{}`. The bound ensures T can be printed."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the purpose of `where` clauses in Rust generics?",
+      "options": ["They define new types", "They provide a cleaner syntax for complex trait bounds", "They replace impl blocks", "They define lifetime parameters"],
+      "correctIndex": 1,
+      "explanation": "`where` clauses offer a more readable way to express trait bounds, especially with multiple generics."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Generic type parameters are resolved at compile time through monomorphization.",
+      "correctAnswer": true,
+      "explanation": "Rust generates specialized code for each concrete type used with a generic, ensuring zero runtime cost."
+    },
+    {
+      "id": "q6",
+      "type": "code_completion",
+      "question": "Implement this trait for the given struct:",
+      "code": "trait Greet {\n    fn hello(&self) -> String;\n}\n\nstruct Bot;\n\n___ Greet for Bot {\n    fn hello(&self) -> String {\n        String::from(\"Beep boop!\")\n    }\n}",
+      "correctAnswer": "impl",
+      "acceptableAnswers": ["impl"],
+      "explanation": "The `impl Trait for Type` syntax is how you implement a trait for a specific type."
+    }
+  ]
+}

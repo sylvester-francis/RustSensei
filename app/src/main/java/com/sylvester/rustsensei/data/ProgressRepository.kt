@@ -177,4 +177,18 @@ class ProgressRepository(private val progressDao: ProgressDao) {
 
     fun getRecentStats(days: Int = 7): Flow<List<LearningStats>> = progressDao.getRecentStats(days)
     fun getTotalStudyTime(): Flow<Long?> = progressDao.getTotalStudyTime()
+
+    // Quiz Results
+    suspend fun saveQuizResult(result: QuizResult) {
+        progressDao.insertQuizResult(result)
+    }
+
+    suspend fun getBestQuizResult(quizId: String): QuizResult? =
+        progressDao.getBestQuizResult(quizId)
+
+    fun getQuizResults(quizId: String): Flow<List<QuizResult>> =
+        progressDao.getQuizResults(quizId)
+
+    fun getAllQuizResults(): Flow<List<QuizResult>> =
+        progressDao.getAllQuizResults()
 }

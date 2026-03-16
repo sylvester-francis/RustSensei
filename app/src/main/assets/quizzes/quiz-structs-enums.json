@@ -1,0 +1,54 @@
+{
+  "id": "quiz-structs-enums",
+  "title": "Structs & Enums Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which keyword is used to create an instance method that takes ownership of self?",
+      "options": ["fn method(&self)", "fn method(&mut self)", "fn method(self)", "fn method(mut self)"],
+      "correctIndex": 2,
+      "explanation": "Using `self` (without &) as the first parameter takes ownership of the instance."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Enum variants in Rust can hold data of different types.",
+      "correctAnswer": true,
+      "explanation": "Rust enums are algebraic data types -- each variant can hold different types and amounts of data."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Complete the match expression to extract the value from this enum:",
+      "code": "enum Shape {\n    Circle(f64),\n    Rectangle(f64, f64),\n}\n\nfn area(shape: &Shape) -> f64 {\n    match shape {\n        Shape::Circle(r) => std::f64::consts::PI * r * r,\n        ___ => w * h,\n    }\n}",
+      "correctAnswer": "Shape::Rectangle(w, h)",
+      "acceptableAnswers": ["Shape::Rectangle(w, h)", "Shape::Rectangle(w,h)", "Shape::Rectangle( w, h )"],
+      "explanation": "Pattern matching destructures the Rectangle variant, binding its two fields to w and h."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does #[derive(Debug)] do for a struct?",
+      "options": ["Makes it printable with {:?}", "Adds comparison operators", "Makes it clonable", "Enables serialization"],
+      "correctIndex": 0,
+      "explanation": "#[derive(Debug)] auto-implements the Debug trait, allowing the struct to be printed with {:?} or {:#?}."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "A tuple struct like `struct Color(u8, u8, u8);` can be destructured in a let binding.",
+      "correctAnswer": true,
+      "explanation": "You can destructure tuple structs: `let Color(r, g, b) = my_color;`"
+    },
+    {
+      "id": "q6",
+      "type": "code_completion",
+      "question": "Add an impl block to give this struct a constructor method:",
+      "code": "struct Point {\n    x: f64,\n    y: f64,\n}\n\nimpl Point {\n    fn new(x: f64, y: f64) -> ___ {\n        Point { x, y }\n    }\n}",
+      "correctAnswer": "Self",
+      "acceptableAnswers": ["Self", "Point"],
+      "explanation": "The return type `Self` (or `Point`) refers to the type being implemented. Using `Self` is idiomatic."
+    }
+  ]
+}

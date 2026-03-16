@@ -1,0 +1,54 @@
+{
+  "id": "quiz-error-handling",
+  "title": "Error Handling Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does the `?` operator do in Rust?",
+      "options": ["Ignores the error", "Unwraps the value or panics", "Propagates the error to the calling function", "Converts the error to a string"],
+      "correctIndex": 2,
+      "explanation": "The `?` operator returns early with the Err value if the Result is Err, or unwraps the Ok value."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Using unwrap() in production code is generally considered a best practice.",
+      "correctAnswer": false,
+      "explanation": "unwrap() panics on Err/None, crashing the program. In production, prefer proper error handling with match, if let, or `?`."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Complete this function to propagate errors using the ? operator:",
+      "code": "use std::fs;\nuse std::io;\n\nfn read_config() -> ___ {\n    let contents = fs::read_to_string(\"config.toml\")?;\n    Ok(contents)\n}",
+      "correctAnswer": "Result<String, io::Error>",
+      "acceptableAnswers": ["Result<String, io::Error>", "io::Result<String>", "Result<String,io::Error>"],
+      "explanation": "The return type must be Result (or Option) to use the `?` operator. io::Result<T> is shorthand for Result<T, io::Error>."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the difference between `panic!` and returning `Err`?",
+      "options": ["They are the same", "panic! is recoverable, Err is not", "panic! is unrecoverable, Err allows the caller to handle the error", "Err always exits the program"],
+      "correctIndex": 2,
+      "explanation": "panic! aborts the current thread (unrecoverable by default). Returning Err gives the caller a chance to handle the failure."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Option<T> represents a value that might be absent, with Some(T) or None.",
+      "correctAnswer": true,
+      "explanation": "Option<T> is Rust's way of handling nullable values. Some(T) holds a value, None represents absence."
+    },
+    {
+      "id": "q6",
+      "type": "code_completion",
+      "question": "Use `if let` to handle the Option value:",
+      "code": "fn greet(name: Option<&str>) {\n    ___ Some(n) = name {\n        println!(\"Hello, {}!\", n);\n    } else {\n        println!(\"Hello, stranger!\");\n    }\n}",
+      "correctAnswer": "if let",
+      "acceptableAnswers": ["if let"],
+      "explanation": "`if let` is a concise way to match a single pattern, useful when you only care about one variant of an enum."
+    }
+  ]
+}

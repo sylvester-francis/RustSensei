@@ -1,0 +1,9 @@
+{
+  "quizzes": [
+    {"id": "quiz-ownership", "title": "Ownership & Borrowing", "chapterId": "ch04-ownership", "questionCount": 8},
+    {"id": "quiz-structs-enums", "title": "Structs & Enums", "chapterId": "ch05-structs", "questionCount": 6},
+    {"id": "quiz-error-handling", "title": "Error Handling", "chapterId": "ch09-error-handling", "questionCount": 6},
+    {"id": "quiz-traits-generics", "title": "Traits & Generics", "chapterId": "ch10-generics-traits-lifetimes", "questionCount": 6},
+    {"id": "quiz-collections", "title": "Collections", "chapterId": "ch08-common-collections", "questionCount": 6}
+  ]
+}

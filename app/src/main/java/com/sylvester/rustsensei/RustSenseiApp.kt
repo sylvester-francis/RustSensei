@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sylvester.rustsensei.ui.screens.LearningPathScreen
 import com.sylvester.rustsensei.ui.screens.MainScreen
 import com.sylvester.rustsensei.ui.screens.ModelSetupScreen
+import com.sylvester.rustsensei.ui.screens.QuizScreen
 import com.sylvester.rustsensei.ui.screens.ReviewScreen
 import com.sylvester.rustsensei.ui.screens.SettingsScreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
@@ -16,6 +17,7 @@ import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
+import com.sylvester.rustsensei.viewmodel.QuizViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 
@@ -25,6 +27,7 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object Review : Screen("review")
     data object LearningPath : Screen("learning_path")
+    data object Quiz : Screen("quiz")
 }
 
 @Composable
@@ -38,6 +41,7 @@ fun RustSenseiApp() {
     val referenceViewModel: ReferenceViewModel = hiltViewModel()
     val reviewViewModel: ReviewViewModel = hiltViewModel()
     val learningPathViewModel: LearningPathViewModel = hiltViewModel()
+    val quizViewModel: QuizViewModel = hiltViewModel()
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.
@@ -84,6 +88,9 @@ fun RustSenseiApp() {
                 },
                 onNavigateToLearningPaths = {
                     navController.navigate(Screen.LearningPath.route)
+                },
+                onNavigateToQuiz = {
+                    navController.navigate(Screen.Quiz.route)
                 }
             )
         }
@@ -104,6 +111,10 @@ fun RustSenseiApp() {
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(Screen.Quiz.route) {
+            QuizScreen(viewModel = quizViewModel)
         }
 
         composable(Screen.Settings.route) {

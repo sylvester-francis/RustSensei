@@ -68,6 +68,7 @@ import com.sylvester.rustsensei.ui.components.CodeEditor
 import com.sylvester.rustsensei.ui.components.UndoRedoManager
 import com.sylvester.rustsensei.viewmodel.ExerciseScreenMode
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
+import androidx.compose.material.icons.filled.Quiz
 
 // Python parallel descriptions for exercise categories
 private fun pythonParallel(categoryTitle: String): String {
@@ -102,7 +103,8 @@ private fun pythonParallel(categoryTitle: String): String {
 @Composable
 fun ExercisesScreen(
     viewModel: ExerciseViewModel,
-    onAskSensei: (String, String) -> Unit
+    onAskSensei: (String, String) -> Unit,
+    onNavigateToQuiz: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -111,7 +113,10 @@ fun ExercisesScreen(
     }
 
     when (uiState.mode) {
-        ExerciseScreenMode.CATEGORIES -> CategoriesView(viewModel = viewModel)
+        ExerciseScreenMode.CATEGORIES -> CategoriesView(
+            viewModel = viewModel,
+            onNavigateToQuiz = onNavigateToQuiz
+        )
         ExerciseScreenMode.DETAIL -> ExerciseDetailView(
             viewModel = viewModel,
             onAskSensei = onAskSensei
@@ -120,7 +125,10 @@ fun ExercisesScreen(
 }
 
 @Composable
-private fun CategoriesView(viewModel: ExerciseViewModel) {
+private fun CategoriesView(
+    viewModel: ExerciseViewModel,
+    onNavigateToQuiz: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     // Calculate total exercise count
@@ -194,6 +202,55 @@ private fun CategoriesView(viewModel: ExerciseViewModel) {
                             modifier = Modifier.size(20.dp)
                         )
                     }
+                }
+            }
+        }
+
+        // Quiz entry card
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .clickable { onNavigateToQuiz() },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Quiz,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Topic Quizzes",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Test your knowledge after each chapter",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Icon(
+                        Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }

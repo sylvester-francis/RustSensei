@@ -1,0 +1,54 @@
+{
+  "id": "quiz-collections",
+  "title": "Collections Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which macro is used to create a new Vec with initial values?",
+      "options": ["array![]", "vec![]", "list![]", "Vec::new()"],
+      "correctIndex": 1,
+      "explanation": "The `vec![]` macro creates a new Vec with the given values, e.g., `vec![1, 2, 3]`."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "A HashMap in Rust automatically orders its keys.",
+      "correctAnswer": false,
+      "explanation": "HashMap does not guarantee any particular order. Use BTreeMap if you need sorted keys."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Insert a value into this HashMap only if the key doesn't exist:",
+      "code": "use std::collections::HashMap;\n\nlet mut scores = HashMap::new();\nscores.insert(\"Alice\", 100);\nscores.___\n    .or_insert(50);",
+      "correctAnswer": "entry(\"Bob\")",
+      "acceptableAnswers": ["entry(\"Bob\")", "entry( \"Bob\" )"],
+      "explanation": "The entry API lets you check if a key exists and insert a default value if it doesn't."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the difference between &str and String in Rust?",
+      "options": ["They are the same type", "&str is a borrowed reference to string data, String is an owned heap-allocated string", "&str is mutable, String is immutable", "String is stack-allocated, &str is heap-allocated"],
+      "correctIndex": 1,
+      "explanation": "&str is a borrowed slice (view) of string data. String owns its data on the heap and can grow."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Iterators in Rust are lazy -- they don't do anything until consumed.",
+      "correctAnswer": true,
+      "explanation": "Iterator adaptors like map() and filter() are lazy. You need a consumer like collect(), for_each(), or sum() to process them."
+    },
+    {
+      "id": "q6",
+      "type": "code_completion",
+      "question": "Use an iterator to double all values in this vector:",
+      "code": "let nums = vec![1, 2, 3, 4];\nlet doubled: Vec<i32> = nums.iter()\n    .map(|x| x * 2)\n    .___",
+      "correctAnswer": "collect();",
+      "acceptableAnswers": ["collect();", "collect()", "collect::<Vec<i32>>()", "collect::<Vec<i32>>();", "collect::<Vec<_>>()", "collect::<Vec<_>>();"],
+      "explanation": "collect() consumes the iterator and gathers results into a collection. The type annotation on doubled guides type inference."
+    }
+  ]
+}
