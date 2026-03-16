@@ -134,8 +134,8 @@ fun DashboardScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // =====================================================
         // Section 1: Hero Greeting + Streak
@@ -144,7 +144,7 @@ fun DashboardScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(110.dp),
+                    .height(140.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -154,7 +154,7 @@ fun DashboardScreen(
                     // Greeting
                     Text(
                         text = greeting,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center
                     )
@@ -187,7 +187,7 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "${uiState.studyStreak}-day streak",
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.headlineMedium,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -717,8 +717,8 @@ private fun QuickActionCard(
     Card(
         onClick = onClick,
         modifier = Modifier
-            .width(140.dp)
-            .height(85.dp),
+            .width(150.dp)
+            .height(100.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = cardBackground
@@ -782,7 +782,7 @@ private fun ProgressRingWithLabel(
     ) {
         ProgressRing(
             progress = progress,
-            diameter = 68.dp,
+            diameter = 80.dp,
             thickness = 8.dp,
             color = color,
             centerText = "${(progress * 100).toInt()}%"

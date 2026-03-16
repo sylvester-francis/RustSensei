@@ -111,29 +111,29 @@ fun MainScreen(
         topBar = {
             if (!hideTopBar) {
                 Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(44.dp)
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "RustSensei",
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.weight(1f)
-                        )
-                        IconButton(onClick = onNavigateToSearch) {
-                            Icon(
-                                Icons.Default.Search,
-                                contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(22.dp)
+                    TopAppBar(
+                        title = {
+                            Text(
+                                "RustSensei",
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace,
+                                style = MaterialTheme.typography.titleLarge
                             )
-                        }
-                    }
+                        },
+                        actions = {
+                            IconButton(onClick = onNavigateToSearch) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = "Search",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -319,12 +319,13 @@ private fun RustSenseiNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(72.dp)
             .background(containerColor)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -336,7 +337,7 @@ private fun RustSenseiNavigationBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(64.dp)
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
@@ -352,8 +353,8 @@ private fun RustSenseiNavigationBar(
                         // Pill background behind icon when selected
                         Box(
                             modifier = Modifier
-                                .size(width = 48.dp, height = 26.dp)
-                                .clip(RoundedCornerShape(13.dp))
+                                .size(width = 56.dp, height = 30.dp)
+                                .clip(RoundedCornerShape(15.dp))
                                 .then(
                                     if (isSelected) {
                                         Modifier.background(primaryColor)
@@ -366,17 +367,17 @@ private fun RustSenseiNavigationBar(
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = tab.title,
-                                modifier = Modifier.size(18.dp),
+                                modifier = Modifier.size(20.dp),
                                 tint = if (isSelected) activeIconColor else inactiveColor
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         Text(
                             text = tab.title,
                             style = MaterialTheme.typography.labelSmall,
-                            fontSize = 10.sp,
+                            fontSize = 11.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                             color = if (isSelected) primaryColor else inactiveColor
                         )

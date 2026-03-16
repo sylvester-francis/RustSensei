@@ -365,7 +365,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 64.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // 48sp crab emoji avatar
@@ -446,7 +446,7 @@ private fun NoModelState(onDownload: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 64.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Crab emoji
