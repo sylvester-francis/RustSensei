@@ -18,6 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
@@ -38,9 +41,13 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         )
     }
 
-    private var engine: Engine? = null
-    private var conversation: Conversation? = null
-    private var isLoaded = false
+    private val lock = Any()
+    @Volatile private var engine: Engine? = null
+    @Volatile private var conversation: Conversation? = null
+    @Volatile private var isGenerating = false
+
+    private val _modelLoaded = MutableStateFlow(false)
+    val modelLoaded: StateFlow<Boolean> = _modelLoaded.asStateFlow()
 
     @OptIn(ExperimentalApi::class)
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
@@ -70,12 +77,12 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 ExperimentalFlags.enableConversationConstrainedDecoding = false
                 conversation = conv
 
-                isLoaded = true
+                _modelLoaded.value = true
                 Log.i(TAG, "Model loaded: $modelPath")
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load: ${e.message}", e)
-                isLoaded = false
+                _modelLoaded.value = false
                 false
             }
         }
@@ -97,6 +104,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
         // conversation.sendMessageAsync(Contents.of(contents), MessageCallback)
         return callbackFlow {
             try {
+                isGenerating = true
                 val startTime = System.currentTimeMillis()
                 var firstTokenTime: Long? = null
                 var tokenCount = 0
@@ -126,6 +134,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                         }
 
                         override fun onDone() {
+                            isGenerating = false
                             try {
                                 val ftTime = firstTokenTime ?: startTime
                                 val genMs = System.currentTimeMillis() - ftTime
@@ -139,6 +148,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                         }
 
                         override fun onError(throwable: Throwable) {
+                            isGenerating = false
                             if (throwable is CancellationException) {
                                 Log.i(TAG, "Inference cancelled")
                                 close()
@@ -150,18 +160,26 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                     }
                 )
             } catch (e: Exception) {
+                isGenerating = false
                 Log.e(TAG, "Error starting generation: ${e.message}", e)
                 trySend("Error: ${e.message}")
                 close()
             }
 
             awaitClose {
-                try { conv.cancelProcess() } catch (_: Exception) {}
+                // Do NOT call cancelProcess() here — it races with the native
+                // inference thread and causes SIGSEGV in liblitertlm_jni.so.
+                // The native thread will finish on its own; trySend() on the
+                // closed channel is safely ignored.
+                Log.d(TAG, "Flow cancelled, native inference will complete naturally")
             }
         }.buffer(capacity = 64, onBufferOverflow = BufferOverflow.SUSPEND)
     }
 
     override fun stopGeneration() {
+        // Only cancel if we're actually generating — calling cancelProcess()
+        // on an idle conversation is safe, but we guard anyway.
+        if (!isGenerating) return
         try {
             conversation?.cancelProcess()
         } catch (e: Exception) {
@@ -171,36 +189,55 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
 
     @OptIn(ExperimentalApi::class)
     override fun clearCache() {
-        // Reset conversation — reuse engine (Google's pattern)
-        try {
-            val eng = engine ?: return
-            conversation?.close()
-            ExperimentalFlags.enableConversationConstrainedDecoding = false
-            // Bug 5: use the same DEFAULT_SAMPLER as loadModel() to avoid config drift
-            conversation = eng.createConversation(
-                ConversationConfig(
-                    samplerConfig = DEFAULT_SAMPLER
+        synchronized(lock) {
+            try {
+                val eng = engine ?: return
+                val oldConv = conversation
+
+                // If generating, cancel first and don't close the old conversation —
+                // the native thread may still reference it. Let GC clean it up.
+                if (isGenerating) {
+                    try { oldConv?.cancelProcess() } catch (_: Exception) {}
+                    Log.d(TAG, "Skipping close of active conversation, creating new one")
+                } else {
+                    try { oldConv?.close() } catch (_: Exception) {}
+                }
+
+                ExperimentalFlags.enableConversationConstrainedDecoding = false
+                // Bug 5: use the same DEFAULT_SAMPLER as loadModel() to avoid config drift
+                conversation = eng.createConversation(
+                    ConversationConfig(
+                        samplerConfig = DEFAULT_SAMPLER
+                    )
                 )
-            )
-            ExperimentalFlags.enableConversationConstrainedDecoding = false
-        } catch (e: Exception) {
-            Log.w(TAG, "Reset conversation error: ${e.message}")
+                ExperimentalFlags.enableConversationConstrainedDecoding = false
+            } catch (e: Exception) {
+                Log.w(TAG, "Reset conversation error: ${e.message}")
+            }
         }
     }
 
     override suspend fun unloadModel() {
         withContext(Dispatchers.IO) {
-            try {
-                conversation?.close()
-                engine?.close()
-            } catch (e: Exception) {
-                Log.w(TAG, "Unload error: ${e.message}")
+            synchronized(lock) {
+                try {
+                    if (isGenerating) {
+                        try { conversation?.cancelProcess() } catch (_: Exception) {}
+                        // Give native thread a brief moment to wind down
+                        Thread.sleep(200)
+                    }
+                    conversation?.close()
+                    engine?.close()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Unload error: ${e.message}")
+                }
+                conversation = null
+                engine = null
+                _modelLoaded.value = false
+                isGenerating = false
             }
-            conversation = null
-            engine = null
-            isLoaded = false
         }
     }
 
-    override fun isModelLoaded(): Boolean = isLoaded
+    override fun isModelLoaded(): Boolean = _modelLoaded.value
 }

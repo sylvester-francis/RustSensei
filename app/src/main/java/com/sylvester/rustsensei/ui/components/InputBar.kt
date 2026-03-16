@@ -1,9 +1,13 @@
 package com.sylvester.rustsensei.ui.components
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,16 +26,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
+import com.sylvester.rustsensei.ui.theme.ErrorNeon
+import com.sylvester.rustsensei.ui.theme.PrimaryGlow
 
 @Composable
 fun InputBar(
@@ -43,9 +52,15 @@ fun InputBar(
     modifier: Modifier = Modifier
 ) {
     val primary = MaterialTheme.colorScheme.primary
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val pillShape = RoundedCornerShape(28.dp)
+    val borderWidth = if (isFocused) 2.dp else 1.dp
+    val borderColor = if (isFocused) primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Neon top border — 1dp primary at 15% alpha
+        // Neon top divider: 1dp primary at 15% alpha
         HorizontalDivider(
             thickness = 1.dp,
             color = primary.copy(alpha = 0.15f)
@@ -55,7 +70,6 @@ fun InputBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 8.dp)
-                .padding(bottom = 8.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.Bottom
@@ -63,32 +77,45 @@ fun InputBar(
                 TextField(
                     value = value,
                     onValueChange = onValueChange,
-                    modifier = Modifier.weight(1f),
+                    interactionSource = interactionSource,
+                    modifier = Modifier
+                        .weight(1f)
+                        .defaultMinSize(minHeight = 56.dp)
+                        .border(
+                            width = borderWidth,
+                            color = borderColor,
+                            shape = pillShape
+                        ),
                     placeholder = {
-                        // Terminal-style prompt: ">" in primary, then hint text
+                        // Terminal-style prompt: ">" in primary monospace, then hint text
                         Text(
                             text = buildAnnotatedString {
-                                withStyle(SpanStyle(
-                                    color = primary,
-                                    fontFamily = FontFamily.Monospace,
-                                    fontSize = 15.sp
-                                )) {
+                                withStyle(
+                                    SpanStyle(
+                                        color = primary,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 15.sp
+                                    )
+                                ) {
                                     append("> ")
                                 }
-                                withStyle(SpanStyle(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                    fontSize = 15.sp
-                                )) {
+                                withStyle(
+                                    SpanStyle(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            .copy(alpha = 0.5f),
+                                        fontSize = 15.sp
+                                    )
+                                ) {
                                     append("Enter command...")
                                 }
                             }
                         )
                     },
-                    shape = RoundedCornerShape(8.dp),
+                    shape = pillShape,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        focusedContainerColor = DarkSurfaceContainer,
+                        unfocusedContainerColor = DarkSurfaceContainer,
+                        disabledContainerColor = DarkSurfaceContainer,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,
@@ -96,33 +123,33 @@ fun InputBar(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    maxLines = 5,
+                    maxLines = 8,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp)
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Send / stop button with neon glow
+                // Send / stop button: 40dp filled circle with shadow glow
                 FilledIconButton(
                     onClick = if (isGenerating) onStop else onSend,
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(40.dp)
                         .shadow(
-                            elevation = 8.dp,
+                            elevation = 12.dp,
                             shape = CircleShape,
                             spotColor = if (isGenerating)
-                                MaterialTheme.colorScheme.error.copy(alpha = 0.4f)
+                                ErrorNeon.copy(alpha = 0.5f)
                             else
-                                primary.copy(alpha = 0.4f),
+                                PrimaryGlow,
                             ambientColor = if (isGenerating)
-                                MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
+                                ErrorNeon.copy(alpha = 0.25f)
                             else
-                                primary.copy(alpha = 0.2f)
+                                PrimaryGlow.copy(alpha = 0.5f)
                         ),
                     shape = CircleShape,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = if (isGenerating)
-                            MaterialTheme.colorScheme.error
+                            ErrorNeon
                         else
                             primary
                     )
@@ -131,13 +158,15 @@ fun InputBar(
                         Icon(
                             Icons.Default.Stop,
                             contentDescription = "Stop generation",
-                            tint = MaterialTheme.colorScheme.onError
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier.size(20.dp)
                         )
                     } else {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send message",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }

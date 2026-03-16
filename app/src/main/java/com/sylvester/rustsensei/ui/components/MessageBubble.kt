@@ -14,10 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -31,6 +30,25 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
+
+// User bubble background: primaryContainer dark variant
+private val UserBubbleBackground = Color(0xFF2A1510)
+
+// Bubble corner radii
+private val UserBubbleShape = RoundedCornerShape(
+    topStart = 20.dp,
+    topEnd = 20.dp,
+    bottomEnd = 4.dp,
+    bottomStart = 20.dp
+)
+
+private val AiBubbleShape = RoundedCornerShape(
+    topStart = 20.dp,
+    topEnd = 20.dp,
+    bottomEnd = 20.dp,
+    bottomStart = 4.dp
+)
 
 @Composable
 fun MessageBubble(
@@ -40,9 +58,9 @@ fun MessageBubble(
     modifier: Modifier = Modifier
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val primary = MaterialTheme.colorScheme.primary
 
     if (isUser) {
+        // Right-aligned user message
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -51,57 +69,48 @@ fun MessageBubble(
         ) {
             Box(
                 modifier = Modifier
-                    .widthIn(max = screenWidth * 0.88f)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(20.dp),
-                        spotColor = primary.copy(alpha = 0.3f),
-                        ambientColor = primary.copy(alpha = 0.15f)
-                    )
-                    .background(
-                        color = primary,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(horizontal = 14.dp, vertical = 14.dp)
+                    .widthIn(max = screenWidth * 0.85f)
+                    .clip(UserBubbleShape)
+                    .background(UserBubbleBackground)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(
                     text = content,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     lineHeight = 22.sp
                 )
             }
         }
     } else {
-        val accentColor = primary.copy(alpha = 0.25f)
-        val showBorder = isFirstInGroup
-
-        Column(
+        // Left-aligned AI message
+        Row(
             modifier = modifier
                 .fillMaxWidth()
-                .semantics { contentDescription = "RustSensei said: $content" }
-                .then(
-                    if (showBorder) {
-                        Modifier.drawBehind {
-                            drawRect(
-                                color = accentColor,
-                                topLeft = Offset.Zero,
-                                size = androidx.compose.ui.geometry.Size(
-                                    width = 3.dp.toPx(),
-                                    height = size.height
-                                )
-                            )
-                        }
-                    } else Modifier
-                )
-                .padding(
-                    start = if (showBorder) 12.dp else 4.dp,
-                    end = 4.dp,
-                    top = 2.dp,
-                    bottom = 2.dp
-                )
+                .semantics { contentDescription = "RustSensei said: $content" },
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.Top
         ) {
-            RichContent(content)
+            // Crab emoji indicator for first message in a group
+            if (isFirstInGroup) {
+                Text(
+                    text = "\uD83E\uDD80",
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(end = 6.dp, top = 4.dp)
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .widthIn(max = screenWidth * 0.90f)
+                    .clip(AiBubbleShape)
+                    .background(DarkSurfaceContainerHigh)
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Column {
+                    RichContent(content)
+                }
+            }
         }
     }
 }
@@ -147,7 +156,7 @@ private sealed class ContentBlock {
 
 /**
  * Splits text into prose and fenced code blocks.
- * Only ``` fences are treated as code — everything else stays as prose.
+ * Only ``` fences are treated as code -- everything else stays as prose.
  */
 private fun splitCodeBlocks(text: String): List<ContentBlock> {
     val blocks = mutableListOf<ContentBlock>()
@@ -174,7 +183,7 @@ private fun splitCodeBlocks(text: String): List<ContentBlock> {
 /**
  * Renders inline markdown as an AnnotatedString.
  * Handles: **bold**, *italic*, `inline code`, ### headings, - bullets.
- * All markdown syntax characters are consumed — none leak to the user.
+ * All markdown syntax characters are consumed -- none leak to the user.
  */
 private fun renderInline(text: String): AnnotatedString {
     // Pre-process: convert markdown headings to bold lines
@@ -218,12 +227,14 @@ private fun renderInline(text: String): AnnotatedString {
                 s[i] == '`' -> {
                     val end = s.indexOf('`', i + 1)
                     if (end != -1) {
-                        withStyle(SpanStyle(
-                            fontFamily = FontFamily.Monospace,
-                            background = Color(0xFF141820),
-                            color = Color(0xFFCE412B),
-                            fontSize = 14.sp
-                        )) {
+                        withStyle(
+                            SpanStyle(
+                                fontFamily = FontFamily.Monospace,
+                                background = Color(0xFF1A1F2A),
+                                color = Color(0xFFE8975A),
+                                fontSize = 14.sp
+                            )
+                        ) {
                             append(" ${s.substring(i + 1, end)} ")
                         }
                         i = end + 1

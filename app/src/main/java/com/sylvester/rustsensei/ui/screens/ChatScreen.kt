@@ -2,6 +2,8 @@ package com.sylvester.rustsensei.ui.screens
 
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -26,8 +28,10 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -39,6 +43,7 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.Conversation
@@ -71,8 +77,7 @@ fun ChatScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToSetup: () -> Unit = {}
 ) {
-    val modelLoaded = viewModel.isAnyModelLoaded()
-
+    val modelLoaded by viewModel.modelLoaded.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
@@ -100,8 +105,6 @@ fun ChatScreen(
     }
 
     // Start a new conversation ONLY if none has ever been created.
-    // Key on currentConversationId so this only fires once when it's null,
-    // not every time the Chat tab is re-entered.
     val convId = uiState.currentConversationId
     LaunchedEffect(convId) {
         if (convId == null) {
@@ -115,8 +118,8 @@ fun ChatScreen(
             ConversationDrawer(
                 conversations = conversations,
                 currentConversationId = uiState.currentConversationId,
-                onConversationSelected = { convId ->
-                    viewModel.loadConversation(convId)
+                onConversationSelected = { id ->
+                    viewModel.loadConversation(id)
                     scope.launch { drawerState.close() }
                 },
                 onNewConversation = {
@@ -131,47 +134,64 @@ fun ChatScreen(
                 .fillMaxSize()
                 .imePadding()
         ) {
-            // Clean top row: hamburger + new conversation — 12dp vertical padding
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                    Icon(
-                        Icons.Default.Menu,
-                        contentDescription = "Conversations",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+            // Top bar: [menu-hamburger] "Rust Sensei" (centered, headlineSmall mono) [share] [new-chat]
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Rust Sensei",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                if (uiState.messages.isNotEmpty()) {
-                    IconButton(onClick = {
-                        val shareText = viewModel.exportConversation()
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, shareText)
-                            type = "text/plain"
-                        }
-                        val shareIntent = Intent.createChooser(sendIntent, "Share conversation")
-                        context.startActivity(shareIntent)
-                    }) {
+                },
+                navigationIcon = {
+                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
                         Icon(
-                            Icons.Default.Share,
-                            contentDescription = "Share conversation",
+                            Icons.Default.Menu,
+                            contentDescription = "Conversations",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                }
-                IconButton(onClick = { viewModel.startNewConversation() }) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "New conversation",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+                },
+                actions = {
+                    if (uiState.messages.isNotEmpty()) {
+                        IconButton(onClick = {
+                            val shareText = viewModel.exportConversation()
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, "Share conversation")
+                            context.startActivity(shareIntent)
+                        }) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = "Share conversation",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    IconButton(onClick = { viewModel.startNewConversation() }) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "New conversation",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+
+            // Thin divider below top bar
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+            )
 
             // Messages list
             LazyColumn(
@@ -201,13 +221,13 @@ fun ChatScreen(
                 }
 
                 if (!modelLoaded) {
-                    // No model — show download prompt
-                    item {
+                    // No model -- show download prompt
+                    item(key = "no_model") {
                         NoModelState(onDownload = onNavigateToSetup)
                     }
                 } else if (uiState.messages.isEmpty() && !uiState.isGenerating) {
-                    item {
-                        EmptyState(onPromptSelected = { prompt ->
+                    item(key = "welcome") {
+                        WelcomeState(onPromptSelected = { prompt ->
                             inputText = prompt
                         })
                     }
@@ -229,7 +249,7 @@ fun ChatScreen(
 
                 // Streaming response
                 if (uiState.streamingText.isNotEmpty()) {
-                    item {
+                    item(key = "streaming") {
                         MessageBubble(
                             content = uiState.streamingText,
                             isUser = false,
@@ -241,16 +261,16 @@ fun ChatScreen(
 
                 // Typing indicator
                 if (uiState.isGenerating && uiState.streamingText.isEmpty()) {
-                    item {
+                    item(key = "typing_indicator") {
                         StreamingIndicator(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
                 }
 
-                // Inference stats — monospace, primary at 40% alpha
+                // Inference stats -- monospace, primary at 65% alpha
                 if (!uiState.isGenerating && uiState.inferenceTimeMs > 0) {
-                    item {
+                    item(key = "inference_stats") {
                         val statsText = buildString {
                             append("%.1fs".format(uiState.inferenceTimeMs / 1000.0))
                             if (uiState.lastDecodeTokPerSec > 0f) {
@@ -261,7 +281,7 @@ fun ChatScreen(
                             text = statsText,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.65f),
                             modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                         )
                     }
@@ -295,6 +315,9 @@ fun ChatScreen(
                                     border = BorderStroke(
                                         width = 1.dp,
                                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                                    ),
+                                    colors = AssistChipDefaults.assistChipColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainer
                                     )
                                 )
                             }
@@ -303,7 +326,7 @@ fun ChatScreen(
                 }
             }
 
-            // Input bar — only show when model is loaded
+            // Input bar -- only show when model is loaded
             if (modelLoaded) {
                 InputBar(
                     value = inputText,
@@ -322,15 +345,19 @@ fun ChatScreen(
     }
 }
 
+/**
+ * Welcome / empty state shown when no messages exist and the model is loaded.
+ * Displays a crab avatar, intro text, privacy badge, and quick-prompt suggestion buttons.
+ */
 @Composable
-private fun EmptyState(onPromptSelected: (String) -> Unit) {
+private fun WelcomeState(onPromptSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 48sp crab emoji
+        // 48sp crab emoji avatar
         Text(
             text = "\uD83E\uDD80",
             fontSize = 48.sp
@@ -338,7 +365,7 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // headlineSmall (monospace via theme)
+        // headlineSmall (monospace via theme typography)
         Text(
             text = "Ask me anything about Rust",
             style = MaterialTheme.typography.headlineSmall,
@@ -357,6 +384,7 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // Privacy badge -- labelSmall mono, primary at 50%
         Text(
             text = "Offline \u00B7 Private \u00B7 On-device AI",
             style = MaterialTheme.typography.labelSmall,
@@ -367,7 +395,7 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Suggestion buttons — Python-specific, sharp 8dp corners, thin primary border at 20% alpha
+        // 3 suggestion outlined buttons with thin primary border at 20%
         val suggestions = listOf(
             "How is Rust's ownership different from Python's GC?",
             "Show me Rust's match vs Python's match",
@@ -383,6 +411,9 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
                 border = BorderStroke(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                ),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
                 Text(
@@ -395,6 +426,10 @@ private fun EmptyState(onPromptSelected: (String) -> Unit) {
     }
 }
 
+/**
+ * State shown when no AI model has been downloaded yet.
+ * Displays the crab avatar, explanation text, and a full-width download button.
+ */
 @Composable
 private fun NoModelState(onDownload: () -> Unit) {
     Column(
@@ -403,28 +438,36 @@ private fun NoModelState(onDownload: () -> Unit) {
             .padding(top = 80.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Crab emoji
         Text(text = "\uD83E\uDD80", fontSize = 48.sp)
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Text(
             text = "Your tutor needs a brain",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = "Download a small AI model to enable chat.\nAll other features work without it.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
+
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Primary filled, full-width, 56dp pill shape
         Button(
             onClick = onDownload,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(8.dp),
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
             )
@@ -444,6 +487,11 @@ private fun NoModelState(onDownload: () -> Unit) {
     }
 }
 
+/**
+ * Context banner displayed when the chat has contextual information
+ * from a book section or exercise. Uses monospace labelSmall in primary color,
+ * surfaceContainer background with 1dp primary border at 15%.
+ */
 @Composable
 private fun ContextBanner(
     text: String,
@@ -452,7 +500,17 @@ private fun ContextBanner(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
+            .padding(bottom = 8.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -467,18 +525,22 @@ private fun ContextBanner(
         )
         IconButton(
             onClick = onDismiss,
-            modifier = Modifier.padding(0.dp)
+            modifier = Modifier.size(32.dp)
         ) {
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Dismiss context",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.padding(0.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
     }
 }
 
+/**
+ * Conversation history drawer using ModalDrawerSheet.
+ * Shows a title, new conversation item, divider, and list of existing conversations.
+ */
 @Composable
 private fun ConversationDrawer(
     conversations: List<Conversation>,
@@ -489,30 +551,51 @@ private fun ConversationDrawer(
     ModalDrawerSheet(
         drawerContainerColor = MaterialTheme.colorScheme.surface
     ) {
+        // "Conversations" title
         Text(
             text = "Conversations",
             style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(16.dp)
         )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+
+        // New Conversation item
         NavigationDrawerItem(
-            label = { Text("New Conversation", style = MaterialTheme.typography.bodyLarge) },
+            label = {
+                Text(
+                    "New Conversation",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+            },
             selected = false,
             onClick = onNewConversation,
-            icon = { Icon(Icons.Default.Add, contentDescription = "New conversation") },
-            modifier = Modifier.padding(horizontal = 12.dp)
+            icon = {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "New conversation",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            modifier = Modifier.padding(horizontal = 12.dp),
+            shape = RoundedCornerShape(8.dp)
         )
+
         HorizontalDivider(
             modifier = Modifier.padding(vertical = 4.dp),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
         )
 
+        // List of existing conversations
         conversations.forEach { conversation ->
             NavigationDrawerItem(
                 label = {
                     Text(
                         text = conversation.title,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },

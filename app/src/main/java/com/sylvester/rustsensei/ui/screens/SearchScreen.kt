@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,6 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
+import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.viewmodel.SearchResult
 import com.sylvester.rustsensei.viewmodel.SearchViewModel
 
@@ -66,12 +71,17 @@ fun SearchScreen(
         focusRequester.requestFocus()
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        // Search bar
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .imePadding()
+    ) {
+        // Search bar row with pill-shaped input
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
@@ -84,6 +94,7 @@ fun SearchScreen(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
+
             TextField(
                 value = uiState.query,
                 onValueChange = { viewModel.updateQuery(it) },
@@ -91,42 +102,55 @@ fun SearchScreen(
                     Text(
                         "Search sections, exercises, glossary...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        color = SecondaryText.copy(alpha = 0.5f)
                     )
                 },
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester),
                 singleLine = true,
+                shape = RoundedCornerShape(28.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    focusedContainerColor = DarkSurfaceContainer,
+                    unfocusedContainerColor = DarkSurfaceContainer,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = RustOrange
                 ),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = FontFamily.Monospace
                 ),
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = SecondaryText
+                    )
+                },
                 trailingIcon = {
                     if (uiState.query.isNotEmpty()) {
                         IconButton(onClick = { viewModel.clearSearch() }) {
                             Icon(
                                 Icons.Default.Clear,
                                 contentDescription = "Clear",
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
+                                tint = SecondaryText
                             )
                         }
                     }
                 }
             )
+
+            Spacer(modifier = Modifier.width(8.dp))
         }
 
-        // Neon separator
+        // Separator
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                .background(RustOrange.copy(alpha = 0.08f))
         )
 
         if (uiState.isSearching) {
@@ -139,7 +163,7 @@ fun SearchScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
                     strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = RustOrange
                 )
             }
         } else if (uiState.query.isBlank()) {
@@ -155,17 +179,26 @@ fun SearchScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Recent Searches",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.History,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = SecondaryText
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Recent Searches",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             TextButton(onClick = { viewModel.clearRecentSearches() }) {
                                 Text(
-                                    "Clear",
+                                    "Clear All",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = RustOrange
                                 )
                             }
                         }
@@ -182,7 +215,7 @@ fun SearchScreen(
                                 Icons.Default.History,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                tint = SecondaryText.copy(alpha = 0.5f)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
@@ -195,6 +228,7 @@ fun SearchScreen(
                     }
                 }
             } else {
+                // Empty state: no recent searches
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -205,19 +239,20 @@ fun SearchScreen(
                         Icon(
                             Icons.Default.Search,
                             contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                            modifier = Modifier.size(64.dp),
+                            tint = SecondaryText.copy(alpha = 0.3f)
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "Search across all content",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            color = SecondaryText.copy(alpha = 0.5f)
                         )
                     }
                 }
             }
         } else if (uiState.results.isEmpty()) {
+            // No results found
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -225,6 +260,13 @@ fun SearchScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = SecondaryText.copy(alpha = 0.25f)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "No results found",
                         style = MaterialTheme.typography.bodyLarge,
@@ -235,7 +277,7 @@ fun SearchScreen(
                     Text(
                         text = "Try different keywords",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        color = SecondaryText.copy(alpha = 0.4f)
                     )
                 }
             }
@@ -257,7 +299,7 @@ fun SearchScreen(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = RustOrange,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
                     }
@@ -265,7 +307,7 @@ fun SearchScreen(
                         SearchResultRow(result = result)
                         HorizontalDivider(
                             thickness = 0.5.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f),
+                            color = RustOrange.copy(alpha = 0.06f),
                             modifier = Modifier.padding(start = 48.dp)
                         )
                     }
@@ -293,7 +335,7 @@ private fun SearchResultRow(result: SearchResult) {
             modifier = Modifier
                 .size(20.dp)
                 .padding(top = 2.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            tint = RustOrange.copy(alpha = 0.7f)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -307,7 +349,7 @@ private fun SearchResultRow(result: SearchResult) {
             Text(
                 text = result.subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                color = SecondaryText.copy(alpha = 0.6f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -315,7 +357,7 @@ private fun SearchResultRow(result: SearchResult) {
                 Text(
                     text = result.matchSnippet,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
+                    color = SecondaryText.copy(alpha = 0.45f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 16.sp

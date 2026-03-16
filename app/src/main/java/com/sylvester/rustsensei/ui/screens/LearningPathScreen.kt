@@ -1,7 +1,14 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +19,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,14 +29,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.PlayCircleFilled
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Rocket
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,7 +55,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -54,8 +66,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathStep
+import com.sylvester.rustsensei.ui.theme.CrispWhite
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
+import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.PathMode
+
+// Accent colors per path index
+private val pathAccents = listOf(
+    RustOrange,
+    NeonCyan,
+    Color(0xFFFF6B35),
+    SuccessGreen,
+    Color(0xFFA78BFA),
+)
+
+private val pathIcons = listOf(
+    Icons.Default.Rocket,
+    Icons.Default.Speed,
+    Icons.Default.Star,
+    Icons.Default.School,
+    Icons.Default.Code,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,11 +101,8 @@ fun LearningPathScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     BackHandler {
-        if (uiState.mode == PathMode.DETAIL) {
-            viewModel.navigateBack()
-        } else {
-            onNavigateBack()
-        }
+        if (uiState.mode == PathMode.DETAIL) viewModel.navigateBack()
+        else onNavigateBack()
     }
 
     Scaffold(
@@ -81,38 +113,28 @@ fun LearningPathScreen(
                         Text(
                             text = if (uiState.mode == PathMode.DETAIL)
                                 uiState.selectedPath?.title ?: "Learning Path"
-                            else
-                                "Learning Paths",
+                            else "Learning Paths",
                             fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.headlineSmall
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = {
-                            if (uiState.mode == PathMode.DETAIL) {
-                                viewModel.navigateBack()
-                            } else {
-                                onNavigateBack()
-                            }
+                            if (uiState.mode == PathMode.DETAIL) viewModel.navigateBack()
+                            else onNavigateBack()
                         }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
-                // Neon bottom border
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                        .background(RustOrange.copy(alpha = 0.15f))
                 )
             }
         }
@@ -120,10 +142,9 @@ fun LearningPathScreen(
         when (uiState.mode) {
             PathMode.LIST -> PathListContent(
                 paths = uiState.paths,
-                stepProgress = uiState.stepProgress,
+                viewModel = viewModel,
                 onSelectPath = { viewModel.selectPath(it.id) },
-                modifier = Modifier.padding(innerPadding),
-                viewModel = viewModel
+                modifier = Modifier.padding(innerPadding)
             )
             PathMode.DETAIL -> {
                 val path = uiState.selectedPath
@@ -131,9 +152,7 @@ fun LearningPathScreen(
                     PathDetailContent(
                         path = path,
                         stepProgress = uiState.stepProgress,
-                        onStepTap = { step ->
-                            viewModel.markStepComplete(path.id, step.id)
-                        },
+                        onStepTap = { viewModel.markStepComplete(path.id, it.id) },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -142,37 +161,45 @@ fun LearningPathScreen(
     }
 }
 
+// --- PATH LIST ---
+
 @Composable
 private fun PathListContent(
     paths: List<LearningPath>,
-    stepProgress: Map<String, Boolean>,
+    viewModel: LearningPathViewModel,
     onSelectPath: (LearningPath) -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: LearningPathViewModel
+    modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
             Text(
-                text = "Choose a guided path to structure your learning journey.",
+                text = "Pick a structured path to guide your Rust journey",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 6.dp)
             )
         }
 
         items(paths.size) { index ->
             val path = paths[index]
-            val completionPercent = viewModel.getPathCompletionPercent(path)
+            val percent = viewModel.getPathCompletionPercent(path)
+            val accent = pathAccents[index % pathAccents.size]
+            val icon = pathIcons[index % pathIcons.size]
+
             PathCard(
                 path = path,
-                completionPercent = completionPercent,
+                completionPercent = percent,
+                accent = accent,
+                icon = icon,
                 onClick = { onSelectPath(path) }
             )
         }
+
+        item { Spacer(modifier = Modifier.height(8.dp)) }
     }
 }
 
@@ -180,113 +207,114 @@ private fun PathListContent(
 private fun PathCard(
     path: LearningPath,
     completionPercent: Float,
+    accent: Color,
+    icon: ImageVector,
     onClick: () -> Unit
 ) {
+    val percentInt = (completionPercent * 100).toInt()
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = DarkSurfaceContainerHigh
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Title row
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            // Progress ring with icon
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(56.dp)
             ) {
-                Icon(
-                    Icons.Default.School,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                // Track
+                CircularProgressIndicator(
+                    progress = { 1f },
+                    modifier = Modifier.size(56.dp),
+                    strokeWidth = 4.dp,
+                    color = accent.copy(alpha = 0.12f),
+                    strokeCap = StrokeCap.Round
                 )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = path.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                // Progress
+                CircularProgressIndicator(
+                    progress = { completionPercent },
+                    modifier = Modifier.size(56.dp),
+                    strokeWidth = 4.dp,
+                    color = accent,
+                    strokeCap = StrokeCap.Round
+                )
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(22.dp),
+                    tint = accent
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = path.description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Meta info row
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Schedule,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${path.estimatedDays} days",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.PlayCircleFilled,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = path.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = CrispWhite
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = path.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     Text(
                         text = "${path.steps.size} steps",
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                            text = "${path.estimatedDays}d",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Text(
+                        text = "$percentInt%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (percentInt == 100) SuccessGreen
+                        else if (percentInt > 0) accent
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                Text(
-                    text = "${(completionPercent * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { completionPercent },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                strokeCap = StrokeCap.Butt
-            )
         }
     }
 }
+
+// --- PATH DETAIL (Vertical Node Path - Duolingo style) ---
 
 @Composable
 private fun PathDetailContent(
@@ -295,148 +323,192 @@ private fun PathDetailContent(
     onStepTap: (PathStep) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val completedCount = path.steps.count { step ->
-        stepProgress["${path.id}:${step.id}"] == true
-    }
+    val completedCount = path.steps.count { stepProgress["${path.id}:${it.id}"] == true }
+    val progress = if (path.steps.isEmpty()) 0f else completedCount.toFloat() / path.steps.size
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(0.dp)
+        contentPadding = PaddingValues(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Path description header
+        // Header with description and progress
         item {
-            Column(modifier = Modifier.padding(bottom = 16.dp)) {
+            Text(
+                text = path.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Progress summary
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(DarkSurfaceContainer)
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "$completedCount of ${path.steps.size} steps",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = CrispWhite
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp)),
+                        color = RustOrange,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        strokeCap = StrokeCap.Round
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    text = path.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "$completedCount of ${path.steps.size} steps completed",
-                    style = MaterialTheme.typography.labelSmall,
+                    text = "${(progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LinearProgressIndicator(
-                    progress = {
-                        if (path.steps.isEmpty()) 0f
-                        else completedCount.toFloat() / path.steps.size
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    strokeCap = StrokeCap.Butt
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Neon separator
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                    color = RustOrange
                 )
             }
+
+            Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // Timeline steps
+        // Timeline steps (vertical node path)
         itemsIndexed(path.steps) { index, step ->
             val isCompleted = stepProgress["${path.id}:${step.id}"] == true
-            // Find the first uncompleted step as the "current" step
-            val isCurrentStep = !isCompleted && path.steps.take(index).all { prev ->
-                stepProgress["${path.id}:${prev.id}"] == true
+            val isCurrentStep = !isCompleted && path.steps.take(index).all {
+                stepProgress["${path.id}:${it.id}"] == true
             }
+            val isLocked = !isCompleted && !isCurrentStep
             val isLastStep = index == path.steps.size - 1
 
-            TimelineStepItem(
+            NodeStepItem(
                 step = step,
+                stepNumber = index + 1,
                 isCompleted = isCompleted,
                 isCurrentStep = isCurrentStep,
+                isLocked = isLocked,
                 isLastStep = isLastStep,
                 onTap = { onStepTap(step) }
             )
         }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
 @Composable
-private fun TimelineStepItem(
+private fun NodeStepItem(
     step: PathStep,
+    stepNumber: Int,
     isCompleted: Boolean,
     isCurrentStep: Boolean,
+    isLocked: Boolean,
     isLastStep: Boolean,
     onTap: () -> Unit
 ) {
-    val accentColor = MaterialTheme.colorScheme.primary
-    val completedColor = MaterialTheme.colorScheme.tertiary
-    val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-
-    val lineColor = when {
-        isCompleted -> completedColor.copy(alpha = 0.5f)
-        else -> inactiveColor
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onTap)
-            .padding(vertical = 0.dp),
+            .clickable(enabled = !isLocked, onClick = onTap),
         verticalAlignment = Alignment.Top
     ) {
-        // Timeline column: icon + line
+        // Timeline column (node + connection line)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(40.dp)
+            modifier = Modifier.width(56.dp)
         ) {
-            // Step indicator icon
+            // Node circle
             when {
                 isCompleted -> {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = "Completed",
-                        modifier = Modifier.size(24.dp),
-                        tint = completedColor
-                    )
-                }
-                isCurrentStep -> {
+                    // Completed: 48dp circle, primary bg, white checkmark
                     Box(
                         modifier = Modifier
-                            .size(24.dp)
-                            .background(
-                                accentColor.copy(alpha = 0.15f),
-                                CircleShape
-                            ),
+                            .size(48.dp)
+                            .background(RustOrange, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .background(accentColor, CircleShape)
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = "Completed",
+                            modifier = Modifier.size(24.dp),
+                            tint = CrispWhite
                         )
                     }
                 }
-                else -> {
-                    Icon(
-                        Icons.Default.RadioButtonUnchecked,
-                        contentDescription = "Not started",
-                        modifier = Modifier.size(24.dp),
-                        tint = inactiveColor
+
+                isCurrentStep -> {
+                    // Current: primaryContainer bg, pulsing primary border, play icon
+                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    val pulseAlpha by infiniteTransition.animateFloat(
+                        initialValue = 0.4f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(1000, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulseAlpha"
                     )
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(RustOrange.copy(alpha = 0.15f), CircleShape)
+                            .border(
+                                width = 3.dp,
+                                color = RustOrange.copy(alpha = pulseAlpha),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = "Current",
+                            modifier = Modifier.size(24.dp),
+                            tint = RustOrange
+                        )
+                    }
+                }
+
+                else -> {
+                    // Locked: surfaceVariant bg, lock icon, 60% opacity
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .alpha(0.6f)
+                            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Lock,
+                            contentDescription = "Locked",
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
                 }
             }
 
-            // Connecting line (unless last step)
+            // Connection line
             if (!isLastStep) {
+                val nextStep = step // We determine line style based on current node state
+                val lineColor = when {
+                    isCompleted -> RustOrange
+                    isCurrentStep -> RustOrange.copy(alpha = 0.3f)
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                }
                 Box(
                     modifier = Modifier
-                        .width(2.dp)
-                        .height(52.dp)
-                        .offset(y = (-2).dp)
+                        .width(3.dp)
+                        .height(48.dp)
                         .background(lineColor)
                 )
             }
@@ -445,73 +517,84 @@ private fun TimelineStepItem(
         Spacer(modifier = Modifier.width(12.dp))
 
         // Step content
+        val contentAlpha = if (isLocked) 0.6f else 1f
+
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = if (isLastStep) 0.dp else 32.dp)
+                .alpha(contentAlpha)
+                .padding(bottom = if (isLastStep) 0.dp else 16.dp, top = 4.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Step type icon
-                val typeIcon = stepTypeIcon(step.type)
+            // Type label
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    typeIcon,
-                    contentDescription = step.type,
+                    stepTypeIcon(step.type),
+                    contentDescription = null,
                     modifier = Modifier.size(14.dp),
                     tint = when {
-                        isCompleted -> completedColor
-                        isCurrentStep -> accentColor
+                        isCompleted -> RustOrange
+                        isCurrentStep -> RustOrange
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = step.type.replaceFirstChar { it.uppercase() },
+                    text = step.type.uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     fontFamily = FontFamily.Monospace,
+                    letterSpacing = 0.5.sp,
                     color = when {
-                        isCompleted -> completedColor
-                        isCurrentStep -> accentColor
+                        isCompleted -> RustOrange.copy(alpha = 0.7f)
+                        isCurrentStep -> RustOrange
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    },
-                    fontSize = 10.sp
+                    }
                 )
+                if (isCurrentStep) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "UP NEXT",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        color = NeonCyan,
+                        fontSize = 9.sp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = step.title,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = if (isCurrentStep) FontWeight.Bold else FontWeight.SemiBold,
+                fontWeight = if (isCurrentStep) FontWeight.Bold else FontWeight.Medium,
                 color = when {
-                    isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    isCurrentStep -> MaterialTheme.colorScheme.onSurface
-                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    isCurrentStep -> CrispWhite
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 }
             )
 
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
 
             Text(
                 text = step.description,
                 style = MaterialTheme.typography.bodySmall,
+                lineHeight = 18.sp,
                 color = when {
-                    isCompleted -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    isCompleted -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                     isCurrentStep -> MaterialTheme.colorScheme.onSurfaceVariant
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
                 }
             )
         }
     }
 }
 
-private fun stepTypeIcon(type: String): ImageVector {
-    return when (type) {
-        "read" -> Icons.AutoMirrored.Filled.MenuBook
-        "exercise" -> Icons.Default.Code
-        "review" -> Icons.Default.School
-        else -> Icons.Default.PlayCircleFilled
-    }
+private fun stepTypeIcon(type: String): ImageVector = when (type) {
+    "read" -> Icons.AutoMirrored.Filled.MenuBook
+    "exercise" -> Icons.Default.Code
+    "review" -> Icons.Default.School
+    else -> Icons.Default.PlayArrow
 }

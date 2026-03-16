@@ -23,10 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.TouchApp
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -47,12 +47,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
+import com.sylvester.rustsensei.ui.theme.ErrorNeon
+import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.SuccessGreen
+import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,12 +99,11 @@ fun ReviewScreen(
                         titleContentColor = MaterialTheme.colorScheme.onSurface
                     )
                 )
-                // Neon bottom border
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                        .background(RustOrange.copy(alpha = 0.10f))
                 )
             }
         }
@@ -113,17 +119,17 @@ fun ReviewScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        CircularProgressIndicator(color = RustOrange)
                     }
                 }
+
                 uiState.sessionComplete -> {
                     SessionCompleteScreen(
                         cardsReviewed = uiState.cardsReviewed,
                         onNavigateBack = onNavigateBack
                     )
                 }
+
                 uiState.currentCard != null -> {
                     val totalCards = uiState.cardsReviewed + uiState.cardsRemaining
                     Column(
@@ -131,14 +137,14 @@ fun ReviewScreen(
                             .fillMaxSize()
                             .padding(16.dp)
                     ) {
-                        // Progress indicator
+                        // Progress section
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
-                                text = "${uiState.cardsReviewed + 1} of $totalCards cards",
+                                text = "${uiState.cardsRemaining} remaining",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontFamily = FontFamily.Monospace,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -147,22 +153,25 @@ fun ReviewScreen(
                                 text = uiState.currentCard!!.category,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                color = RustOrange.copy(alpha = 0.7f)
                             )
                         }
-                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
                         LinearProgressIndicator(
                             progress = {
                                 if (totalCards > 0) (uiState.cardsReviewed.toFloat() / totalCards) else 0f
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(3.dp)
+                                .height(4.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            color = MaterialTheme.colorScheme.primary,
+                            color = RustOrange,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            strokeCap = StrokeCap.Butt
+                            strokeCap = StrokeCap.Round
                         )
+
                         Spacer(modifier = Modifier.height(24.dp))
 
                         // Flash card
@@ -225,28 +234,26 @@ private fun FlashCardView(
     onFlip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val accentColor = if (isFlipped) NeonCyan else RustOrange
+
     Card(
         modifier = modifier
             .fillMaxWidth()
+            .padding(horizontal = 16.dp)
             .clickable(onClick = onFlip),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = DarkSurfaceContainerHigh
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Neon top accent line
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Neon accent line at top
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(2.dp)
-                    .background(
-                        if (isFlipped) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
+                    .height(3.dp)
+                    .background(accentColor.copy(alpha = 0.7f))
                     .align(Alignment.TopCenter)
             )
 
@@ -254,7 +261,7 @@ private fun FlashCardView(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
+                    .padding(28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -265,8 +272,7 @@ private fun FlashCardView(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp,
-                    color = if (isFlipped) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.6f)
-                    else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                    color = accentColor.copy(alpha = 0.6f)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -305,29 +311,25 @@ private fun RatingButtons(
         ) {
             RatingButton(
                 label = "Again",
-                sublabel = "1d",
-                color = MaterialTheme.colorScheme.error,
+                color = ErrorNeon,
                 modifier = Modifier.weight(1f),
                 onClick = { onRate(1) }
             )
             RatingButton(
                 label = "Hard",
-                sublabel = "1-3d",
-                color = MaterialTheme.colorScheme.secondary,
+                color = WarningAmber,
                 modifier = Modifier.weight(1f),
                 onClick = { onRate(3) }
             )
             RatingButton(
                 label = "Good",
-                sublabel = "4-6d",
-                color = MaterialTheme.colorScheme.primary,
+                color = RustOrange,
                 modifier = Modifier.weight(1f),
                 onClick = { onRate(4) }
             )
             RatingButton(
                 label = "Easy",
-                sublabel = "7d+",
-                color = MaterialTheme.colorScheme.tertiary,
+                color = NeonCyan,
                 modifier = Modifier.weight(1f),
                 onClick = { onRate(5) }
             )
@@ -339,38 +341,26 @@ private fun RatingButtons(
 @Composable
 private fun RatingButton(
     label: String,
-    sublabel: String,
-    color: androidx.compose.ui.graphics.Color,
+    color: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Button(
+    OutlinedButton(
         onClick = onClick,
-        modifier = modifier.height(56.dp),
-        shape = RoundedCornerShape(8.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = color.copy(alpha = 0.12f),
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(10.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.5f)),
+        colors = ButtonDefaults.outlinedButtonColors(
             contentColor = color
         ),
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp
-            )
-            Text(
-                text = sublabel,
-                style = MaterialTheme.typography.labelSmall,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 10.sp,
-                color = color.copy(alpha = 0.7f)
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+        )
     }
 }
 
@@ -386,13 +376,23 @@ private fun SessionCompleteScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        // Checkmark icon
+        Box(
+            modifier = Modifier
+                .size(80.dp)
+                .background(SuccessGreen.copy(alpha = 0.12f), RoundedCornerShape(40.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = SuccessGreen
+            )
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
+
         Text(
             text = "Session Complete",
             style = MaterialTheme.typography.headlineMedium,
@@ -400,7 +400,9 @@ private fun SessionCompleteScreen(
             fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onSurface
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
         if (cardsReviewed > 0) {
             Text(
                 text = "You reviewed $cardsReviewed card${if (cardsReviewed != 1) "s" else ""}",
@@ -416,19 +418,24 @@ private fun SessionCompleteScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = "Come back tomorrow for your next review",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             textAlign = TextAlign.Center
         )
+
         Spacer(modifier = Modifier.height(32.dp))
-        Button(
+
+        OutlinedButton(
             onClick = onNavigateBack,
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+            shape = RoundedCornerShape(10.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, RustOrange.copy(alpha = 0.5f)),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = RustOrange
             )
         ) {
             Icon(

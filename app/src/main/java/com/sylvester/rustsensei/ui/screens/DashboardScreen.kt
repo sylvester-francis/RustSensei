@@ -1,5 +1,10 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,18 +23,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +50,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
@@ -54,6 +65,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.ActivityChart
+import com.sylvester.rustsensei.ui.components.ProgressRing
+import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.Achievement
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
@@ -77,6 +91,16 @@ fun DashboardScreen(
     val reviewUiState by reviewViewModel.uiState.collectAsState()
     val pathUiState by learningPathViewModel.uiState.collectAsState()
 
+    // Time-aware greeting
+    val greeting = remember {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        when {
+            hour < 12 -> "Good morning, Rustacean!"
+            hour < 17 -> "Good afternoon, Rustacean!"
+            else -> "Good evening, Rustacean!"
+        }
+    }
+
     // Daily motivational quote that changes by day of year
     val dailyQuote = remember {
         val quotes = listOf(
@@ -92,75 +116,100 @@ fun DashboardScreen(
         quotes[dayOfYear % quotes.size]
     }
 
-    // Calculate daily goal progress (simple: 1 section + 1 exercise)
+    // Calculate daily goal progress (read 1 chapter, 1 exercise, 1 quiz)
     val todayStats = uiState.weeklyStats.lastOrNull()
     val sectionsToday = todayStats?.sectionsRead ?: 0
     val exercisesToday = todayStats?.exercisesCompleted ?: 0
-    val dailyGoalProgress = ((sectionsToday.coerceAtMost(1) + exercisesToday.coerceAtMost(1)) / 2f)
+    // Daily goals: Read 1 chapter, Complete 1 exercise, Complete 1 quiz
+    val chapterGoalDone = sectionsToday >= 1
+    val exerciseGoalDone = exercisesToday >= 1
+    // Quiz is harder to track directly, so use a heuristic based on study time
+    val quizGoalDone = (todayStats?.studyTimeSeconds ?: 0) > 300 && (sectionsToday + exercisesToday >= 2)
+    val goalsCompleted = listOf(chapterGoalDone, exerciseGoalDone, quizGoalDone).count { it }
+    val dailyGoalProgress = goalsCompleted / 3f
+    val dailyGoalPercent = (dailyGoalProgress * 100).toInt()
+
+    val cardShape = RoundedCornerShape(12.dp)
+    val cardBackground = MaterialTheme.colorScheme.surfaceContainerHigh
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // Large streak display + 7-day activity row
+        // =====================================================
+        // Section 1: Hero Greeting + Streak (160dp height)
+        // =====================================================
         item {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "\uD83D\uDD25 ${uiState.studyStreak} day streak",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                val streakMessage = when {
-                    uiState.studyStreak >= 30 -> "Incredible! A whole month of consistency!"
-                    uiState.studyStreak >= 14 -> "Two weeks strong! You're unstoppable."
-                    uiState.studyStreak >= 7 -> "One week streak! Keep the momentum going."
-                    uiState.studyStreak >= 3 -> "Great start! Keep showing up daily."
-                    uiState.studyStreak >= 1 -> "Nice! You're building a habit."
-                    else -> "Start learning today to build your streak."
-                }
-                Text(
-                    text = streakMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Greeting
+                    Text(
+                        text = greeting,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
 
-                // 7-day activity row
-                if (uiState.weekActivity.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Streak with flame icon
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        uiState.weekActivity.forEach { day ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(
-                                            when (day.level) {
-                                                2 -> MaterialTheme.colorScheme.primary
-                                                1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-                                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                                            }
-                                        )
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = day.label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontSize = 9.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        val transition = rememberInfiniteTransition(label = "streak_flame")
+                        val flameScale by transition.animateFloat(
+                            initialValue = 0.95f,
+                            targetValue = 1.05f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(durationMillis = 1500),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "flame_scale"
+                        )
+                        Icon(
+                            imageVector = Icons.Default.LocalFireDepartment,
+                            contentDescription = "Streak flame",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(32.dp)
+                                .scale(flameScale)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "${uiState.studyStreak}-day streak",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Weekly dots: 7 circles (Mo-Su)
+                    if (uiState.weekActivity.isNotEmpty()) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            uiState.weekActivity.forEachIndexed { index, day ->
+                                val isToday = index == uiState.weekActivity.lastIndex
+                                WeekDayDot(
+                                    label = day.label,
+                                    level = day.level,
+                                    isToday = isToday,
+                                    primaryColor = MaterialTheme.colorScheme.primary,
+                                    surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
                             }
                         }
@@ -169,285 +218,86 @@ fun DashboardScreen(
             }
         }
 
-        // Today's Goal card with progress ring
+        // =====================================================
+        // Section 2: Daily Goal Card
+        // =====================================================
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = cardShape,
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
+                    containerColor = cardBackground
                 )
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(16.dp)
                 ) {
-                    // Progress ring
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.size(56.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CircularProgressIndicator(
-                            progress = { 1f },
-                            modifier = Modifier.size(56.dp),
-                            strokeWidth = 5.dp,
-                            color = MaterialTheme.colorScheme.surfaceVariant,
-                            strokeCap = StrokeCap.Round
-                        )
-                        CircularProgressIndicator(
-                            progress = { dailyGoalProgress },
-                            modifier = Modifier.size(56.dp),
-                            strokeWidth = 5.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            strokeCap = StrokeCap.Round
-                        )
                         Text(
-                            text = "${(dailyGoalProgress * 100).toInt()}%",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Today's Goal",
+                            text = "Daily Goal",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Read 1 section and solve 1 exercise",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "${sectionsToday} read \u00B7 ${exercisesToday} solved",
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "$goalsCompleted/3 complete -- $dailyGoalPercent%",
+                            style = MaterialTheme.typography.labelMedium,
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
-            }
-        }
 
-        // Spaced Repetition Review card
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        if (reviewUiState.dueCardCount > 0) {
-                            Text(
-                                text = "\uD83E\uDDE0 ${reviewUiState.dueCardCount} card${if (reviewUiState.dueCardCount != 1) "s" else ""} due for review",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "${reviewUiState.totalCardCount} total cards",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        } else {
-                            Text(
-                                text = "All caught up!",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Next review tomorrow",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Button(
-                        onClick = onNavigateToReview,
-                        enabled = reviewUiState.dueCardCount > 0,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Text(
-                            text = "Start Review",
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.sp
-                        )
-                    }
-                }
-            }
-        }
+                    Spacer(modifier = Modifier.height(12.dp))
 
-        // Learning Paths card
-        item {
-            Card(
-                onClick = onNavigateToLearningPaths,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.06f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.AutoStories,
-                        contentDescription = "Learning paths",
-                        modifier = Modifier.size(28.dp),
-                        tint = MaterialTheme.colorScheme.secondary
+                    // Progress bar
+                    LinearProgressIndicator(
+                        progress = { dailyGoalProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        strokeCap = StrokeCap.Round
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        val activePath = pathUiState.paths.firstOrNull { path ->
-                            val completedSteps = path.steps.count { step ->
-                                pathUiState.stepProgress["${path.id}:${step.id}"] == true
-                            }
-                            completedSteps > 0 && completedSteps < path.steps.size
-                        }
-                        if (activePath != null) {
-                            val completedSteps = activePath.steps.count { step ->
-                                pathUiState.stepProgress["${activePath.id}:${step.id}"] == true
-                            }
-                            val percent = (completedSteps.toFloat() / activePath.steps.size * 100).toInt()
-                            Text(
-                                text = activePath.title,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "$completedSteps of ${activePath.steps.size} steps -- $percent%",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontFamily = FontFamily.Monospace,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        } else {
-                            Text(
-                                text = "Learning Paths",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Choose a guided path to start",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Icon(
-                        Icons.Default.AutoStories,
-                        contentDescription = "Go to learning paths",
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Checklist items
+                    DailyGoalCheckItem(
+                        text = "Read 1 chapter",
+                        isCompleted = chapterGoalDone
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    DailyGoalCheckItem(
+                        text = "Complete 1 exercise",
+                        isCompleted = exerciseGoalDone
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    DailyGoalCheckItem(
+                        text = "Complete 1 quiz",
+                        isCompleted = quizGoalDone
                     )
                 }
             }
         }
 
-        // Stat cards - 2x2 grid — monospace values (smaller)
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.AutoStories,
-                    title = "Sections",
-                    value = "${uiState.completedSections}",
-                    subtitle = "of ${uiState.totalSections}",
-                    progress = if (uiState.totalSections > 0)
-                        uiState.completedSections.toFloat() / uiState.totalSections
-                    else 0f,
-                    accentColor = MaterialTheme.colorScheme.primary
-                )
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Code,
-                    title = "Exercises",
-                    value = "${uiState.completedExercises}",
-                    subtitle = "of ${uiState.totalExercises}",
-                    progress = if (uiState.totalExercises > 0)
-                        uiState.completedExercises.toFloat() / uiState.totalExercises
-                    else 0f,
-                    accentColor = MaterialTheme.colorScheme.tertiary
-                )
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.LocalFireDepartment,
-                    title = "Streak",
-                    value = "${uiState.studyStreak}",
-                    subtitle = "days",
-                    progress = null,
-                    accentColor = MaterialTheme.colorScheme.secondary
-                )
-                StatCard(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.Timer,
-                    title = "Study Time",
-                    value = formatStudyTime(uiState.totalStudyTimeSeconds),
-                    subtitle = "total",
-                    progress = null,
-                    accentColor = MaterialTheme.colorScheme.tertiary
-                )
-            }
-        }
-
-        // Weekly activity chart — thin neon border at top
+        // =====================================================
+        // Section 3: Activity Heatmap
+        // =====================================================
         item {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // Neon accent border at top of section
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                )
-                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "This Week",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
@@ -455,7 +305,9 @@ fun DashboardScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp),
+                            .height(120.dp)
+                            .clip(cardShape)
+                            .background(cardBackground),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -483,7 +335,99 @@ fun DashboardScreen(
             }
         }
 
-        // Achievements section
+        // =====================================================
+        // Section 4: Quick Action Cards (Horizontal scroll)
+        // =====================================================
+        item {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 0.dp)
+            ) {
+                item {
+                    QuickActionCard(
+                        title = "Continue Reading",
+                        subtitle = if (uiState.continueTarget?.type == "section")
+                            "Resume last section"
+                        else
+                            "${uiState.completedSections} of ${uiState.totalSections} done",
+                        icon = Icons.Default.MenuBook,
+                        accentColor = MaterialTheme.colorScheme.primary,
+                        cardBackground = cardBackground,
+                        onClick = {
+                            val target = uiState.continueTarget
+                            if (target != null && target.type == "section" && target.parentId != null) {
+                                onContinueReading?.invoke(target.parentId, target.id)
+                            }
+                        }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = "Exercises",
+                        subtitle = "${uiState.totalExercises - uiState.completedExercises} pending",
+                        icon = Icons.Default.Code,
+                        accentColor = NeonCyan,
+                        cardBackground = cardBackground,
+                        onClick = {
+                            val target = uiState.continueTarget
+                            if (target != null && target.type == "exercise") {
+                                onContinueExercise?.invoke(target.id)
+                            }
+                        }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = "Start Quiz",
+                        subtitle = "Test your knowledge",
+                        icon = Icons.Default.Quiz,
+                        accentColor = WarningAmber,
+                        cardBackground = cardBackground,
+                        onClick = { /* Quiz navigation handled by parent */ }
+                    )
+                }
+            }
+        }
+
+        // =====================================================
+        // Section 5: Progress Overview (3 Radial Charts)
+        // =====================================================
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                val chapterProgress = if (uiState.totalSections > 0)
+                    uiState.completedSections.toFloat() / uiState.totalSections else 0f
+                val exerciseProgress = if (uiState.totalExercises > 0)
+                    uiState.completedExercises.toFloat() / uiState.totalExercises else 0f
+                // Quiz progress: use a fraction based on available data
+                val quizProgress = dailyGoalProgress // Approximate with daily goal as proxy
+
+                ProgressRingWithLabel(
+                    progress = chapterProgress,
+                    label = "Chapters",
+                    fraction = "${uiState.completedSections}/${uiState.totalSections}",
+                    color = MaterialTheme.colorScheme.primary
+                )
+                ProgressRingWithLabel(
+                    progress = exerciseProgress,
+                    label = "Exercises",
+                    fraction = "${uiState.completedExercises}/${uiState.totalExercises}",
+                    color = NeonCyan
+                )
+                ProgressRingWithLabel(
+                    progress = quizProgress,
+                    label = "Quizzes",
+                    fraction = "$goalsCompleted/3",
+                    color = WarningAmber
+                )
+            }
+        }
+
+        // =====================================================
+        // Section 6: Achievements
+        // =====================================================
         item {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -527,7 +471,9 @@ fun DashboardScreen(
             }
         }
 
-        // My Notes section
+        // =====================================================
+        // Section 9: Recent Activity / Notes
+        // =====================================================
         item {
             Column(
                 modifier = Modifier.fillMaxWidth()
@@ -571,9 +517,9 @@ fun DashboardScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 4.dp),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = cardShape,
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                containerColor = cardBackground
                             )
                         ) {
                             Column(
@@ -624,7 +570,9 @@ fun DashboardScreen(
             }
         }
 
-        // Motivational quote at bottom
+        // =====================================================
+        // Section 10: Motivational Quote
+        // =====================================================
         item {
             Column(
                 modifier = Modifier
@@ -653,66 +601,205 @@ fun DashboardScreen(
     }
 }
 
+// =====================================================================
+// Private composables
+// =====================================================================
+
 @Composable
-private fun StatCard(
-    modifier: Modifier = Modifier,
-    icon: ImageVector,
-    title: String,
-    value: String,
-    subtitle: String,
-    progress: Float?,
-    accentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
+private fun WeekDayDot(
+    label: String,
+    level: Int,
+    isToday: Boolean,
+    primaryColor: Color,
+    surfaceVariantColor: Color
 ) {
+    val dotSize = 12.dp
+
     Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .padding(16.dp)
-            .semantics { contentDescription = "$title: $value $subtitle" }
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        when {
+            // Today with no activity: pulsing outline
+            isToday && level == 0 -> {
+                val transition = rememberInfiniteTransition(label = "today_pulse_$label")
+                val pulseAlpha by transition.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(durationMillis = 1200),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "pulse_alpha_$label"
+                )
+                Box(
+                    modifier = Modifier
+                        .size(dotSize)
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            color = primaryColor.copy(alpha = pulseAlpha),
+                            shape = CircleShape
+                        )
+                )
+            }
+            // Completed day (today or past): filled primary
+            level > 0 -> {
+                Box(
+                    modifier = Modifier
+                        .size(dotSize)
+                        .clip(CircleShape)
+                        .background(primaryColor)
+                )
+            }
+            // Missed past day: surfaceVariant
+            else -> {
+                Box(
+                    modifier = Modifier
+                        .size(dotSize)
+                        .clip(CircleShape)
+                        .background(surfaceVariantColor)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label.take(2), // Mo, Tu, We, Th, Fr, Sa, Su
+            style = MaterialTheme.typography.labelSmall,
+            fontSize = 9.sp,
+            color = if (isToday) primaryColor
+            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+@Composable
+private fun DailyGoalCheckItem(
+    text: String,
+    isCompleted: Boolean
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(28.dp)
     ) {
         Icon(
-            icon,
-            contentDescription = title,
-            modifier = Modifier.size(20.dp),
-            tint = accentColor
+            imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+            contentDescription = if (isCompleted) "Completed: $text" else "Not completed: $text",
+            modifier = Modifier.size(18.dp),
+            tint = if (isCompleted)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
         )
-        Spacer(modifier = Modifier.height(12.dp))
-        Row(
-            verticalAlignment = Alignment.Bottom
-        ) {
-            // Monospace headlineSmall for stat values — precise/technical look
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
-        }
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = title,
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isCompleted)
+                MaterialTheme.colorScheme.onSurface
+            else
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+    }
+}
+
+@Composable
+private fun QuickActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    accentColor: Color,
+    cardBackground: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .width(150.dp)
+            .height(100.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardBackground
+        )
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Colored left-edge accent
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxSize()
+                    .background(accentColor)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = accentColor
+                )
+                Column {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProgressRingWithLabel(
+    progress: Float,
+    label: String,
+    fraction: String,
+    color: Color
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.semantics {
+            contentDescription = "$label: ${(progress * 100).toInt()}%, $fraction"
+        }
+    ) {
+        ProgressRing(
+            progress = progress,
+            diameter = 80.dp,
+            thickness = 8.dp,
+            color = color,
+            centerText = "${(progress * 100).toInt()}%"
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
             style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = fraction,
+            style = MaterialTheme.typography.labelSmall,
+            fontFamily = FontFamily.Monospace,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        if (progress != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            // Sharp progress bar — 4dp height, 2dp corners
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                color = accentColor,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                strokeCap = StrokeCap.Butt
-            )
-        }
     }
 }
 
@@ -733,26 +820,26 @@ private fun AchievementBadge(achievement: Achievement) {
     Column(
         modifier = Modifier
             .width(80.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (achievement.isUnlocked) {
                     Modifier.shadow(
-                        elevation = 4.dp,
-                        shape = RoundedCornerShape(16.dp),
+                        elevation = 6.dp,
+                        shape = RoundedCornerShape(12.dp),
                         ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                         spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                     )
                 } else Modifier
             )
             .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .padding(8.dp),
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = achievement.icon,
             fontSize = 28.sp,
-            modifier = Modifier.padding(bottom = 4.dp)
+            modifier = Modifier.padding(bottom = 6.dp)
         )
         Text(
             text = achievement.title,

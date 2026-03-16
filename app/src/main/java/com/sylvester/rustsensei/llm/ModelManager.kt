@@ -47,17 +47,6 @@ class ModelManager(private val context: Context) {
 
         val AVAILABLE_MODELS = listOf(
             ModelInfo(
-                id = "litert-0.6b",
-                displayName = "Rust Mentor 0.6B",
-                parameterSize = "0.6B",
-                filename = "rust_mentor_0_6b_q8_ekv2048.litertlm",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-0.6b-LiteRT/resolve/main/rust_mentor_0_6b_q8_ekv2048.litertlm",
-                expectedSizeBytes = 665_000_000L,
-                description = "Fastest responses. Good for quick questions.",
-                ramRequired = "~2 GB RAM",
-                minDeviceMemoryGb = 2f
-            ),
-            ModelInfo(
                 id = "litert-1b-gemma",
                 displayName = "Rust Mentor 1B",
                 parameterSize = "1B",
@@ -67,18 +56,11 @@ class ModelManager(private val context: Context) {
                 description = "Best balance of speed and quality. Recommended.",
                 ramRequired = "~3 GB RAM",
                 minDeviceMemoryGb = 3f
-            ),
-            ModelInfo(
-                id = "litert-1.7b",
-                displayName = "Rust Mentor 1.7B",
-                parameterSize = "1.7B",
-                filename = "rust_mentor_1_7b_q8_ekv2048.litertlm",
-                downloadUrl = "https://huggingface.co/sylvester-francis/rust-mentor-1.7b-LiteRT/resolve/main/rust_mentor_1_7b_q8_ekv2048.litertlm",
-                expectedSizeBytes = 1_800_000_000L,
-                description = "Most capable. Best for detailed explanations.",
-                ramRequired = "~4 GB RAM",
-                minDeviceMemoryGb = 4f
             )
+            // NOTE: 0.6B and 1.7B models removed — they have ops that can't fully
+            // delegate to GPU (1203/1255 nodes), causing LiteRT's LLM engine to fail
+            // with INTERNAL error at llm_litert_compiled_model_executor.cc:2143.
+            // Re-add once the models are re-converted with full GPU-compatible ops.
         )
 
         fun getModelById(id: String): ModelInfo? = AVAILABLE_MODELS.find { it.id == id }

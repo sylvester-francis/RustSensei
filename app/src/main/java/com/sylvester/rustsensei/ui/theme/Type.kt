@@ -14,8 +14,8 @@ val RustSenseiTypography = Typography(
     headlineLarge = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
-        fontSize = 26.sp,
-        lineHeight = 34.sp,
+        fontSize = 28.sp,
+        lineHeight = 36.sp,
         letterSpacing = (-0.5).sp
     ),
     headlineMedium = TextStyle(
@@ -60,7 +60,7 @@ val RustSenseiTypography = Typography(
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.25.sp  // Reduced from 0.5sp — less spacey
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.Default,

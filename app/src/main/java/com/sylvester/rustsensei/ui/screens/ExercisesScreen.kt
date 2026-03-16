@@ -2,16 +2,21 @@ package com.sylvester.rustsensei.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,20 +28,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
@@ -52,8 +55,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,16 +68,25 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.CodeBlock
 import com.sylvester.rustsensei.ui.components.CodeEditor
 import com.sylvester.rustsensei.ui.components.UndoRedoManager
+import com.sylvester.rustsensei.ui.theme.DangerRed
+import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
+import com.sylvester.rustsensei.ui.theme.ErrorNeon
+import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.SecondaryText
+import com.sylvester.rustsensei.ui.theme.SuccessGreen
+import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ExerciseScreenMode
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
-import androidx.compose.material.icons.filled.Quiz
 
 // Python parallel descriptions for exercise categories
 private fun pythonParallel(categoryTitle: String): String {
@@ -102,6 +118,31 @@ private fun pythonParallel(categoryTitle: String): String {
     }
 }
 
+// Determine difficulty color based on exercise naming patterns
+private fun getDifficultyColor(exerciseId: String): Color {
+    return when {
+        exerciseId.contains("1") || exerciseId.contains("intro") ||
+            exerciseId.contains("primitive") || exerciseId.contains("variable") -> SuccessGreen
+        exerciseId.contains("error") || exerciseId.contains("generic") ||
+            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
+            exerciseId.contains("thread") || exerciseId.contains("macro") ||
+            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> DangerRed
+        else -> WarningAmber
+    }
+}
+
+private fun getDifficultyLabel(exerciseId: String): String {
+    return when {
+        exerciseId.contains("1") || exerciseId.contains("intro") ||
+            exerciseId.contains("primitive") || exerciseId.contains("variable") -> "Easy"
+        exerciseId.contains("error") || exerciseId.contains("generic") ||
+            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
+            exerciseId.contains("thread") || exerciseId.contains("macro") ||
+            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> "Hard"
+        else -> "Medium"
+    }
+}
+
 @Composable
 fun ExercisesScreen(
     viewModel: ExerciseViewModel,
@@ -126,37 +167,39 @@ fun ExercisesScreen(
     }
 }
 
+// ---- CATEGORIES VIEW --------------------------------------------------------
+
 @Composable
 private fun CategoriesView(
     viewModel: ExerciseViewModel,
     onNavigateToQuiz: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
-    // Calculate total exercise count
     val totalExercises = uiState.categories.sumOf { it.exercises.size }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
+        // -- Heading --
         item {
-            // headlineMedium (monospace via theme)
             Text(
                 text = "Practice",
                 style = MaterialTheme.typography.headlineMedium,
+                fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
                 text = "$totalExercises exercises from Rustlings",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = SecondaryText
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Continue card — more visual weight
+        // -- Continue card --
         val lastExerciseId = uiState.lastIncompleteExerciseId
         if (lastExerciseId != null) {
             item {
@@ -165,43 +208,54 @@ private fun CategoriesView(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                         .clickable { viewModel.openExercise(lastExerciseId) },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                        containerColor = DarkSurfaceContainerHigh
                     )
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .semantics { contentDescription = "Continue exercise: $lastExerciseId" },
+                            .semantics {
+                                contentDescription = "Continue exercise: $lastExerciseId"
+                            },
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.PlayArrow,
-                            contentDescription = "Continue exercise",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(28.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(RustOrange.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = "Continue exercise",
+                                tint = RustOrange,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Continue where you left off",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = RustOrange
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = lastExerciseId,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontFamily = FontFamily.Monospace,
+                                color = SecondaryText
                             )
                         }
                         Icon(
                             Icons.Default.ChevronRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = RustOrange.copy(alpha = 0.6f),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -209,179 +263,226 @@ private fun CategoriesView(
             }
         }
 
-        // Quiz entry card
+        // -- Mode strip: Exercises | Quizzes --
         item {
-            Card(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .clickable { onNavigateToQuiz() },
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
-                )
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Row(
+                // Exercises (active)
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Quiz,
-                        contentDescription = "Topic Quizzes",
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Topic Quizzes",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(RustOrange.copy(alpha = 0.12f))
+                        .border(
+                            1.dp,
+                            RustOrange.copy(alpha = 0.30f),
+                            RoundedCornerShape(12.dp)
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        .padding(14.dp)
+                ) {
+                    Column {
+                        Icon(
+                            Icons.Default.Code,
+                            contentDescription = null,
+                            tint = RustOrange,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Test your knowledge after each chapter",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            text = "Exercises",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = RustOrange
+                        )
+                        Text(
+                            text = "$totalExercises Rustlings",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = RustOrange.copy(alpha = 0.7f)
                         )
                     }
-                    Icon(
-                        Icons.Default.ChevronRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(20.dp)
-                    )
+                }
+
+                // Quizzes (navigable)
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(NeonCyan.copy(alpha = 0.08f))
+                        .border(
+                            1.dp,
+                            NeonCyan.copy(alpha = 0.20f),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .clickable { onNavigateToQuiz() }
+                        .padding(14.dp)
+                ) {
+                    Column {
+                        Icon(
+                            Icons.Default.Quiz,
+                            contentDescription = null,
+                            tint = NeonCyan,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Quizzes",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = NeonCyan
+                        )
+                        Text(
+                            text = "Test knowledge",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontFamily = FontFamily.Monospace,
+                            color = NeonCyan.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
         }
 
+        // -- Category list --
         items(uiState.categories, key = { it.id }) { category ->
             val isExpanded = uiState.expandedCategory == category.id
             val progress = uiState.categoryProgress[category.id] ?: emptyList()
             val completedCount = progress.count { it.status == "completed" }
 
-            // Chevron rotation
             val chevronRotation by animateFloatAsState(
                 targetValue = if (isExpanded) 180f else 0f,
+                animationSpec = tween(durationMillis = 250),
                 label = "chevron"
             )
 
             Column {
-                // Category header row
+                // Category header
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
                         .clickable { viewModel.toggleCategory(category.id) }
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                        .padding(horizontal = 12.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        // Category name with Python parallel
                         Text(
                             text = pythonParallel(category.title),
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        // Stat in labelSmall
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = "${category.exercises.size} exercises \u00B7 $completedCount done",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            fontFamily = FontFamily.Monospace,
+                            color = SecondaryText
                         )
                     }
                     Icon(
                         Icons.Default.ExpandMore,
                         contentDescription = if (isExpanded) "Collapse category" else "Expand category",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = SecondaryText,
                         modifier = Modifier
                             .size(20.dp)
                             .rotate(chevronRotation)
                     )
                 }
 
-                // Expanded exercises list — prefix with ">" in primary (monospace)
+                // Expanded exercise items
                 AnimatedVisibility(visible = isExpanded) {
-                    Column(modifier = Modifier.padding(start = 32.dp, end = 16.dp, bottom = 8.dp)) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 12.dp,
+                            bottom = 8.dp
+                        )
+                    ) {
                         category.exercises.forEach { exerciseId ->
-                            val exerciseProgress = progress.find { it.exerciseId == exerciseId }
-                            val isCompleted = exerciseProgress?.status == "completed"
+                            val exerciseProgress =
+                                progress.find { it.exerciseId == exerciseId }
+                            val isCompleted =
+                                exerciseProgress?.status == "completed"
+                            val diffColor = getDifficultyColor(exerciseId)
+                            val diffLabel = getDifficultyLabel(exerciseId)
 
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
                                     .clickable { viewModel.openExercise(exerciseId) }
-                                    .padding(vertical = 12.dp),
+                                    .padding(vertical = 10.dp, horizontal = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // Status indicator
                                 if (isCompleted) {
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         contentDescription = "Completed",
-                                        tint = Color(0xFF3FB950),
+                                        tint = SuccessGreen,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 } else {
-                                    // ">" prefix in primary, monospace
                                     Text(
                                         text = ">",
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = RustOrange,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                // Exercise name
                                 Text(
                                     text = exerciseId,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = if (isCompleted)
-                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                        SecondaryText
                                     else
-                                        MaterialTheme.colorScheme.onSurface
+                                        MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.weight(1f)
                                 )
+
+                                // Difficulty pill
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(diffColor.copy(alpha = 0.12f))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = diffLabel,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontFamily = FontFamily.Monospace,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = diffColor
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                // Orange-tinted neon divider
                 HorizontalDivider(
                     thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.08f)
                 )
             }
         }
+
+        // Bottom spacer
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
-// Determine difficulty color based on exercise naming patterns
-private fun getDifficultyColor(exerciseId: String): Color {
-    return when {
-        exerciseId.contains("1") || exerciseId.contains("intro") ||
-            exerciseId.contains("primitive") || exerciseId.contains("variable") -> Color(0xFF3FB950) // green - beginner
-        exerciseId.contains("error") || exerciseId.contains("generic") ||
-            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
-            exerciseId.contains("thread") || exerciseId.contains("macro") ||
-            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> Color(0xFFF85149) // red - advanced
-        else -> Color(0xFFF0883E) // amber - intermediate
-    }
-}
-
-private fun getDifficultyLabel(exerciseId: String): String {
-    return when {
-        exerciseId.contains("1") || exerciseId.contains("intro") ||
-            exerciseId.contains("primitive") || exerciseId.contains("variable") -> "Beginner"
-        exerciseId.contains("error") || exerciseId.contains("generic") ||
-            exerciseId.contains("trait") || exerciseId.contains("lifetime") ||
-            exerciseId.contains("thread") || exerciseId.contains("macro") ||
-            exerciseId.contains("smart_pointer") || exerciseId.contains("iterator") -> "Advanced"
-        else -> "Intermediate"
-    }
-}
+// ---- EXERCISE DETAIL VIEW ---------------------------------------------------
 
 @Composable
 private fun ExerciseDetailView(
@@ -391,17 +492,19 @@ private fun ExerciseDetailView(
     val uiState by viewModel.uiState.collectAsState()
     val exercise = uiState.currentExercise ?: return
 
-    // P0 Fix #3: key only on exercise ID, NOT userCode — otherwise every keystroke
-    // recreates the TextFieldValue and resets the cursor to the end
+    // TextFieldValue keyed only on exercise ID to avoid cursor-reset on every keystroke
     var textFieldValue by remember(uiState.currentExercise?.id) {
-        mutableStateOf(TextFieldValue(
-            text = uiState.userCode,
-            selection = TextRange(uiState.userCode.length)
-        ))
+        mutableStateOf(
+            TextFieldValue(
+                text = uiState.userCode,
+                selection = TextRange(uiState.userCode.length)
+            )
+        )
     }
+
     // Sync ViewModel -> TextFieldValue only when exercise changes externally (reset)
     val currentExerciseCode = uiState.userCode
-    androidx.compose.runtime.LaunchedEffect(uiState.currentExercise?.id) {
+    LaunchedEffect(uiState.currentExercise?.id) {
         if (textFieldValue.text != currentExerciseCode) {
             textFieldValue = TextFieldValue(
                 text = currentExerciseCode,
@@ -410,53 +513,77 @@ private fun ExerciseDetailView(
         }
     }
 
-    // Undo/redo manager — keyed to exercise so it resets on navigation
+    // Undo/redo manager keyed to exercise so it resets on navigation
     val undoRedoManager = remember(uiState.currentExercise?.id) {
         UndoRedoManager().also { it.push(uiState.userCode) }
     }
 
-    // Difficulty label
+    // Difficulty label and color
     val difficultyColor = when (exercise.difficulty.lowercase()) {
-        "beginner" -> Color(0xFF3FB950)
-        "advanced" -> Color(0xFFF85149)
-        else -> Color(0xFFF0883E)
+        "beginner", "easy" -> SuccessGreen
+        "advanced", "hard" -> ErrorNeon
+        else -> WarningAmber
     }
+    val difficultyLabel = exercise.difficulty.replaceFirstChar { it.uppercase() }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
     ) {
-        // Header
+        // -- Header: back + title + difficulty + reset --
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { viewModel.navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            IconButton(
+                onClick = { viewModel.navigateBack() },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back"
+                )
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = exercise.title,
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    text = exercise.difficulty.replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = difficultyColor
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(difficultyColor.copy(alpha = 0.12f))
+                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = difficultyLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.SemiBold,
+                            color = difficultyColor
+                        )
+                    }
+                }
             }
-            IconButton(onClick = { viewModel.resetExercise() }) {
+            IconButton(
+                onClick = { viewModel.resetExercise() },
+                modifier = Modifier.size(48.dp)
+            ) {
                 Icon(
                     Icons.Default.Refresh,
-                    contentDescription = "Reset",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    contentDescription = "Reset exercise",
+                    tint = SecondaryText
                 )
             }
         }
 
+        // -- Scrollable content --
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -476,12 +603,12 @@ private fun ExerciseDetailView(
                 text = exercise.instructions,
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 22.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = SecondaryText
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Code editor with line numbers, syntax highlighting, auto-indent/brackets
+            // Code editor
             CodeEditor(
                 value = textFieldValue,
                 onValueChange = { newValue ->
@@ -493,18 +620,20 @@ private fun ExerciseDetailView(
                 minHeight = 240.dp
             )
 
-            // Symbol toolbar with undo/redo — surface background, sharp corners
+            // Quick-insert symbol toolbar with Undo/Redo
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surface)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(0.dp, 0.dp, 12.dp, 12.dp))
+                    .background(DarkSurfaceContainerHigh)
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Undo button
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Undo
                 TextButton(
                     onClick = {
                         undoRedoManager.undo()?.let { undoneText ->
@@ -516,7 +645,7 @@ private fun ExerciseDetailView(
                         }
                     },
                     enabled = undoRedoManager.canUndo(),
-                    modifier = Modifier.height(44.dp),
+                    modifier = Modifier.height(48.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                 ) {
                     Text(
@@ -524,13 +653,13 @@ private fun ExerciseDetailView(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         color = if (undoRedoManager.canUndo())
-                            MaterialTheme.colorScheme.primary
+                            RustOrange
                         else
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            SecondaryText.copy(alpha = 0.4f)
                     )
                 }
 
-                // Redo button
+                // Redo
                 TextButton(
                     onClick = {
                         undoRedoManager.redo()?.let { redoneText ->
@@ -542,7 +671,7 @@ private fun ExerciseDetailView(
                         }
                     },
                     enabled = undoRedoManager.canRedo(),
-                    modifier = Modifier.height(44.dp),
+                    modifier = Modifier.height(48.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                 ) {
                     Text(
@@ -550,9 +679,9 @@ private fun ExerciseDetailView(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         color = if (undoRedoManager.canRedo())
-                            MaterialTheme.colorScheme.primary
+                            RustOrange
                         else
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                            SecondaryText.copy(alpha = 0.4f)
                     )
                 }
 
@@ -561,10 +690,15 @@ private fun ExerciseDetailView(
                     modifier = Modifier
                         .height(24.dp)
                         .width(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                        .background(SecondaryText.copy(alpha = 0.2f))
                 )
 
-                val symbols = listOf("{", "}", "(", ")", "[", "]", "<", ">", ";", ":", "&", "*", "=", "\"", "'", "|", "->", "::", "=>")
+                // Symbol buttons
+                val symbols = listOf(
+                    "{", "}", "(", ")", "[", "]", "<", ">",
+                    ";", ":", "&", "*", "=", "\"", "'", "|",
+                    "->", "::", "=>"
+                )
                 symbols.forEach { symbol ->
                     TextButton(
                         onClick = {
@@ -580,53 +714,74 @@ private fun ExerciseDetailView(
                             undoRedoManager.push(newText)
                             viewModel.updateCode(newText)
                         },
-                        // P3 Fix #13: minimum 48dp touch target per Material guidelines
-                        modifier = Modifier.height(44.dp),
+                        modifier = Modifier.height(48.dp),
                         contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
                     ) {
                         Text(
                             text = symbol,
                             fontFamily = FontFamily.Monospace,
                             fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = SecondaryText
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.width(4.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Check result
+            // -- Check result --
             uiState.checkResult?.let { result ->
+                val resultBg = when (result) {
+                    "correct" -> SuccessGreen.copy(alpha = 0.10f)
+                    "uncertain" -> WarningAmber.copy(alpha = 0.10f)
+                    else -> ErrorNeon.copy(alpha = 0.10f)
+                }
+                val resultBorder = when (result) {
+                    "correct" -> SuccessGreen.copy(alpha = 0.30f)
+                    "uncertain" -> WarningAmber.copy(alpha = 0.30f)
+                    else -> ErrorNeon.copy(alpha = 0.30f)
+                }
+                val resultColor = when (result) {
+                    "correct" -> SuccessGreen
+                    "uncertain" -> WarningAmber
+                    else -> ErrorNeon
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            when (result) {
-                                "correct" -> Color(0xFF3FB950).copy(alpha = 0.1f)
-                                "uncertain" -> Color(0xFFF0883E).copy(alpha = 0.1f)
-                                else -> Color(0xFFF85149).copy(alpha = 0.1f)
-                            }
-                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, resultBorder, RoundedCornerShape(12.dp))
+                        .background(resultBg)
                         .padding(16.dp)
                 ) {
                     Column {
-                        Text(
-                            text = when (result) {
-                                "correct" -> "Correct! Well done!"
-                                "uncertain" -> "Your code looks different from the expected solution. It might still be correct!"
-                                else -> "Not quite right. Try again or reveal a hint."
-                            },
-                            color = when (result) {
-                                "correct" -> Color(0xFF3FB950)
-                                "uncertain" -> Color(0xFFF0883E)
-                                else -> Color(0xFFF85149)
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        // Design Concern #1: LLM fallback — offer inline AI validation or self-mark
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                when (result) {
+                                    "correct" -> Icons.Default.CheckCircle
+                                    else -> Icons.Default.Close
+                                },
+                                contentDescription = null,
+                                tint = resultColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = when (result) {
+                                    "correct" -> "Correct! Well done!"
+                                    "uncertain" -> "Solution looks different -- it might still be correct!"
+                                    else -> "Not quite right. Try again or reveal a hint."
+                                },
+                                color = resultColor,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        // LLM fallback for uncertain results
                         if (result == "uncertain") {
                             Spacer(modifier = Modifier.height(12.dp))
                             Row(
@@ -635,9 +790,14 @@ private fun ExerciseDetailView(
                             ) {
                                 Button(
                                     onClick = { viewModel.validateWithLlm() },
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
                                     enabled = !uiState.isValidating,
-                                    shape = RoundedCornerShape(8.dp)
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = RustOrange
+                                    )
                                 ) {
                                     if (uiState.isValidating) {
                                         CircularProgressIndicator(
@@ -646,9 +806,13 @@ private fun ExerciseDetailView(
                                             color = MaterialTheme.colorScheme.onPrimary
                                         )
                                     } else {
-                                        Icon(Icons.Default.CheckCircle, contentDescription = "Verify with AI", modifier = Modifier.size(16.dp))
+                                        Icon(
+                                            Icons.Default.CheckCircle,
+                                            contentDescription = "Verify with AI",
+                                            modifier = Modifier.size(16.dp)
+                                        )
                                     }
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
                                         if (uiState.isValidating) "Verifying..." else "Verify with AI",
                                         style = MaterialTheme.typography.labelMedium
@@ -656,103 +820,121 @@ private fun ExerciseDetailView(
                                 }
                                 OutlinedButton(
                                     onClick = { viewModel.markCurrentExerciseCorrect() },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(8.dp)
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(48.dp),
+                                    shape = RoundedCornerShape(12.dp)
                                 ) {
-                                    Icon(Icons.Default.CheckCircle, contentDescription = "Mark correct", modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Mark Correct", style = MaterialTheme.typography.labelMedium)
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = "Mark correct",
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text(
+                                        "Mark Correct",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
                                 }
                             }
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // AI Review section — visually separated with a section divider
+            // -- AI Validation section with primary left border --
             if (uiState.llmValidationResult.isNotEmpty() || uiState.isValidating) {
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
+                        .height(IntrinsicSize.Min)
+                        .clip(RoundedCornerShape(12.dp))
                 ) {
-                    Row {
-                        // Primary-colored left border (3dp)
-                        Box(
-                            modifier = Modifier
-                                .width(3.dp)
-                                .height(120.dp)
-                                .background(MaterialTheme.colorScheme.primary)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f))
-                                .padding(16.dp)
-                        ) {
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "AI Review",
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    if (uiState.isValidating) {
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(14.dp),
-                                            strokeWidth = 2.dp
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
+                    // Primary-colored left border (3dp)
+                    Box(
+                        modifier = Modifier
+                            .width(3.dp)
+                            .fillMaxHeight()
+                            .background(RustOrange)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(DarkSurfaceContainerHigh)
+                            .padding(16.dp)
+                    ) {
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    lineHeight = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    text = "AI Review",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = RustOrange
                                 )
                                 if (uiState.isValidating) {
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    OutlinedButton(
-                                        onClick = { viewModel.stopValidation() },
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = RoundedCornerShape(8.dp)
-                                    ) {
-                                        Text("Stop", style = MaterialTheme.typography.labelMedium)
-                                    }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(14.dp),
+                                        strokeWidth = 2.dp,
+                                        color = RustOrange
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
+                                style = MaterialTheme.typography.bodyMedium,
+                                lineHeight = 20.sp,
+                                color = SecondaryText
+                            )
+                            if (uiState.isValidating) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                OutlinedButton(
+                                    onClick = { viewModel.stopValidation() },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(48.dp),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Text(
+                                        "Stop",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
                                 }
                             }
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Action buttons — sharp 8dp corners, outlined, 12dp spacing
+            // -- Action buttons: Check + Hint --
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = { viewModel.checkSolution() },
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RustOrange
+                    )
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = "Check solution", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Check", style = MaterialTheme.typography.labelLarge)
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = "Check solution",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        "Check",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 OutlinedButton(
                     onClick = { viewModel.revealHint() },
@@ -760,84 +942,130 @@ private fun ExerciseDetailView(
                         .weight(1f)
                         .height(48.dp),
                     enabled = uiState.hintsRevealed < exercise.hints.size,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Icon(Icons.Default.Lightbulb, contentDescription = "Reveal hint", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Hint (${uiState.hintsRevealed}/${exercise.hints.size})", style = MaterialTheme.typography.labelLarge)
+                    Icon(
+                        Icons.Default.Lightbulb,
+                        contentDescription = "Reveal hint",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        "Hint (${uiState.hintsRevealed}/${exercise.hints.size})",
+                        style = MaterialTheme.typography.labelLarge
+                    )
                 }
             }
 
-            // Revealed hints
+            // -- Revealed hints --
             if (uiState.hintsRevealed > 0) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Hints:",
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                for (i in 0 until uiState.hintsRevealed.coerceAtMost(exercise.hints.size)) {
-                    Text(
-                        text = "${i + 1}. ${exercise.hints[i]}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    )
-                }
-            }
-
-            // Show solution (collapsible)
-            if (uiState.hintsRevealed > 0 && !uiState.showSolution) {
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedButton(
-                    onClick = { viewModel.showSolution() },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(Icons.Default.Visibility, contentDescription = "Show solution", modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Show Solution", style = MaterialTheme.typography.labelLarge)
-                }
-            }
-
-            // Solution
-            if (uiState.showSolution) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Solution:",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    fontWeight = FontWeight.Bold,
+                    color = WarningAmber
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                CodeBlock(code = exercise.solution, language = "rust")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = exercise.explanation,
-                    style = MaterialTheme.typography.bodyMedium,
-                    lineHeight = 20.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                for (i in 0 until uiState.hintsRevealed.coerceAtMost(exercise.hints.size)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "${i + 1}.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = FontFamily.Monospace,
+                            color = WarningAmber,
+                            modifier = Modifier.width(24.dp)
+                        )
+                        Text(
+                            text = exercise.hints[i],
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = SecondaryText,
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+            }
+
+            // -- Solution reveal (collapsible) --
+            if (uiState.hintsRevealed > 0 && !uiState.showSolution) {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = { viewModel.showSolution() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = ErrorNeon
+                    )
+                ) {
+                    Icon(
+                        Icons.Default.Visibility,
+                        contentDescription = "Show solution",
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        "Reveal Solution",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+
+            // -- Solution display --
+            AnimatedVisibility(visible = uiState.showSolution) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateContentSize()
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Solution:",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = RustOrange
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    CodeBlock(code = exercise.solution, language = "rust")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = exercise.explanation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        lineHeight = 20.sp,
+                        color = SecondaryText
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ask Sensei button — sharp 8dp corners, 48dp touch target
+            // -- Ask Sensei button --
             OutlinedButton(
                 onClick = { onAskSensei(exercise.description, uiState.userCode) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Chat, contentDescription = "Ask Sensei for help", modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Default.Chat,
+                    contentDescription = "Ask Sensei for help",
+                    modifier = Modifier.size(18.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Ask Sensei", style = MaterialTheme.typography.labelLarge)
+                Text(
+                    "Ask Sensei",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

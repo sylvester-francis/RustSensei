@@ -1,7 +1,9 @@
 package com.sylvester.rustsensei
 
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -36,16 +38,19 @@ sealed class Screen(val route: String) {
 @Composable
 fun RustSenseiApp() {
     val navController = rememberNavController()
-    val chatViewModel: ChatViewModel = hiltViewModel()
-    val modelViewModel: ModelViewModel = hiltViewModel()
-    val bookViewModel: BookViewModel = hiltViewModel()
-    val exerciseViewModel: ExerciseViewModel = hiltViewModel()
-    val progressViewModel: ProgressViewModel = hiltViewModel()
-    val referenceViewModel: ReferenceViewModel = hiltViewModel()
-    val reviewViewModel: ReviewViewModel = hiltViewModel()
-    val learningPathViewModel: LearningPathViewModel = hiltViewModel()
-    val quizViewModel: QuizViewModel = hiltViewModel()
-    val searchViewModel: SearchViewModel = hiltViewModel()
+    val app = LocalContext.current.applicationContext as RustSenseiApplication
+    val factory = remember { AppViewModelFactory(app, app.container) }
+
+    val chatViewModel: ChatViewModel = viewModel(factory = factory)
+    val modelViewModel: ModelViewModel = viewModel(factory = factory)
+    val bookViewModel: BookViewModel = viewModel(factory = factory)
+    val exerciseViewModel: ExerciseViewModel = viewModel(factory = factory)
+    val progressViewModel: ProgressViewModel = viewModel(factory = factory)
+    val referenceViewModel: ReferenceViewModel = viewModel(factory = factory)
+    val reviewViewModel: ReviewViewModel = viewModel(factory = factory)
+    val learningPathViewModel: LearningPathViewModel = viewModel(factory = factory)
+    val quizViewModel: QuizViewModel = viewModel(factory = factory)
+    val searchViewModel: SearchViewModel = viewModel(factory = factory)
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.
@@ -71,8 +76,6 @@ fun RustSenseiApp() {
         }
 
         composable(Screen.Main.route) {
-            // No model gate — MainScreen always renders.
-            // AI features check model state themselves.
             MainScreen(
                 chatViewModel = chatViewModel,
                 bookViewModel = bookViewModel,
@@ -81,6 +84,7 @@ fun RustSenseiApp() {
                 referenceViewModel = referenceViewModel,
                 reviewViewModel = reviewViewModel,
                 learningPathViewModel = learningPathViewModel,
+                modelViewModel = modelViewModel,
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
