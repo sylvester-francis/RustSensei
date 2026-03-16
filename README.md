@@ -1,81 +1,78 @@
-# RustSensei
+```
+██████╗ ██╗   ██╗███████╗████████╗███████╗███████╗███╗   ██╗███████╗███████╗██╗
+██╔══██╗██║   ██║██╔════╝╚══██╔══╝██╔════╝██╔════╝████╗  ██║██╔════╝██╔════╝██║
+██████╔╝██║   ██║███████╗   ██║   ███████╗█████╗  ██╔██╗ ██║███████╗█████╗  ██║
+██╔══██╗██║   ██║╚════██║   ██║   ╚════██║██╔══╝  ██║╚██╗██║╚════██║██╔══╝  ██║
+██║  ██║╚██████╔╝███████║   ██║   ███████║███████╗██║ ╚████║███████║███████╗██║
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝   ╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝╚══════╝╚═╝
+```
 
-An offline Android app that teaches Rust programming through an on-device AI tutor, interactive exercises, quizzes, and a structured book — all running locally via LiteRT. No internet required after the initial model download.
+**An offline Android app that teaches Rust programming through an on-device AI tutor, interactive exercises, quizzes, and a structured book — all running locally via LiteRT.**
+
+> No internet required after the initial model download. No data leaves your device.
+
+[![GitHub release](https://img.shields.io/github/v/release/sylvester-francis/RustSensei)](https://github.com/sylvester-francis/RustSensei/releases)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF?logo=kotlin&logoColor=white)
+![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)
+![LiteRT](https://img.shields.io/badge/LiteRT-GPU_Accelerated-FF6F00?logo=tensorflow&logoColor=white)
+![Android](https://img.shields.io/badge/Android-8.0+-3DDC84?logo=android&logoColor=white)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue)
+
+[Download APK](#install) · [Features](#features) · [Model](#model) · [Architecture](#architecture) · [Build](#build-from-source) · [Privacy](#privacy)
+
+---
+
+## Why RustSensei?
+
+Most programming tutors require a constant internet connection and send your data to cloud servers. RustSensei takes a different approach:
+
+**Everything runs on your device.** A fine-tuned 1B parameter LLM runs locally via Google's LiteRT with GPU acceleration. Your conversations, progress, and learning data never leave your phone. Pair that with a full Rust curriculum — book, exercises, quizzes, flashcards — and you have a complete Rust learning environment in your pocket.
 
 ## Features
 
-### AI Tutor
-- **On-device LLM** — runs a fine-tuned 1B parameter model via Google's LiteRT (GPU-accelerated)
-- **Streaming chat** — token-by-token output with inference stats (tok/s, latency)
-- **Context-aware** — ask about a book section or get help with an exercise, and the AI has full context
-- **Conversation history** — persisted locally, accessible from a navigation drawer
+- **On-Device AI Tutor** — fine-tuned 1B parameter LLM with GPU-accelerated streaming inference via LiteRT
+- **Context-Aware Help** — ask about a book section or get help with an exercise, and the AI has full context
+- **19-Chapter Rust Book** — from Getting Started to Macros, with code examples and reading progress tracking
+- **97 Coding Exercises** — Rustlings-style challenges with syntax-highlighted editor, hints, and AI-powered code review
+- **5 Topic Quizzes** (32 questions) — multiple choice, true/false, and code completion with score rings and detailed feedback
+- **110+ Spaced Repetition Flashcards** — SM2-scheduled review system for long-term retention
+- **5 Guided Learning Paths** — structured step-by-step progression through Rust concepts
+- **12 Reference Guides** — cheat sheets, compiler errors, language comparisons, design patterns, glossary
+- **Study Streaks** — animated flame, weekly activity dots, and daily goals for reading, exercises, and quizzes
+- **Achievement Badges** — unlock milestones for reading, coding, quizzes, and streaks
+- **Activity Heatmap** — GitHub-style weekly visualization of your learning activity
+- **Conversation History** — persisted locally, accessible from a navigation drawer
+- **Dark Terminal Aesthetic** — blue-tinted near-black surfaces with Rust Orange accent, monospace headings, neon accents
 
-### Learning Content
-- **19-chapter Rust book** — from Getting Started to Macros, with code examples and reading progress tracking
-- **97 exercises** — Rustlings-style coding challenges with syntax-highlighted editor, hints, and AI-powered code review
-- **5 topic quizzes** (32 questions) — multiple choice, true/false, and code completion with score rings, animated transitions, and detailed feedback
-- **Spaced repetition flashcards** — SM2-scheduled review system with 110+ cards
-- **5 guided learning paths** — structured step-by-step progression through Rust concepts
-- **12 reference guides** — cheat sheets, compiler errors, language comparisons, design patterns, glossary
+## Install
 
-### Gamification
-- **Study streaks** with animated flame and weekly activity dots
-- **Daily goals** — read, exercise, and quiz targets with progress tracking
-- **Achievement badges** — unlock milestones for reading, coding, quizzes, and streaks
-- **Activity heatmap** — GitHub-style weekly visualization
-- **Progress rings** — chapter, exercise, and quiz completion at a glance
+Download the latest signed APK from [GitHub Releases](https://github.com/sylvester-francis/RustSensei/releases):
 
-### Design
-- **Dark terminal aesthetic** — blue-tinted near-black surfaces with Rust Orange accent
-- **Monospace headings** — code tutor identity throughout
-- **5-tab navigation** — Home, Learn, Chat (full-screen), Practice, Settings
-- **Material 3** — proper color tokens, responsive layout, accessibility support
-- **Neon accents** — cyan for links/streaks, amber for warnings/XP, green for success
+1. Download `app-release.apk` from the latest release
+2. On your Android device, enable **Settings > Install from Unknown Sources** for your browser
+3. Open the downloaded APK and tap **Install**
+4. Launch RustSensei and download the AI model from the **Settings** tab (~1.2 GB, one-time)
 
-## Tech Stack
-
-- **Kotlin** + **Jetpack Compose** (100% Compose, no XML)
-- **Material 3** (`androidx.compose.material3`)
-- **LiteRT** (formerly TFLite) for on-device GPU-accelerated inference
-- **Room** for persistence (chat, progress, flashcards, notes)
-- **Navigation Compose** with nested tab navigation
-- **Coroutines + Flow** for streaming inference and reactive UI
-- **OkHttp** for model download with resume support
+All learning content (book, exercises, quizzes, flashcards) works immediately — the model is only needed for the AI chat tutor.
 
 ## Model
 
-Downloads from HuggingFace on first use:
+Downloads from Hugging Face on first use:
 
 | Model | Parameters | Quantization | Size | RAM |
 |-------|-----------|-------------|------|-----|
 | [Rust Mentor 1B](https://huggingface.co/sylvester-francis/rust-mentor-1b-mobile-LiteRT) | 1B | Q8 | ~1.2 GB | ~3 GB |
 
-The model runs entirely on-device using the GPU via LiteRT's OpenCL delegate.
+The model runs entirely on-device using the GPU via LiteRT's OpenCL delegate. No data is sent to any server.
 
 ## Requirements
 
-- Android 8.0+ (API 26)
-- Device with GPU (tested on Pixel 8 Pro with Tensor G3)
-- ~1.2 GB free storage for the model
-- ~3 GB RAM available for inference
-
-## Build
-
-```bash
-git clone git@github.com:sylvester-francis/RustSensei.git
-cd RustSensei
-./gradlew assembleDebug
-adb install app/build/outputs/apk/debug/app-debug.apk
-```
-
-## Usage
-
-1. Launch the app
-2. Go to **Settings** tab and download the AI model (~1.2 GB, one-time)
-3. All learning features (book, exercises, quizzes, flashcards) work immediately without a model
-4. Once downloaded, the **Chat** tab enables AI tutoring
-
-Everything runs offline after the model download. No data leaves your device.
+| Requirement | Minimum |
+|-------------|---------|
+| Android | 8.0+ (API 26) |
+| GPU | Required (tested on Pixel 8 Pro / Tensor G3) |
+| Storage | ~1.2 GB for the model |
+| RAM | ~3 GB available for inference |
 
 ## Architecture
 
@@ -94,20 +91,52 @@ app/src/main/java/com/sylvester/rustsensei/
 └── viewmodel/               # 10 ViewModels with StateFlow
 ```
 
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Language | Kotlin 2.1 |
+| UI | Jetpack Compose (100% Compose, no XML) |
+| Design System | Material 3 (`androidx.compose.material3`) |
+| AI Inference | LiteRT (formerly TFLite) — GPU-accelerated via OpenCL |
+| Database | Room (chat, progress, flashcards, notes) |
+| Navigation | Navigation Compose with nested tab navigation |
+| Async | Coroutines + Flow for streaming inference and reactive UI |
+| Network | OkHttp for model download with resume support |
+
+## Build from Source
+
+**Prerequisites:** Android Studio, JDK 11+
+
+```bash
+git clone https://github.com/sylvester-francis/RustSensei.git
+cd RustSensei
+./gradlew assembleDebug
+adb install app/build/outputs/apk/debug/app-debug.apk
+```
+
+## Acknowledgments
+
+| Project | License | Usage |
+|---------|---------|-------|
+| [The Rust Programming Language](https://github.com/rust-lang/book) | MIT / Apache 2.0 | Book content adapted for mobile |
+| [Rustlings](https://github.com/rust-lang/rustlings) | MIT | Exercise concepts and structure |
+| [Google LiteRT](https://github.com/google-ai-edge/LiteRT) | Apache 2.0 | On-device GPU-accelerated inference |
+
+## Privacy
+
+RustSensei collects no data. No analytics, no tracking, no accounts, no telemetry. Everything runs on-device. See [Privacy Policy](PRIVACY_POLICY.md).
+
 ## Author
 
 **Sylvester Ranjith Francis**
 
-- [GitHub](https://github.com/sylvester-francis)
-- [Hugging Face](https://huggingface.co/sylvester-francis)
-- [LinkedIn](https://www.linkedin.com/in/sylvesterranjith/)
-- [Substack](https://techwithsyl.substack.com/)
-- [Medium](https://medium.com/@sylvesterranjithfrancis)
-- [Instagram](https://www.instagram.com/techwithsyl)
-
-## Privacy
-
-RustSensei collects no data. Everything runs on-device. See [Privacy Policy](PRIVACY_POLICY.md).
+[![GitHub](https://img.shields.io/badge/GitHub-sylvester--francis-181717?logo=github)](https://github.com/sylvester-francis)
+[![Hugging Face](https://img.shields.io/badge/Hugging_Face-sylvester--francis-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/sylvester-francis)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-sylvesterranjith-0A66C2?logo=linkedin)](https://www.linkedin.com/in/sylvesterranjith/)
+[![Substack](https://img.shields.io/badge/Substack-techwithsyl-FF6719?logo=substack&logoColor=white)](https://techwithsyl.substack.com/)
+[![Medium](https://img.shields.io/badge/Medium-sylvesterranjithfrancis-000000?logo=medium)](https://medium.com/@sylvesterranjithfrancis)
+[![Instagram](https://img.shields.io/badge/Instagram-techwithsyl-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/techwithsyl)
 
 ## License
 
