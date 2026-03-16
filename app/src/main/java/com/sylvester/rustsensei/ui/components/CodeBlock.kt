@@ -48,21 +48,21 @@ import kotlinx.coroutines.launch
 // ── Neon Terminal code block colors ──────────────────────────────────
 
 // Rust syntax highlighting — tuned for dark neon background
-private val KeywordColor = Color(0xFFCC7832)      // orange - keywords
-private val StringColor = Color(0xFF6A8759)        // green - strings
-private val CommentColor = Color(0xFF5C6370)       // muted gray - comments
-private val TypeColor = Color(0xFF4DEEEA)          // neon cyan - types
-private val NumberColor = Color(0xFFB5CEA8)        // light green - numbers
-private val MacroColor = Color(0xFFD4D4AA)         // yellow - macros
-private val FunctionColor = Color(0xFFDCDCAA)      // light yellow - functions
-private val DefaultCodeColor = Color(0xFFD4D4D4)   // light gray - default
+internal val KeywordColor = Color(0xFFCC7832)      // orange - keywords
+internal val StringColor = Color(0xFF6A8759)        // green - strings
+internal val CommentColor = Color(0xFF5C6370)       // muted gray - comments
+internal val TypeColor = Color(0xFF4DEEEA)          // neon cyan - types
+internal val NumberColor = Color(0xFFB5CEA8)        // light green - numbers
+internal val MacroColor = Color(0xFFD4D4AA)         // yellow - macros
+internal val FunctionColor = Color(0xFFDCDCAA)      // light yellow - functions
+internal val DefaultCodeColor = Color(0xFFD4D4D4)   // light gray - default
 
 // Code block structure colors — embedded terminal feel
-private val CodeBgColor = Color(0xFF06080C)        // same as app background
+internal val CodeBgColor = Color(0xFF06080C)        // same as app background
 private val CodeHeaderColor = Color(0xFF0C1018)    // dark navy header
 private val NeonAccent = Color(0xFFCE412B)         // primary orange for accents
 
-private val rustKeywords = setOf(
+internal val rustKeywords = setOf(
     "fn", "let", "mut", "pub", "struct", "enum", "impl", "trait", "use", "mod",
     "match", "if", "else", "for", "while", "loop", "return", "break", "continue",
     "where", "as", "in", "ref", "self", "Self", "super", "crate", "const", "static",
@@ -70,7 +70,7 @@ private val rustKeywords = setOf(
     "Some", "None", "Ok", "Err", "Box", "Vec", "String", "Option", "Result"
 )
 
-private val rustTypes = setOf(
+internal val rustTypes = setOf(
     "i8", "i16", "i32", "i64", "i128", "isize",
     "u8", "u16", "u32", "u64", "u128", "usize",
     "f32", "f64", "bool", "char", "str", "&str"
@@ -214,7 +214,7 @@ fun CodeBlock(
     }
 }
 
-private fun highlightRustSyntax(code: String): AnnotatedString {
+internal fun highlightRustSyntax(code: String): AnnotatedString {
     return buildAnnotatedString {
         var i = 0
         val text = code
@@ -300,7 +300,7 @@ private fun highlightRustSyntax(code: String): AnnotatedString {
     }
 }
 
-private fun findStringEnd(text: String, start: Int): Int {
+internal fun findStringEnd(text: String, start: Int): Int {
     var i = start + 1
     while (i < text.length) {
         if (text[i] == '\\') {

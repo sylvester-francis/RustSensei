@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -60,13 +59,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.CodeBlock
+import com.sylvester.rustsensei.ui.components.CodeEditor
+import com.sylvester.rustsensei.ui.components.UndoRedoManager
 import com.sylvester.rustsensei.viewmodel.ExerciseScreenMode
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 
@@ -351,6 +350,11 @@ private fun ExerciseDetailView(
         }
     }
 
+    // Undo/redo manager — keyed to exercise so it resets on navigation
+    val undoRedoManager = remember(uiState.currentExercise?.id) {
+        UndoRedoManager().also { it.push(uiState.userCode) }
+    }
+
     // Difficulty label
     val difficultyColor = when (exercise.difficulty.lowercase()) {
         "beginner" -> Color(0xFF3FB950)
@@ -417,60 +421,19 @@ private fun ExerciseDetailView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Code editor — dark background, sharp corners (8dp), minimum 200dp+ height
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF0D1117))
-            ) {
-                Column {
-                    // Editor tab label — terminal tab style
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color(0xFF161B22))
-                            .padding(horizontal = 14.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color(0xFF21262D))
-                                .padding(horizontal = 8.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "Editor",
-                                color = Color(0xFF8B949E),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontFamily = FontFamily.Monospace
-                            )
-                        }
-                    }
+            // Code editor with line numbers, syntax highlighting, auto-indent/brackets
+            CodeEditor(
+                value = textFieldValue,
+                onValueChange = { newValue ->
+                    textFieldValue = newValue
+                    undoRedoManager.push(newValue.text)
+                    viewModel.updateCode(newValue.text)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                minHeight = 240.dp
+            )
 
-                    BasicTextField(
-                        value = textFieldValue,
-                        onValueChange = { newValue ->
-                            textFieldValue = newValue
-                            viewModel.updateCode(newValue.text)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                            .padding(14.dp),
-                        textStyle = TextStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 13.sp,
-                            lineHeight = 20.sp,
-                            color = Color(0xFFD4D4D4)
-                        ),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary)
-                    )
-                }
-            }
-
-            // Symbol toolbar — surface background, sharp corners, monospace symbols
+            // Symbol toolbar with undo/redo — surface background, sharp corners
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -481,6 +444,66 @@ private fun ExerciseDetailView(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Undo button
+                TextButton(
+                    onClick = {
+                        undoRedoManager.undo()?.let { undoneText ->
+                            textFieldValue = TextFieldValue(
+                                text = undoneText,
+                                selection = TextRange(undoneText.length)
+                            )
+                            viewModel.updateCode(undoneText)
+                        }
+                    },
+                    enabled = undoRedoManager.canUndo(),
+                    modifier = Modifier.height(44.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Text(
+                        text = "Undo",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        color = if (undoRedoManager.canUndo())
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
+                }
+
+                // Redo button
+                TextButton(
+                    onClick = {
+                        undoRedoManager.redo()?.let { redoneText ->
+                            textFieldValue = TextFieldValue(
+                                text = redoneText,
+                                selection = TextRange(redoneText.length)
+                            )
+                            viewModel.updateCode(redoneText)
+                        }
+                    },
+                    enabled = undoRedoManager.canRedo(),
+                    modifier = Modifier.height(44.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Text(
+                        text = "Redo",
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        color = if (undoRedoManager.canRedo())
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                    )
+                }
+
+                // Separator
+                Box(
+                    modifier = Modifier
+                        .height(24.dp)
+                        .width(1.dp)
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
+                )
+
                 val symbols = listOf("{", "}", "(", ")", "[", "]", "<", ">", ";", ":", "&", "*", "=", "\"", "'", "|", "->", "::", "=>")
                 symbols.forEach { symbol ->
                     TextButton(
@@ -494,6 +517,7 @@ private fun ExerciseDetailView(
                                 text = newText,
                                 selection = TextRange(newCursorPos)
                             )
+                            undoRedoManager.push(newText)
                             viewModel.updateCode(newText)
                         },
                         // P3 Fix #13: minimum 48dp touch target per Material guidelines
