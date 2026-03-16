@@ -1,6 +1,7 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.ActivityChart
+import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 import java.util.Calendar
@@ -53,12 +55,15 @@ import java.util.Calendar
 fun DashboardScreen(
     viewModel: ProgressViewModel,
     reviewViewModel: ReviewViewModel,
+    learningPathViewModel: LearningPathViewModel,
     onNavigateToReview: () -> Unit = {},
+    onNavigateToLearningPaths: () -> Unit = {},
     onContinueReading: ((chapterId: String, sectionId: String) -> Unit)? = null,
     onContinueExercise: ((exerciseId: String) -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val reviewUiState by reviewViewModel.uiState.collectAsState()
+    val pathUiState by learningPathViewModel.uiState.collectAsState()
 
     // Daily motivational quote that changes by day of year
     val dailyQuote = remember {
@@ -245,6 +250,79 @@ fun DashboardScreen(
                             fontSize = 13.sp
                         )
                     }
+                }
+            }
+        }
+
+        // Learning Paths card
+        item {
+            Card(
+                onClick = onNavigateToLearningPaths,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.06f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.AutoStories,
+                        contentDescription = null,
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        val activePath = pathUiState.paths.firstOrNull { path ->
+                            val completedSteps = path.steps.count { step ->
+                                pathUiState.stepProgress["${path.id}:${step.id}"] == true
+                            }
+                            completedSteps > 0 && completedSteps < path.steps.size
+                        }
+                        if (activePath != null) {
+                            val completedSteps = activePath.steps.count { step ->
+                                pathUiState.stepProgress["${activePath.id}:${step.id}"] == true
+                            }
+                            val percent = (completedSteps.toFloat() / activePath.steps.size * 100).toInt()
+                            Text(
+                                text = activePath.title,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "$completedSteps of ${activePath.steps.size} steps -- $percent%",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Text(
+                                text = "Learning Paths",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Choose a guided path to start",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Icon(
+                        Icons.Default.AutoStories,
+                        contentDescription = "Go to learning paths",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
                 }
             }
         }

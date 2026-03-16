@@ -59,4 +59,17 @@ interface ProgressDao {
 
     @Query("SELECT SUM(studyTimeSeconds) FROM learning_stats")
     fun getTotalStudyTime(): Flow<Long?>
+
+    // Path Progress
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertPathProgress(progress: PathProgress)
+
+    @Query("SELECT * FROM path_progress WHERE pathId = :pathId")
+    suspend fun getPathProgress(pathId: String): List<PathProgress>
+
+    @Query("SELECT * FROM path_progress WHERE pathId = :pathId")
+    fun observePathProgress(pathId: String): Flow<List<PathProgress>>
+
+    @Query("SELECT * FROM path_progress")
+    fun observeAllPathProgress(): Flow<List<PathProgress>>
 }

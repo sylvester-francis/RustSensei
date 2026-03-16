@@ -1,0 +1,64 @@
+{
+  "paths": [
+    {
+      "id": "rust-fundamentals",
+      "title": "Rust Fundamentals",
+      "description": "Master the basics in 2 weeks",
+      "estimatedDays": 14,
+      "steps": [
+        {"id": "step-1", "type": "read", "targetId": "ch01-getting-started", "title": "Getting Started", "description": "Install Rust and write your first program"},
+        {"id": "step-2", "type": "exercise", "targetId": "intro1", "title": "Hello World", "description": "Complete the intro exercise"},
+        {"id": "step-3", "type": "read", "targetId": "ch03-common-concepts", "title": "Common Concepts", "description": "Variables, types, functions, control flow"},
+        {"id": "step-4", "type": "exercise", "targetId": "variables1", "title": "Variables", "description": "Practice variable bindings"},
+        {"id": "step-5", "type": "exercise", "targetId": "variables2", "title": "Mutability", "description": "Learn about mut"},
+        {"id": "step-6", "type": "exercise", "targetId": "functions1", "title": "Functions", "description": "Define functions"},
+        {"id": "step-7", "type": "exercise", "targetId": "if1", "title": "Control Flow", "description": "If expressions"},
+        {"id": "step-8", "type": "read", "targetId": "ch04-ownership", "title": "Ownership", "description": "Rust's core concept"},
+        {"id": "step-9", "type": "exercise", "targetId": "move_semantics1", "title": "Move Semantics", "description": "Practice ownership"},
+        {"id": "step-10", "type": "exercise", "targetId": "move_semantics2", "title": "Borrowing", "description": "References and borrowing"},
+        {"id": "step-11", "type": "read", "targetId": "ch05-structs", "title": "Structs", "description": "Structure your data"},
+        {"id": "step-12", "type": "exercise", "targetId": "structs1", "title": "Struct Practice", "description": "Define and use structs"},
+        {"id": "step-13", "type": "read", "targetId": "ch06-enums", "title": "Enums & Matching", "description": "Pattern matching power"},
+        {"id": "step-14", "type": "exercise", "targetId": "enums1", "title": "Enum Practice", "description": "Create and match enums"},
+        {"id": "step-15", "type": "review", "targetId": "review", "title": "Review Session", "description": "Review flashcards for everything learned"}
+      ]
+    },
+    {
+      "id": "ownership-deep-dive",
+      "title": "Ownership Deep Dive",
+      "description": "Master ownership in 3 days",
+      "estimatedDays": 3,
+      "steps": [
+        {"id": "step-1", "type": "read", "targetId": "ch04-ownership", "title": "What is Ownership?", "description": "The core rules"},
+        {"id": "step-2", "type": "exercise", "targetId": "move_semantics1", "title": "Move Semantics 1", "description": "Basic move"},
+        {"id": "step-3", "type": "exercise", "targetId": "move_semantics2", "title": "Move Semantics 2", "description": "Mutable reference"},
+        {"id": "step-4", "type": "exercise", "targetId": "move_semantics3", "title": "Move Semantics 3", "description": "Borrowing"},
+        {"id": "step-5", "type": "exercise", "targetId": "move_semantics4", "title": "Move Semantics 4", "description": "Multiple references"},
+        {"id": "step-6", "type": "exercise", "targetId": "move_semantics5", "title": "Move Semantics 5", "description": "Return ownership"},
+        {"id": "step-7", "type": "exercise", "targetId": "move_semantics6", "title": "Move Semantics 6", "description": "Mutable borrow"},
+        {"id": "step-8", "type": "review", "targetId": "review", "title": "Review", "description": "Solidify with flashcards"}
+      ]
+    },
+    {
+      "id": "python-to-rust",
+      "title": "From Python to Rust",
+      "description": "Leverage your Python knowledge",
+      "estimatedDays": 7,
+      "steps": [
+        {"id": "step-1", "type": "read", "targetId": "ch01-getting-started", "title": "Setup", "description": "Get Rust installed"},
+        {"id": "step-2", "type": "read", "targetId": "ch03-common-concepts", "title": "Rust vs Python Basics", "description": "Variables, types — what's different"},
+        {"id": "step-3", "type": "exercise", "targetId": "variables1", "title": "Variables", "description": "Immutable by default (unlike Python)"},
+        {"id": "step-4", "type": "exercise", "targetId": "primitive_types1", "title": "Types", "description": "No duck typing here"},
+        {"id": "step-5", "type": "read", "targetId": "ch04-ownership", "title": "Ownership", "description": "No garbage collector — this is the big shift"},
+        {"id": "step-6", "type": "exercise", "targetId": "move_semantics1", "title": "Move Semantics", "description": "Python copies refs, Rust moves values"},
+        {"id": "step-7", "type": "read", "targetId": "ch08-common-collections", "title": "Collections", "description": "Vec, HashMap, String — like list, dict, str"},
+        {"id": "step-8", "type": "exercise", "targetId": "vecs1", "title": "Vectors", "description": "Rust's list equivalent"},
+        {"id": "step-9", "type": "exercise", "targetId": "hashmaps1", "title": "HashMaps", "description": "Rust's dict equivalent"},
+        {"id": "step-10", "type": "exercise", "targetId": "strings1", "title": "Strings", "description": "String vs &str — not like Python's str"},
+        {"id": "step-11", "type": "read", "targetId": "ch09-error-handling", "title": "Error Handling", "description": "No exceptions — Result and Option"},
+        {"id": "step-12", "type": "exercise", "targetId": "errors1", "title": "Error Handling Practice", "description": "try/except → match Result"},
+        {"id": "step-13", "type": "review", "targetId": "review", "title": "Review", "description": "Flashcard review of key concepts"}
+      ]
+    }
+  ]
+}

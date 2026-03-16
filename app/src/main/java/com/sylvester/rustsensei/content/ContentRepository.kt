@@ -5,6 +5,8 @@ import android.util.Log
 import android.util.LruCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.sylvester.rustsensei.data.LearningPath
+import com.sylvester.rustsensei.data.PathStep
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -235,6 +237,52 @@ class ContentRepository(private val context: Context) {
             Log.e(TAG, "Error getting total exercises count: ${e.message}", e)
             0
         }
+    }
+
+    // Learning Paths
+    private var learningPaths: List<LearningPath>? = null
+
+    suspend fun getLearningPaths(): List<LearningPath> {
+        learningPaths?.let { return it }
+
+        return try {
+            val json = loadAssetJson("paths/index.json")
+            val paths = mutableListOf<LearningPath>()
+
+            val pathsArray = json.getJSONArray("paths")
+            for (i in 0 until pathsArray.length()) {
+                val pathObj = pathsArray.getJSONObject(i)
+                val steps = mutableListOf<PathStep>()
+                val stepsArray = pathObj.getJSONArray("steps")
+                for (j in 0 until stepsArray.length()) {
+                    val stepObj = stepsArray.getJSONObject(j)
+                    steps.add(PathStep(
+                        id = stepObj.getString("id"),
+                        type = stepObj.getString("type"),
+                        targetId = stepObj.getString("targetId"),
+                        title = stepObj.getString("title"),
+                        description = stepObj.getString("description")
+                    ))
+                }
+                paths.add(LearningPath(
+                    id = pathObj.getString("id"),
+                    title = pathObj.getString("title"),
+                    description = pathObj.getString("description"),
+                    estimatedDays = pathObj.getInt("estimatedDays"),
+                    steps = steps
+                ))
+            }
+
+            learningPaths = paths
+            paths
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading learning paths: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getLearningPath(pathId: String): LearningPath? {
+        return getLearningPaths().find { it.id == pathId }
     }
 
     private fun parseChapter(json: JSONObject): BookChapter {

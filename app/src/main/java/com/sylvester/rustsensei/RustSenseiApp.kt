@@ -5,6 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sylvester.rustsensei.ui.screens.LearningPathScreen
 import com.sylvester.rustsensei.ui.screens.MainScreen
 import com.sylvester.rustsensei.ui.screens.ModelSetupScreen
 import com.sylvester.rustsensei.ui.screens.ReviewScreen
@@ -12,6 +13,7 @@ import com.sylvester.rustsensei.ui.screens.SettingsScreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
+import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
@@ -22,6 +24,7 @@ sealed class Screen(val route: String) {
     data object Main : Screen("main")
     data object Settings : Screen("settings")
     data object Review : Screen("review")
+    data object LearningPath : Screen("learning_path")
 }
 
 @Composable
@@ -34,6 +37,7 @@ fun RustSenseiApp() {
     val progressViewModel: ProgressViewModel = hiltViewModel()
     val referenceViewModel: ReferenceViewModel = hiltViewModel()
     val reviewViewModel: ReviewViewModel = hiltViewModel()
+    val learningPathViewModel: LearningPathViewModel = hiltViewModel()
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.
@@ -68,6 +72,7 @@ fun RustSenseiApp() {
                 progressViewModel = progressViewModel,
                 referenceViewModel = referenceViewModel,
                 reviewViewModel = reviewViewModel,
+                learningPathViewModel = learningPathViewModel,
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
@@ -76,6 +81,9 @@ fun RustSenseiApp() {
                 },
                 onNavigateToReview = {
                     navController.navigate(Screen.Review.route)
+                },
+                onNavigateToLearningPaths = {
+                    navController.navigate(Screen.LearningPath.route)
                 }
             )
         }
@@ -83,6 +91,15 @@ fun RustSenseiApp() {
         composable(Screen.Review.route) {
             ReviewScreen(
                 viewModel = reviewViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.LearningPath.route) {
+            LearningPathScreen(
+                viewModel = learningPathViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

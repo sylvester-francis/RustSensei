@@ -14,9 +14,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         BookProgress::class,
         ExerciseProgress::class,
         LearningStats::class,
-        FlashCard::class
+        FlashCard::class,
+        PathProgress::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +28,19 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `path_progress` (
+                        `stepId` TEXT NOT NULL PRIMARY KEY,
+                        `pathId` TEXT NOT NULL,
+                        `isCompleted` INTEGER NOT NULL DEFAULT 0,
+                        `completedAt` INTEGER
+                    )
+                """)
+            }
+        }
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -90,7 +104,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rustsensei_db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     // WARNING: Do NOT use fallbackToDestructiveMigration() here — it wipes
                     // all user data (chat history, progress, stats) on ANY missing migration.
                     // Only allow destructive migration on version downgrade (e.g. debug builds).

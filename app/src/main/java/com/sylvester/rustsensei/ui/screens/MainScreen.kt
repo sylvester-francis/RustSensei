@@ -41,6 +41,7 @@ import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
+import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
@@ -63,9 +64,11 @@ fun MainScreen(
     progressViewModel: ProgressViewModel,
     referenceViewModel: ReferenceViewModel,
     reviewViewModel: ReviewViewModel,
+    learningPathViewModel: LearningPathViewModel,
     onNavigateToSettings: () -> Unit,
     onNavigateToSetup: () -> Unit = {},
-    onNavigateToReview: () -> Unit = {}
+    onNavigateToReview: () -> Unit = {},
+    onNavigateToLearningPaths: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -209,7 +212,9 @@ fun MainScreen(
                 DashboardScreen(
                     viewModel = progressViewModel,
                     reviewViewModel = reviewViewModel,
-                    onNavigateToReview = onNavigateToReview
+                    learningPathViewModel = learningPathViewModel,
+                    onNavigateToReview = onNavigateToReview,
+                    onNavigateToLearningPaths = onNavigateToLearningPaths
                 )
             }
         }
