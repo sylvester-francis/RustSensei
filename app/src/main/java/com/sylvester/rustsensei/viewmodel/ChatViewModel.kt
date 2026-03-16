@@ -1,16 +1,18 @@
 package com.sylvester.rustsensei.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
+import com.sylvester.rustsensei.content.RagRetriever
 import com.sylvester.rustsensei.data.ChatMessage
 import com.sylvester.rustsensei.data.ChatRepository
+import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
+import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.inject.Inject
 
 sealed class ChatContext {
     data object General : ChatContext()
@@ -39,7 +42,13 @@ data class ChatUiState(
     val lastTimeToFirstTokenMs: Long = 0
 )
 
-class ChatViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val repository: ChatRepository,
+    val liteRtEngine: LiteRtEngine,
+    private val ragRetriever: RagRetriever,
+    private val prefsManager: PreferencesManager
+) : ViewModel() {
 
     companion object {
         private const val TAG = "ChatViewModel"
@@ -47,13 +56,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         private const val MAX_MESSAGE_LENGTH = 4000
     }
 
-    private val app = application as RustSenseiApplication
-    private val repository: ChatRepository = app.repository
-
-    val liteRtEngine = app.liteRtEngine
-
     private fun getActiveEngine(): InferenceEngine {
-        val modelId = app.preferencesManager.getSelectedModelId()
+        val modelId = prefsManager.getSelectedModelId()
         val model = ModelManager.getModelById(modelId)
         return liteRtEngine
     }
@@ -66,7 +70,6 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
     // P1 Fix #14: load persisted config on init, save on change
-    private val prefsManager = app.preferencesManager
     private val _config = MutableStateFlow(prefsManager.loadInferenceConfig())
     val config: StateFlow<InferenceConfig> = _config.asStateFlow()
 
@@ -172,7 +175,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                 val ragContext = when (val ctx = _chatContext.value) {
                     is ChatContext.General -> {
                         withContext(Dispatchers.IO) {
-                            app.ragRetriever.retrieveContext(message)
+                            ragRetriever.retrieveContext(message)
                         }
                     }
                     is ChatContext.BookSection -> {

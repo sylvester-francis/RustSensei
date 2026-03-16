@@ -1,11 +1,11 @@
 package com.sylvester.rustsensei.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
+import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ReferenceSectionInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import javax.inject.Inject
 
 enum class ReferenceScreenMode {
     INDEX,
@@ -29,14 +30,14 @@ data class ReferenceUiState(
     val errorMessage: String? = null
 )
 
-class ReferenceViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ReferenceViewModel @Inject constructor(
+    private val contentRepo: ContentRepository
+) : ViewModel() {
 
     companion object {
         private const val TAG = "ReferenceViewModel"
     }
-
-    private val app = application as RustSenseiApplication
-    private val contentRepo = app.contentRepository
 
     private val _uiState = MutableStateFlow(ReferenceUiState())
     val uiState: StateFlow<ReferenceUiState> = _uiState.asStateFlow()

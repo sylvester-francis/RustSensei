@@ -1,7 +1,7 @@
 package com.sylvester.rustsensei
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,12 +24,12 @@ sealed class Screen(val route: String) {
 @Composable
 fun RustSenseiApp() {
     val navController = rememberNavController()
-    val chatViewModel: ChatViewModel = viewModel()
-    val modelViewModel: ModelViewModel = viewModel()
-    val bookViewModel: BookViewModel = viewModel()
-    val exerciseViewModel: ExerciseViewModel = viewModel()
-    val progressViewModel: ProgressViewModel = viewModel()
-    val referenceViewModel: ReferenceViewModel = viewModel()
+    val chatViewModel: ChatViewModel = hiltViewModel()
+    val modelViewModel: ModelViewModel = hiltViewModel()
+    val bookViewModel: BookViewModel = hiltViewModel()
+    val exerciseViewModel: ExerciseViewModel = hiltViewModel()
+    val progressViewModel: ProgressViewModel = hiltViewModel()
+    val referenceViewModel: ReferenceViewModel = hiltViewModel()
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.

@@ -1,17 +1,20 @@
 package com.sylvester.rustsensei.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
+import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ExerciseCategory
-import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
+import com.sylvester.rustsensei.data.PreferencesManager
+import com.sylvester.rustsensei.data.ProgressRepository
+import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
+import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +24,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 enum class ExerciseScreenMode {
     CATEGORIES,
@@ -43,19 +47,20 @@ data class ExerciseUiState(
     val isValidating: Boolean = false
 )
 
-class ExerciseViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ExerciseViewModel @Inject constructor(
+    private val contentRepo: ContentRepository,
+    private val progressRepo: ProgressRepository,
+    private val liteRtEngine: LiteRtEngine,
+    private val prefsManager: PreferencesManager
+) : ViewModel() {
 
     companion object {
         private const val TAG = "ExerciseViewModel"
     }
 
-    private val app = application as RustSenseiApplication
-    private val contentRepo = app.contentRepository
-    private val progressRepo = app.progressRepository
-    private val liteRtEngine = app.liteRtEngine
-
     private fun getActiveEngine(): InferenceEngine {
-        val modelId = app.preferencesManager.getSelectedModelId()
+        val modelId = prefsManager.getSelectedModelId()
         val model = ModelManager.getModelById(modelId)
         return liteRtEngine
     }

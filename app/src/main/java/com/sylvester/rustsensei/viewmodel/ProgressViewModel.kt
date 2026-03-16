@@ -1,17 +1,19 @@
 package com.sylvester.rustsensei.viewmodel
 
-import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
+import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningStats
+import com.sylvester.rustsensei.data.ProgressRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 data class ContinueTarget(
     val type: String, // "section" or "exercise"
@@ -30,15 +32,15 @@ data class ProgressUiState(
     val continueTarget: ContinueTarget? = null
 )
 
-class ProgressViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ProgressViewModel @Inject constructor(
+    private val progressRepo: ProgressRepository,
+    private val contentRepo: ContentRepository
+) : ViewModel() {
 
     companion object {
         private const val TAG = "ProgressViewModel"
     }
-
-    private val app = application as RustSenseiApplication
-    private val progressRepo = app.progressRepository
-    private val contentRepo = app.contentRepository
 
     private val _uiState = MutableStateFlow(ProgressUiState())
     val uiState: StateFlow<ProgressUiState> = _uiState.asStateFlow()

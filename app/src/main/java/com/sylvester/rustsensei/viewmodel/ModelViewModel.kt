@@ -5,15 +5,15 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
+import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.llm.DownloadState
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
-
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class ModelState {
     NOT_DOWNLOADED,
@@ -48,15 +49,16 @@ data class ModelUiState(
     val downloadedModelIds: Set<String> = emptySet()
 )
 
-class ModelViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class ModelViewModel @Inject constructor(
+    application: Application,
+    val modelManager: ModelManager,
+    private val prefsManager: PreferencesManager
+) : AndroidViewModel(application) {
 
     companion object {
         private const val TAG = "ModelViewModel"
     }
-
-    private val app = application as RustSenseiApplication
-    val modelManager = ModelManager(application)
-    private val prefsManager = app.preferencesManager
 
     private val _uiState = MutableStateFlow(ModelUiState())
     val uiState: StateFlow<ModelUiState> = _uiState.asStateFlow()
@@ -230,7 +232,7 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
             context.startForegroundService(intent)
         } catch (e: Exception) {
             // ForegroundServiceStartNotAllowedException on Android 12+ when app is in background
-            android.util.Log.w("ModelViewModel", "Could not start foreground service: ${e.message}")
+            Log.w("ModelViewModel", "Could not start foreground service: ${e.message}")
         }
     }
 

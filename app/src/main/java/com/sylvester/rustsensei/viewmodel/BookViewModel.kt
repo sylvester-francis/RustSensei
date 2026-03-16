@@ -1,14 +1,15 @@
 package com.sylvester.rustsensei.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.util.Log
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.RustSenseiApplication
 import com.sylvester.rustsensei.content.BookChapter
 import com.sylvester.rustsensei.content.BookIndexEntry
 import com.sylvester.rustsensei.content.BookSection
+import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.BookProgress
-import android.util.Log
+import com.sylvester.rustsensei.data.ProgressRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 enum class BookScreenMode {
     INDEX,
@@ -38,15 +40,15 @@ data class BookUiState(
     val errorMessage: String? = null
 )
 
-class BookViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class BookViewModel @Inject constructor(
+    private val contentRepo: ContentRepository,
+    private val progressRepo: ProgressRepository
+) : ViewModel() {
 
     companion object {
         private const val TAG = "BookViewModel"
     }
-
-    private val app = application as RustSenseiApplication
-    private val contentRepo = app.contentRepository
-    private val progressRepo = app.progressRepository
 
     private val _uiState = MutableStateFlow(BookUiState())
     val uiState: StateFlow<BookUiState> = _uiState.asStateFlow()
