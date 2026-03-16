@@ -191,4 +191,27 @@ class ProgressRepository(private val progressDao: ProgressDao) {
 
     fun getAllQuizResults(): Flow<List<QuizResult>> =
         progressDao.getAllQuizResults()
+
+    // User Notes
+    suspend fun upsertNote(note: UserNote) = progressDao.upsertNote(note)
+
+    suspend fun getNotesForSection(sectionId: String): List<UserNote> =
+        progressDao.getNotesForSection(sectionId)
+
+    fun getAllNotes(): Flow<List<UserNote>> = progressDao.getAllNotes()
+
+    suspend fun deleteNote(noteId: Long) = progressDao.deleteNote(noteId)
+
+    suspend fun searchNotes(query: String): List<UserNote> =
+        progressDao.searchNotes(query)
+
+    // Achievement helpers
+    suspend fun getCompletedExerciseCountByCategory(category: String): Int =
+        progressDao.getCompletedExerciseCountByCategory(category)
+
+    suspend fun getCompletedExercisesCountSync(): Int =
+        progressDao.getCompletedExercisesCountSync()
+
+    suspend fun getCompletedSectionsCountSync(): Int =
+        progressDao.getCompletedSectionsCountSync()
 }

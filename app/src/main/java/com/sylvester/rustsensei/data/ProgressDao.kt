@@ -85,4 +85,30 @@ interface ProgressDao {
 
     @Query("SELECT * FROM quiz_results ORDER BY completedAt DESC")
     fun getAllQuizResults(): Flow<List<QuizResult>>
+
+    // User Notes
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertNote(note: UserNote)
+
+    @Query("SELECT * FROM user_notes WHERE sectionId = :sectionId ORDER BY updatedAt DESC")
+    suspend fun getNotesForSection(sectionId: String): List<UserNote>
+
+    @Query("SELECT * FROM user_notes ORDER BY updatedAt DESC")
+    fun getAllNotes(): Flow<List<UserNote>>
+
+    @Query("DELETE FROM user_notes WHERE id = :noteId")
+    suspend fun deleteNote(noteId: Long)
+
+    @Query("SELECT * FROM user_notes WHERE content LIKE '%' || :query || '%' ORDER BY updatedAt DESC")
+    suspend fun searchNotes(query: String): List<UserNote>
+
+    // Exercise progress queries for achievements
+    @Query("SELECT COUNT(*) FROM exercise_progress WHERE category = :category AND status = 'completed'")
+    suspend fun getCompletedExerciseCountByCategory(category: String): Int
+
+    @Query("SELECT COUNT(*) FROM exercise_progress WHERE status = 'completed'")
+    suspend fun getCompletedExercisesCountSync(): Int
+
+    @Query("SELECT COUNT(*) FROM book_progress WHERE isCompleted = 1")
+    suspend fun getCompletedSectionsCountSync(): Int
 }

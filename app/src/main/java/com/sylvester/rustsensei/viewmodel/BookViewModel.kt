@@ -9,6 +9,7 @@ import com.sylvester.rustsensei.content.BookSection
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.BookProgress
 import com.sylvester.rustsensei.data.ProgressRepository
+import com.sylvester.rustsensei.data.UserNote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -248,6 +249,47 @@ class BookViewModel @Inject constructor(
 
     fun getCurrentSectionId(): String {
         return _uiState.value.currentSectionId ?: ""
+    }
+
+    // Notes
+    suspend fun getNotesForSection(sectionId: String): List<UserNote> {
+        return try {
+            progressRepo.getNotesForSection(sectionId)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting notes: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    fun saveNote(sectionId: String, content: String, existingNoteId: Long?) {
+        viewModelScope.launch {
+            try {
+                val note = UserNote(
+                    id = existingNoteId ?: 0,
+                    sectionId = sectionId,
+                    content = content,
+                    createdAt = if (existingNoteId != null) {
+                        progressRepo.getNotesForSection(sectionId)
+                            .firstOrNull { it.id == existingNoteId }?.createdAt
+                            ?: System.currentTimeMillis()
+                    } else System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis()
+                )
+                progressRepo.upsertNote(note)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving note: ${e.message}", e)
+            }
+        }
+    }
+
+    fun deleteNote(noteId: Long) {
+        viewModelScope.launch {
+            try {
+                progressRepo.deleteNote(noteId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error deleting note: ${e.message}", e)
+            }
+        }
     }
 
     // Fix #8: save accumulated read time

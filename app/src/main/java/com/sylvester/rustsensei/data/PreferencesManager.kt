@@ -55,4 +55,14 @@ class PreferencesManager(context: Context) {
     fun getSelectedModelId(): String {
         return prefs.getString("selected_model_id", "litert-1b-gemma") ?: "litert-1b-gemma"
     }
+
+    // Recent Searches
+    fun saveRecentSearches(searches: List<String>) {
+        prefs.edit().putString("recent_searches", searches.take(10).joinToString(",")).apply()
+    }
+
+    fun getRecentSearches(): List<String> {
+        val raw = prefs.getString("recent_searches", "") ?: ""
+        return if (raw.isBlank()) emptyList() else raw.split(",").filter { it.isNotBlank() }
+    }
 }

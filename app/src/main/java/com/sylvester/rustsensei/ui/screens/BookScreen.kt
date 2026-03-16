@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.CompareArrows
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.MenuBook
@@ -39,19 +40,30 @@ import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +81,7 @@ import com.sylvester.rustsensei.viewmodel.BookScreenMode
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceScreenMode
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
+import kotlinx.coroutines.launch
 
 private fun referenceSectionIcon(id: String): ImageVector = when (id) {
     "cheatsheets" -> Icons.Default.Speed
@@ -428,6 +441,7 @@ private fun ChapterView(viewModel: BookViewModel) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SectionView(
     viewModel: BookViewModel,
@@ -436,6 +450,26 @@ private fun SectionView(
     val uiState by viewModel.uiState.collectAsState()
     val section = uiState.currentSection ?: return
     val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
+
+    // Notes bottom sheet state
+    var showNotesSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var noteText by remember(uiState.currentSectionId) { mutableStateOf("") }
+    var currentNoteId by remember(uiState.currentSectionId) { mutableStateOf<Long?>(null) }
+
+    // Load existing note for this section
+    LaunchedEffect(uiState.currentSectionId) {
+        val sectionId = uiState.currentSectionId ?: return@LaunchedEffect
+        val notes = viewModel.getNotesForSection(sectionId)
+        if (notes.isNotEmpty()) {
+            noteText = notes.first().content
+            currentNoteId = notes.first().id
+        } else {
+            noteText = ""
+            currentNoteId = null
+        }
+    }
 
     // Fix #1 & #8: Track scroll progress, mark complete only once (via ViewModel flag)
     LaunchedEffect(scrollState) {
@@ -455,6 +489,115 @@ private fun SectionView(
                     }
                 }
             }
+    }
+
+    // Notes bottom sheet
+    if (showNotesSheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                // Save note on dismiss
+                val sectionId = uiState.currentSectionId
+                if (sectionId != null && noteText.isNotBlank()) {
+                    viewModel.saveNote(sectionId, noteText, currentNoteId)
+                } else if (sectionId != null && noteText.isBlank() && currentNoteId != null) {
+                    viewModel.deleteNote(currentNoteId!!)
+                    currentNoteId = null
+                }
+                showNotesSheet = false
+            },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Notes",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = section.title,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                TextField(
+                    value = noteText,
+                    onValueChange = { noteText = it },
+                    placeholder = {
+                        Text(
+                            "Write your notes here...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = 22.sp
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (currentNoteId != null) {
+                        TextButton(
+                            onClick = {
+                                viewModel.deleteNote(currentNoteId!!)
+                                noteText = ""
+                                currentNoteId = null
+                                scope.launch {
+                                    sheetState.hide()
+                                    showNotesSheet = false
+                                }
+                            }
+                        ) {
+                            Text(
+                                "Delete",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Button(
+                        onClick = {
+                            val sectionId = uiState.currentSectionId
+                            if (sectionId != null && noteText.isNotBlank()) {
+                                viewModel.saveNote(sectionId, noteText, currentNoteId)
+                            }
+                            scope.launch {
+                                sheetState.hide()
+                                showNotesSheet = false
+                            }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Save", style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+            }
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -526,7 +669,7 @@ private fun SectionView(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -536,21 +679,30 @@ private fun SectionView(
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Previous", style = MaterialTheme.typography.labelLarge)
+                Spacer(modifier = Modifier.width(2.dp))
+                Text("Prev", style = MaterialTheme.typography.labelMedium)
+            }
+            TextButton(onClick = { showNotesSheet = true }) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text("Notes", style = MaterialTheme.typography.labelMedium)
             }
             TextButton(onClick = { onAskSensei(section.content, "") }) {
                 Icon(
                     Icons.Default.Chat,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Ask Sensei", style = MaterialTheme.typography.labelLarge)
+                Spacer(modifier = Modifier.width(2.dp))
+                Text("Sensei", style = MaterialTheme.typography.labelMedium)
             }
             TextButton(onClick = { viewModel.navigateToNextSection() }) {
-                Text("Next", style = MaterialTheme.typography.labelLarge)
-                Spacer(modifier = Modifier.width(4.dp))
+                Text("Next", style = MaterialTheme.typography.labelMedium)
+                Spacer(modifier = Modifier.width(2.dp))
                 Icon(
                     Icons.AutoMirrored.Filled.NavigateNext,
                     contentDescription = null,

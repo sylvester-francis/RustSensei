@@ -10,6 +10,7 @@ import com.sylvester.rustsensei.ui.screens.MainScreen
 import com.sylvester.rustsensei.ui.screens.ModelSetupScreen
 import com.sylvester.rustsensei.ui.screens.QuizScreen
 import com.sylvester.rustsensei.ui.screens.ReviewScreen
+import com.sylvester.rustsensei.ui.screens.SearchScreen
 import com.sylvester.rustsensei.ui.screens.SettingsScreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
@@ -20,6 +21,7 @@ import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.QuizViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import com.sylvester.rustsensei.viewmodel.SearchViewModel
 
 sealed class Screen(val route: String) {
     data object Setup : Screen("setup")
@@ -28,6 +30,7 @@ sealed class Screen(val route: String) {
     data object Review : Screen("review")
     data object LearningPath : Screen("learning_path")
     data object Quiz : Screen("quiz")
+    data object Search : Screen("search")
 }
 
 @Composable
@@ -42,6 +45,7 @@ fun RustSenseiApp() {
     val reviewViewModel: ReviewViewModel = hiltViewModel()
     val learningPathViewModel: LearningPathViewModel = hiltViewModel()
     val quizViewModel: QuizViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.
@@ -91,6 +95,9 @@ fun RustSenseiApp() {
                 },
                 onNavigateToQuiz = {
                     navController.navigate(Screen.Quiz.route)
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Screen.Search.route)
                 }
             )
         }
@@ -115,6 +122,15 @@ fun RustSenseiApp() {
 
         composable(Screen.Quiz.route) {
             QuizScreen(viewModel = quizViewModel)
+        }
+
+        composable(Screen.Search.route) {
+            SearchScreen(
+                viewModel = searchViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(Screen.Settings.route) {
