@@ -208,7 +208,7 @@ private fun CategoriesView(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                         .clickable { viewModel.openExercise(lastExerciseId) },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = MaterialTheme.shapes.medium,
                     colors = CardDefaults.cardColors(
                         containerColor = DarkSurfaceContainerHigh
                     )
@@ -427,12 +427,10 @@ private fun CategoriesView(
                                         modifier = Modifier.size(18.dp)
                                     )
                                 } else {
-                                    Text(
-                                        text = ">",
-                                        fontFamily = FontFamily.Monospace,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 14.sp,
-                                        color = RustOrange,
+                                    Icon(
+                                        Icons.Default.ChevronRight,
+                                        contentDescription = "Not completed",
+                                        tint = RustOrange,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }
@@ -919,7 +917,7 @@ private fun ExerciseDetailView(
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = RustOrange
                     )
@@ -942,7 +940,7 @@ private fun ExerciseDetailView(
                         .weight(1f)
                         .height(48.dp),
                     enabled = uiState.hintsRevealed < exercise.hints.size,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     Icon(
                         Icons.Default.Lightbulb,

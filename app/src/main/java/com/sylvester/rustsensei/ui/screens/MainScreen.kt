@@ -310,7 +310,7 @@ private fun RustSenseiNavigationBar(
     onTabSelected: (Int, Tab) -> Unit,
     currentDestination: NavDestination?
 ) {
-    // Inactive icon color: #8B95A5
+    // M3 Navigation Bar spec: 80dp height, 24dp icons, 64x32dp active indicator
     val inactiveColor = Color(0xFF8B95A5)
     val activeIconColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -319,7 +319,7 @@ private fun RustSenseiNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(72.dp)
+            .height(80.dp)
             .background(containerColor)
     ) {
         Row(
@@ -337,7 +337,7 @@ private fun RustSenseiNavigationBar(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(64.dp)
+                        .height(72.dp)
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
@@ -350,11 +350,11 @@ private fun RustSenseiNavigationBar(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        // Pill background behind icon when selected
+                        // M3 active indicator pill: 64x32dp with 16dp corner radius
                         Box(
                             modifier = Modifier
-                                .size(width = 56.dp, height = 30.dp)
-                                .clip(RoundedCornerShape(15.dp))
+                                .size(width = 64.dp, height = 32.dp)
+                                .clip(RoundedCornerShape(16.dp))
                                 .then(
                                     if (isSelected) {
                                         Modifier.background(primaryColor)
@@ -367,7 +367,7 @@ private fun RustSenseiNavigationBar(
                             Icon(
                                 imageVector = tab.icon,
                                 contentDescription = tab.title,
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(24.dp),
                                 tint = if (isSelected) activeIconColor else inactiveColor
                             )
                         }
@@ -377,8 +377,7 @@ private fun RustSenseiNavigationBar(
                         Text(
                             text = tab.title,
                             style = MaterialTheme.typography.labelSmall,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) primaryColor else inactiveColor
                         )
                     }

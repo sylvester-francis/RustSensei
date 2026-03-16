@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -239,13 +240,13 @@ private fun FlashCardView(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 8.dp)
             .clickable(onClick = onFlip),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = DarkSurfaceContainerHigh
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Neon accent line at top
@@ -347,19 +348,18 @@ private fun RatingButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.height(48.dp),
-        shape = RoundedCornerShape(10.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.5f)),
+        modifier = modifier.height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, color.copy(alpha = 0.5f)),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = color
         ),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -376,17 +376,17 @@ private fun SessionCompleteScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Checkmark icon
+        // Checkmark icon — larger and more prominent
         Box(
             modifier = Modifier
-                .size(80.dp)
-                .background(SuccessGreen.copy(alpha = 0.12f), RoundedCornerShape(40.dp)),
+                .size(96.dp)
+                .background(SuccessGreen.copy(alpha = 0.10f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.Check,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(48.dp),
                 tint = SuccessGreen
             )
         }

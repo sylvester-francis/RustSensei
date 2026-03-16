@@ -365,16 +365,16 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 64.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 48sp crab emoji avatar
+        // 56sp crab emoji avatar — larger for visual weight
         Text(
             text = "\uD83E\uDD80",
-            fontSize = 48.sp
+            fontSize = 56.sp
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // headlineSmall (monospace via theme typography)
         Text(
@@ -393,7 +393,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         // Privacy badge -- labelSmall mono, primary at 50%
         Text(
@@ -404,9 +404,9 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // 3 suggestion outlined buttons with thin primary border at 20%
+        // 3 suggestion outlined buttons — taller for better touch targets
         val suggestions = listOf(
             "How is Rust's ownership different from Python's GC?",
             "Show me Rust's match vs Python's match",
@@ -418,14 +418,15 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
             ) {
                 Text(
                     text = suggestion,
@@ -446,13 +447,13 @@ private fun NoModelState(onDownload: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 64.dp, bottom = 32.dp, start = 24.dp, end = 24.dp),
+            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Crab emoji
-        Text(text = "\uD83E\uDD80", fontSize = 48.sp)
+        // Crab emoji — larger for visual weight
+        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Text(
             text = "Your tutor needs a brain",
@@ -470,7 +471,7 @@ private fun NoModelState(onDownload: () -> Unit) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         // Primary filled, full-width, 56dp pill shape
         Button(
@@ -486,7 +487,7 @@ private fun NoModelState(onDownload: () -> Unit) {
             Icon(
                 Icons.Default.Download,
                 contentDescription = "Download model",
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 10.dp)
             )
             Text(
                 "Download Model",

@@ -88,6 +88,22 @@ fun SettingsScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
         ) {
+            // ── Screen Title ──
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineMedium,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            Text(
+                text = "Model, inference & account",
+                style = MaterialTheme.typography.bodyMedium,
+                color = SecondaryText,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             // --- Model Management Section ---
             SectionHeader("Model Management")
             Spacer(modifier = Modifier.height(12.dp))

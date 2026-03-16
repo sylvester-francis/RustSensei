@@ -35,18 +35,18 @@ import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 // User bubble background: primaryContainer dark variant
 private val UserBubbleBackground = Color(0xFF2A1510)
 
-// Bubble corner radii
+// Bubble corner radii — M3 large shape (16dp) with tail corner at 4dp
 private val UserBubbleShape = RoundedCornerShape(
-    topStart = 20.dp,
-    topEnd = 20.dp,
+    topStart = 18.dp,
+    topEnd = 18.dp,
     bottomEnd = 4.dp,
-    bottomStart = 20.dp
+    bottomStart = 18.dp
 )
 
 private val AiBubbleShape = RoundedCornerShape(
-    topStart = 20.dp,
-    topEnd = 20.dp,
-    bottomEnd = 20.dp,
+    topStart = 18.dp,
+    topEnd = 18.dp,
+    bottomEnd = 18.dp,
     bottomStart = 4.dp
 )
 
@@ -69,10 +69,10 @@ fun MessageBubble(
         ) {
             Box(
                 modifier = Modifier
-                    .widthIn(max = screenWidth * 0.85f)
+                    .widthIn(max = screenWidth * 0.82f)
                     .clip(UserBubbleShape)
                     .background(UserBubbleBackground)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Text(
                     text = content,
@@ -102,10 +102,10 @@ fun MessageBubble(
 
             Box(
                 modifier = Modifier
-                    .widthIn(max = screenWidth * 0.90f)
+                    .widthIn(max = screenWidth * 0.88f)
                     .clip(AiBubbleShape)
                     .background(DarkSurfaceContainerHigh)
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Column {
                     RichContent(content)

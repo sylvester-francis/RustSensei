@@ -239,14 +239,20 @@ fun SearchScreen(
                         Icon(
                             Icons.Default.Search,
                             contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = SecondaryText.copy(alpha = 0.3f)
+                            modifier = Modifier.size(56.dp),
+                            tint = SecondaryText.copy(alpha = 0.25f)
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Search across all content",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = SecondaryText.copy(alpha = 0.5f)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Chapters, exercises, reference guides",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = SecondaryText.copy(alpha = 0.35f)
                         )
                     }
                 }

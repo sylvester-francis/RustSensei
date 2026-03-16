@@ -72,7 +72,7 @@ fun InputBar(
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.Bottom
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 TextField(
                     value = value,
@@ -80,7 +80,7 @@ fun InputBar(
                     interactionSource = interactionSource,
                     modifier = Modifier
                         .weight(1f)
-                        .defaultMinSize(minHeight = 56.dp)
+                        .defaultMinSize(minHeight = 52.dp)
                         .border(
                             width = borderWidth,
                             color = borderColor,
@@ -106,7 +106,7 @@ fun InputBar(
                                         fontSize = 15.sp
                                     )
                                 ) {
-                                    append("Enter command...")
+                                    append("Ask about Rust...")
                                 }
                             }
                         )
@@ -123,28 +123,28 @@ fun InputBar(
                         focusedTextColor = MaterialTheme.colorScheme.onSurface,
                         unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    maxLines = 8,
+                    maxLines = 6,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp)
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
-                // Send / stop button: 40dp filled circle with shadow glow
+                // Send / stop button: 48dp filled circle (M3 min touch target)
                 FilledIconButton(
                     onClick = if (isGenerating) onStop else onSend,
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(48.dp)
                         .shadow(
-                            elevation = 12.dp,
+                            elevation = 8.dp,
                             shape = CircleShape,
                             spotColor = if (isGenerating)
-                                ErrorNeon.copy(alpha = 0.5f)
+                                ErrorNeon.copy(alpha = 0.4f)
                             else
                                 PrimaryGlow,
                             ambientColor = if (isGenerating)
-                                ErrorNeon.copy(alpha = 0.25f)
+                                ErrorNeon.copy(alpha = 0.2f)
                             else
-                                PrimaryGlow.copy(alpha = 0.5f)
+                                PrimaryGlow.copy(alpha = 0.4f)
                         ),
                     shape = CircleShape,
                     colors = IconButtonDefaults.filledIconButtonColors(
@@ -159,14 +159,14 @@ fun InputBar(
                             Icons.Default.Stop,
                             contentDescription = "Stop generation",
                             tint = MaterialTheme.colorScheme.onError,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     } else {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
                             contentDescription = "Send message",
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }

@@ -141,77 +141,73 @@ fun DashboardScreen(
         // Section 1: Hero Greeting + Streak
         // =====================================================
         item {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp),
-                contentAlignment = Alignment.Center
+                    .padding(vertical = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                // Greeting
+                Text(
+                    text = greeting,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Streak with flame icon
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    // Greeting
-                    Text(
-                        text = greeting,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
+                    val transition = rememberInfiniteTransition(label = "streak_flame")
+                    val flameScale by transition.animateFloat(
+                        initialValue = 0.95f,
+                        targetValue = 1.05f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(durationMillis = 1500),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "flame_scale"
                     )
+                    Icon(
+                        imageVector = Icons.Default.LocalFireDepartment,
+                        contentDescription = "Streak flame",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .scale(flameScale)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${uiState.studyStreak}-day streak",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                    // Streak with flame icon
+                // Weekly dots: 7 circles (Mo-Su) — larger for better visibility
+                if (uiState.weekActivity.isNotEmpty()) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val transition = rememberInfiniteTransition(label = "streak_flame")
-                        val flameScale by transition.animateFloat(
-                            initialValue = 0.95f,
-                            targetValue = 1.05f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(durationMillis = 1500),
-                                repeatMode = RepeatMode.Reverse
-                            ),
-                            label = "flame_scale"
-                        )
-                        Icon(
-                            imageVector = Icons.Default.LocalFireDepartment,
-                            contentDescription = "Streak flame",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .scale(flameScale)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "${uiState.studyStreak}-day streak",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Weekly dots: 7 circles (Mo-Su)
-                    if (uiState.weekActivity.isNotEmpty()) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            uiState.weekActivity.forEachIndexed { index, day ->
-                                val isToday = index == uiState.weekActivity.lastIndex
-                                WeekDayDot(
-                                    label = day.label,
-                                    level = day.level,
-                                    isToday = isToday,
-                                    primaryColor = MaterialTheme.colorScheme.primary,
-                                    surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
-                                )
-                            }
+                        uiState.weekActivity.forEachIndexed { index, day ->
+                            val isToday = index == uiState.weekActivity.lastIndex
+                            WeekDayDot(
+                                label = day.label,
+                                level = day.level,
+                                isToday = isToday,
+                                primaryColor = MaterialTheme.colorScheme.primary,
+                                surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
                         }
                     }
                 }
@@ -432,13 +428,6 @@ fun DashboardScreen(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                )
-                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Achievements",
                     style = MaterialTheme.typography.titleMedium,
@@ -478,13 +467,6 @@ fun DashboardScreen(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                )
-                Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -580,13 +562,6 @@ fun DashboardScreen(
                     .padding(top = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                )
-                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = dailyQuote,
                     style = MaterialTheme.typography.bodySmall,
@@ -613,11 +588,22 @@ private fun WeekDayDot(
     primaryColor: Color,
     surfaceVariantColor: Color
 ) {
-    val dotSize = 12.dp
+    // Larger dots (16dp) for better visibility per WCAG touch guidelines
+    val dotSize = 16.dp
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Day label above dot
+        Text(
+            text = label.take(2), // Mo, Tu, We, Th, Fr, Sa, Su
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isToday) primaryColor
+            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+
+        Spacer(modifier = Modifier.height(6.dp))
+
         when {
             // Today with no activity: pulsing outline
             isToday && level == 0 -> {
@@ -661,15 +647,6 @@ private fun WeekDayDot(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label.take(2), // Mo, Tu, We, Th, Fr, Sa, Su
-            style = MaterialTheme.typography.labelSmall,
-            fontSize = 9.sp,
-            color = if (isToday) primaryColor
-            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-        )
     }
 }
 
@@ -717,9 +694,9 @@ private fun QuickActionCard(
     Card(
         onClick = onClick,
         modifier = Modifier
-            .width(150.dp)
-            .height(100.dp),
-        shape = RoundedCornerShape(12.dp),
+            .width(164.dp)
+            .height(112.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = cardBackground
         )
@@ -735,31 +712,31 @@ private fun QuickActionCard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp),
+                    .padding(14.dp),
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(26.dp),
                     tint = accentColor
                 )
                 Column {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontSize = 10.sp
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

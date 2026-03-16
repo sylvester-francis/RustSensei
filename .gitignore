@@ -8,3 +8,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+DESIGN_RECOMMENDATIONS.md
+REDESIGN_PROMPT.md
+
+# Release signing (never commit these)
+release-keystore.jks
+keystore.properties

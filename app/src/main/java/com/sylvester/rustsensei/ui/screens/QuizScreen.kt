@@ -144,7 +144,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.startQuiz(quiz.id) },
-                shape = RoundedCornerShape(16.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
@@ -471,8 +471,8 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
+                    .height(56.dp),
+                shape = MaterialTheme.shapes.large,
                 colors = ButtonDefaults.buttonColors(containerColor = RustOrange)
             ) {
                 Text(
@@ -803,24 +803,24 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
         // Buttons
         Button(
             onClick = { viewModel.startQuiz(quiz.id) },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.buttonColors(containerColor = RustOrange)
         ) {
-            Icon(Icons.Default.Refresh, null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Retry Quiz", fontWeight = FontWeight.Bold)
+            Icon(Icons.Default.Refresh, null, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(10.dp))
+            Text("Retry Quiz", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = { viewModel.returnToList() },
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = MaterialTheme.shapes.large,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
         ) {
-            Text("Back to Quizzes", fontWeight = FontWeight.Bold)
+            Text("Back to Quizzes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
         }
 
         Spacer(modifier = Modifier.height(24.dp))
