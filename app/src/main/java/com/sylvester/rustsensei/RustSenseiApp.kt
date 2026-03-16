@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.sylvester.rustsensei.ui.screens.MainScreen
 import com.sylvester.rustsensei.ui.screens.ModelSetupScreen
+import com.sylvester.rustsensei.ui.screens.ReviewScreen
 import com.sylvester.rustsensei.ui.screens.SettingsScreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
@@ -14,11 +15,13 @@ import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
+import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 
 sealed class Screen(val route: String) {
     data object Setup : Screen("setup")
     data object Main : Screen("main")
     data object Settings : Screen("settings")
+    data object Review : Screen("review")
 }
 
 @Composable
@@ -30,6 +33,7 @@ fun RustSenseiApp() {
     val exerciseViewModel: ExerciseViewModel = hiltViewModel()
     val progressViewModel: ProgressViewModel = hiltViewModel()
     val referenceViewModel: ReferenceViewModel = hiltViewModel()
+    val reviewViewModel: ReviewViewModel = hiltViewModel()
 
     // Start directly at Main — all non-AI features work without a model.
     // The Chat tab gracefully handles missing model with a download prompt.
@@ -63,11 +67,24 @@ fun RustSenseiApp() {
                 exerciseViewModel = exerciseViewModel,
                 progressViewModel = progressViewModel,
                 referenceViewModel = referenceViewModel,
+                reviewViewModel = reviewViewModel,
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
                 onNavigateToSetup = {
                     navController.navigate(Screen.Setup.route)
+                },
+                onNavigateToReview = {
+                    navController.navigate(Screen.Review.route)
+                }
+            )
+        }
+
+        composable(Screen.Review.route) {
+            ReviewScreen(
+                viewModel = reviewViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }

@@ -43,6 +43,7 @@ import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
+import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 
 sealed class Tab(val route: String, val title: String, val icon: ImageVector) {
     data object Learn : Tab("learn", "Learn", Icons.Default.MenuBook)
@@ -61,8 +62,10 @@ fun MainScreen(
     exerciseViewModel: ExerciseViewModel,
     progressViewModel: ProgressViewModel,
     referenceViewModel: ReferenceViewModel,
+    reviewViewModel: ReviewViewModel,
     onNavigateToSettings: () -> Unit,
-    onNavigateToSetup: () -> Unit = {}
+    onNavigateToSetup: () -> Unit = {},
+    onNavigateToReview: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -203,7 +206,11 @@ fun MainScreen(
                 )
             }
             composable(Tab.Profile.route) {
-                DashboardScreen(viewModel = progressViewModel)
+                DashboardScreen(
+                    viewModel = progressViewModel,
+                    reviewViewModel = reviewViewModel,
+                    onNavigateToReview = onNavigateToReview
+                )
             }
         }
     }

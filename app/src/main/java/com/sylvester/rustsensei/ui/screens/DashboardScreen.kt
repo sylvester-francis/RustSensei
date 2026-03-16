@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -44,15 +46,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.ActivityChart
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
+import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 import java.util.Calendar
 
 @Composable
 fun DashboardScreen(
     viewModel: ProgressViewModel,
+    reviewViewModel: ReviewViewModel,
+    onNavigateToReview: () -> Unit = {},
     onContinueReading: ((chapterId: String, sectionId: String) -> Unit)? = null,
     onContinueExercise: ((exerciseId: String) -> Unit)? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val reviewUiState by reviewViewModel.uiState.collectAsState()
 
     // Daily motivational quote that changes by day of year
     val dailyQuote = remember {
@@ -173,6 +179,70 @@ fun DashboardScreen(
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+
+        // Spaced Repetition Review card
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.06f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (reviewUiState.dueCardCount > 0) {
+                            Text(
+                                text = "\uD83E\uDDE0 ${reviewUiState.dueCardCount} card${if (reviewUiState.dueCardCount != 1) "s" else ""} due for review",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "${reviewUiState.totalCardCount} total cards",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontFamily = FontFamily.Monospace,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        } else {
+                            Text(
+                                text = "All caught up!",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Next review tomorrow",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Button(
+                        onClick = onNavigateToReview,
+                        enabled = reviewUiState.dueCardCount > 0,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text(
+                            text = "Start Review",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
                         )
                     }
                 }

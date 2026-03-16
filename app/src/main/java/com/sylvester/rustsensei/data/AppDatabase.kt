@@ -13,18 +13,39 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Conversation::class,
         BookProgress::class,
         ExerciseProgress::class,
-        LearningStats::class
+        LearningStats::class,
+        FlashCard::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun chatDao(): ChatDao
     abstract fun progressDao(): ProgressDao
+    abstract fun flashCardDao(): FlashCardDao
 
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `flash_cards` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `front` TEXT NOT NULL,
+                        `back` TEXT NOT NULL,
+                        `category` TEXT NOT NULL,
+                        `sourceId` TEXT NOT NULL DEFAULT '',
+                        `nextReviewAt` INTEGER NOT NULL DEFAULT 0,
+                        `interval` INTEGER NOT NULL DEFAULT 0,
+                        `easeFactor` REAL NOT NULL DEFAULT 2.5,
+                        `repetitions` INTEGER NOT NULL DEFAULT 0,
+                        `lastReviewedAt` INTEGER NOT NULL DEFAULT 0
+                    )
+                """)
+            }
+        }
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -69,7 +90,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rustsensei_db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     // WARNING: Do NOT use fallbackToDestructiveMigration() here — it wipes
                     // all user data (chat history, progress, stats) on ANY missing migration.
                     // Only allow destructive migration on version downgrade (e.g. debug builds).
