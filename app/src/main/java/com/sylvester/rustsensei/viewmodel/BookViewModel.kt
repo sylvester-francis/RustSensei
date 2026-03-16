@@ -169,6 +169,9 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
                     currentSectionId = null,
                     sectionMarkedComplete = false
                 )
+                // Bug 9: refresh the "Continue Reading" card so it reflects
+                // the section the user just left, not the stale init-time value.
+                loadLastRead()
             }
             BookScreenMode.CHAPTER -> {
                 _uiState.value = state.copy(
@@ -176,6 +179,8 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
                     currentChapter = null,
                     currentChapterId = null
                 )
+                // Bug 9: also refresh when returning to the index from chapter view
+                loadLastRead()
             }
             BookScreenMode.INDEX -> { /* already at root */ }
         }

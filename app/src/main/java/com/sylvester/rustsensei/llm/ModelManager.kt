@@ -100,6 +100,12 @@ class ModelManager(private val context: Context) {
         return file.exists() && file.length() > 1_000_000
     }
 
+    /** Bug 12: Check if a partial .tmp file exists from an interrupted download. */
+    fun hasTempFile(modelInfo: ModelInfo): Boolean {
+        val tempFile = getTempFile(modelInfo)
+        return tempFile.exists() && tempFile.length() > 0
+    }
+
     fun isModelDownloaded(): Boolean = isModelDownloaded(AVAILABLE_MODELS[0])
 
     fun getModelSizeMB(modelInfo: ModelInfo): Long {

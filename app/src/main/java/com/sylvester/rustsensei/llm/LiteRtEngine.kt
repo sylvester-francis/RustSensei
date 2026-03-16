@@ -28,6 +28,14 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
 
     companion object {
         private const val TAG = "LiteRtEngine"
+
+        // Bug 5: single source of truth for sampler parameters, used in both
+        // loadModel() and clearCache() to prevent configuration drift.
+        val DEFAULT_SAMPLER = SamplerConfig(
+            topK = 40,
+            topP = 0.95,
+            temperature = 0.7
+        )
     }
 
     private var engine: Engine? = null
@@ -56,11 +64,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                 ExperimentalFlags.enableConversationConstrainedDecoding = false
                 val conv = newEngine.createConversation(
                     ConversationConfig(
-                        samplerConfig = SamplerConfig(
-                            topK = 40,
-                            topP = 0.95,
-                            temperature = 0.7
-                        )
+                        samplerConfig = DEFAULT_SAMPLER
                     )
                 )
                 ExperimentalFlags.enableConversationConstrainedDecoding = false
@@ -172,9 +176,10 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
             val eng = engine ?: return
             conversation?.close()
             ExperimentalFlags.enableConversationConstrainedDecoding = false
+            // Bug 5: use the same DEFAULT_SAMPLER as loadModel() to avoid config drift
             conversation = eng.createConversation(
                 ConversationConfig(
-                    samplerConfig = SamplerConfig(topK = 64, topP = 0.95, temperature = 1.0)
+                    samplerConfig = DEFAULT_SAMPLER
                 )
             )
             ExperimentalFlags.enableConversationConstrainedDecoding = false

@@ -26,6 +26,7 @@ enum class ModelState {
     NOT_DOWNLOADED,
     DOWNLOADING,
     DOWNLOADED,
+    DOWNLOAD_INCOMPLETE,  // Bug 12: partial .tmp file exists from interrupted download
     LOADING,
     READY,
     ERROR
@@ -41,7 +42,8 @@ data class ModelUiState(
     val errorMessage: String? = null,
     val modelSizeMB: Long = 0,
     val availableModels: List<ModelInfo> = ModelManager.AVAILABLE_MODELS,
-    val selectedModelId: String = "litert-0.6b",
+    // Bug 1: default to the recommended model "litert-1b-gemma" instead of "litert-0.6b"
+    val selectedModelId: String = "litert-1b-gemma",
     val loadedModelId: String? = null,
     val downloadedModelIds: Set<String> = emptySet()
 )
@@ -78,6 +80,9 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
 
         val state = if (modelManager.isModelDownloaded(selectedModel)) {
             ModelState.DOWNLOADED
+        } else if (modelManager.hasTempFile(selectedModel)) {
+            // Bug 12: detect partial downloads from process death
+            ModelState.DOWNLOAD_INCOMPLETE
         } else {
             ModelState.NOT_DOWNLOADED
         }
@@ -96,8 +101,14 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun getSelectedModelInfo(): ModelInfo {
-        return ModelManager.getModelById(_uiState.value.selectedModelId)
-            ?: ModelManager.AVAILABLE_MODELS[0]
+        val selectedId = _uiState.value.selectedModelId
+        val model = ModelManager.getModelById(selectedId)
+        // Bug 1: log a warning if the persisted ID doesn't match any known model
+        if (model == null) {
+            Log.w(TAG, "Persisted model ID '$selectedId' does not match any available model. " +
+                "Falling back to '${ModelManager.AVAILABLE_MODELS[0].id}'.")
+        }
+        return model ?: ModelManager.AVAILABLE_MODELS[0]
     }
 
     fun startDownload() {
@@ -159,13 +170,8 @@ class ModelViewModel(application: Application) : AndroidViewModel(application) {
                 // Unload current model first if a different one is loaded
                 val currentLoaded = _uiState.value.loadedModelId
                 if (currentLoaded != null && currentLoaded != modelInfo.id) {
-                    // Unload the previously active engine
-                    val previousModel = ModelManager.getModelById(currentLoaded)
-                    if (true) { // LiteRT only
-                        liteRtEngine.unloadModel()
-                    } else {
-                        // no-op: only LiteRT now
-                    }
+                    // Bug 14: removed dead `if (true)` branch — only LiteRT is supported
+                    liteRtEngine.unloadModel()
                 }
 
                 val modelPath = modelManager.getModelFile(modelInfo).absolutePath

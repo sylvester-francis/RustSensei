@@ -62,6 +62,10 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
 
     private var validationJob: Job? = null
 
+    // Bug 4: track category observer jobs so we can cancel previous collectors
+    // when a category is re-expanded, preventing coroutine leaks
+    private val categoryObserverJobs = mutableMapOf<String, Job>()
+
     private val _uiState = MutableStateFlow(ExerciseUiState())
     val uiState: StateFlow<ExerciseUiState> = _uiState.asStateFlow()
 
@@ -103,14 +107,15 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val newExpanded = if (current == categoryId) null else categoryId
         _uiState.value = _uiState.value.copy(expandedCategory = newExpanded)
 
-        // Load progress for the newly expanded category if not already loaded
-        if (newExpanded != null && !_uiState.value.categoryProgress.containsKey(newExpanded)) {
+        if (newExpanded != null) {
+            // Bug 4: cancel any existing observer for this category before starting a new one
+            categoryObserverJobs[newExpanded]?.cancel()
             loadCategoryProgress(newExpanded)
         }
     }
 
     private fun loadCategoryProgress(categoryId: String) {
-        viewModelScope.launch {
+        val job = viewModelScope.launch {
             try {
                 progressRepo.getExerciseProgressByCategory(categoryId).collect { progressList ->
                     val currentMap = _uiState.value.categoryProgress.toMutableMap()
@@ -121,29 +126,17 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
                 Log.e(TAG, "Error in loadCategoryProgress: ${e.message}", e)
             }
         }
+        // Bug 4: store the job so it can be cancelled on re-expand or cleanup
+        categoryObserverJobs[categoryId] = job
     }
 
     // Refresh progress for the current category after completing an exercise
     private fun refreshCurrentCategoryProgress() {
         val exercise = _uiState.value.currentExercise ?: return
         val categoryId = exercise.category
-        // Re-fetch from DB to update the map
-        viewModelScope.launch {
-            try {
-                val progressList = withContext(Dispatchers.IO) {
-                    // Fetch once, not as a flow
-                    progressRepo.getExerciseProgressByCategory(categoryId)
-                }
-                // Collect just the first emission to update
-                progressList.collect { list ->
-                    val currentMap = _uiState.value.categoryProgress.toMutableMap()
-                    currentMap[categoryId] = list
-                    _uiState.value = _uiState.value.copy(categoryProgress = currentMap)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in refreshCurrentCategoryProgress: ${e.message}", e)
-            }
-        }
+        // Bug 4: cancel the existing observer before re-fetching
+        categoryObserverJobs[categoryId]?.cancel()
+        loadCategoryProgress(categoryId)
     }
 
     fun openExercise(exerciseId: String) {
@@ -405,5 +398,12 @@ class ExerciseViewModel(application: Application) : AndroidViewModel(application
         val matchedDiffs = keyDifferences.intersect(userWords)
 
         return matchedDiffs.size >= keyDifferences.size * 0.7
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Bug 4: cancel all category observer jobs on cleanup
+        categoryObserverJobs.values.forEach { it.cancel() }
+        categoryObserverJobs.clear()
     }
 }

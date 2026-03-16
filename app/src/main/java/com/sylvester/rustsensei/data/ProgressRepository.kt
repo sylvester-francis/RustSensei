@@ -12,7 +12,9 @@ class ProgressRepository(private val progressDao: ProgressDao) {
         SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
 
-    private fun todayString(): String = (dateFormat.get() ?: SimpleDateFormat("yyyy-MM-dd", Locale.US)).format(Date())
+    // Bug 3: ThreadLocal.withInitial guarantees a non-null value, so !! is safe here.
+    // The previous fallback was unnecessary and masked the intent.
+    private fun todayString(): String = dateFormat.get()!!.format(Date())
 
     // Book Progress
     suspend fun updateReadProgress(sectionId: String, chapterId: String, readPercent: Float) {

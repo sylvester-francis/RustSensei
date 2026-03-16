@@ -70,8 +70,10 @@ abstract class AppDatabase : RoomDatabase() {
                     "rustsensei_db"
                 )
                     .addMigrations(MIGRATION_1_2)
-                    // P1 Fix #8: safety net if a future migration is missing
-                    .fallbackToDestructiveMigration()
+                    // WARNING: Do NOT use fallbackToDestructiveMigration() here — it wipes
+                    // all user data (chat history, progress, stats) on ANY missing migration.
+                    // Only allow destructive migration on version downgrade (e.g. debug builds).
+                    .fallbackToDestructiveMigrationOnDowngrade()
                     .build()
                 INSTANCE = instance
                 instance

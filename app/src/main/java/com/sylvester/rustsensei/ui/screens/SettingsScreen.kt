@@ -224,14 +224,9 @@ fun SettingsScreen(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            @Suppress("KotlinConstantConditions")
-            val formatInfo = if (true) {
-                "Quantization: Q8  |  Format: LiteRT (TFLite)  |  GPU-accelerated"
-            } else {
-                "Quantization: Q4_K_M  |  Format: GGUF"
-            }
+            // Bug 14: removed dead `if (true)` branch left over from GGUF removal
             Text(
-                text = formatInfo,
+                text = "Quantization: Q8  |  Format: LiteRT (TFLite)  |  GPU-accelerated",
                 fontSize = 13.sp,
                 fontFamily = FontFamily.Monospace,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),

@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicBoolean
 
 sealed class ChatContext {
     data object General : ChatContext()
@@ -42,6 +43,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
         private const val TAG = "ChatViewModel"
+        // Bug 10: maximum allowed input length
+        private const val MAX_MESSAGE_LENGTH = 4000
     }
 
     private val app = application as RustSenseiApplication
@@ -72,6 +75,10 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     private var generationJob: Job? = null
     private var messagesJob: Job? = null
+
+    // Bug 6: AtomicBoolean gate to prevent double-tap race condition.
+    // compareAndSet is atomic — only the first caller wins.
+    private val sendingGate = AtomicBoolean(false)
 
     fun updateConfig(config: InferenceConfig) {
         _config.value = config
@@ -140,17 +147,32 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
 
     fun sendMessage(text: String) {
         val convId = _uiState.value.currentConversationId ?: return
-        if (text.isBlank() || _uiState.value.isGenerating) return
+
+        // Bug 10: trim whitespace and validate input
+        val trimmed = text.trim()
+        if (trimmed.isBlank()) return
+
+        // Bug 6: atomic gate — only the first concurrent caller proceeds.
+        // This prevents the race where two quick taps both pass the isGenerating check.
+        if (!sendingGate.compareAndSet(false, true)) return
+
+        // Bug 10: enforce max character limit
+        val message = if (trimmed.length > MAX_MESSAGE_LENGTH) {
+            Log.w(TAG, "Message truncated from ${trimmed.length} to $MAX_MESSAGE_LENGTH characters")
+            trimmed.take(MAX_MESSAGE_LENGTH)
+        } else {
+            trimmed
+        }
 
         viewModelScope.launch {
             try {
-                repository.addMessage(convId, "user", text)
+                repository.addMessage(convId, "user", message)
 
                 // Build RAG context based on current chat context
                 val ragContext = when (val ctx = _chatContext.value) {
                     is ChatContext.General -> {
                         withContext(Dispatchers.IO) {
-                            app.ragRetriever.retrieveContext(text)
+                            app.ragRetriever.retrieveContext(message)
                         }
                     }
                     is ChatContext.BookSection -> {
@@ -224,6 +246,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                                 streamingText = "",
                                 inferenceTimeMs = elapsed
                             )
+                            // Bug 6: release the gate so the next message can be sent
+                            sendingGate.set(false)
                         }
                         .collect { token ->
                             tokenBuffer.append(token)
@@ -241,6 +265,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     isGenerating = false,
                     streamingText = ""
                 )
+                // Bug 6: release the gate on error so user is not permanently locked out
+                sendingGate.set(false)
             }
         }
     }
@@ -248,6 +274,8 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     fun stopGeneration() {
         getActiveEngine().stopGeneration()
         generationJob?.cancel()
+        // Bug 6: release the gate when generation is manually stopped
+        sendingGate.set(false)
     }
 
     fun getConversations() = repository.getConversations()

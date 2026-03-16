@@ -153,7 +153,7 @@ fun ModelSetupScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         when (uiState.modelState) {
-            ModelState.NOT_DOWNLOADED -> {
+            ModelState.NOT_DOWNLOADED, ModelState.DOWNLOAD_INCOMPLETE -> {
                 Text(
                     text = "Choose a model to download.\nAfter downloading, no internet connection is required.",
                     textAlign = TextAlign.Center,

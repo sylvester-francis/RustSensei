@@ -44,24 +44,29 @@ fun ActivityChart(
         val barWidth = (chartWidth / barCount) * 0.6f
         val barSpacing = chartWidth / barCount
 
-        // Find max value for scaling
+        // Bug 11: Guard against division by zero when all stats have 0 values.
+        // maxOf with coerceAtLeast(1) only protects per-entry, but if every entry
+        // sums to 0 the maxOf still returns 1 due to coerceAtLeast. However, the
+        // real issue is that sectionsRead and exercisesCompleted are Int, and
+        // dividing Int by Float can produce unexpected results. Use explicit toFloat()
+        // on each operand and ensure maxValue is never zero.
         val maxValue = sortedStats.maxOf {
-            (it.sectionsRead + it.exercisesCompleted).coerceAtLeast(1)
-        }.toFloat()
+            it.sectionsRead + it.exercisesCompleted
+        }.coerceAtLeast(1).toFloat()
 
         sortedStats.forEachIndexed { index, stat ->
             val x = padding + index * barSpacing + (barSpacing - barWidth) / 2
 
-            // Sections bar
-            val sectionsHeight = (stat.sectionsRead / maxValue) * chartHeight
+            // Sections bar — safe: maxValue >= 1f so no division by zero
+            val sectionsHeight = (stat.sectionsRead.toFloat() / maxValue) * chartHeight
             drawRect(
                 color = primaryColor,
                 topLeft = Offset(x, padding + chartHeight - sectionsHeight),
                 size = Size(barWidth / 2, sectionsHeight)
             )
 
-            // Exercises bar
-            val exercisesHeight = (stat.exercisesCompleted / maxValue) * chartHeight
+            // Exercises bar — safe: maxValue >= 1f so no division by zero
+            val exercisesHeight = (stat.exercisesCompleted.toFloat() / maxValue) * chartHeight
             drawRect(
                 color = tertiaryColor,
                 topLeft = Offset(x + barWidth / 2, padding + chartHeight - exercisesHeight),
