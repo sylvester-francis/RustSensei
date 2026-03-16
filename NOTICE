@@ -1,0 +1,31 @@
+RustSensei
+Copyright 2024 Sylvester Ranjith Francis
+
+This product includes content adapted from the following open-source projects:
+
+---
+
+The Rust Programming Language (The Rust Book)
+Copyright (c) The Rust Project Developers
+Licensed under MIT and Apache License 2.0
+https://github.com/rust-lang/book
+
+Book content has been adapted and reformatted for mobile consumption.
+
+---
+
+Rustlings
+Copyright (c) The Rust Community
+Licensed under MIT
+https://github.com/rust-lang/rustlings
+
+Exercise concepts and structure are inspired by Rustlings.
+
+---
+
+Google LiteRT (formerly TensorFlow Lite)
+Copyright (c) Google LLC
+Licensed under Apache License 2.0
+https://github.com/google-ai-edge/LiteRT
+
+Used for on-device GPU-accelerated language model inference.

@@ -66,6 +66,7 @@ import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.SuccessGreen
+import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
@@ -157,11 +158,14 @@ fun SettingsScreen(
                             fontFamily = FontFamily.Monospace,
                             color = SecondaryText
                         )
+                        val backend = chatViewModel.liteRtEngine.getActiveBackend()
+                        val backendLabel = if (backend == "GPU") "GPU-accelerated" else "CPU mode (slower)"
                         Text(
-                            text = "Q8 | LiteRT (TFLite) | GPU-accelerated",
+                            text = "Q8 | LiteRT | $backendLabel",
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = SecondaryText.copy(alpha = 0.7f)
+                            color = if (backend == "GPU") SecondaryText.copy(alpha = 0.7f)
+                                    else WarningAmber.copy(alpha = 0.7f)
                         )
                     } else {
                         Text(
@@ -567,6 +571,69 @@ fun SettingsScreen(
                             )
                         }
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Acknowledgments card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = DarkSurfaceContainerHigh
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Acknowledgments",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontFamily = FontFamily.Monospace,
+                        color = RustOrange
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Book content adapted from The Rust Programming Language by Steve Klabnik and Carol Nichols, licensed under MIT/Apache 2.0.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryText,
+                        lineHeight = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "github.com/rust-lang/book",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = NeonCyan,
+                        modifier = Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rust-lang/book"))
+                            aboutContext.startActivity(intent)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Exercises inspired by Rustlings by the Rust Community, licensed under MIT.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryText,
+                        lineHeight = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "github.com/rust-lang/rustlings",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = NeonCyan,
+                        modifier = Modifier.clickable {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rust-lang/rustlings"))
+                            aboutContext.startActivity(intent)
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "AI model powered by Google LiteRT, running entirely on-device.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SecondaryText,
+                        lineHeight = 18.sp
+                    )
                 }
             }
 
