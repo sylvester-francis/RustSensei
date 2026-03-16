@@ -2,6 +2,4 @@
 <!-- For API < 31 -->
 <full-backup-content>
     <include domain="sharedpref" path="." />
-    <exclude domain="database" path="." />
-    <exclude domain="file" path="models" />
 </full-backup-content>

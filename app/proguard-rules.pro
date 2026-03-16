@@ -23,6 +23,14 @@
 -keep class javax.inject.** { *; }
 -keep class * extends dagger.hilt.android.internal.managers.ViewComponentManager$FragmentContextWrapper { *; }
 
+# Suppress warnings for optional Tink dependencies (not used at runtime)
+-dontwarn com.google.api.client.http.**
+-dontwarn com.google.api.client.http.javanet.**
+-dontwarn org.joda.time.Instant
+
+# LiteRT LLM engine (uses reflection)
+-keep class com.google.ai.edge.litertlm.** { *; }
+
 # Keep line numbers for crash reporting
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
