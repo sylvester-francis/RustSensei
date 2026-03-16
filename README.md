@@ -13,7 +13,7 @@ An offline Android app that teaches Rust programming through an on-device AI tut
 ### Learning Content
 - **19-chapter Rust book** — from Getting Started to Macros, with code examples and reading progress tracking
 - **97 exercises** — Rustlings-style coding challenges with syntax-highlighted editor, hints, and AI-powered code review
-- **5 topic quizzes** (32 questions) — multiple choice, true/false, and code completion with animated feedback
+- **5 topic quizzes** (32 questions) — multiple choice, true/false, and code completion with score rings, animated transitions, and detailed feedback
 - **Spaced repetition flashcards** — SM2-scheduled review system with 110+ cards
 - **5 guided learning paths** — structured step-by-step progression through Rust concepts
 - **12 reference guides** — cheat sheets, compiler errors, language comparisons, design patterns, glossary
