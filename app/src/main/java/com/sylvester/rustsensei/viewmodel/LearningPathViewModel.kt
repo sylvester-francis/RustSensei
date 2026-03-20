@@ -33,6 +33,18 @@ class LearningPathViewModel(
     private val _uiState = MutableStateFlow(PathUiState())
     val uiState: StateFlow<PathUiState> = _uiState.asStateFlow()
 
+    // Signals MainScreen to switch to a specific tab after navigating back from learning paths
+    private val _requestedTab = MutableStateFlow<String?>(null)
+    val requestedTab: StateFlow<String?> = _requestedTab.asStateFlow()
+
+    fun requestTabNavigation(tab: String) {
+        _requestedTab.value = tab
+    }
+
+    fun clearTabRequest() {
+        _requestedTab.value = null
+    }
+
     init {
         loadPaths()
     }

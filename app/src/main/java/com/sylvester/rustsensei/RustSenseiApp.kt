@@ -120,6 +120,21 @@ fun RustSenseiApp() {
                 viewModel = learningPathViewModel,
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToChapter = { chapterId ->
+                    bookViewModel.openChapter(chapterId)
+                    learningPathViewModel.requestTabNavigation("learn")
+                    navController.popBackStack()
+                },
+                onNavigateToExercise = { exerciseId ->
+                    exerciseViewModel.openExercise(exerciseId)
+                    learningPathViewModel.requestTabNavigation("practice")
+                    navController.popBackStack()
+                },
+                onNavigateToReview = {
+                    navController.navigate(Screen.Review.route) {
+                        popUpTo(Screen.LearningPath.route) { inclusive = true }
+                    }
                 }
             )
         }

@@ -96,7 +96,10 @@ private val pathIcons = listOf(
 @Composable
 fun LearningPathScreen(
     viewModel: LearningPathViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToChapter: (chapterId: String) -> Unit = {},
+    onNavigateToExercise: (exerciseId: String) -> Unit = {},
+    onNavigateToReview: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -152,7 +155,14 @@ fun LearningPathScreen(
                     PathDetailContent(
                         path = path,
                         stepProgress = uiState.stepProgress,
-                        onStepTap = { viewModel.markStepComplete(path.id, it.id) },
+                        onStepTap = { step ->
+                            viewModel.markStepComplete(path.id, step.id)
+                            when (step.type) {
+                                "read" -> onNavigateToChapter(step.targetId)
+                                "exercise" -> onNavigateToExercise(step.targetId)
+                                "review" -> onNavigateToReview()
+                            }
+                        },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

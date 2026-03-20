@@ -37,6 +37,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -102,6 +104,28 @@ fun MainScreen(
 
     // Track selected index for the nav bar pill highlight
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    // Switch tab when returning from Learning Paths with content loaded
+    val requestedTab by learningPathViewModel.requestedTab.collectAsState()
+    LaunchedEffect(requestedTab) {
+        val tab = requestedTab ?: return@LaunchedEffect
+        val targetTab = when (tab) {
+            "learn" -> Tab.Learn
+            "practice" -> Tab.Practice
+            else -> null
+        }
+        targetTab?.let {
+            tabNavController.navigate(it.route) {
+                popUpTo(tabNavController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+            selectedTabIndex = tabs.indexOf(it)
+        }
+        learningPathViewModel.clearTabRequest()
+    }
 
     // Hide chrome when Chat is active (it has its own top bar and needs full screen)
     val isChatActive = currentDestination?.route == Tab.Chat.route
