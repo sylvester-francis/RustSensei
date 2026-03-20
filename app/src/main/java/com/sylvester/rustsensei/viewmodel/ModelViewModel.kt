@@ -166,7 +166,8 @@ class ModelViewModel(
     }
 
     fun loadModel(liteRtEngine: LiteRtEngine) {
-        if (_uiState.value.modelState == ModelState.LOADING) return
+        val currentState = _uiState.value.modelState
+        if (currentState == ModelState.LOADING || currentState == ModelState.READY) return
 
         val modelInfo = getSelectedModelInfo()
         viewModelScope.launch {

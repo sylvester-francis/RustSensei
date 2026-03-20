@@ -59,58 +59,70 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
     @OptIn(ExperimentalApi::class)
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {
         return withContext(Dispatchers.IO) {
-            try {
-                _isModelLoading.value = true
-                engine?.close()
-                conversation?.close()
+            synchronized(lock) {
+                try {
+                    _isModelLoading.value = true
 
-                // Try GPU first (fast, Tensor/Adreno), fall back to CPU (universal)
-                val newEngine = try {
-                    val gpuConfig = EngineConfig(
-                        modelPath = modelPath,
-                        backend = Backend.GPU(),
-                        cacheDir = context.cacheDir.absolutePath
+                    // Cancel any in-flight generation before closing handles
+                    if (isGenerating) {
+                        try { conversation?.cancelProcess() } catch (_: Exception) {}
+                        Thread.sleep(200)
+                    }
+
+                    conversation?.close()
+                    engine?.close()
+                    conversation = null
+                    engine = null
+
+                    // Try GPU first (fast, Tensor/Adreno), fall back to CPU (universal)
+                    val newEngine = try {
+                        val gpuConfig = EngineConfig(
+                            modelPath = modelPath,
+                            backend = Backend.GPU(),
+                            cacheDir = context.cacheDir.absolutePath
+                        )
+                        val eng = Engine(gpuConfig)
+                        eng.initialize()
+                        activeBackend = "GPU"
+                        Log.i(TAG, "Using GPU backend")
+                        eng
+                    } catch (gpuError: Exception) {
+                        Log.w(TAG, "GPU backend failed: ${gpuError.message}, falling back to CPU")
+                        val cpuConfig = EngineConfig(
+                            modelPath = modelPath,
+                            backend = Backend.CPU(),
+                            cacheDir = context.cacheDir.absolutePath
+                        )
+                        val eng = Engine(cpuConfig)
+                        eng.initialize()
+                        activeBackend = "CPU"
+                        Log.i(TAG, "Using CPU backend (slower, but universal)")
+                        eng
+                    }
+
+                    engine = newEngine
+
+                    // Create initial conversation — exact Google pattern
+                    ExperimentalFlags.enableConversationConstrainedDecoding = false
+                    val conv = newEngine.createConversation(
+                        ConversationConfig(
+                            samplerConfig = DEFAULT_SAMPLER
+                        )
                     )
-                    val eng = Engine(gpuConfig)
-                    eng.initialize()
-                    activeBackend = "GPU"
-                    Log.i(TAG, "Using GPU backend")
-                    eng
-                } catch (gpuError: Exception) {
-                    Log.w(TAG, "GPU backend failed: ${gpuError.message}, falling back to CPU")
-                    val cpuConfig = EngineConfig(
-                        modelPath = modelPath,
-                        backend = Backend.CPU(),
-                        cacheDir = context.cacheDir.absolutePath
-                    )
-                    val eng = Engine(cpuConfig)
-                    eng.initialize()
-                    activeBackend = "CPU"
-                    Log.i(TAG, "Using CPU backend (slower, but universal)")
-                    eng
+                    ExperimentalFlags.enableConversationConstrainedDecoding = false
+                    conversation = conv
+
+                    _modelLoaded.value = true
+                    _isModelLoading.value = false
+                    isGenerating = false
+                    Log.i(TAG, "Model loaded: $modelPath")
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load: ${e.message}", e)
+                    _modelLoaded.value = false
+                    _isModelLoading.value = false
+                    false
                 }
-
-                engine = newEngine
-
-                // Create initial conversation — exact Google pattern
-                ExperimentalFlags.enableConversationConstrainedDecoding = false
-                val conv = newEngine.createConversation(
-                    ConversationConfig(
-                        samplerConfig = DEFAULT_SAMPLER
-                    )
-                )
-                ExperimentalFlags.enableConversationConstrainedDecoding = false
-                conversation = conv
-
-                _modelLoaded.value = true
-                _isModelLoading.value = false
-                Log.i(TAG, "Model loaded: $modelPath")
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load: ${e.message}", e)
-                _modelLoaded.value = false
-                _isModelLoading.value = false
-                false
             }
         }
     }
