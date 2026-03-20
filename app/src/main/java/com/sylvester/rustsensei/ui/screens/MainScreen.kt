@@ -127,6 +127,35 @@ fun MainScreen(
         learningPathViewModel.clearTabRequest()
     }
 
+    // Mark learning path step complete when the opened content is actually finished
+    val pendingStep by learningPathViewModel.pendingStep.collectAsState()
+    val bookUiState by bookViewModel.uiState.collectAsState()
+    val exerciseUiState by exerciseViewModel.uiState.collectAsState()
+    val reviewUiState by reviewViewModel.uiState.collectAsState()
+
+    LaunchedEffect(bookUiState.sectionMarkedComplete) {
+        val pending = pendingStep
+        if (bookUiState.sectionMarkedComplete && pending != null && pending.type == "read" &&
+            bookUiState.currentChapterId == pending.targetId) {
+            learningPathViewModel.completePendingStep()
+        }
+    }
+
+    LaunchedEffect(exerciseUiState.checkResult) {
+        val pending = pendingStep
+        if (exerciseUiState.checkResult == "correct" && pending != null && pending.type == "exercise" &&
+            exerciseUiState.currentExercise?.id == pending.targetId) {
+            learningPathViewModel.completePendingStep()
+        }
+    }
+
+    LaunchedEffect(reviewUiState.sessionComplete) {
+        val pending = pendingStep
+        if (reviewUiState.sessionComplete && pending != null && pending.type == "review") {
+            learningPathViewModel.completePendingStep()
+        }
+    }
+
     // Hide chrome when Chat is active (it has its own top bar and needs full screen)
     val isChatActive = currentDestination?.route == Tab.Chat.route
     val hideTopBar = isChatActive || currentDestination?.route == Tab.Profile.route

@@ -1,6 +1,9 @@
 package com.sylvester.rustsensei
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -107,6 +110,15 @@ fun RustSenseiApp() {
         }
 
         composable(Screen.Review.route) {
+            val reviewUiState by reviewViewModel.uiState.collectAsState()
+            val pendingStep by learningPathViewModel.pendingStep.collectAsState()
+
+            LaunchedEffect(reviewUiState.sessionComplete) {
+                if (reviewUiState.sessionComplete && pendingStep != null && pendingStep?.type == "review") {
+                    learningPathViewModel.completePendingStep()
+                }
+            }
+
             ReviewScreen(
                 viewModel = reviewViewModel,
                 onNavigateBack = {

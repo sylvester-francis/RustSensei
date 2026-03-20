@@ -156,7 +156,7 @@ fun LearningPathScreen(
                         path = path,
                         stepProgress = uiState.stepProgress,
                         onStepTap = { step ->
-                            viewModel.markStepComplete(path.id, step.id)
+                            viewModel.setPendingStep(path.id, step)
                             when (step.type) {
                                 "read" -> onNavigateToChapter(step.targetId)
                                 "exercise" -> onNavigateToExercise(step.targetId)

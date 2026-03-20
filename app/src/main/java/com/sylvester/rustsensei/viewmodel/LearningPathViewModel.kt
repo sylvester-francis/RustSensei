@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathProgress
+import com.sylvester.rustsensei.data.PathStep
 import com.sylvester.rustsensei.data.ProgressDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 enum class PathMode { LIST, DETAIL }
+
+data class PendingPathStep(
+    val pathId: String,
+    val stepId: String,
+    val type: String,
+    val targetId: String
+)
 
 data class PathUiState(
     val paths: List<LearningPath> = emptyList(),
@@ -43,6 +51,24 @@ class LearningPathViewModel(
 
     fun clearTabRequest() {
         _requestedTab.value = null
+    }
+
+    // Tracks the step the user tapped — completion is deferred until content is actually finished
+    private val _pendingStep = MutableStateFlow<PendingPathStep?>(null)
+    val pendingStep: StateFlow<PendingPathStep?> = _pendingStep.asStateFlow()
+
+    fun setPendingStep(pathId: String, step: PathStep) {
+        _pendingStep.value = PendingPathStep(pathId, step.id, step.type, step.targetId)
+    }
+
+    fun completePendingStep() {
+        val pending = _pendingStep.value ?: return
+        markStepComplete(pending.pathId, pending.stepId)
+        _pendingStep.value = null
+    }
+
+    fun clearPendingStep() {
+        _pendingStep.value = null
     }
 
     init {
