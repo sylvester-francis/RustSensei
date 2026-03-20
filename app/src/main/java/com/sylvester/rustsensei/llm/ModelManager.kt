@@ -1,6 +1,8 @@
 package com.sylvester.rustsensei.llm
 
 import android.content.Context
+import android.net.wifi.WifiManager
+import android.os.PowerManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -119,7 +121,19 @@ class ModelManager(private val context: Context) {
     fun downloadModel(modelInfo: ModelInfo): Flow<DownloadState> = flow {
         emit(DownloadState.Downloading(0f, 0, 0))
 
+        // Optimization #8: Acquire WiFi and Wake locks during large model download.
+        // Without these, the WiFi radio may throttle or disconnect when the screen
+        // turns off mid-download (~1.2 GB), wasting battery on retries.
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        @Suppress("DEPRECATION")
+        val wifiLock = wifiManager?.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "RustSensei:ModelDownload")
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+        val wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "RustSensei:ModelDownload")
+
         try {
+            wifiLock?.acquire()
+            wakeLock?.acquire(30 * 60 * 1000L) // 30 min timeout safety net
+
             val client = OkHttpClient.Builder()
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
@@ -231,6 +245,10 @@ class ModelManager(private val context: Context) {
                 tempFile.delete()
             }
             emit(DownloadState.Error(e.message ?: "Unknown download error"))
+        } finally {
+            // Optimization #8: Always release locks when download finishes or fails
+            try { if (wakeLock?.isHeld == true) wakeLock.release() } catch (_: Exception) {}
+            try { if (wifiLock?.isHeld == true) wifiLock.release() } catch (_: Exception) {}
         }
     }.flowOn(Dispatchers.IO)
 

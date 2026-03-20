@@ -35,8 +35,10 @@ class AppContainer(context: Context) {
     val ragRetriever = RagRetriever(context)
     val preferencesManager = PreferencesManager(context)
 
-    val liteRtEngine = LiteRtEngine(context)
-    val modelManager = ModelManager(context)
+    // Optimization #4: Lazy-init expensive native resources — only allocate when
+    // user actually opens chat, not at app startup.
+    val liteRtEngine by lazy { LiteRtEngine(context) }
+    val modelManager by lazy { ModelManager(context) }
 }
 
 class AppViewModelFactory(

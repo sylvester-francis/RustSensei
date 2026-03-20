@@ -7,9 +7,12 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningStats
 import com.sylvester.rustsensei.data.ProgressRepository
 import com.sylvester.rustsensei.data.UserNote
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -63,6 +66,9 @@ class ProgressViewModel(
         loadRecentNotes()
     }
 
+    // Optimization #2 & #7: Use combine() to merge all progress flows into a single
+    // emission, and debounce achievement refreshes to avoid redundant DB queries.
+    @OptIn(FlowPreview::class)
     private fun loadProgress() {
         viewModelScope.launch {
             try {
@@ -74,48 +80,41 @@ class ProgressViewModel(
                     totalExercises = totalExercises
                 )
 
+                // Optimization #7: Combine all four flows into one emission so the
+                // Dashboard recomposes once per batch instead of 4 separate times.
                 launch {
                     try {
-                        progressRepo.getCompletedSectionsCount().collect { count ->
-                            _uiState.value = _uiState.value.copy(completedSections = count)
-                            refreshAchievements()
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error collecting completedSections: ${e.message}", e)
-                    }
-                }
-                launch {
-                    try {
-                        progressRepo.getCompletedExercisesCount().collect { count ->
-                            _uiState.value = _uiState.value.copy(completedExercises = count)
-                            refreshAchievements()
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error collecting completedExercises: ${e.message}", e)
-                    }
-                }
-                launch {
-                    try {
-                        progressRepo.getTotalStudyTime().collect { time ->
-                            _uiState.value = _uiState.value.copy(totalStudyTimeSeconds = time ?: 0)
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error collecting totalStudyTime: ${e.message}", e)
-                    }
-                }
-                launch {
-                    try {
-                        progressRepo.getRecentStats(7).collect { stats ->
+                        combine(
+                            progressRepo.getCompletedSectionsCount(),
+                            progressRepo.getCompletedExercisesCount(),
+                            progressRepo.getTotalStudyTime(),
+                            progressRepo.getRecentStats(7)
+                        ) { sections, exercises, studyTime, stats ->
                             val streak = calculateStreak(stats)
-                            _uiState.value = _uiState.value.copy(
+                            _uiState.value.copy(
+                                completedSections = sections,
+                                completedExercises = exercises,
+                                totalStudyTimeSeconds = studyTime ?: 0,
                                 weeklyStats = stats,
                                 studyStreak = streak,
-                                weekActivity = buildWeekActivity(stats)
+                                weekActivity = buildWeekActivity(stats),
+                                totalSections = totalSections,
+                                totalExercises = totalExercises
+                            )
+                        }
+                        // Optimization #2: Debounce so rapid DB changes (e.g. completing
+                        // an exercise updates multiple tables) coalesce into one update.
+                        .debounce(300)
+                        .collect { newState ->
+                            _uiState.value = newState.copy(
+                                continueTarget = _uiState.value.continueTarget,
+                                achievements = _uiState.value.achievements,
+                                recentNotes = _uiState.value.recentNotes
                             )
                             refreshAchievements()
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error collecting recentStats: ${e.message}", e)
+                        Log.e(TAG, "Error in combined progress flow: ${e.message}", e)
                     }
                 }
 

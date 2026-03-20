@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.ui.screens
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -44,6 +45,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -55,6 +57,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -64,6 +67,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.sylvester.rustsensei.ui.components.ActivityChart
 import com.sylvester.rustsensei.ui.components.ProgressRing
 import com.sylvester.rustsensei.ui.theme.NeonCyan
@@ -72,6 +77,7 @@ import com.sylvester.rustsensei.viewmodel.Achievement
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import kotlinx.coroutines.isActive
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -160,28 +166,30 @@ fun DashboardScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Streak with flame icon
+                // Optimization #5: Lifecycle-aware flame animation — pauses when
+                // the screen is not visible (e.g. user switches to another tab),
+                // saving CPU/GPU draw cycles and battery.
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    val transition = rememberInfiniteTransition(label = "streak_flame")
-                    val flameScale by transition.animateFloat(
-                        initialValue = 0.95f,
-                        targetValue = 1.05f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(durationMillis = 1500),
-                            repeatMode = RepeatMode.Reverse
-                        ),
-                        label = "flame_scale"
-                    )
+                    val flameScale = remember { Animatable(1f) }
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    LaunchedEffect(lifecycleOwner) {
+                        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                            while (isActive) {
+                                flameScale.animateTo(1.05f, tween(750))
+                                flameScale.animateTo(0.95f, tween(750))
+                            }
+                        }
+                    }
                     Icon(
                         imageVector = Icons.Default.LocalFireDepartment,
                         contentDescription = "Streak flame",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(36.dp)
-                            .scale(flameScale)
+                            .scale(flameScale.value)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -614,25 +622,25 @@ private fun WeekDayDot(
         Spacer(modifier = Modifier.height(6.dp))
 
         when {
-            // Today with no activity: pulsing outline
+            // Optimization #5: Lifecycle-aware pulse — stops when screen is offscreen
             isToday && level == 0 -> {
-                val transition = rememberInfiniteTransition(label = "today_pulse_$label")
-                val pulseAlpha by transition.animateFloat(
-                    initialValue = 0.3f,
-                    targetValue = 1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(durationMillis = 1200),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "pulse_alpha_$label"
-                )
+                val pulseAlpha = remember { Animatable(0.3f) }
+                val lifecycleOwner = LocalLifecycleOwner.current
+                LaunchedEffect(lifecycleOwner) {
+                    lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                        while (isActive) {
+                            pulseAlpha.animateTo(1f, tween(600))
+                            pulseAlpha.animateTo(0.3f, tween(600))
+                        }
+                    }
+                }
                 Box(
                     modifier = Modifier
                         .size(dotSize)
                         .clip(CircleShape)
                         .border(
                             width = 2.dp,
-                            color = primaryColor.copy(alpha = pulseAlpha),
+                            color = primaryColor.copy(alpha = pulseAlpha.value),
                             shape = CircleShape
                         )
                 )

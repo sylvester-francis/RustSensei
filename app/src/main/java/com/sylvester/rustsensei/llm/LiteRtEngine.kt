@@ -139,6 +139,13 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
             }
         }
 
+        // Optimization #9: Automatically reduce inference workload on low battery
+        val effectiveConfig = InferenceConfig.adjustForBattery(config, context)
+        if (effectiveConfig.maxTokens != config.maxTokens) {
+            Log.i(TAG, "Low battery — reduced context to ${effectiveConfig.contextLength}, " +
+                "maxTokens to ${effectiveConfig.maxTokens}")
+        }
+
         // Exact Google Gallery pattern:
         // conversation.sendMessageAsync(Contents.of(contents), MessageCallback)
         return callbackFlow {

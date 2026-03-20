@@ -13,6 +13,7 @@ import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelManager
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +21,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.SharingStarted
 
 sealed class ChatContext {
     data object General : ChatContext()
@@ -53,6 +52,8 @@ class ChatViewModel(
         private const val TAG = "ChatViewModel"
         // Bug 10: maximum allowed input length
         private const val MAX_MESSAGE_LENGTH = 4000
+        // Optimization #1: Unload LLM after 5 minutes of inactivity
+        private const val IDLE_UNLOAD_DELAY_MS = 5 * 60 * 1000L
     }
 
     private fun getActiveEngine(): InferenceEngine {
@@ -81,6 +82,9 @@ class ChatViewModel(
 
     private var generationJob: Job? = null
     private var messagesJob: Job? = null
+
+    // Optimization #1: Idle timer to unload the model after inactivity
+    private var idleUnloadJob: Job? = null
 
     // Bug 6: AtomicBoolean gate to prevent double-tap race condition.
     // compareAndSet is atomic — only the first caller wins.
@@ -156,6 +160,24 @@ class ChatViewModel(
         }
     }
 
+    // Optimization #1: Schedule model unload after idle period
+    private fun scheduleIdleUnload() {
+        idleUnloadJob?.cancel()
+        idleUnloadJob = viewModelScope.launch {
+            delay(IDLE_UNLOAD_DELAY_MS)
+            if (!_uiState.value.isGenerating) {
+                Log.i(TAG, "Idle timeout reached — unloading model to save battery")
+                liteRtEngine.unloadModel()
+            }
+        }
+    }
+
+    // Optimization #1: Cancel idle timer when user is actively chatting
+    private fun cancelIdleUnload() {
+        idleUnloadJob?.cancel()
+        idleUnloadJob = null
+    }
+
     fun sendMessage(text: String) {
         val convId = _uiState.value.currentConversationId ?: return
 
@@ -175,11 +197,15 @@ class ChatViewModel(
             trimmed
         }
 
+        // Optimization #1: Cancel idle unload while actively chatting
+        cancelIdleUnload()
+
         viewModelScope.launch {
             try {
                 repository.addMessage(convId, "user", message)
 
-                // Build RAG context based on current chat context
+                // Optimization #6: RAG retrieval already runs on Dispatchers.IO
+                // (see RagRetriever.retrieveContext), so this is safe.
                 val ragContext = when (val ctx = _chatContext.value) {
                     is ChatContext.General -> {
                         ragRetriever.retrieveContext(message)
@@ -265,6 +291,8 @@ class ChatViewModel(
                             )
                             // Bug 6: release the gate so the next message can be sent
                             sendingGate.set(false)
+                            // Optimization #1: Start idle timer after generation completes
+                            scheduleIdleUnload()
                         }
                         .collect { token ->
                             tokenBuffer.append(token)
@@ -285,6 +313,8 @@ class ChatViewModel(
                 )
                 // Bug 6: release the gate on error so user is not permanently locked out
                 sendingGate.set(false)
+                // Optimization #1: Start idle timer even on error
+                scheduleIdleUnload()
             }
         }
     }
@@ -295,6 +325,8 @@ class ChatViewModel(
         // Bug 6: release the gate when generation is manually stopped
         sendingGate.set(false)
         _uiState.value = _uiState.value.copy(isGenerating = false, streamingText = "")
+        // Optimization #1: Start idle timer after manual stop
+        scheduleIdleUnload()
     }
 
     fun exportConversation(): String {
@@ -364,6 +396,7 @@ class ChatViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        idleUnloadJob?.cancel()
         getActiveEngine().stopGeneration()
     }
 }

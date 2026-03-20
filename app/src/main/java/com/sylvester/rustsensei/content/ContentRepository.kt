@@ -99,8 +99,10 @@ class ContentRepository(private val context: Context) : ContentProvider {
         private const val TAG = "ContentRepository"
     }
 
-    private val chapterCache = LruCache<String, BookChapter>(5)
-    private val exerciseCache = LruCache<String, ExerciseData>(10)
+    // Optimization #10: Increase cache sizes — 19 chapters total, so cache them all
+    // to avoid re-parsing JSON when users flip between chapters.
+    private val chapterCache = LruCache<String, BookChapter>(19)
+    private val exerciseCache = LruCache<String, ExerciseData>(30)
 
     private var bookIndex: BookIndex? = null
     private var exerciseCategories: List<ExerciseCategory>? = null

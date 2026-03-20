@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -31,6 +32,17 @@ fun ActivityChart(
         val totalSections = sortedStats.sumOf { it.sectionsRead }
         val totalExercises = sortedStats.sumOf { it.exercisesCompleted }
         "Weekly activity chart: $totalSections sections read, $totalExercises exercises completed over ${sortedStats.size} days"
+    }
+
+    // Optimization #3: Hoist Paint allocation out of the draw loop.
+    // Canvas lambdas can redraw at 60fps — allocating Paint() on each frame
+    // creates GC pressure and unnecessary object churn.
+    val labelPaint = remember(onSurfaceColor) {
+        android.graphics.Paint().apply {
+            color = onSurfaceColor.hashCode()
+            textSize = 24f
+            textAlign = android.graphics.Paint.Align.CENTER
+        }
     }
 
     Canvas(modifier = modifier
@@ -87,17 +99,13 @@ fun ActivityChart(
                 size = Size(barWidth / 2, exercisesHeight)
             )
 
-            // Date label
+            // Date label — uses hoisted Paint instead of allocating per frame
             val dateLabel = stat.date.takeLast(5) // MM-DD
             drawContext.canvas.nativeCanvas.drawText(
                 dateLabel,
                 x + barWidth / 2 - 15f,
                 size.height - 10f,
-                android.graphics.Paint().apply {
-                    color = onSurfaceColor.hashCode()
-                    textSize = 24f
-                    textAlign = android.graphics.Paint.Align.CENTER
-                }
+                labelPaint
             )
         }
     }

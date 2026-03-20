@@ -1,9 +1,6 @@
 package com.sylvester.rustsensei.ui.components
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,15 +19,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.isActive
 
 data class DayActivity(
     val label: String,
@@ -43,16 +45,19 @@ fun StreakWidget(
     weekActivity: List<DayActivity>,
     modifier: Modifier = Modifier
 ) {
-    val transition = rememberInfiniteTransition(label = "streak_flame")
-    val flameScale by transition.animateFloat(
-        initialValue = 0.97f,
-        targetValue = 1.03f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2000),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "flame_scale"
-    )
+    // Optimization #5: Lifecycle-aware flame animation — automatically pauses
+    // when the composable is not in STARTED state (e.g. screen offscreen, app
+    // backgrounded), eliminating unnecessary GPU draw calls and saving battery.
+    val flameScale = remember { Animatable(1f) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (isActive) {
+                flameScale.animateTo(1.03f, tween(1000))
+                flameScale.animateTo(0.97f, tween(1000))
+            }
+        }
+    }
 
     val primary = MaterialTheme.colorScheme.primary
     val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
@@ -63,14 +68,14 @@ fun StreakWidget(
         },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Flame icon with animated scale
+        // Flame icon with lifecycle-aware animated scale
         Icon(
             imageVector = Icons.Default.LocalFireDepartment,
             contentDescription = null,
             tint = primary,
             modifier = Modifier
                 .size(40.dp)
-                .scale(flameScale)
+                .scale(flameScale.value)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -119,25 +124,25 @@ private fun WeekDot(
     val dotSize = 10.dp
 
     when {
-        // Today: pulsing outline
+        // Optimization #5: Lifecycle-aware pulse — stops when offscreen
         isToday && day.level == 0 -> {
-            val transition = rememberInfiniteTransition(label = "today_pulse")
-            val pulseAlpha by transition.animateFloat(
-                initialValue = 0.4f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = 1200),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "pulse_alpha"
-            )
+            val pulseAlpha = remember { Animatable(0.4f) }
+            val lifecycleOwner = LocalLifecycleOwner.current
+            LaunchedEffect(lifecycleOwner) {
+                lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    while (isActive) {
+                        pulseAlpha.animateTo(1f, tween(600))
+                        pulseAlpha.animateTo(0.4f, tween(600))
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .size(dotSize)
                     .clip(CircleShape)
                     .border(
                         width = 1.5.dp,
-                        color = primary.copy(alpha = pulseAlpha),
+                        color = primary.copy(alpha = pulseAlpha.value),
                         shape = CircleShape
                     )
             )
