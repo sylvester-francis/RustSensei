@@ -18,9 +18,22 @@
 ![Android](https://img.shields.io/badge/Android-8.0+-3DDC84?logo=android&logoColor=white)
 ![License](https://img.shields.io/badge/License-Apache_2.0-blue)
 
-[Download APK](#install) · [Features](#features) · [Model](#model) · [Architecture](#architecture) · [Build](#build-from-source) · [Privacy](#privacy)
+[Download APK](#install) · [Features](#features) · [Screenshots](#screenshots) · [Model](#model) · [Architecture](#architecture) · [Build](#build-from-source) · [Privacy](#privacy)
 
 ---
+
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/phone_01_dashboard.png" width="270" alt="Dashboard" />
+  <img src="screenshots/phone_02_book.png" width="270" alt="Book" />
+  <img src="screenshots/phone_03_chat.png" width="270" alt="AI Chat" />
+</p>
+<p align="center">
+  <img src="screenshots/phone_04_exercises.png" width="270" alt="Exercises" />
+  <img src="screenshots/phone_05_quiz.png" width="270" alt="Quiz" />
+  <img src="screenshots/phone_06_model_setup.png" width="270" alt="Model Setup" />
+</p>
 
 ## Why RustSensei?
 
