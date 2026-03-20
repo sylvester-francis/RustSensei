@@ -1,0 +1,19 @@
+hooks:
+  pre-commit:
+    builtin: ["scan_secrets"]
+    commands:
+      unit-tests:
+        run: ./gradlew testDebugUnitTest --quiet
+        name: "Unit Tests"
+
+  pre-push:
+    commands:
+      unit-tests:
+        run: ./gradlew testDebugUnitTest --quiet
+        name: "Unit Tests"
+
+  commit-msg:
+    builtin: ["conventional_commits"]
+
+settings:
+  max_workers: 4

@@ -3,7 +3,7 @@ package com.sylvester.rustsensei.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.content.ContentRepository
+import com.sylvester.rustsensei.content.ContentProvider
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathProgress
 import com.sylvester.rustsensei.data.PathStep
@@ -30,7 +30,7 @@ data class PathUiState(
 )
 
 class LearningPathViewModel(
-    private val contentRepo: ContentRepository,
+    private val contentRepo: ContentProvider,
     private val progressDao: ProgressDao
 ) : ViewModel() {
 

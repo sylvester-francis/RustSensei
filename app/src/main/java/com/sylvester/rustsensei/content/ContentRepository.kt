@@ -77,7 +77,23 @@ data class BookIndexEntry(
     val sectionTitles: List<String>
 )
 
-class ContentRepository(private val context: Context) {
+interface ContentProvider {
+    suspend fun getBookIndex(): BookIndex
+    suspend fun getChapter(chapterId: String): BookChapter?
+    suspend fun getSection(chapterId: String, sectionId: String): BookSection?
+    suspend fun getExerciseCategories(): List<ExerciseCategory>
+    suspend fun getExercise(exerciseId: String): ExerciseData?
+    suspend fun getReferenceIndex(): ReferenceIndex
+    suspend fun getReferenceItem(sectionId: String, itemId: String): org.json.JSONObject?
+    suspend fun getTotalSectionsCount(): Int
+    suspend fun getTotalExercisesCount(): Int
+    suspend fun getLearningPaths(): List<LearningPath>
+    suspend fun getLearningPath(pathId: String): LearningPath?
+    suspend fun getQuizIndex(): List<com.sylvester.rustsensei.data.QuizIndexEntry>
+    suspend fun getQuiz(quizId: String): com.sylvester.rustsensei.data.Quiz?
+}
+
+class ContentRepository(private val context: Context) : ContentProvider {
 
     companion object {
         private const val TAG = "ContentRepository"
@@ -89,7 +105,7 @@ class ContentRepository(private val context: Context) {
     private var bookIndex: BookIndex? = null
     private var exerciseCategories: List<ExerciseCategory>? = null
 
-    suspend fun getBookIndex(): BookIndex {
+    override suspend fun getBookIndex(): BookIndex {
         bookIndex?.let { return it }
 
         return try {
@@ -124,7 +140,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getChapter(chapterId: String): BookChapter? {
+    override suspend fun getChapter(chapterId: String): BookChapter? {
         chapterCache.get(chapterId)?.let { return it }
 
         return try {
@@ -137,12 +153,12 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getSection(chapterId: String, sectionId: String): BookSection? {
+    override suspend fun getSection(chapterId: String, sectionId: String): BookSection? {
         val chapter = getChapter(chapterId) ?: return null
         return chapter.sections.find { it.id == sectionId }
     }
 
-    suspend fun getExerciseCategories(): List<ExerciseCategory> {
+    override suspend fun getExerciseCategories(): List<ExerciseCategory> {
         exerciseCategories?.let { return it }
 
         return try {
@@ -173,7 +189,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getExercise(exerciseId: String): ExerciseData? {
+    override suspend fun getExercise(exerciseId: String): ExerciseData? {
         exerciseCache.get(exerciseId)?.let { return it }
 
         return try {
@@ -189,7 +205,7 @@ class ContentRepository(private val context: Context) {
     // Reference content
     private var referenceIndex: ReferenceIndex? = null
 
-    suspend fun getReferenceIndex(): ReferenceIndex {
+    override suspend fun getReferenceIndex(): ReferenceIndex {
         referenceIndex?.let { return it }
 
         return try {
@@ -216,7 +232,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
+    override suspend fun getReferenceItem(sectionId: String, itemId: String): JSONObject? {
         return try {
             loadAssetJson("reference/$sectionId/$itemId.json")
         } catch (e: Exception) {
@@ -224,7 +240,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getTotalSectionsCount(): Int {
+    override suspend fun getTotalSectionsCount(): Int {
         return try {
             getBookIndex().chapters.sumOf { it.sectionIds.size }
         } catch (e: Exception) {
@@ -233,7 +249,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getTotalExercisesCount(): Int {
+    override suspend fun getTotalExercisesCount(): Int {
         return try {
             getExerciseCategories().sumOf { it.exercises.size }
         } catch (e: Exception) {
@@ -245,7 +261,7 @@ class ContentRepository(private val context: Context) {
     // Learning Paths
     private var learningPaths: List<LearningPath>? = null
 
-    suspend fun getLearningPaths(): List<LearningPath> {
+    override suspend fun getLearningPaths(): List<LearningPath> {
         learningPaths?.let { return it }
 
         return try {
@@ -284,14 +300,14 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getLearningPath(pathId: String): LearningPath? {
+    override suspend fun getLearningPath(pathId: String): LearningPath? {
         return getLearningPaths().find { it.id == pathId }
     }
 
     // Quiz content
     private var quizIndex: List<QuizIndexEntry>? = null
 
-    suspend fun getQuizIndex(): List<QuizIndexEntry> {
+    override suspend fun getQuizIndex(): List<QuizIndexEntry> {
         quizIndex?.let { return it }
 
         return try {
@@ -317,7 +333,7 @@ class ContentRepository(private val context: Context) {
         }
     }
 
-    suspend fun getQuiz(quizId: String): Quiz? {
+    override suspend fun getQuiz(quizId: String): Quiz? {
         return try {
             val json = loadAssetJson("quizzes/$quizId.json")
             parseQuiz(json)
