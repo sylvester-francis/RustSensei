@@ -12,7 +12,7 @@
 > No internet required after the initial model download. No data leaves your device.
 
 [![GitHub release](https://img.shields.io/github/v/release/sylvester-francis/RustSensei)](https://github.com/sylvester-francis/RustSensei/releases)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.1-7F52FF?logo=kotlin&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2-7F52FF?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?logo=jetpackcompose&logoColor=white)
 ![LiteRT](https://img.shields.io/badge/LiteRT-GPU_Accelerated-FF6F00?logo=tensorflow&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-8.0+-3DDC84?logo=android&logoColor=white)
@@ -55,6 +55,12 @@ Most programming tutors require a constant internet connection and send your dat
 - **Achievement Badges** — unlock milestones for reading, coding, quizzes, and streaks
 - **Activity Heatmap** — GitHub-style weekly visualization of your learning activity
 - **Conversation History** — persisted locally, accessible from a navigation drawer
+- **Exercise Search & Filter** — search 200+ exercises by name, filter by difficulty (Beginner/Intermediate/Advanced)
+- **Confetti Celebrations** — particle burst on exercise completion, daily goal, review session, quiz high score
+- **3D Flashcard Flip** — smooth rotation animation when revealing card answers
+- **Haptic Feedback** — tactile response on send, answer selection, and flashcard rating
+- **First-Launch Onboarding** — guided "Start Chapter 1" card for new users
+- **Time Estimates** — "~48 min" reading time on each book chapter
 - **Dark Terminal Aesthetic** — blue-tinted near-black surfaces with Rust Orange accent, monospace headings, neon accents
 
 ## Install
@@ -89,33 +95,62 @@ The model runs entirely on-device using the GPU via LiteRT's OpenCL delegate. No
 
 ## Architecture
 
+Built on **Clean Architecture** with SOLID principles and Google's recommended Android patterns.
+
+```
+┌──────────────────────────────────────────────────┐
+│  UI Layer (Jetpack Compose + @Immutable states)  │
+│  Type-safe @Serializable navigation              │
+├──────────────────────────────────────────────────┤
+│  ViewModel Layer (@HiltViewModel)                │
+│  Thin coordinators — map events to UI state      │
+├──────────────────────────────────────────────────┤
+│  Domain Layer (UseCases)                         │
+│  SendChatMessageUseCase, ValidateExerciseUseCase │
+├──────────────────────────────────────────────────┤
+│  Abstractions (interfaces)                       │
+│  InferenceEngine, ModelLifecycle, ContentProvider │
+├──────────────────────────────────────────────────┤
+│  Data / Infra (Room, LiteRT, OkHttp)            │
+│  Concrete implementations, Hilt-provided         │
+└──────────────────────────────────────────────────┘
+```
+
 ```
 app/src/main/java/com/sylvester/rustsensei/
+├── di/                      # Hilt DI modules (DataModule, InferenceModule)
+├── domain/                  # UseCases (SendChatMessage, ValidateExercise)
 ├── data/                    # Room database, DAOs, repositories
-├── content/                 # Bundled JSON content (book, exercises, quizzes, reference)
+├── content/                 # Bundled JSON content + RAG retriever
 ├── llm/
-│   ├── LiteRtEngine.kt     # LiteRT GPU inference with Flow-based streaming
-│   ├── ModelManager.kt      # HuggingFace download with resume + SHA256 verification
-│   └── ModelForegroundService.kt
+│   ├── InferenceEngine.kt   # Abstraction for LLM inference
+│   ├── LiteRtEngine.kt      # LiteRT GPU implementation
+│   ├── ModelLifecycleManager.kt  # Load/unload/idle-timer lifecycle
+│   ├── ModelManager.kt      # Download with resume + SHA256 verification
+│   └── ChatTemplateFormatter.kt  # ChatML formatting + sanitization
 ├── ui/
-│   ├── theme/               # Color system, typography, Material 3 theme
-│   ├── components/          # 20 reusable composables (CodeBlock, InputBar, ProgressRing, etc.)
-│   └── screens/             # 12 screens (Dashboard, Chat, Book, Exercises, Quiz, etc.)
-└── viewmodel/               # 10 ViewModels with StateFlow
+│   ├── theme/               # Color, Type, Tokens (Spacing, Alpha, Dimens)
+│   ├── components/          # 20 reusable composables
+│   └── screens/             # 15 screen files (split for maintainability)
+└── viewmodel/               # 10 @HiltViewModel classes
 ```
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Language | Kotlin 2.1 |
+| Language | Kotlin 2.2 |
 | UI | Jetpack Compose (100% Compose, no XML) |
-| Design System | Material 3 (`androidx.compose.material3`) |
-| AI Inference | LiteRT (formerly TFLite) — GPU-accelerated via OpenCL |
-| Database | Room (chat, progress, flashcards, notes) |
-| Navigation | Navigation Compose with nested tab navigation |
+| Design System | Material 3 with custom design tokens (Spacing, Alpha, Dimens) |
+| DI | Hilt (`@HiltViewModel`, `@Binds`, `@Provides`) |
+| Architecture | MVVM + Clean Architecture (UseCases, Repository interfaces) |
+| AI Inference | LiteRT — GPU-accelerated via OpenCL with idle-unload lifecycle |
+| Database | Room (9 entities, 3 DAOs, 6 migrations) |
+| Navigation | Navigation Compose 2.8+ with type-safe `@Serializable` routes |
 | Async | Coroutines + Flow for streaming inference and reactive UI |
-| Network | OkHttp for model download with resume support |
+| Serialization | Kotlin Serialization (navigation routes, future JSON parsing) |
+| Network | OkHttp for model download with resume + SHA256 verification |
+| Testing | JUnit + Turbine + test doubles (50 tests, 7 suites) |
 
 ## Build from Source
 

@@ -14,3 +14,9 @@ REDESIGN_PROMPT.md
 # Release signing (never commit these)
 release-keystore.jks
 keystore.properties
+
+# Agent skills and worktrees
+.agent/
+.agents/
+.claude/skills/
+.claude/worktrees/
