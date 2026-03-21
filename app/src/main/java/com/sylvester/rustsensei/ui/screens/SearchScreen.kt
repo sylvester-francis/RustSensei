@@ -53,9 +53,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
+import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.SearchResult
 import com.sylvester.rustsensei.viewmodel.SearchViewModel
 
@@ -81,7 +84,7 @@ fun SearchScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
+                .padding(horizontal = Spacing.SM, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
@@ -102,14 +105,14 @@ fun SearchScreen(
                     Text(
                         "Search sections, exercises, glossary...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = SecondaryText.copy(alpha = 0.5f)
+                        color = SecondaryText.copy(alpha = Alpha.HINT)
                     )
                 },
                 modifier = Modifier
                     .weight(1f)
                     .focusRequester(focusRequester),
                 singleLine = true,
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(Dimens.PillRadius),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = DarkSurfaceContainer,
                     unfocusedContainerColor = DarkSurfaceContainer,
@@ -124,7 +127,7 @@ fun SearchScreen(
                     Icon(
                         Icons.Default.Search,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(Dimens.IconSM),
                         tint = SecondaryText
                     )
                 },
@@ -134,7 +137,7 @@ fun SearchScreen(
                             Icon(
                                 Icons.Default.Clear,
                                 contentDescription = "Clear",
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(Dimens.IconSM),
                                 tint = SecondaryText
                             )
                         }
@@ -142,14 +145,14 @@ fun SearchScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(Spacing.SM))
         }
 
         // Separator
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(1.dp)
+                .height(Dimens.Divider)
                 .background(RustOrange.copy(alpha = 0.08f))
         )
 
@@ -157,12 +160,12 @@ fun SearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(Spacing.XXXL),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(Dimens.IconMD),
+                    strokeWidth = Spacing.XXS,
                     color = RustOrange
                 )
             }
@@ -170,8 +173,8 @@ fun SearchScreen(
             // Show recent searches
             if (uiState.recentSearches.isNotEmpty()) {
                 LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    contentPadding = PaddingValues(Dimens.ScreenPadding),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.XS)
                 ) {
                     item {
                         Row(
@@ -183,10 +186,10 @@ fun SearchScreen(
                                 Icon(
                                     Icons.Default.History,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
+                                    modifier = Modifier.size(Spacing.LG),
                                     tint = SecondaryText
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(Spacing.SM))
                                 Text(
                                     text = "Recent Searches",
                                     style = MaterialTheme.typography.titleSmall,
@@ -208,16 +211,16 @@ fun SearchScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { viewModel.selectRecentSearch(search) }
-                                .padding(vertical = 12.dp, horizontal = 8.dp),
+                                .padding(vertical = Spacing.MD, horizontal = Spacing.SM),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 Icons.Default.History,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = SecondaryText.copy(alpha = 0.5f)
+                                tint = SecondaryText.copy(alpha = Alpha.HINT)
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(Spacing.MD))
                             Text(
                                 text = search,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -232,7 +235,7 @@ fun SearchScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(48.dp),
+                        .padding(Spacing.Section),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -242,13 +245,13 @@ fun SearchScreen(
                             modifier = Modifier.size(56.dp),
                             tint = SecondaryText.copy(alpha = 0.25f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(Spacing.LG))
                         Text(
                             text = "Search across all content",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = SecondaryText.copy(alpha = 0.5f)
+                            color = SecondaryText.copy(alpha = Alpha.HINT)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.XS))
                         Text(
                             text = "Chapters, exercises, reference guides",
                             style = MaterialTheme.typography.bodySmall,
@@ -262,7 +265,7 @@ fun SearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(48.dp),
+                    .padding(Spacing.Section),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -272,14 +275,14 @@ fun SearchScreen(
                         modifier = Modifier.size(64.dp),
                         tint = SecondaryText.copy(alpha = 0.25f)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.LG))
                     Text(
                         text = "No results found",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SECONDARY)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "Try different keywords",
                         style = MaterialTheme.typography.bodySmall,
@@ -293,20 +296,20 @@ fun SearchScreen(
             val typeOrder = listOf("section", "exercise", "reference", "glossary")
 
             LazyColumn(
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                contentPadding = PaddingValues(Dimens.ScreenPadding),
+                verticalArrangement = Arrangement.spacedBy(Spacing.XS)
             ) {
                 for (type in typeOrder) {
                     val typeResults = grouped[type] ?: continue
                     item {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.SM))
                         Text(
                             text = typeLabel(type),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
                             color = RustOrange,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            modifier = Modifier.padding(bottom = Spacing.XS)
                         )
                     }
                     items(typeResults, key = { "${it.type}-${it.id}" }) { result ->
@@ -314,12 +317,12 @@ fun SearchScreen(
                         HorizontalDivider(
                             thickness = 0.5.dp,
                             color = RustOrange.copy(alpha = 0.06f),
-                            modifier = Modifier.padding(start = 48.dp)
+                            modifier = Modifier.padding(start = Spacing.Section)
                         )
                     }
                 }
                 item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.LG))
                 }
             }
         }
@@ -332,18 +335,18 @@ private fun SearchResultRow(result: SearchResult) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { /* navigation can be added later */ }
-            .padding(vertical = 12.dp, horizontal = 8.dp),
+            .padding(vertical = Spacing.MD, horizontal = Spacing.SM),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
             typeIcon(result.type),
             contentDescription = null,
             modifier = Modifier
-                .size(20.dp)
-                .padding(top = 2.dp),
-            tint = RustOrange.copy(alpha = 0.7f)
+                .size(Dimens.IconSM)
+                .padding(top = Spacing.XXS),
+            tint = RustOrange.copy(alpha = Alpha.SOFT)
         )
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.MD))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = result.title,
@@ -355,7 +358,7 @@ private fun SearchResultRow(result: SearchResult) {
             Text(
                 text = result.subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = SecondaryText.copy(alpha = 0.6f),
+                color = SecondaryText.copy(alpha = Alpha.SECONDARY),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

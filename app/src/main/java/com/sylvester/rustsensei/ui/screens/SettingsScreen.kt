@@ -59,12 +59,15 @@ import com.sylvester.rustsensei.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.llm.ModelManager
+import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.CrispWhite
+import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.ErrorNeon
 import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
@@ -87,7 +90,7 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(Dimens.ScreenPadding)
         ) {
             // ── Screen Title ──
             Text(
@@ -96,27 +99,27 @@ fun SettingsScreen(
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = Spacing.XS)
             )
             Text(
                 text = "Model, inference & account",
                 style = MaterialTheme.typography.bodyMedium,
                 color = SecondaryText,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = Spacing.SM)
             )
 
             // --- Model Management Section ---
             SectionHeader("Model Management")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     // Current active model
                     val activeModel = modelState.loadedModelId?.let { ModelManager.getModelById(it) }
                     if (activeModel != null) {
@@ -131,7 +134,7 @@ fun SettingsScreen(
                                     fontFamily = FontFamily.Monospace,
                                     color = RustOrange
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(Spacing.XS))
                                 Text(
                                     text = activeModel.displayName,
                                     style = MaterialTheme.typography.titleMedium,
@@ -148,10 +151,10 @@ fun SettingsScreen(
                                 Icons.Default.CheckCircle,
                                 contentDescription = "Active",
                                 tint = SuccessGreen,
-                                modifier = Modifier.size(24.dp)
+                                modifier = Modifier.size(Dimens.IconMD)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(Spacing.SM))
                         Text(
                             text = "Size: ${modelViewModel.getModelSizeMB(activeModel)} MB",
                             fontSize = 12.sp,
@@ -164,8 +167,8 @@ fun SettingsScreen(
                             text = "Q8 | LiteRT | $backendLabel",
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = if (backend == "GPU") SecondaryText.copy(alpha = 0.7f)
-                                    else WarningAmber.copy(alpha = 0.7f)
+                            color = if (backend == "GPU") SecondaryText.copy(alpha = Alpha.SOFT)
+                                    else WarningAmber.copy(alpha = Alpha.SOFT)
                         )
                     } else {
                         Text(
@@ -174,17 +177,17 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Medium,
                             color = SecondaryText
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(Spacing.XS))
                         Text(
                             text = "Download and load a model to start chatting",
                             style = MaterialTheme.typography.bodySmall,
-                            color = SecondaryText.copy(alpha = 0.7f)
+                            color = SecondaryText.copy(alpha = Alpha.SOFT)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             // Available models list
             ModelManager.AVAILABLE_MODELS.forEach { model ->
@@ -198,7 +201,7 @@ fun SettingsScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = Spacing.XS)
                         .clickable(enabled = !isDownloading && !isLoading) {
                             if (isDownloaded && !isLoaded) {
                                 modelViewModel.switchModel(model.id)
@@ -207,7 +210,7 @@ fun SettingsScreen(
                                 modelViewModel.startDownload()
                             }
                         },
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(Dimens.CardRadius),
                     colors = CardDefaults.cardColors(
                         containerColor = DarkSurfaceContainerHigh
                     )
@@ -227,7 +230,7 @@ fun SettingsScreen(
                                     color = CrispWhite
                                 )
                                 if (isLoaded) {
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(Spacing.SM))
                                     Text(
                                         text = "Active",
                                         fontSize = 11.sp,
@@ -246,32 +249,32 @@ fun SettingsScreen(
 
                             // Download progress bar
                             if (isDownloading) {
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.SM))
                                 LinearProgressIndicator(
                                     progress = { modelState.downloadProgress },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(4.dp)
-                                        .clip(RoundedCornerShape(2.dp)),
+                                        .height(Spacing.XS)
+                                        .clip(RoundedCornerShape(Spacing.XXS)),
                                     color = RustOrange,
                                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(Spacing.XS))
                                 Text(
                                     text = "${modelState.downloadedMB} / ${modelState.totalMB} MB \u00B7 ${"%.1f".format(modelState.downloadSpeedMBps)} MB/s",
                                     fontSize = 10.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange.copy(alpha = 0.7f)
+                                    color = RustOrange.copy(alpha = Alpha.SOFT)
                                 )
                             }
 
                             if (isLoading) {
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(Spacing.XS))
                                 Text(
                                     text = "Initializing...",
                                     fontSize = 10.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange.copy(alpha = 0.7f)
+                                    color = RustOrange.copy(alpha = Alpha.SOFT)
                                 )
                             }
                         }
@@ -290,7 +293,7 @@ fun SettingsScreen(
                                     Icons.Default.CheckCircle,
                                     contentDescription = "Active",
                                     tint = SuccessGreen,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(Dimens.IconSM)
                                 )
                             } else {
                                 Text(
@@ -305,8 +308,8 @@ fun SettingsScreen(
                                     modelViewModel.selectModel(model.id)
                                     modelViewModel.startDownload()
                                 },
-                                shape = RoundedCornerShape(8.dp),
-                                border = BorderStroke(1.dp, RustOrange.copy(alpha = 0.4f)),
+                                shape = RoundedCornerShape(Spacing.SM),
+                                border = BorderStroke(Dimens.Divider, RustOrange.copy(alpha = 0.4f)),
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     contentColor = RustOrange
                                 )
@@ -314,9 +317,9 @@ fun SettingsScreen(
                                 Icon(
                                     Icons.Default.Download,
                                     contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(Spacing.LG)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
+                                Spacer(modifier = Modifier.width(Spacing.XS))
                                 Text("Download", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                             }
                         }
@@ -326,16 +329,16 @@ fun SettingsScreen(
 
             // --- Inference Config Section ---
             SectionHeader("Inference Config")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     SettingSlider(
                         label = "Temperature",
                         value = config.temperature,
@@ -366,7 +369,7 @@ fun SettingsScreen(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
 
                     Text(
                         text = "Context Length: ${config.contextLength} tokens",
@@ -375,7 +378,7 @@ fun SettingsScreen(
                         color = SecondaryText
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.LG))
 
                     OutlinedButton(
                         onClick = {
@@ -388,8 +391,8 @@ fun SettingsScreen(
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, SecondaryText.copy(alpha = 0.3f))
+                        shape = RoundedCornerShape(Spacing.SM),
+                        border = BorderStroke(Dimens.Divider, SecondaryText.copy(alpha = Alpha.MUTED))
                     ) {
                         Text(
                             "Reset to Defaults",
@@ -402,40 +405,40 @@ fun SettingsScreen(
 
             // --- Danger Zone Section ---
             SectionHeader("Danger Zone")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 ),
-                border = BorderStroke(1.dp, ErrorNeon.copy(alpha = 0.15f))
+                border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = Alpha.BORDER))
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = Spacing.MD)
                     ) {
                         Icon(
                             Icons.Default.Warning,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = ErrorNeon.copy(alpha = 0.7f)
+                            modifier = Modifier.size(Spacing.LG),
+                            tint = ErrorNeon.copy(alpha = Alpha.SOFT)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(Spacing.SM))
                         Text(
                             text = "Destructive actions",
                             style = MaterialTheme.typography.labelMedium,
-                            color = ErrorNeon.copy(alpha = 0.7f)
+                            color = ErrorNeon.copy(alpha = Alpha.SOFT)
                         )
                     }
 
                     OutlinedButton(
                         onClick = { showClearDialog = true },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, ErrorNeon.copy(alpha = 0.4f)),
+                        shape = RoundedCornerShape(Spacing.SM),
+                        border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = 0.4f)),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = ErrorNeon
                         )
@@ -443,19 +446,19 @@ fun SettingsScreen(
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(Spacing.LG)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(Spacing.SM))
                         Text("Clear All Conversations")
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
 
                     OutlinedButton(
                         onClick = { showDeleteModelDialog = true },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
-                        border = BorderStroke(1.dp, ErrorNeon.copy(alpha = 0.4f)),
+                        shape = RoundedCornerShape(Spacing.SM),
+                        border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = 0.4f)),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = ErrorNeon
                         )
@@ -463,9 +466,9 @@ fun SettingsScreen(
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = null,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(Spacing.LG)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(Spacing.SM))
                         Text("Delete Active Model")
                     }
                 }
@@ -473,32 +476,32 @@ fun SettingsScreen(
 
             // --- About Section ---
             SectionHeader("About")
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             val aboutContext = LocalContext.current
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Text(
                         text = "RustSensei v1.0",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = CrispWhite
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "Your offline Rust programming tutor powered by on-device AI",
                         style = MaterialTheme.typography.bodySmall,
                         color = SecondaryText,
                         lineHeight = 18.sp
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.MD))
                     Text(
                         text = "Content version: ${chatViewModel.getContentVersion()}",
                         style = MaterialTheme.typography.bodySmall,
@@ -508,31 +511,31 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             // Creator card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Text(
                         text = "Created by",
                         style = MaterialTheme.typography.labelMedium,
                         fontFamily = FontFamily.Monospace,
                         color = RustOrange
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
                     Text(
                         text = "Sylvester Ranjith Francis",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = CrispWhite
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.MD))
 
                     data class SocialLink(val label: String, val url: String, val iconRes: Int)
 
@@ -553,16 +556,16 @@ fun SettingsScreen(
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link.url))
                                     aboutContext.startActivity(intent)
                                 }
-                                .padding(vertical = 8.dp),
+                                .padding(vertical = Spacing.SM),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 painter = painterResource(id = link.iconRes),
                                 contentDescription = link.label,
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(Dimens.IconSM),
                                 tint = NeonCyan
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(Spacing.MD))
                             Text(
                                 text = link.label,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -574,17 +577,17 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.MD))
 
             // Acknowledgments card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
                     containerColor = DarkSurfaceContainerHigh
                 )
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Text(
                         text = "Acknowledgments",
                         style = MaterialTheme.typography.labelMedium,
@@ -598,7 +601,7 @@ fun SettingsScreen(
                         color = SecondaryText,
                         lineHeight = 18.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "github.com/rust-lang/book",
                         style = MaterialTheme.typography.labelSmall,
@@ -609,14 +612,14 @@ fun SettingsScreen(
                             aboutContext.startActivity(intent)
                         }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.MD))
                     Text(
                         text = "Exercises inspired by Rustlings by the Rust Community, licensed under MIT.",
                         style = MaterialTheme.typography.bodySmall,
                         color = SecondaryText,
                         lineHeight = 18.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "github.com/rust-lang/rustlings",
                         style = MaterialTheme.typography.labelSmall,
@@ -627,7 +630,7 @@ fun SettingsScreen(
                             aboutContext.startActivity(intent)
                         }
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(Spacing.MD))
                     Text(
                         text = "AI model powered by Google LiteRT, running entirely on-device.",
                         style = MaterialTheme.typography.bodySmall,
@@ -637,7 +640,7 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.XXXL))
     }
 
     // Confirm dialog: Clear All Conversations
@@ -704,7 +707,7 @@ private fun SectionHeader(title: String) {
         color = RustOrange,
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(top = 28.dp, bottom = 4.dp)
+        modifier = Modifier.padding(top = 28.dp, bottom = Spacing.XS)
     )
 }
 
@@ -716,7 +719,7 @@ private fun SettingSlider(
     valueLabel: String,
     onValueChange: (Float) -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(vertical = Spacing.SM)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -735,7 +738,7 @@ private fun SettingSlider(
                 color = RustOrange
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(Spacing.XS))
         Slider(
             value = value,
             onValueChange = onValueChange,

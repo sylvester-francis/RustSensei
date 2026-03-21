@@ -66,11 +66,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathStep
+import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.CrispWhite
+import com.sylvester.rustsensei.ui.theme.Dimens
+
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.PathMode
@@ -136,8 +140,8 @@ fun LearningPathScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(1.dp)
-                        .background(RustOrange.copy(alpha = 0.15f))
+                        .height(Dimens.Divider)
+                        .background(RustOrange.copy(alpha = Alpha.BORDER))
                 )
             }
         }
@@ -182,7 +186,7 @@ private fun PathListContent(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
+        contentPadding = PaddingValues(Spacing.XL),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item {
@@ -209,7 +213,7 @@ private fun PathListContent(
             )
         }
 
-        item { Spacer(modifier = Modifier.height(8.dp)) }
+        item { Spacer(modifier = Modifier.height(Spacing.SM)) }
     }
 }
 
@@ -235,7 +239,7 @@ private fun PathCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(Dimens.CardPadding),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Progress ring with icon
@@ -247,7 +251,7 @@ private fun PathCard(
                 CircularProgressIndicator(
                     progress = { 1f },
                     modifier = Modifier.size(56.dp),
-                    strokeWidth = 4.dp,
+                    strokeWidth = Spacing.XS,
                     color = accent.copy(alpha = 0.12f),
                     strokeCap = StrokeCap.Round
                 )
@@ -255,7 +259,7 @@ private fun PathCard(
                 CircularProgressIndicator(
                     progress = { completionPercent },
                     modifier = Modifier.size(56.dp),
-                    strokeWidth = 4.dp,
+                    strokeWidth = Spacing.XS,
                     color = accent,
                     strokeCap = StrokeCap.Round
                 )
@@ -267,7 +271,7 @@ private fun PathCard(
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.LG))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -276,17 +280,17 @@ private fun PathCard(
                     fontWeight = FontWeight.Bold,
                     color = CrispWhite
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(Spacing.XS))
                 Text(
                     text = path.description,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 2
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(Spacing.SM))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.MD)
                 ) {
                     Text(
                         text = "${path.steps.size} steps",
@@ -298,7 +302,7 @@ private fun PathCard(
                         Icon(
                             Icons.Default.Schedule,
                             contentDescription = null,
-                            modifier = Modifier.size(12.dp),
+                            modifier = Modifier.size(Spacing.MD),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.width(3.dp))
@@ -338,7 +342,7 @@ private fun PathDetailContent(
 
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
+        contentPadding = PaddingValues(Spacing.XL),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header with description and progress
@@ -354,7 +358,7 @@ private fun PathDetailContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(Dimens.CardRadius))
                     .background(DarkSurfaceContainer)
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -367,7 +371,7 @@ private fun PathDetailContent(
                         fontFamily = FontFamily.Monospace,
                         color = CrispWhite
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
                     LinearProgressIndicator(
                         progress = { progress },
                         modifier = Modifier
@@ -379,7 +383,7 @@ private fun PathDetailContent(
                         strokeCap = StrokeCap.Round
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Spacing.LG))
                 Text(
                     text = "${(progress * 100).toInt()}%",
                     style = MaterialTheme.typography.titleMedium,
@@ -412,7 +416,7 @@ private fun PathDetailContent(
             )
         }
 
-        item { Spacer(modifier = Modifier.height(16.dp)) }
+        item { Spacer(modifier = Modifier.height(Spacing.LG)) }
     }
 }
 
@@ -443,14 +447,14 @@ private fun NodeStepItem(
                     // Completed: 48dp circle, primary bg, white checkmark
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(Spacing.Section)
                             .background(RustOrange, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Check,
                             contentDescription = "Completed",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(Dimens.IconMD),
                             tint = CrispWhite
                         )
                     }
@@ -470,8 +474,8 @@ private fun NodeStepItem(
                     )
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .background(RustOrange.copy(alpha = 0.15f), CircleShape)
+                            .size(Spacing.Section)
+                            .background(RustOrange.copy(alpha = Alpha.BORDER), CircleShape)
                             .border(
                                 width = 3.dp,
                                 color = RustOrange.copy(alpha = pulseAlpha),
@@ -482,7 +486,7 @@ private fun NodeStepItem(
                         Icon(
                             Icons.Default.PlayArrow,
                             contentDescription = "Current",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(Dimens.IconMD),
                             tint = RustOrange
                         )
                     }
@@ -492,16 +496,16 @@ private fun NodeStepItem(
                     // Locked: surfaceVariant bg, lock icon, 60% opacity
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .alpha(0.6f)
+                            .size(Spacing.Section)
+                            .alpha(Alpha.SECONDARY)
                             .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             Icons.Default.Lock,
                             contentDescription = "Locked",
-                            modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            modifier = Modifier.size(Dimens.IconSM),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
                     }
                 }
@@ -512,28 +516,28 @@ private fun NodeStepItem(
                 val nextStep = step // We determine line style based on current node state
                 val lineColor = when {
                     isCompleted -> RustOrange
-                    isCurrentStep -> RustOrange.copy(alpha = 0.3f)
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+                    isCurrentStep -> RustOrange.copy(alpha = Alpha.MUTED)
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.BORDER)
                 }
                 Box(
                     modifier = Modifier
                         .width(3.dp)
-                        .height(48.dp)
+                        .height(Spacing.Section)
                         .background(lineColor)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Spacing.MD))
 
         // Step content
-        val contentAlpha = if (isLocked) 0.6f else 1f
+        val contentAlpha = if (isLocked) Alpha.SECONDARY else 1f
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .alpha(contentAlpha)
-                .padding(bottom = if (isLastStep) 0.dp else 16.dp, top = 4.dp)
+                .padding(bottom = if (isLastStep) 0.dp else Spacing.LG, top = Spacing.XS)
         ) {
             // Type label
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -544,7 +548,7 @@ private fun NodeStepItem(
                     tint = when {
                         isCompleted -> RustOrange
                         isCurrentStep -> RustOrange
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     }
                 )
                 Spacer(modifier = Modifier.width(6.dp))
@@ -554,13 +558,13 @@ private fun NodeStepItem(
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 0.5.sp,
                     color = when {
-                        isCompleted -> RustOrange.copy(alpha = 0.7f)
+                        isCompleted -> RustOrange.copy(alpha = Alpha.SOFT)
                         isCurrentStep -> RustOrange
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     }
                 )
                 if (isCurrentStep) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Spacing.SM))
                     Text(
                         text = "UP NEXT",
                         style = MaterialTheme.typography.labelSmall,
@@ -573,16 +577,16 @@ private fun NodeStepItem(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(Spacing.XS))
 
             Text(
                 text = step.title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = if (isCurrentStep) FontWeight.Bold else FontWeight.Medium,
                 color = when {
-                    isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.HINT)
                     isCurrentStep -> CrispWhite
-                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    else -> MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.SECONDARY)
                 }
             )
 

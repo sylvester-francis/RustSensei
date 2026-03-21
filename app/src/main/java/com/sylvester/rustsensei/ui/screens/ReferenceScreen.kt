@@ -52,6 +52,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.BookContentRenderer
 import com.sylvester.rustsensei.ui.components.CodeBlock
+import com.sylvester.rustsensei.ui.theme.Alpha
+import com.sylvester.rustsensei.ui.theme.Dimens
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.ReferenceScreenMode
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import org.json.JSONObject
@@ -104,7 +107,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp)
+        contentPadding = PaddingValues(Dimens.ScreenPadding)
     ) {
         item {
             // headlineMedium (monospace via theme)
@@ -112,14 +115,14 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                 text = "Reference",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 4.dp)
+                modifier = Modifier.padding(bottom = Spacing.XS)
             )
             Text(
                 text = "Quick lookup, cheat sheets, and deep dives",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.LG))
         }
 
         items(uiState.sections, key = { it.id }) { section ->
@@ -127,7 +130,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { viewModel.openSection(section.id) }
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .padding(horizontal = Dimens.ScreenPadding, vertical = Spacing.LG),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -136,7 +139,7 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                     modifier = Modifier.size(22.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Spacing.LG))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = section.title,
@@ -153,14 +156,14 @@ private fun ReferenceIndexView(viewModel: ReferenceViewModel) {
                     Icons.Default.ChevronRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(Dimens.IconSM)
                 )
             }
             // Neon-tinted divider at 8% alpha
             HorizontalDivider(
                 thickness = 0.5.dp,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                modifier = Modifier.padding(start = 48.dp)
+                modifier = Modifier.padding(start = Spacing.Section)
             )
         }
     }
@@ -175,7 +178,7 @@ private fun SectionListView(viewModel: ReferenceViewModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = Spacing.SM, vertical = Spacing.XS),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { viewModel.navigateBack() }) {
@@ -191,14 +194,14 @@ private fun SectionListView(viewModel: ReferenceViewModel) {
         }
 
         LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp)
+            contentPadding = PaddingValues(horizontal = Dimens.ScreenPadding)
         ) {
             items(section.items) { itemId ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { viewModel.openItem(section.id, itemId) }
-                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                        .padding(horizontal = Spacing.LG, vertical = Spacing.LG),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -211,14 +214,14 @@ private fun SectionListView(viewModel: ReferenceViewModel) {
                         Icons.Default.ChevronRight,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(Dimens.IconSM)
                     )
                 }
                 // Neon-tinted divider
                 HorizontalDivider(
                     thickness = 0.5.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = Spacing.LG)
                 )
             }
         }
@@ -236,7 +239,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = Spacing.SM, vertical = Spacing.XS),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { viewModel.navigateBack() }) {
@@ -255,7 +258,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(Dimens.ScreenPadding)
         ) {
             // Render based on content type — with 24dp between sections, 12dp between code blocks and text
             when {
@@ -269,7 +272,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp, bottom = 12.dp)
+                            modifier = Modifier.padding(top = if (i > 0) Spacing.XXL else 0.dp, bottom = Spacing.MD)
                         )
                         val entries = sec.getJSONArray("entries")
                         for (j in 0 until entries.length()) {
@@ -278,12 +281,12 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = entry.getString("label"),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 12.dp)
+                                modifier = Modifier.padding(top = Spacing.MD)
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = entry.getString("code"), language = "rust")
                             if (entry.has("note")) {
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.SM))
                                 Text(
                                     text = entry.getString("note"),
                                     style = MaterialTheme.typography.bodySmall,
@@ -303,7 +306,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     Text(
@@ -312,9 +315,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
                     CodeBlock(code = json.getString("error_message"), language = "text")
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XXL))
 
                     Text(
                         "Bad code:",
@@ -322,9 +325,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.SM))
                     CodeBlock(code = json.optString("example_bad", ""), language = "rust")
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(Spacing.XXL))
 
                     val fixes = json.optJSONArray("fixes")
                     if (fixes != null && fixes.length() > 0) {
@@ -336,20 +339,20 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                         )
                         for (i in 0 until fixes.length()) {
                             val fix = fixes.getJSONObject(i)
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(Spacing.MD))
                             Text(
                                 text = "${i + 1}. ${fix.getString("description")}",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = fix.getString("code"), language = "rust")
                         }
                     }
 
                     json.optString("tip", "").let {
                         if (it.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                             Text(
                                 text = "Tip: $it",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -369,7 +372,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     val comparisons = json.getJSONArray("comparisons")
@@ -380,24 +383,24 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
+                            modifier = Modifier.padding(top = if (i > 0) Spacing.XXL else 0.dp)
                         )
                         // Show each language's code
                         for (lang in listOf("go", "python", "typescript", "rust")) {
                             if (cmp.has(lang)) {
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(Spacing.MD))
                                 Text(
                                     text = lang.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
+                                Spacer(modifier = Modifier.height(Spacing.XS))
                                 CodeBlock(code = cmp.getString(lang), language = lang)
                             }
                         }
                         cmp.optString("note", "").let {
                             if (it.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(Spacing.SM))
                                 Text(
                                     text = it,
                                     style = MaterialTheme.typography.bodySmall,
@@ -418,13 +421,13 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     json.optString("content", "").let {
                         if (it.isNotEmpty()) {
                             BookContentRenderer(content = it)
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     json.optString("quickStart", "").let {
@@ -435,9 +438,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     json.optString("starterCode", "").let {
@@ -448,9 +451,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     json.optString("solution", "").let {
@@ -461,9 +464,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = it, language = "rust")
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Spacing.XXL))
                         }
                     }
                     // Code examples array
@@ -474,15 +477,15 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = ex.getString("description"),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 12.dp)
+                                modifier = Modifier.padding(top = Spacing.MD)
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = ex.getString("code"), language = "rust")
                         }
                     }
                     // Common patterns array
                     json.optJSONArray("commonPatterns")?.let { patterns ->
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(Spacing.XXL))
                         Text(
                             "Common Patterns:",
                             style = MaterialTheme.typography.titleSmall,
@@ -495,12 +498,12 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = p.getString("title"),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(top = 12.dp)
+                                modifier = Modifier.padding(top = Spacing.MD)
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             CodeBlock(code = p.getString("code"), language = "rust")
                         }
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(Spacing.XXL))
                     }
                     // Key points array
                     json.optJSONArray("keyPoints")?.let { points ->
@@ -510,16 +513,16 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(Spacing.MD))
                         for (i in 0 until points.length()) {
                             Text(
                                 text = "\u2022 ${points.getString(i)}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 lineHeight = 22.sp,
-                                modifier = Modifier.padding(vertical = 4.dp)
+                                modifier = Modifier.padding(vertical = Spacing.XS)
                             )
                         }
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(Spacing.XXL))
                     }
                     // Mappings array (concepts-mapping)
                     json.optJSONArray("mappings")?.let { mappings ->
@@ -530,14 +533,14 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
+                                modifier = Modifier.padding(top = if (i > 0) Spacing.XXL else 0.dp)
                             )
                             for (lang in listOf("go", "python", "typescript", "rust")) {
                                 if (m.has(lang)) {
                                     Text(
                                         text = "${lang.replaceFirstChar { it.uppercase() }}: ${m.getString(lang)}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                                        modifier = Modifier.padding(start = Spacing.SM, top = Spacing.XS)
                                     )
                                 }
                             }
@@ -548,7 +551,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                         style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(start = 8.dp, top = 8.dp)
+                                        modifier = Modifier.padding(start = Spacing.SM, top = Spacing.SM)
                                     )
                                 }
                             }
@@ -562,9 +565,9 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                                 text = t.getString("term"),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(top = if (i > 0) 24.dp else 0.dp)
+                                modifier = Modifier.padding(top = if (i > 0) Spacing.XXL else 0.dp)
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(Spacing.SM))
                             Text(
                                 text = t.getString("definition"),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -576,7 +579,7 @@ private fun ItemDetailView(viewModel: ReferenceViewModel) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.XXXL))
         }
     }
 }
