@@ -57,6 +57,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.sylvester.rustsensei.ui.theme.Alpha
+import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
@@ -197,7 +199,7 @@ fun MainScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = Alpha.DIVIDER))
                     )
                 }
             }
@@ -209,7 +211,7 @@ fun MainScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = Alpha.DIVIDER))
                     )
                     RustSenseiNavigationBar(
                         onTabSelected = { tab -> tabNavController.navigateToTab(tab) },
@@ -330,7 +332,7 @@ private fun RustSenseiNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(Dimens.BottomBarHeight)
             .background(containerColor)
     ) {
         Row(

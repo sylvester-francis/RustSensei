@@ -65,6 +65,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.Conversation
 import com.sylvester.rustsensei.llm.ModelReadyState
+import com.sylvester.rustsensei.ui.theme.Alpha
+import com.sylvester.rustsensei.ui.theme.Dimens
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
 import com.sylvester.rustsensei.ui.components.StreamingIndicator
@@ -149,8 +152,8 @@ fun ChatScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .statusBarsPadding()
-                    .height(48.dp)
-                    .padding(horizontal = 4.dp),
+                    .height(Dimens.CompactTopBarHeight)
+                    .padding(horizontal = Spacing.XS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (onNavigateBack != null) {
@@ -209,15 +212,15 @@ fun ChatScreen(
                 }
             }
             HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+                thickness = Dimens.Divider,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.BORDER)
             )
 
             // Messages list
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 state = listState,
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+                contentPadding = PaddingValues(horizontal = Dimens.ScreenPadding, vertical = Spacing.MD)
             ) {
                 // Context indicator banner
                 when (val ctx = chatContext) {
@@ -315,7 +318,7 @@ fun ChatScreen(
                             text = statsText,
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.65f),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.SECONDARY),
                             modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                         )
                     }
@@ -348,7 +351,7 @@ fun ChatScreen(
                                     shape = RoundedCornerShape(8.dp),
                                     border = BorderStroke(
                                         width = 1.dp,
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                                        color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.MUTED)
                                     ),
                                     colors = AssistChipDefaults.assistChipColors(
                                         containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -425,7 +428,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
         // 56sp crab emoji avatar — larger for visual weight
         Text(
             text = "\uD83E\uDD80",
-            fontSize = 56.sp
+            fontSize = Dimens.AvatarEmoji
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -443,7 +446,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
         Text(
             text = "I'll explain things like you're coming from Python",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT),
             textAlign = TextAlign.Center
         )
 
@@ -454,7 +457,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
             text = "Offline \u00B7 Private \u00B7 On-device AI",
             style = MaterialTheme.typography.labelSmall,
             fontFamily = FontFamily.Monospace,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.HINT),
             textAlign = TextAlign.Center
         )
 
@@ -475,7 +478,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.DIVIDER)
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -505,7 +508,7 @@ private fun NoModelState(onDownload: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Crab emoji — larger for visual weight
-        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
+        Text(text = "\uD83E\uDD80", fontSize = Dimens.AvatarEmoji)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -521,7 +524,7 @@ private fun NoModelState(onDownload: () -> Unit) {
         Text(
             text = "Download a small AI model to enable chat.\nAll other features work without it.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT),
             textAlign = TextAlign.Center
         )
 
@@ -574,7 +577,7 @@ private fun ModelLoadingState() {
             .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
+        Text(text = "\uD83E\uDD80", fontSize = Dimens.AvatarEmoji)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Loading your tutor...",
@@ -592,7 +595,7 @@ private fun ModelLoadingState() {
         Text(
             text = "Initializing on-device AI model",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT),
             textAlign = TextAlign.Center
         )
     }
@@ -606,7 +609,7 @@ private fun ModelErrorState(onRetry: () -> Unit) {
             .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
+        Text(text = "\uD83E\uDD80", fontSize = Dimens.AvatarEmoji)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
             text = "Failed to load model",
@@ -618,7 +621,7 @@ private fun ModelErrorState(onRetry: () -> Unit) {
         Text(
             text = "The model file may be corrupted.\nTry reloading or re-download from Settings.",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT),
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(20.dp))
