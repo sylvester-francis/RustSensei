@@ -68,9 +68,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.ui.components.ActivityChart
 import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.components.ProgressRing
@@ -262,7 +264,7 @@ fun DashboardScreen(
                             .padding(Dimens.CardPadding)
                     ) {
                         Text(
-                            text = "Welcome to Rust!",
+                            text = stringResource(R.string.welcome_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -345,7 +347,7 @@ fun DashboardScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Daily Goal",
+                            text = stringResource(R.string.daily_goal),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
@@ -376,17 +378,17 @@ fun DashboardScreen(
 
                     // Checklist items
                     DailyGoalCheckItem(
-                        text = "Read 1 chapter",
+                        text = stringResource(R.string.read_1_chapter),
                         isCompleted = chapterGoalDone
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     DailyGoalCheckItem(
-                        text = "Complete 1 exercise",
+                        text = stringResource(R.string.complete_1_exercise),
                         isCompleted = exerciseGoalDone
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     DailyGoalCheckItem(
-                        text = "Complete 1 quiz",
+                        text = stringResource(R.string.complete_1_quiz),
                         isCompleted = quizGoalDone
                     )
                 }
@@ -401,7 +403,7 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "This Week",
+                    text = stringResource(R.string.this_week),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -417,7 +419,7 @@ fun DashboardScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "No activity yet this week",
+                                text = stringResource(R.string.no_activity_yet),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -544,7 +546,7 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Achievements",
+                    text = stringResource(R.string.achievements),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -588,13 +590,13 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "My Notes",
+                        text = stringResource(R.string.my_notes),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     if (uiState.recentNotes.size > 3) {
                         Text(
-                            text = "See all",
+                            text = stringResource(R.string.see_all),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.clickable { /* future navigation */ }

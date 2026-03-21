@@ -1,12 +1,16 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material3.TextButton
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
@@ -89,9 +93,13 @@ import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.QuizScreenMode
 import com.sylvester.rustsensei.viewmodel.QuizViewModel
+import kotlinx.coroutines.delay
 
 @Composable
-fun QuizScreen(viewModel: QuizViewModel) {
+fun QuizScreen(
+    viewModel: QuizViewModel,
+    onNavigateToLearningPaths: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     BackHandler(enabled = uiState.mode != QuizScreenMode.LIST) {
@@ -101,7 +109,7 @@ fun QuizScreen(viewModel: QuizViewModel) {
     when (uiState.mode) {
         QuizScreenMode.LIST -> QuizListView(viewModel)
         QuizScreenMode.IN_PROGRESS -> QuizInProgressView(viewModel)
-        QuizScreenMode.COMPLETE -> QuizCompleteView(viewModel)
+        QuizScreenMode.COMPLETE -> QuizCompleteView(viewModel, onNavigateToLearningPaths)
     }
 }
 
@@ -535,6 +543,12 @@ private fun MultipleChoiceAnswers(
     val haptic = LocalHapticFeedback.current
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         question.options.forEachIndexed { index, option ->
+            val visible = remember { mutableStateOf(false) }
+            LaunchedEffect(Unit) {
+                delay(index * 80L) // 80ms stagger between each option
+                visible.value = true
+            }
+
             val isSelected = selectedIndex == index
             val isCorrect = index == question.correctIndex
 
@@ -553,45 +567,50 @@ private fun MultipleChoiceAnswers(
             }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(borderW, borderColor, RoundedCornerShape(12.dp))
-                    .background(bgColor)
-                    .clickable(enabled = !answered) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onSelect(index)
-                    }
-                    .padding(horizontal = 14.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically
+            AnimatedVisibility(
+                visible = visible.value,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 3 })
             ) {
-                Box(
+                Row(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(borderColor.copy(alpha = 0.12f)),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(borderW, borderColor, RoundedCornerShape(12.dp))
+                        .background(bgColor)
+                        .clickable(enabled = !answered) {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onSelect(index)
+                        }
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(borderColor.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${'A' + index}",
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = borderColor
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "${'A' + index}",
-                        fontSize = 14.sp,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        color = borderColor
+                        text = option,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = option,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                if (answered && isCorrect) {
-                    Icon(Icons.Default.CheckCircle, null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
-                } else if (answered && isSelected && !isCorrect) {
-                    Icon(Icons.Default.Close, null, tint = ErrorNeon, modifier = Modifier.size(20.dp))
+                    if (answered && isCorrect) {
+                        Icon(Icons.Default.CheckCircle, null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
+                    } else if (answered && isSelected && !isCorrect) {
+                        Icon(Icons.Default.Close, null, tint = ErrorNeon, modifier = Modifier.size(20.dp))
+                    }
                 }
             }
         }
@@ -742,7 +761,10 @@ private fun CodeCompletionAnswer(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun QuizCompleteView(viewModel: QuizViewModel) {
+private fun QuizCompleteView(
+    viewModel: QuizViewModel,
+    onNavigateToLearningPaths: () -> Unit
+) {
     val uiState by viewModel.uiState.collectAsState()
     val quiz = uiState.currentQuiz ?: return
     val score = uiState.score
@@ -873,6 +895,27 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
         ) {
             Text("Back to Quizzes", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        TextButton(
+            onClick = onNavigateToLearningPaths,
+            modifier = Modifier.fillMaxWidth().height(48.dp)
+        ) {
+            Icon(
+                Icons.Default.AutoStories,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = NeonCyan
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                "Continue Learning Path",
+                style = MaterialTheme.typography.labelLarge,
+                color = NeonCyan,
+                fontWeight = FontWeight.Medium
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))

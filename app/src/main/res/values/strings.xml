@@ -6,7 +6,7 @@
     <string name="downloading">Downloading…</string>
     <string name="loading_model">Loading model…</string>
     <string name="model_ready">Model ready</string>
-    <string name="ask_about_rust">Ask about Rust…</string>
+    <string name="ask_about_rust">Ask me anything about Rust</string>
     <string name="stop_generation">Stop</string>
     <string name="new_conversation">New Conversation</string>
     <string name="settings">Settings</string>
@@ -23,4 +23,88 @@
     <string name="notification_channel_name">Model Service</string>
     <string name="notification_model_loaded">RustSensei is ready</string>
     <string name="storage_warning">This will use approximately 2.5 GB of storage.</string>
+
+    <!-- Dashboard -->
+    <string name="welcome_title">Welcome to Rust!</string>
+    <string name="welcome_subtitle">Here\'s how to get started:</string>
+    <string name="onboarding_step1_title">Read the Book</string>
+    <string name="onboarding_step1_desc">Start with Chapter 1 — we\'ll explain Rust like you\'re coming from Python</string>
+    <string name="onboarding_step2_title">Practice Exercises</string>
+    <string name="onboarding_step2_desc">213 exercises from Rustlings — with hints and AI code review</string>
+    <string name="onboarding_step3_title">Test Yourself</string>
+    <string name="onboarding_step3_desc">Take quizzes and review flashcards to lock in what you learn</string>
+    <string name="start_chapter_1">Start Chapter 1</string>
+    <string name="daily_goal">Daily Goal</string>
+    <string name="daily_goal_status">%1$d/3 complete — %2$d%%</string>
+    <string name="read_1_chapter">Read 1 chapter</string>
+    <string name="complete_1_exercise">Complete 1 exercise</string>
+    <string name="complete_1_quiz">Complete 1 quiz</string>
+    <string name="this_week">This Week</string>
+    <string name="no_activity_yet">No activity yet this week</string>
+    <string name="start_activity_hint">Start reading or solving exercises!</string>
+    <string name="achievements">Achievements</string>
+    <string name="achievements_unlocked">%1$d of %2$d unlocked</string>
+    <string name="keep_learning_badges">Keep learning to unlock badges!</string>
+    <string name="my_notes">My Notes</string>
+    <string name="see_all">See all</string>
+    <string name="no_notes_yet">No notes yet. Add notes while reading sections!</string>
+    <string name="continue_reading">Continue Reading</string>
+
+    <!-- Chat -->
+    <string name="python_context">I\'ll explain things like you\'re coming from Python</string>
+    <string name="privacy_badge">Offline · Private · On-device AI</string>
+    <string name="tutor_needs_brain">Your tutor needs a brain</string>
+    <string name="download_model_hint">Download a small AI model to enable chat.\nAll other features work without it.</string>
+    <string name="loading_tutor">Loading your tutor…</string>
+    <string name="initializing_model">Initializing on-device AI model</string>
+    <string name="failed_load_model">Failed to load model</string>
+    <string name="model_error_hint">The model file may be corrupted.\nTry reloading or re-download from Settings.</string>
+    <string name="retry">Retry</string>
+    <string name="download_model">Download Model</string>
+
+    <!-- Review -->
+    <string name="review_title">Review</string>
+    <string name="tap_to_reveal">Tap card to reveal answer</string>
+    <string name="no_cards_to_review">No cards to review right now</string>
+    <string name="come_back_after_studying">Come back after studying new material</string>
+    <string name="how_well_did_you_know">How well did you know this?</string>
+    <string name="rating_again">Again</string>
+    <string name="rating_hard">Hard</string>
+    <string name="rating_good">Good</string>
+    <string name="rating_easy">Easy</string>
+    <string name="session_complete">Session Complete</string>
+    <string name="no_cards_due">No cards due for review right now</string>
+    <string name="return_tomorrow">Come back tomorrow for your next review</string>
+
+    <!-- Quiz -->
+    <string name="quizzes">Quizzes</string>
+    <string name="quiz_subtitle">Test your understanding of each topic</string>
+    <string name="no_quizzes">No quizzes available</string>
+    <string name="correct">Correct!</string>
+    <string name="not_quite">Not quite</string>
+    <string name="continue_label">Continue</string>
+    <string name="see_results">See Results</string>
+    <string name="retry_quiz">Retry Quiz</string>
+    <string name="back_to_quizzes">Back to Quizzes</string>
+
+    <!-- Search -->
+    <string name="search_placeholder">Search sections, exercises, glossary…</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="clear_all">Clear All</string>
+    <string name="search_all_content">Search across all content</string>
+    <string name="no_results_found">No results found</string>
+    <string name="try_different_keywords">Try different keywords</string>
+
+    <!-- Settings -->
+    <string name="settings_subtitle">Model, inference &amp; account</string>
+    <string name="model_management">Model Management</string>
+    <string name="active_model">Active Model</string>
+    <string name="no_model_loaded">No model loaded</string>
+    <string name="inference_config">Inference Config</string>
+    <string name="top_p">Top P</string>
+    <string name="reset_to_defaults">Reset to Defaults</string>
+    <string name="danger_zone">Danger Zone</string>
+    <string name="destructive_actions">Destructive actions</string>
+    <string name="clear_all_conversations">Clear All Conversations</string>
+    <string name="delete_active_model">Delete Active Model</string>
 </resources>

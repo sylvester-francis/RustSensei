@@ -154,6 +154,18 @@ class BookViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
+    fun retry() {
+        when (_uiState.value.mode) {
+            BookScreenMode.INDEX -> loadBookIndex()
+            BookScreenMode.CHAPTER -> _uiState.value.currentChapterId?.let { openChapter(it) }
+            BookScreenMode.SECTION -> {
+                val chId = _uiState.value.currentChapterId
+                val secId = _uiState.value.currentSectionId
+                if (chId != null && secId != null) openSection(chId, secId)
+            }
+        }
+    }
+
     fun navigateBack() {
         val state = _uiState.value
         when (state.mode) {

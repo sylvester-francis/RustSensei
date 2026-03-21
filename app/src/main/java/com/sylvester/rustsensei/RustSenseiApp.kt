@@ -132,7 +132,10 @@ fun RustSenseiApp() {
         }
 
         composable<QuizRoute> {
-            QuizScreen(viewModel = quizViewModel)
+            QuizScreen(
+                viewModel = quizViewModel,
+                onNavigateToLearningPaths = { navController.navigate(LearningPathRoute) }
+            )
         }
 
         composable<SearchRoute> {

@@ -62,7 +62,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.data.Conversation
 import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
@@ -435,7 +437,7 @@ private fun WelcomeState(onPromptSelected: (String) -> Unit) {
 
         // headlineSmall (monospace via theme typography)
         Text(
-            text = "Ask me anything about Rust",
+            text = stringResource(R.string.ask_about_rust),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
@@ -513,7 +515,7 @@ private fun NoModelState(onDownload: () -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Your tutor needs a brain",
+            text = stringResource(R.string.tutor_needs_brain),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
@@ -557,7 +559,7 @@ private fun NoModelState(onDownload: () -> Unit) {
                 modifier = Modifier.padding(end = 10.dp)
             )
             Text(
-                "Download Model",
+                stringResource(R.string.download_model),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -580,7 +582,7 @@ private fun ModelLoadingState() {
         Text(text = "\uD83E\uDD80", fontSize = Dimens.AvatarEmoji)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Loading your tutor...",
+            text = stringResource(R.string.loading_tutor),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
@@ -612,7 +614,7 @@ private fun ModelErrorState(onRetry: () -> Unit) {
         Text(text = "\uD83E\uDD80", fontSize = Dimens.AvatarEmoji)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Failed to load model",
+            text = stringResource(R.string.failed_load_model),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
@@ -633,7 +635,7 @@ private fun ModelErrorState(onRetry: () -> Unit) {
             shape = RoundedCornerShape(28.dp)
         ) {
             Text(
-                "Retry",
+                stringResource(R.string.retry),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -708,7 +710,7 @@ private fun ConversationDrawer(
     ) {
         // "Conversations" title
         Text(
-            text = "Conversations",
+            text = stringResource(R.string.conversations),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(16.dp)
@@ -720,7 +722,7 @@ private fun ConversationDrawer(
         NavigationDrawerItem(
             label = {
                 Text(
-                    "New Conversation",
+                    stringResource(R.string.new_conversation),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )

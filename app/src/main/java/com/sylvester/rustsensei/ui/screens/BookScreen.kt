@@ -63,7 +63,15 @@ fun BookScreen(
             onDismissRequest = { viewModel.clearError() },
             title = { Text("Error") },
             text = { Text(error) },
-            confirmButton = { TextButton(onClick = { viewModel.clearError() }) { Text("OK") } }
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.clearError()
+                    viewModel.retry()
+                }) { Text("Retry") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.clearError() }) { Text("Dismiss") }
+            }
         )
     }
 
@@ -72,7 +80,9 @@ fun BookScreen(
             onDismissRequest = { referenceViewModel.clearError() },
             title = { Text("Unavailable") },
             text = { Text(error) },
-            confirmButton = { TextButton(onClick = { referenceViewModel.clearError() }) { Text("OK") } }
+            confirmButton = {
+                TextButton(onClick = { referenceViewModel.clearError() }) { Text("OK") }
+            }
         )
     }
 

@@ -1,6 +1,8 @@
 package com.sylvester.rustsensei.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -53,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
@@ -275,12 +278,24 @@ private fun FlashCardView(
     onFlip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val accentColor = if (isFlipped) NeonCyan else RustOrange
+    val rotation by animateFloatAsState(
+        targetValue = if (isFlipped) 180f else 0f,
+        animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing),
+        label = "card_flip"
+    )
+
+    // Determine which face to show based on rotation angle
+    val showBack = rotation > 90f
+    val accentColor = if (showBack) NeonCyan else RustOrange
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
+            .graphicsLayer {
+                rotationY = rotation
+                cameraDistance = 12f * density
+            }
             .clickable(onClick = onFlip),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
@@ -288,45 +303,90 @@ private fun FlashCardView(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Neon accent line at top
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .background(accentColor.copy(alpha = 0.7f))
-                    .align(Alignment.TopCenter)
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(28.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                // Side label
-                Text(
-                    text = if (isFlipped) "ANSWER" else "QUESTION",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp,
-                    color = accentColor.copy(alpha = 0.6f)
+        if (showBack) {
+            // Mirror the back face so text reads correctly
+            Box(modifier = Modifier.fillMaxSize().graphicsLayer { rotationY = 180f }) {
+                // Neon accent line at top
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(accentColor.copy(alpha = 0.7f))
+                        .align(Alignment.TopCenter)
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    // Side label
+                    Text(
+                        text = "ANSWER",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = accentColor.copy(alpha = 0.6f)
+                    )
 
-                // Card content
-                Text(
-                    text = if (isFlipped) back else front,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontFamily = FontFamily.Monospace,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 26.sp
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Card content
+                    Text(
+                        text = back,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 26.sp
+                    )
+                }
+            }
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Neon accent line at top
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(accentColor.copy(alpha = 0.7f))
+                        .align(Alignment.TopCenter)
                 )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    // Side label
+                    Text(
+                        text = "QUESTION",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp,
+                        color = accentColor.copy(alpha = 0.6f)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Card content
+                    Text(
+                        text = front,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontFamily = FontFamily.Monospace,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 26.sp
+                    )
+                }
             }
         }
     }
