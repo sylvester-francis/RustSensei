@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.CodeBlock
 import com.sylvester.rustsensei.ui.components.CodeEditor
+import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.components.UndoRedoManager
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
@@ -83,6 +84,20 @@ internal fun ExerciseDetailView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val exercise = uiState.currentExercise ?: return
+
+    var showConfetti by remember { mutableStateOf(false) }
+
+    // Trigger confetti when check result becomes "correct"
+    LaunchedEffect(uiState.checkResult) {
+        if (uiState.checkResult == "correct") {
+            showConfetti = true
+        }
+    }
+
+    // Reset confetti when the exercise changes
+    LaunchedEffect(uiState.currentExercise) {
+        showConfetti = false
+    }
 
     // TextFieldValue keyed only on exercise ID to avoid cursor-reset on every keystroke
     var textFieldValue by remember(uiState.currentExercise?.id) {
@@ -118,11 +133,12 @@ internal fun ExerciseDetailView(
     }
     val difficultyLabel = exercise.difficulty.replaceFirstChar { it.uppercase() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+        ) {
         // -- Header: back + title + difficulty + reset --
         Row(
             modifier = Modifier
@@ -659,5 +675,11 @@ internal fun ExerciseDetailView(
 
             Spacer(modifier = Modifier.height(Spacing.XXL))
         }
+    }
+
+    ConfettiOverlay(
+        isVisible = showConfetti,
+        onComplete = { showConfetti = false }
+    )
     }
 }

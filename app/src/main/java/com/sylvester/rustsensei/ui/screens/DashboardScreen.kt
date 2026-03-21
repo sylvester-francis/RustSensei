@@ -48,7 +48,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,8 +72,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.sylvester.rustsensei.ui.components.ActivityChart
+import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.components.ProgressRing
+import com.sylvester.rustsensei.ui.components.SkeletonBox
+import com.sylvester.rustsensei.ui.theme.Alpha
+import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.Achievement
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
@@ -138,9 +145,18 @@ fun DashboardScreen(
     val dailyGoalProgress = goalsCompleted / 3f
     val dailyGoalPercent = (dailyGoalProgress * 100).toInt()
 
+    val isNewUser = uiState.completedSections == 0 && uiState.completedExercises == 0
+    var showDailyGoalConfetti by remember { mutableStateOf(false) }
+
+    // Trigger confetti when daily goal completes
+    LaunchedEffect(goalsCompleted) {
+        if (goalsCompleted == 3) showDailyGoalConfetti = true
+    }
+
     val cardShape = RoundedCornerShape(12.dp)
     val cardBackground = MaterialTheme.colorScheme.surfaceContainerHigh
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -218,6 +234,88 @@ fun DashboardScreen(
                                 isToday = isToday,
                                 primaryColor = MaterialTheme.colorScheme.primary,
                                 surfaceVariantColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // =====================================================
+        // Section 1.5: First-Launch Onboarding (new users only)
+        // =====================================================
+        if (isNewUser) {
+            item(key = "onboarding") {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = cardShape,
+                    colors = CardDefaults.cardColors(containerColor = cardBackground)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.MUTED),
+                                shape = cardShape
+                            )
+                            .padding(Dimens.CardPadding)
+                    ) {
+                        Text(
+                            text = "Welcome to Rust!",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.XS))
+                        Text(
+                            text = "Here's how to get started:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.MD))
+
+                        OnboardingStep(
+                            number = "1",
+                            title = "Read the Book",
+                            description = "Start with Chapter 1 — we'll explain Rust like you're coming from Python",
+                            accentColor = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.SM))
+                        OnboardingStep(
+                            number = "2",
+                            title = "Practice Exercises",
+                            description = "213 exercises from Rustlings — with hints and AI code review",
+                            accentColor = NeonCyan
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.SM))
+                        OnboardingStep(
+                            number = "3",
+                            title = "Test Yourself",
+                            description = "Take quizzes and review flashcards to lock in what you learn",
+                            accentColor = WarningAmber
+                        )
+
+                        Spacer(modifier = Modifier.height(Spacing.LG))
+
+                        Button(
+                            onClick = onNavigateToLearn,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = cardShape,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        ) {
+                            Icon(
+                                Icons.Default.AutoStories,
+                                contentDescription = null,
+                                modifier = Modifier.size(Dimens.IconSM)
+                            )
+                            Spacer(modifier = Modifier.width(Spacing.SM))
+                            Text(
+                                "Start Chapter 1",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -583,14 +681,21 @@ fun DashboardScreen(
                     text = dailyQuote,
                     style = MaterialTheme.typography.bodySmall,
                     fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT),
                     textAlign = TextAlign.Center,
                     lineHeight = 18.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(Spacing.LG))
             }
         }
     }
+
+    // Confetti overlay for daily goal completion
+    ConfettiOverlay(
+        isVisible = showDailyGoalConfetti,
+        onComplete = { showDailyGoalConfetti = false }
+    )
+    } // end Box
 }
 
 // =====================================================================
@@ -845,6 +950,50 @@ private fun AchievementBadge(achievement: Achievement) {
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = contentAlpha),
             lineHeight = 14.sp
         )
+    }
+}
+
+@Composable
+private fun OnboardingStep(
+    number: String,
+    title: String,
+    description: String,
+    accentColor: Color
+) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(accentColor.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = number,
+                style = MaterialTheme.typography.labelMedium,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                color = accentColor
+            )
+        }
+        Spacer(modifier = Modifier.width(Spacing.MD))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT),
+                lineHeight = 18.sp
+            )
+        }
     }
 }
 

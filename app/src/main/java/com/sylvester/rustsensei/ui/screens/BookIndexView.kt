@@ -316,8 +316,9 @@ private fun BookContent(
                             overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(Spacing.XXS))
+                        val estimatedMinutes = (chapter.sectionIds.size * 4).coerceAtLeast(2)
                         Text(
-                            text = "${chapter.sectionIds.size} sections",
+                            text = "${chapter.sectionIds.size} sections · ~${estimatedMinutes} min",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

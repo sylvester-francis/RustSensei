@@ -4,9 +4,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,23 +23,34 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -169,6 +182,50 @@ private fun CategoriesView(
     val uiState by viewModel.uiState.collectAsState()
     val totalExercises = uiState.categories.sumOf { it.exercises.size }
 
+    // -- Search & filter state --
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedDifficulty by remember { mutableStateOf<String?>(null) }
+
+    val difficultyFilters = listOf("All", "Beginner", "Intermediate", "Advanced")
+
+    // Map filter labels to getDifficultyLabel() output values
+    val difficultyLabelMap = mapOf(
+        "Beginner" to "Easy",
+        "Intermediate" to "Medium",
+        "Advanced" to "Hard"
+    )
+
+    // -- Filtered categories --
+    val filteredCategories = remember(uiState.categories, searchQuery, selectedDifficulty) {
+        val query = searchQuery.trim()
+        uiState.categories.mapNotNull { category ->
+            // Start with all exercises in the category
+            var exercises = category.exercises
+
+            // Apply search filter: keep exercises whose ID contains the query
+            if (query.isNotEmpty()) {
+                exercises = exercises.filter { exerciseId ->
+                    exerciseId.contains(query, ignoreCase = true)
+                }
+            }
+
+            // Apply difficulty filter
+            if (selectedDifficulty != null) {
+                val targetLabel = difficultyLabelMap[selectedDifficulty]
+                if (targetLabel != null) {
+                    exercises = exercises.filter { exerciseId ->
+                        getDifficultyLabel(exerciseId) == targetLabel
+                    }
+                }
+            }
+
+            // Only include category if it has matching exercises
+            if (exercises.isNotEmpty()) category else null
+        }
+    }
+
+    val isFiltering = searchQuery.isNotEmpty() || selectedDifficulty != null
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(Dimens.ScreenPadding)
@@ -189,6 +246,113 @@ private fun CategoriesView(
                 color = SecondaryText
             )
             Spacer(modifier = Modifier.height(Spacing.LG))
+        }
+
+        // -- Search bar --
+        item {
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = {
+                    Text(
+                        "Search exercises...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = SecondaryText.copy(alpha = Alpha.HINT)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = Spacing.SM),
+                singleLine = true,
+                shape = RoundedCornerShape(Dimens.CardRadius),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = DarkSurfaceContainerHigh,
+                    unfocusedContainerColor = DarkSurfaceContainerHigh,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = RustOrange
+                ),
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = FontFamily.Monospace,
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier.size(Dimens.IconSM),
+                        tint = SecondaryText
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Clear search",
+                                modifier = Modifier.size(Dimens.IconSM),
+                                tint = SecondaryText
+                            )
+                        }
+                    }
+                }
+            )
+        }
+
+        // -- Difficulty filter chips --
+        item {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(bottom = Spacing.LG),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.SM)
+            ) {
+                difficultyFilters.forEach { label ->
+                    val isSelected = when (label) {
+                        "All" -> selectedDifficulty == null
+                        else -> selectedDifficulty == label
+                    }
+                    val chipColor = when (label) {
+                        "Beginner" -> DifficultyBeginner
+                        "Intermediate" -> DifficultyIntermediate
+                        "Advanced" -> DifficultyAdvanced
+                        else -> RustOrange
+                    }
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = {
+                            selectedDifficulty = if (label == "All") null else label
+                        },
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                        },
+                        shape = RoundedCornerShape(Spacing.SM),
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = DarkSurfaceContainerHigh,
+                            selectedContainerColor = chipColor.copy(alpha = Alpha.BORDER),
+                            labelColor = SecondaryText,
+                            selectedLabelColor = chipColor
+                        ),
+                        border = if (isSelected) {
+                            BorderStroke(
+                                width = Dimens.Divider,
+                                color = chipColor.copy(alpha = Alpha.MUTED)
+                            )
+                        } else {
+                            BorderStroke(
+                                width = Dimens.Divider,
+                                color = Color.Transparent
+                            )
+                        }
+                    )
+                }
+            }
         }
 
         // -- Continue card --
@@ -339,7 +503,7 @@ private fun CategoriesView(
         }
 
         // -- Empty state --
-        if (uiState.categories.isEmpty()) {
+        if (filteredCategories.isEmpty()) {
             item(key = "empty-exercises") {
                 Column(
                     modifier = Modifier
@@ -355,12 +519,12 @@ private fun CategoriesView(
                     )
                     Spacer(modifier = Modifier.height(Spacing.LG))
                     Text(
-                        text = "No exercises available",
+                        text = if (isFiltering) "No matching exercises" else "No exercises available",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SECONDARY)
                     )
                     Text(
-                        text = "Content may still be loading",
+                        text = if (isFiltering) "Try a different search or filter" else "Content may still be loading",
                         style = MaterialTheme.typography.bodySmall,
                         color = SecondaryText.copy(alpha = 0.4f)
                     )
@@ -369,7 +533,7 @@ private fun CategoriesView(
         }
 
         // -- Category list --
-        items(uiState.categories, key = { it.id }) { category ->
+        items(filteredCategories, key = { it.id }) { category ->
             val isExpanded = uiState.expandedCategory == category.id
             val progress = uiState.categoryProgress[category.id] ?: emptyList()
             val completedCount = progress.count { it.status == "completed" }
