@@ -1,5 +1,9 @@
 package com.sylvester.rustsensei.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,8 +68,19 @@ fun MessageBubble(
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
+    // Entrance animation: slide in from the sender's side with a spring
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+
+    val slideDirection = if (isUser) 1 else -1
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInHorizontally(
+            initialOffsetX = { slideDirection * (it / 4) },
+            animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f)
+        ) + fadeIn(animationSpec = spring(stiffness = 400f))
+    ) {
     if (isUser) {
-        // Right-aligned user message
         Row(
             modifier = modifier
                 .fillMaxWidth()
@@ -113,6 +133,7 @@ fun MessageBubble(
             }
         }
     }
+    } // end AnimatedVisibility
 }
 
 /**

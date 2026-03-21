@@ -55,8 +55,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,6 +69,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +78,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.QuizQuestion
+import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.ErrorNeon
@@ -525,6 +532,7 @@ private fun MultipleChoiceAnswers(
     answered: Boolean,
     onSelect: (Int) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         question.options.forEachIndexed { index, option ->
             val isSelected = selectedIndex == index
@@ -551,7 +559,10 @@ private fun MultipleChoiceAnswers(
                     .clip(RoundedCornerShape(12.dp))
                     .border(borderW, borderColor, RoundedCornerShape(12.dp))
                     .background(bgColor)
-                    .clickable(enabled = !answered) { onSelect(index) }
+                    .clickable(enabled = !answered) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onSelect(index)
+                    }
                     .padding(horizontal = 14.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -594,6 +605,7 @@ private fun TrueFalseAnswers(
     answered: Boolean,
     onSelect: (Boolean) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -624,7 +636,10 @@ private fun TrueFalseAnswers(
                     .clip(RoundedCornerShape(14.dp))
                     .border(borderW, borderColor, RoundedCornerShape(14.dp))
                     .background(bgColor)
-                    .clickable(enabled = !answered) { onSelect(value) },
+                    .clickable(enabled = !answered) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onSelect(value)
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -734,6 +749,13 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
     val total = quiz.questions.size
     val percent = (score.toFloat() / total * 100).toInt()
     val color = scoreColor(percent)
+    var showConfetti by remember { mutableStateOf(false) }
+
+    LaunchedEffect(percent) {
+        if (percent >= 80) {
+            showConfetti = true
+        }
+    }
 
     val message = when {
         percent == 100 -> "Perfect!"
@@ -751,6 +773,7 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
         else -> "\uD83E\uDD14"            // thinking
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -853,6 +876,9 @@ private fun QuizCompleteView(viewModel: QuizViewModel) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    ConfettiOverlay(isVisible = showConfetti, onComplete = { showConfetti = false })
     }
 }
 

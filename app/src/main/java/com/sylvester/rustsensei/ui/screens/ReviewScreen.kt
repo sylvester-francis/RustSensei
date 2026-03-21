@@ -45,16 +45,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.ErrorNeon
 import com.sylvester.rustsensei.ui.theme.NeonCyan
@@ -70,11 +76,19 @@ fun ReviewScreen(
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showConfetti by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.startReviewSession()
     }
 
+    LaunchedEffect(uiState.sessionComplete) {
+        if (uiState.sessionComplete) {
+            showConfetti = true
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Scaffold(
         topBar = {
             Column {
@@ -248,6 +262,9 @@ fun ReviewScreen(
             }
         }
     }
+
+    ConfettiOverlay(isVisible = showConfetti, onComplete = { showConfetti = false })
+    }
 }
 
 @Composable
@@ -319,6 +336,7 @@ private fun FlashCardView(
 private fun RatingButtons(
     onRate: (Int) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -337,25 +355,37 @@ private fun RatingButtons(
                 label = "Again",
                 color = ErrorNeon,
                 modifier = Modifier.weight(1f),
-                onClick = { onRate(1) }
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onRate(1)
+                }
             )
             RatingButton(
                 label = "Hard",
                 color = WarningAmber,
                 modifier = Modifier.weight(1f),
-                onClick = { onRate(3) }
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onRate(3)
+                }
             )
             RatingButton(
                 label = "Good",
                 color = RustOrange,
                 modifier = Modifier.weight(1f),
-                onClick = { onRate(4) }
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onRate(4)
+                }
             )
             RatingButton(
                 label = "Easy",
                 color = NeonCyan,
                 modifier = Modifier.weight(1f),
-                onClick = { onRate(5) }
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onRate(5)
+                }
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
