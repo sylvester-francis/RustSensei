@@ -153,12 +153,12 @@ fun SettingsScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Size: ${modelViewModel.modelManager.getModelSizeMB(activeModel)} MB",
+                            text = "Size: ${modelViewModel.getModelSizeMB(activeModel)} MB",
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             color = SecondaryText
                         )
-                        val backend = chatViewModel.liteRtEngine.getActiveBackend()
+                        val backend = modelViewModel.getActiveBackend()
                         val backendLabel = if (backend == "GPU") "GPU-accelerated" else "CPU mode (slower)"
                         Text(
                             text = "Q8 | LiteRT | $backendLabel",
@@ -201,7 +201,7 @@ fun SettingsScreen(
                         .padding(vertical = 4.dp)
                         .clickable(enabled = !isDownloading && !isLoading) {
                             if (isDownloaded && !isLoaded) {
-                                modelViewModel.switchModel(model.id, chatViewModel.liteRtEngine)
+                                modelViewModel.switchModel(model.id)
                             } else if (!isDownloaded) {
                                 modelViewModel.selectModel(model.id)
                                 modelViewModel.startDownload()

@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 // Load keystore properties from file (not checked into git)
@@ -25,8 +27,8 @@ android {
         applicationId = "com.sylvester.rustsensei"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 5
+        versionName = "1.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -107,6 +109,14 @@ dependencies {
 
     // LiteRT LM (GPU-accelerated LLM inference)
     implementation(libs.litertlm)
+
+    // Hilt (Dependency Injection)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+
+    // Kotlin Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     // Testing
     testImplementation(libs.junit)

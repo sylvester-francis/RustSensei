@@ -54,7 +54,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
 
     @Volatile private var activeBackend: String = "GPU"
 
-    fun getActiveBackend(): String = activeBackend
+    override fun getActiveBackend(): String = activeBackend
 
     @OptIn(ExperimentalApi::class)
     override suspend fun loadModel(modelPath: String, contextSize: Int): Boolean {

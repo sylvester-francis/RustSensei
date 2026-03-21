@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +9,12 @@ import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathProgress
 import com.sylvester.rustsensei.data.PathStep
 import com.sylvester.rustsensei.data.ProgressDao
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class PathMode { LIST, DETAIL }
 
@@ -22,6 +25,7 @@ data class PendingPathStep(
     val targetId: String
 )
 
+@Immutable
 data class PathUiState(
     val paths: List<LearningPath> = emptyList(),
     val selectedPath: LearningPath? = null,
@@ -29,7 +33,8 @@ data class PathUiState(
     val mode: PathMode = PathMode.LIST
 )
 
-class LearningPathViewModel(
+@HiltViewModel
+class LearningPathViewModel @Inject constructor(
     private val contentRepo: ContentProvider,
     private val progressDao: ProgressDao
 ) : ViewModel() {

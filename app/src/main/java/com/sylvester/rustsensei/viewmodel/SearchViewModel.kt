@@ -1,17 +1,20 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.data.ProgressRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class SearchResult(
     val title: String,
@@ -21,6 +24,7 @@ data class SearchResult(
     val matchSnippet: String = ""
 )
 
+@Immutable
 data class SearchUiState(
     val query: String = "",
     val results: List<SearchResult> = emptyList(),
@@ -28,7 +32,8 @@ data class SearchUiState(
     val recentSearches: List<String> = emptyList()
 )
 
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository,
     private val preferencesManager: PreferencesManager

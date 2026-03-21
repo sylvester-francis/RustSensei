@@ -58,7 +58,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelInfo
 import com.sylvester.rustsensei.llm.ModelManager
 import com.sylvester.rustsensei.ui.components.MemoryWarningDialog
@@ -70,7 +69,6 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 @Composable
 fun ModelSetupScreen(
     modelViewModel: ModelViewModel,
-    liteRtEngine: LiteRtEngine,
     onNavigateToChat: () -> Unit,
     onSkip: () -> Unit = {}
 ) {
@@ -100,7 +98,7 @@ fun ModelSetupScreen(
 
     LaunchedEffect(uiState.modelState) {
         if (uiState.modelState == ModelState.DOWNLOADED) {
-            modelViewModel.loadModel(liteRtEngine)
+            modelViewModel.loadModel()
         }
     }
 
@@ -377,7 +375,7 @@ fun ModelSetupScreen(
                 Button(
                     onClick = {
                         if (modelViewModel.isModelDownloaded()) {
-                            modelViewModel.loadModel(liteRtEngine)
+                            modelViewModel.loadModel()
                         } else {
                             modelViewModel.startDownload()
                         }

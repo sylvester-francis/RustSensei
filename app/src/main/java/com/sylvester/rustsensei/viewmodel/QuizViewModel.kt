@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,10 +10,12 @@ import com.sylvester.rustsensei.data.QuizIndexEntry
 import com.sylvester.rustsensei.data.QuizQuestion
 import com.sylvester.rustsensei.data.QuizResult
 import com.sylvester.rustsensei.data.ProgressRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class QuizScreenMode {
     LIST,
@@ -20,6 +23,7 @@ enum class QuizScreenMode {
     COMPLETE
 }
 
+@Immutable
 data class QuizUiState(
     val mode: QuizScreenMode = QuizScreenMode.LIST,
     val quizzes: List<QuizIndexEntry> = emptyList(),
@@ -33,7 +37,8 @@ data class QuizUiState(
     val codeInput: String = ""
 )
 
-class QuizViewModel(
+@HiltViewModel
+class QuizViewModel @Inject constructor(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository
 ) : ViewModel() {

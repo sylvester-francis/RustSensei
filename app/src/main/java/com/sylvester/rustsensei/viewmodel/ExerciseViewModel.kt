@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,26 +8,23 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ExerciseCategory
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
-import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.data.ProgressRepository
-import com.sylvester.rustsensei.llm.ChatTemplateFormatter
-import com.sylvester.rustsensei.llm.InferenceConfig
-import com.sylvester.rustsensei.llm.InferenceEngine
-import com.sylvester.rustsensei.llm.LiteRtEngine
-import com.sylvester.rustsensei.llm.ModelManager
+import com.sylvester.rustsensei.domain.ValidateExerciseUseCase
+import com.sylvester.rustsensei.domain.ValidationEvent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class ExerciseScreenMode {
     CATEGORIES,
     DETAIL
 }
 
+@Immutable
 data class ExerciseUiState(
     val mode: ExerciseScreenMode = ExerciseScreenMode.CATEGORIES,
     val categories: List<ExerciseCategory> = emptyList(),
@@ -36,7 +34,7 @@ data class ExerciseUiState(
     val userCode: String = "",
     val hintsRevealed: Int = 0,
     val showSolution: Boolean = false,
-    val checkResult: String? = null, // "correct", "incorrect", "uncertain"
+    val checkResult: String? = null,
     val categoryProgress: Map<String, List<ExerciseProgress>> = emptyMap(),
     val lastIncompleteExerciseId: String? = null,
     val llmValidationResult: String = "",
@@ -44,27 +42,18 @@ data class ExerciseUiState(
     val errorMessage: String? = null
 )
 
-class ExerciseViewModel(
+@HiltViewModel
+class ExerciseViewModel @Inject constructor(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository,
-    private val liteRtEngine: LiteRtEngine,
-    private val prefsManager: PreferencesManager
+    private val validateExercise: ValidateExerciseUseCase
 ) : ViewModel() {
 
     companion object {
         private const val TAG = "ExerciseViewModel"
     }
 
-    private fun getActiveEngine(): InferenceEngine {
-        val modelId = prefsManager.getSelectedModelId()
-        val model = ModelManager.getModelById(modelId)
-        return liteRtEngine
-    }
-
     private var validationJob: Job? = null
-
-    // Bug 4: track category observer jobs so we can cancel previous collectors
-    // when a category is re-expanded, preventing coroutine leaks
     private val categoryObserverJobs = mutableMapOf<String, Job>()
 
     private val _uiState = MutableStateFlow(ExerciseUiState())
@@ -89,7 +78,6 @@ class ExerciseViewModel(
         }
     }
 
-    // Design Concern #3: load last incomplete exercise for "Continue" flow
     private fun loadLastIncomplete() {
         viewModelScope.launch {
             try {
@@ -103,14 +91,12 @@ class ExerciseViewModel(
         }
     }
 
-    // Fix #5: load progress on-demand when a category is expanded, not all at init
     fun toggleCategory(categoryId: String) {
         val current = _uiState.value.expandedCategory
         val newExpanded = if (current == categoryId) null else categoryId
         _uiState.value = _uiState.value.copy(expandedCategory = newExpanded)
 
         if (newExpanded != null) {
-            // Bug 4: cancel any existing observer for this category before starting a new one
             categoryObserverJobs[newExpanded]?.cancel()
             loadCategoryProgress(newExpanded)
         }
@@ -128,15 +114,12 @@ class ExerciseViewModel(
                 Log.e(TAG, "Error in loadCategoryProgress: ${e.message}", e)
             }
         }
-        // Bug 4: store the job so it can be cancelled on re-expand or cleanup
         categoryObserverJobs[categoryId] = job
     }
 
-    // Refresh progress for the current category after completing an exercise
     private fun refreshCurrentCategoryProgress() {
         val exercise = _uiState.value.currentExercise ?: return
         val categoryId = exercise.category
-        // Bug 4: cancel the existing observer before re-fetching
         categoryObserverJobs[categoryId]?.cancel()
         loadCategoryProgress(categoryId)
     }
@@ -243,8 +226,6 @@ class ExerciseViewModel(
                     }
                 }
             } else {
-                // Design Concern #1: if user code differs significantly from starter,
-                // mark as "uncertain" to suggest LLM check, not flat "incorrect"
                 val userChangedCode = normalizedUser != normalizeCode(exercise.starterCode)
                 _uiState.value = _uiState.value.copy(
                     checkResult = if (userChangedCode) "uncertain" else "incorrect"
@@ -253,7 +234,6 @@ class ExerciseViewModel(
         }
     }
 
-    // Design Concern #1: allow user to self-mark as correct after LLM review
     fun markCurrentExerciseCorrect() {
         val exercise = _uiState.value.currentExercise ?: return
         _uiState.value = _uiState.value.copy(checkResult = "correct")
@@ -268,74 +248,39 @@ class ExerciseViewModel(
 
     fun validateWithLlm() {
         val exercise = _uiState.value.currentExercise ?: return
-        val userCode = _uiState.value.userCode.trim()
-
         if (_uiState.value.isValidating) return
-        val activeEngine = getActiveEngine()
-        if (!activeEngine.isModelLoaded()) return
 
         validationJob?.cancel()
-
-        val prompt = ChatTemplateFormatter.formatExerciseValidation(
-            exerciseDescription = exercise.description,
-            exerciseInstructions = exercise.instructions,
-            expectedSolution = exercise.solution,
-            studentCode = userCode
-        )
-
-        _uiState.value = _uiState.value.copy(
-            isValidating = true,
-            llmValidationResult = ""
-        )
-
-        val config = InferenceConfig(
-            temperature = 0.3f,
-            topP = 0.9f,
-            maxTokens = 256,
-            contextLength = 2048
-        )
-
-        val tokenBuffer = StringBuilder()
+        _uiState.value = _uiState.value.copy(isValidating = true, llmValidationResult = "")
 
         validationJob = viewModelScope.launch {
-            try {
-                activeEngine.generate(prompt, config)
-                    .catch { e ->
-                        _uiState.value = _uiState.value.copy(
-                            isValidating = false,
-                            llmValidationResult = "Error: ${e.message}"
-                        )
-                    }
-                    .onCompletion {
-                        val finalText = ChatTemplateFormatter.stripThinkTags(
-                            tokenBuffer.toString()
-                        ).trim()
-                        _uiState.value = _uiState.value.copy(
-                            isValidating = false,
-                            llmValidationResult = finalText
-                        )
-                        if (finalText.uppercase().startsWith("CORRECT")) {
-                            _uiState.value = _uiState.value.copy(checkResult = "correct")
-                            progressRepo.markExerciseComplete(exercise.id, exercise.category)
-                            refreshCurrentCategoryProgress()
+            validateExercise(exercise, _uiState.value.userCode.trim())
+                .collect { event ->
+                    when (event) {
+                        is ValidationEvent.Token -> {
+                            _uiState.value = _uiState.value.copy(
+                                llmValidationResult = event.displayText
+                            )
+                        }
+                        is ValidationEvent.Completed -> {
+                            _uiState.value = _uiState.value.copy(
+                                isValidating = false,
+                                llmValidationResult = event.fullText
+                            )
+                            if (event.isCorrect) {
+                                _uiState.value = _uiState.value.copy(checkResult = "correct")
+                                progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                                refreshCurrentCategoryProgress()
+                            }
+                        }
+                        is ValidationEvent.Error -> {
+                            _uiState.value = _uiState.value.copy(
+                                isValidating = false,
+                                llmValidationResult = event.message
+                            )
                         }
                     }
-                    .collect { token ->
-                        tokenBuffer.append(token)
-                        val displayText = ChatTemplateFormatter.stripThinkTags(
-                            tokenBuffer.toString()
-                        )
-                        _uiState.value = _uiState.value.copy(
-                            llmValidationResult = displayText
-                        )
-                    }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in validateWithLlm: ${e.message}", e)
-                _uiState.value = _uiState.value.copy(
-                    isValidating = false,
-                    llmValidationResult = "Error: ${e.message}"
-                )
-            }
+                }
         }
     }
 
@@ -356,17 +301,11 @@ class ExerciseViewModel(
         )
     }
 
-    fun getExerciseDescription(): String {
-        return _uiState.value.currentExercise?.description ?: ""
-    }
+    fun getExerciseDescription(): String = _uiState.value.currentExercise?.description ?: ""
 
-    fun getExerciseId(): String {
-        return _uiState.value.currentExercise?.id ?: ""
-    }
+    fun getExerciseId(): String = _uiState.value.currentExercise?.id ?: ""
 
-    fun getUserCode(): String {
-        return _uiState.value.userCode
-    }
+    fun getUserCode(): String = _uiState.value.userCode
 
     private fun saveCurrentCode() {
         val exercise = _uiState.value.currentExercise ?: return
@@ -380,11 +319,10 @@ class ExerciseViewModel(
         }
     }
 
-    private fun normalizeCode(code: String): String {
-        return code.replace(Regex("\\s+"), " ")
+    private fun normalizeCode(code: String): String =
+        code.replace(Regex("\\s+"), " ")
             .replace(Regex("//.*"), "")
             .trim()
-    }
 
     private fun checkKeyPatterns(exercise: ExerciseData, userCode: String): Boolean {
         val starterNorm = normalizeCode(exercise.starterCode)
@@ -405,7 +343,6 @@ class ExerciseViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        // Bug 4: cancel all category observer jobs on cleanup
         categoryObserverJobs.values.forEach { it.cancel() }
         categoryObserverJobs.clear()
     }

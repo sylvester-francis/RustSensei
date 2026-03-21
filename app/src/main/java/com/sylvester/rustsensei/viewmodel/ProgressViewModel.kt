@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.LearningStats
 import com.sylvester.rustsensei.data.ProgressRepository
 import com.sylvester.rustsensei.data.UserNote
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class Achievement(
     val id: String,
@@ -35,6 +38,7 @@ data class DayActivity(
     val level: Int // 0=none, 1=low, 2=high
 )
 
+@Immutable
 data class ProgressUiState(
     val completedSections: Int = 0,
     val totalSections: Int = 0,
@@ -49,7 +53,8 @@ data class ProgressUiState(
     val recentNotes: List<UserNote> = emptyList()
 )
 
-class ProgressViewModel(
+@HiltViewModel
+class ProgressViewModel @Inject constructor(
     private val progressRepo: ProgressRepository,
     private val contentRepo: ContentRepository
 ) : ViewModel() {

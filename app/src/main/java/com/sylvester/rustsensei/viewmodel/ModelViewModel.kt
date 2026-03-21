@@ -1,18 +1,21 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.app.Application
 import android.content.Intent
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.llm.DownloadState
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
-import com.sylvester.rustsensei.llm.LiteRtEngine
 import com.sylvester.rustsensei.llm.ModelForegroundService
 import com.sylvester.rustsensei.llm.ModelInfo
+import com.sylvester.rustsensei.llm.ModelLifecycle
 import com.sylvester.rustsensei.llm.ModelManager
+import com.sylvester.rustsensei.llm.ModelReadyState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,17 +23,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class ModelState {
     NOT_DOWNLOADED,
     DOWNLOADING,
     DOWNLOADED,
-    DOWNLOAD_INCOMPLETE,  // Bug 12: partial .tmp file exists from interrupted download
+    DOWNLOAD_INCOMPLETE,
     LOADING,
     READY,
     ERROR
 }
 
+@Immutable
 data class ModelUiState(
     val modelState: ModelState = ModelState.NOT_DOWNLOADED,
     val downloadProgress: Float = 0f,
@@ -41,18 +46,19 @@ data class ModelUiState(
     val errorMessage: String? = null,
     val modelSizeMB: Long = 0,
     val availableModels: List<ModelInfo> = ModelManager.AVAILABLE_MODELS,
-    // Bug 1: default to the recommended model "litert-1b-gemma" instead of "litert-0.6b"
     val selectedModelId: String = "litert-1b-gemma",
     val loadedModelId: String? = null,
     val downloadedModelIds: Set<String> = emptySet()
 )
 
-class ModelViewModel(
-    application: Application,
-    val modelManager: ModelManager,
+@HiltViewModel
+class ModelViewModel @Inject constructor(
+    private val application: Application,
+    private val modelManager: ModelManager,
     private val prefsManager: PreferencesManager,
-    private val liteRtEngine: LiteRtEngine
-) : AndroidViewModel(application) {
+    private val engine: InferenceEngine,
+    private val modelLifecycle: ModelLifecycle
+) : ViewModel() {
 
     companion object {
         private const val TAG = "ModelViewModel"
@@ -69,9 +75,8 @@ class ModelViewModel(
         _uiState.value = _uiState.value.copy(selectedModelId = savedModelId)
         checkModelStatus()
 
-        // Auto-load model in background if file exists and engine isn't loaded yet
-        if (_uiState.value.modelState == ModelState.DOWNLOADED && !liteRtEngine.isModelLoaded()) {
-            loadModel(liteRtEngine)
+        if (_uiState.value.modelState == ModelState.DOWNLOADED && !engine.isModelLoaded()) {
+            loadModel()
         }
     }
 
@@ -86,7 +91,6 @@ class ModelViewModel(
         val state = if (modelManager.isModelDownloaded(selectedModel)) {
             ModelState.DOWNLOADED
         } else if (modelManager.hasTempFile(selectedModel)) {
-            // Bug 12: detect partial downloads from process death
             ModelState.DOWNLOAD_INCOMPLETE
         } else {
             ModelState.NOT_DOWNLOADED
@@ -108,7 +112,6 @@ class ModelViewModel(
     fun getSelectedModelInfo(): ModelInfo {
         val selectedId = _uiState.value.selectedModelId
         val model = ModelManager.getModelById(selectedId)
-        // Bug 1: log a warning if the persisted ID doesn't match any known model
         if (model == null) {
             Log.w(TAG, "Persisted model ID '$selectedId' does not match any available model. " +
                 "Falling back to '${ModelManager.AVAILABLE_MODELS[0].id}'.")
@@ -146,6 +149,7 @@ class ModelViewModel(
                                 modelSizeMB = modelManager.getModelSizeMB(modelInfo),
                                 downloadedModelIds = downloadedIds
                             )
+                            modelLifecycle.refreshState()
                         }
                         is DownloadState.Error -> {
                             _uiState.value = _uiState.value.copy(
@@ -165,7 +169,7 @@ class ModelViewModel(
         }
     }
 
-    fun loadModel(liteRtEngine: LiteRtEngine) {
+    fun loadModel() {
         val currentState = _uiState.value.modelState
         if (currentState == ModelState.LOADING || currentState == ModelState.READY) return
 
@@ -173,29 +177,27 @@ class ModelViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(modelState = ModelState.LOADING)
             try {
-                // Unload current model first if a different one is loaded
                 val currentLoaded = _uiState.value.loadedModelId
                 if (currentLoaded != null && currentLoaded != modelInfo.id) {
-                    // Bug 14: removed dead `if (true)` branch — only LiteRT is supported
-                    liteRtEngine.unloadModel()
+                    engine.unloadModel()
                 }
 
                 val modelPath = modelManager.getModelFile(modelInfo).absolutePath
                 val contextSize = InferenceConfig.forModel(modelInfo.id).contextLength
-                val activeEngine: InferenceEngine = liteRtEngine
-                val success = activeEngine.loadModel(modelPath, contextSize)
+                val success = engine.loadModel(modelPath, contextSize)
                 if (success) {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.READY,
                         loadedModelId = modelInfo.id
                     )
+                    modelLifecycle.refreshState()
                     startModelService()
                     _navigateToChat.emit(Unit)
                 } else {
                     _uiState.value = _uiState.value.copy(
                         modelState = ModelState.ERROR,
                         errorMessage = "Failed to initialize ${modelInfo.displayName}. " +
-                                "The model file may be corrupted \u2014 try deleting and re-downloading."
+                                "The model file may be corrupted — try deleting and re-downloading."
                     )
                 }
             } catch (e: Exception) {
@@ -208,18 +210,20 @@ class ModelViewModel(
         }
     }
 
-    fun switchModel(modelId: String, liteRtEngine: LiteRtEngine) {
+    fun switchModel(modelId: String) {
         selectModel(modelId)
         val modelInfo = getSelectedModelInfo()
         if (modelManager.isModelDownloaded(modelInfo)) {
-            loadModel(liteRtEngine)
+            loadModel()
         }
-        // If not downloaded, the UI will show the download button
     }
 
     fun deleteModel() {
         val modelInfo = getSelectedModelInfo()
         stopModelService()
+        viewModelScope.launch {
+            modelLifecycle.unload()
+        }
         modelManager.deleteModel(modelInfo)
         val downloadedIds = _uiState.value.downloadedModelIds - modelInfo.id
         _uiState.value = _uiState.value.copy(
@@ -227,26 +231,28 @@ class ModelViewModel(
             downloadedModelIds = downloadedIds,
             loadedModelId = if (_uiState.value.loadedModelId == modelInfo.id) null else _uiState.value.loadedModelId
         )
+        modelLifecycle.refreshState()
     }
 
     fun isModelDownloaded(): Boolean = modelManager.isModelDownloaded(getSelectedModelInfo())
 
+    fun getActiveBackend(): String = modelLifecycle.getActiveBackend()
+
+    fun getModelSizeMB(modelInfo: ModelInfo): Long = modelManager.getModelSizeMB(modelInfo)
+
     private fun startModelService() {
         try {
-            val context = getApplication<Application>()
-            val intent = Intent(context, ModelForegroundService::class.java)
-            context.startForegroundService(intent)
+            val intent = Intent(application, ModelForegroundService::class.java)
+            application.startForegroundService(intent)
         } catch (e: Exception) {
-            // ForegroundServiceStartNotAllowedException on Android 12+ when app is in background
-            Log.w("ModelViewModel", "Could not start foreground service: ${e.message}")
+            Log.w(TAG, "Could not start foreground service: ${e.message}")
         }
     }
 
     private fun stopModelService() {
         try {
-            val context = getApplication<Application>()
-            val intent = Intent(context, ModelForegroundService::class.java)
-            context.stopService(intent)
+            val intent = Intent(application, ModelForegroundService::class.java)
+            application.stopService(intent)
         } catch (_: Exception) {}
     }
 

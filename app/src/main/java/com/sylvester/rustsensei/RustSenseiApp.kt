@@ -4,9 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,58 +25,56 @@ import com.sylvester.rustsensei.viewmodel.QuizViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 import com.sylvester.rustsensei.viewmodel.SearchViewModel
+import kotlinx.serialization.Serializable
 
-sealed class Screen(val route: String) {
-    data object Setup : Screen("setup")
-    data object Main : Screen("main")
-    data object Settings : Screen("settings")
-    data object Review : Screen("review")
-    data object LearningPath : Screen("learning_path")
-    data object Quiz : Screen("quiz")
-    data object Search : Screen("search")
-}
+// ── Type-safe route definitions ─────────────────────────────────────
+// Each @Serializable object is a compile-time verified route.
+// No more stringly-typed navigation — typos are caught at build time.
+
+@Serializable object SetupRoute
+@Serializable object MainRoute
+@Serializable object SettingsRoute
+@Serializable object ReviewRoute
+@Serializable object LearningPathRoute
+@Serializable object QuizRoute
+@Serializable object SearchRoute
 
 @Composable
 fun RustSenseiApp() {
     val navController = rememberNavController()
-    val app = LocalContext.current.applicationContext as RustSenseiApplication
-    val factory = remember { AppViewModelFactory(app, app.container) }
 
-    val chatViewModel: ChatViewModel = viewModel(factory = factory)
-    val modelViewModel: ModelViewModel = viewModel(factory = factory)
-    val bookViewModel: BookViewModel = viewModel(factory = factory)
-    val exerciseViewModel: ExerciseViewModel = viewModel(factory = factory)
-    val progressViewModel: ProgressViewModel = viewModel(factory = factory)
-    val referenceViewModel: ReferenceViewModel = viewModel(factory = factory)
-    val reviewViewModel: ReviewViewModel = viewModel(factory = factory)
-    val learningPathViewModel: LearningPathViewModel = viewModel(factory = factory)
-    val quizViewModel: QuizViewModel = viewModel(factory = factory)
-    val searchViewModel: SearchViewModel = viewModel(factory = factory)
+    val chatViewModel: ChatViewModel = hiltViewModel()
+    val modelViewModel: ModelViewModel = hiltViewModel()
+    val bookViewModel: BookViewModel = hiltViewModel()
+    val exerciseViewModel: ExerciseViewModel = hiltViewModel()
+    val progressViewModel: ProgressViewModel = hiltViewModel()
+    val referenceViewModel: ReferenceViewModel = hiltViewModel()
+    val reviewViewModel: ReviewViewModel = hiltViewModel()
+    val learningPathViewModel: LearningPathViewModel = hiltViewModel()
+    val quizViewModel: QuizViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
 
-    // Start directly at Main — all non-AI features work without a model.
-    // The Chat tab gracefully handles missing model with a download prompt.
     NavHost(
         navController = navController,
-        startDestination = Screen.Main.route
+        startDestination = MainRoute
     ) {
-        composable(Screen.Setup.route) {
+        composable<SetupRoute> {
             ModelSetupScreen(
                 modelViewModel = modelViewModel,
-                liteRtEngine = chatViewModel.liteRtEngine,
                 onNavigateToChat = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.Setup.route) { inclusive = true }
+                    navController.navigate(MainRoute) {
+                        popUpTo<SetupRoute> { inclusive = true }
                     }
                 },
                 onSkip = {
-                    navController.navigate(Screen.Main.route) {
-                        popUpTo(Screen.Setup.route) { inclusive = true }
+                    navController.navigate(MainRoute) {
+                        popUpTo<SetupRoute> { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Main.route) {
+        composable<MainRoute> {
             MainScreen(
                 chatViewModel = chatViewModel,
                 bookViewModel = bookViewModel,
@@ -88,28 +84,16 @@ fun RustSenseiApp() {
                 reviewViewModel = reviewViewModel,
                 learningPathViewModel = learningPathViewModel,
                 modelViewModel = modelViewModel,
-                onNavigateToSettings = {
-                    navController.navigate(Screen.Settings.route)
-                },
-                onNavigateToSetup = {
-                    navController.navigate(Screen.Setup.route)
-                },
-                onNavigateToReview = {
-                    navController.navigate(Screen.Review.route)
-                },
-                onNavigateToLearningPaths = {
-                    navController.navigate(Screen.LearningPath.route)
-                },
-                onNavigateToQuiz = {
-                    navController.navigate(Screen.Quiz.route)
-                },
-                onNavigateToSearch = {
-                    navController.navigate(Screen.Search.route)
-                }
+                onNavigateToSettings = { navController.navigate(SettingsRoute) },
+                onNavigateToSetup = { navController.navigate(SetupRoute) },
+                onNavigateToReview = { navController.navigate(ReviewRoute) },
+                onNavigateToLearningPaths = { navController.navigate(LearningPathRoute) },
+                onNavigateToQuiz = { navController.navigate(QuizRoute) },
+                onNavigateToSearch = { navController.navigate(SearchRoute) }
             )
         }
 
-        composable(Screen.Review.route) {
+        composable<ReviewRoute> {
             val reviewUiState by reviewViewModel.uiState.collectAsState()
             val pendingStep by learningPathViewModel.pendingStep.collectAsState()
 
@@ -121,18 +105,14 @@ fun RustSenseiApp() {
 
             ReviewScreen(
                 viewModel = reviewViewModel,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(Screen.LearningPath.route) {
+        composable<LearningPathRoute> {
             LearningPathScreen(
                 viewModel = learningPathViewModel,
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+                onNavigateBack = { navController.popBackStack() },
                 onNavigateToChapter = { chapterId ->
                     bookViewModel.openChapter(chapterId)
                     learningPathViewModel.requestTabNavigation("learn")
@@ -144,33 +124,29 @@ fun RustSenseiApp() {
                     navController.popBackStack()
                 },
                 onNavigateToReview = {
-                    navController.navigate(Screen.Review.route) {
-                        popUpTo(Screen.LearningPath.route) { inclusive = true }
+                    navController.navigate(ReviewRoute) {
+                        popUpTo<LearningPathRoute> { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Quiz.route) {
+        composable<QuizRoute> {
             QuizScreen(viewModel = quizViewModel)
         }
 
-        composable(Screen.Search.route) {
+        composable<SearchRoute> {
             SearchScreen(
                 viewModel = searchViewModel,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(Screen.Settings.route) {
+        composable<SettingsRoute> {
             SettingsScreen(
                 chatViewModel = chatViewModel,
                 modelViewModel = modelViewModel,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

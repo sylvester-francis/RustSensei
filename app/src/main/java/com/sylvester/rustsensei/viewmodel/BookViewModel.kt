@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,11 +11,13 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.BookProgress
 import com.sylvester.rustsensei.data.ProgressRepository
 import com.sylvester.rustsensei.data.UserNote
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 enum class BookScreenMode {
     INDEX,
@@ -22,6 +25,7 @@ enum class BookScreenMode {
     SECTION
 }
 
+@Immutable
 data class BookUiState(
     val mode: BookScreenMode = BookScreenMode.INDEX,
     val chapters: List<BookIndexEntry> = emptyList(),
@@ -37,7 +41,8 @@ data class BookUiState(
     val errorMessage: String? = null
 )
 
-class BookViewModel(
+@HiltViewModel
+class BookViewModel @Inject constructor(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository
 ) : ViewModel() {

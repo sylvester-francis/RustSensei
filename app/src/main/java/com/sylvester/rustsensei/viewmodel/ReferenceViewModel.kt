@@ -1,15 +1,18 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.content.ReferenceSectionInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import javax.inject.Inject
 
 enum class ReferenceScreenMode {
     INDEX,
@@ -17,6 +20,7 @@ enum class ReferenceScreenMode {
     ITEM_DETAIL
 }
 
+@Immutable
 data class ReferenceUiState(
     val mode: ReferenceScreenMode = ReferenceScreenMode.INDEX,
     val sections: List<ReferenceSectionInfo> = emptyList(),
@@ -26,7 +30,8 @@ data class ReferenceUiState(
     val errorMessage: String? = null
 )
 
-class ReferenceViewModel(
+@HiltViewModel
+class ReferenceViewModel @Inject constructor(
     private val contentRepo: ContentRepository
 ) : ViewModel() {
 

@@ -13,4 +13,5 @@ interface InferenceEngine {
     fun clearCache()
     suspend fun unloadModel()
     fun isModelLoaded(): Boolean
+    fun getActiveBackend(): String = "CPU"
 }

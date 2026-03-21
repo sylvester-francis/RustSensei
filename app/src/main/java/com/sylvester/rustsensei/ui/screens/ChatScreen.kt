@@ -64,6 +64,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.Conversation
+import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
 import com.sylvester.rustsensei.ui.components.StreamingIndicator
@@ -79,8 +80,7 @@ fun ChatScreen(
     onNavigateToSetup: () -> Unit = {},
     onNavigateBack: (() -> Unit)? = null
 ) {
-    val modelLoaded by viewModel.modelLoaded.collectAsState()
-    val isModelLoading by viewModel.isModelLoading.collectAsState()
+    val modelState by viewModel.modelState.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val chatContext by viewModel.chatContext.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
@@ -104,6 +104,13 @@ fun ChatScreen(
             if (targetIndex > 0) {
                 listState.animateScrollToItem(targetIndex - 1)
             }
+        }
+    }
+
+    // Auto-reload model when entering chat after idle-unload
+    LaunchedEffect(modelState) {
+        if (modelState == ModelReadyState.DOWNLOADED) {
+            viewModel.reloadModel()
         }
     }
 
@@ -233,17 +240,26 @@ fun ChatScreen(
                     is ChatContext.General -> { /* no banner for general context */ }
                 }
 
-                if (!modelLoaded && isModelLoading) {
-                    // Model is loading in background — show loading state
-                    item(key = "model_loading") {
-                        ModelLoadingState()
+                when (modelState) {
+                    ModelReadyState.LOADING, ModelReadyState.DOWNLOADED -> {
+                        item(key = "model_loading") {
+                            ModelLoadingState()
+                        }
                     }
-                } else if (!modelLoaded) {
-                    // No model -- show download prompt
-                    item(key = "no_model") {
-                        NoModelState(onDownload = onNavigateToSetup)
+                    ModelReadyState.NOT_DOWNLOADED -> {
+                        item(key = "no_model") {
+                            NoModelState(onDownload = onNavigateToSetup)
+                        }
                     }
-                } else if (uiState.messages.isEmpty() && !uiState.isGenerating) {
+                    ModelReadyState.ERROR -> {
+                        item(key = "model_error") {
+                            ModelErrorState(onRetry = { viewModel.reloadModel() })
+                        }
+                    }
+                    ModelReadyState.READY -> {}
+                }
+
+                if (modelState == ModelReadyState.READY && uiState.messages.isEmpty() && !uiState.isGenerating) {
                     item(key = "welcome") {
                         WelcomeState(onPromptSelected = { prompt ->
                             inputText = prompt
@@ -374,8 +390,8 @@ fun ChatScreen(
                 }
             }
 
-            // Input bar -- only show when model is loaded
-            if (modelLoaded) {
+            // Input bar — only show when model is ready for inference
+            if (modelState == ModelReadyState.READY) {
                 InputBar(
                     value = inputText,
                     onValueChange = { inputText = it },
@@ -579,6 +595,47 @@ private fun ModelLoadingState() {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+private fun ModelErrorState(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "\uD83E\uDD80", fontSize = 56.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Failed to load model",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "The model file may be corrupted.\nTry reloading or re-download from Settings.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            onClick = onRetry,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(28.dp)
+        ) {
+            Text(
+                "Retry",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        }
     }
 }
 

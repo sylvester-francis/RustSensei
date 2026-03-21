@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,10 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +49,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,16 +66,40 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
 
-sealed class Tab(val route: String, val title: String, val icon: ImageVector) {
-    data object Home : Tab("home", "Home", Icons.Default.Home)
-    data object Learn : Tab("learn", "Learn", Icons.Default.MenuBook)
-    data object Chat : Tab("chat", "Chat", Icons.Default.Chat)
-    data object Practice : Tab("practice", "Practice", Icons.Default.Code)
-    data object Profile : Tab("profile", "Settings", Icons.Default.Settings)
+// ── Type-safe tab route definitions ─────────────────────────────────
+
+@Serializable object HomeRoute
+@Serializable object LearnRoute
+@Serializable object ChatTabRoute
+@Serializable object PracticeRoute
+@Serializable object ProfileRoute
+
+enum class Tab(val title: String, val icon: ImageVector, val routeClass: KClass<*>) {
+    Home("Home", Icons.Default.Home, HomeRoute::class),
+    Learn("Learn", Icons.Default.MenuBook, LearnRoute::class),
+    Chat("Chat", Icons.Default.Chat, ChatTabRoute::class),
+    Practice("Practice", Icons.Default.Code, PracticeRoute::class),
+    Profile("Settings", Icons.Default.Settings, ProfileRoute::class);
 }
 
-private val tabs = listOf(Tab.Home, Tab.Learn, Tab.Chat, Tab.Practice, Tab.Profile)
+/** Navigate to a tab with standard bottom-nav options (save/restore state, single top). */
+private fun NavController.navigateToTab(tab: Tab) {
+    val navOpts: androidx.navigation.NavOptionsBuilder.() -> Unit = {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+    when (tab) {
+        Tab.Home -> navigate(HomeRoute, navOpts)
+        Tab.Learn -> navigate(LearnRoute, navOpts)
+        Tab.Chat -> navigate(ChatTabRoute, navOpts)
+        Tab.Practice -> navigate(PracticeRoute, navOpts)
+        Tab.Profile -> navigate(ProfileRoute, navOpts)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,27 +123,13 @@ fun MainScreen(
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Track selected index for the nav bar pill highlight
-    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-
     // Switch tab when returning from Learning Paths with content loaded
     val requestedTab by learningPathViewModel.requestedTab.collectAsState()
     LaunchedEffect(requestedTab) {
         val tab = requestedTab ?: return@LaunchedEffect
-        val targetTab = when (tab) {
-            "learn" -> Tab.Learn
-            "practice" -> Tab.Practice
-            else -> null
-        }
-        targetTab?.let {
-            tabNavController.navigate(it.route) {
-                popUpTo(tabNavController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-            selectedTabIndex = tabs.indexOf(it)
+        when (tab) {
+            "learn" -> tabNavController.navigateToTab(Tab.Learn)
+            "practice" -> tabNavController.navigateToTab(Tab.Practice)
         }
         learningPathViewModel.clearTabRequest()
     }
@@ -156,9 +163,8 @@ fun MainScreen(
         }
     }
 
-    // Hide chrome when Chat is active (it has its own top bar and needs full screen)
-    val isChatActive = currentDestination?.route == Tab.Chat.route
-    val hideTopBar = isChatActive || currentDestination?.route == Tab.Profile.route
+    val isChatActive = currentDestination?.hasRoute<ChatTabRoute>() == true
+    val hideTopBar = isChatActive || currentDestination?.hasRoute<ProfileRoute>() == true
 
     Scaffold(
         topBar = {
@@ -199,7 +205,6 @@ fun MainScreen(
         bottomBar = {
             if (!isChatActive) {
                 Column {
-                    // 1dp neon top border
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -207,28 +212,17 @@ fun MainScreen(
                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f))
                     )
                     RustSenseiNavigationBar(
-                        tabs = tabs,
-                        onTabSelected = { index, tab ->
-                            selectedTabIndex = index
-                            tabNavController.navigate(tab.route) {
-                                popUpTo(tabNavController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
+                        onTabSelected = { tab -> tabNavController.navigateToTab(tab) },
                         currentDestination = currentDestination
                     )
                 }
             }
         }
     ) { innerPadding ->
-        // Cross-fade tab transitions with 8dp vertical slide via enterTransition/exitTransition
         val tabEnterTransition = fadeIn(
             animationSpec = spring(stiffness = Spring.StiffnessMedium)
         ) + slideInVertically(
-            initialOffsetY = { 24 }, // ~8dp in pixels
+            initialOffsetY = { 24 },
             animationSpec = spring(stiffness = Spring.StiffnessMedium)
         )
         val tabExitTransition = fadeOut(
@@ -240,14 +234,14 @@ fun MainScreen(
 
         NavHost(
             navController = tabNavController,
-            startDestination = Tab.Home.route,
+            startDestination = HomeRoute,
             modifier = Modifier.padding(innerPadding),
             enterTransition = { tabEnterTransition },
             exitTransition = { tabExitTransition },
             popEnterTransition = { tabEnterTransition },
             popExitTransition = { tabExitTransition }
         ) {
-            composable(Tab.Home.route) {
+            composable<HomeRoute> {
                 DashboardScreen(
                     viewModel = progressViewModel,
                     reviewViewModel = reviewViewModel,
@@ -255,60 +249,26 @@ fun MainScreen(
                     onNavigateToReview = onNavigateToReview,
                     onNavigateToLearningPaths = onNavigateToLearningPaths,
                     onNavigateToQuiz = onNavigateToQuiz,
-                    onNavigateToLearn = {
-                        tabNavController.navigate(Tab.Learn.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = tabs.indexOf(Tab.Learn)
-                    },
-                    onNavigateToExercises = {
-                        tabNavController.navigate(Tab.Practice.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = tabs.indexOf(Tab.Practice)
-                    },
+                    onNavigateToLearn = { tabNavController.navigateToTab(Tab.Learn) },
+                    onNavigateToExercises = { tabNavController.navigateToTab(Tab.Practice) },
                     onContinueReading = { chapterId, sectionId ->
                         bookViewModel.openChapter(chapterId)
                         bookViewModel.openSection(chapterId, sectionId)
-                        tabNavController.navigate(Tab.Learn.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = tabs.indexOf(Tab.Learn)
+                        tabNavController.navigateToTab(Tab.Learn)
                     },
                     onContinueExercise = { exerciseId ->
                         exerciseViewModel.openExercise(exerciseId)
-                        tabNavController.navigate(Tab.Practice.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = tabs.indexOf(Tab.Practice)
+                        tabNavController.navigateToTab(Tab.Practice)
                     }
                 )
             }
-            composable(Tab.Learn.route) {
+            composable<LearnRoute> {
                 BookScreen(
                     viewModel = bookViewModel,
                     referenceViewModel = referenceViewModel,
                     reviewViewModel = reviewViewModel,
                     learningPathViewModel = learningPathViewModel,
-                    onOpenReference = { sectionId ->
-                        referenceViewModel.openSection(sectionId)
-                    },
+                    onOpenReference = { sectionId -> referenceViewModel.openSection(sectionId) },
                     onNavigateToReview = onNavigateToReview,
                     onNavigateToLearningPaths = onNavigateToLearningPaths,
                     onAskSensei = { sectionContent, _ ->
@@ -318,29 +278,19 @@ fun MainScreen(
                                 content = sectionContent
                             )
                         )
-                        tabNavController.navigate(Tab.Chat.route)
-                        selectedTabIndex = tabs.indexOf(Tab.Chat)
+                        tabNavController.navigateToTab(Tab.Chat)
                     }
                 )
             }
-            composable(Tab.Chat.route) {
+            composable<ChatTabRoute> {
                 ChatScreen(
                     viewModel = chatViewModel,
                     onNavigateToSettings = onNavigateToSettings,
                     onNavigateToSetup = onNavigateToSetup,
-                    onNavigateBack = {
-                        tabNavController.navigate(Tab.Home.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = 0
-                    }
+                    onNavigateBack = { tabNavController.navigateToTab(Tab.Home) }
                 )
             }
-            composable(Tab.Practice.route) {
+            composable<PracticeRoute> {
                 ExercisesScreen(
                     viewModel = exerciseViewModel,
                     onAskSensei = { exerciseDesc, userCode ->
@@ -351,27 +301,16 @@ fun MainScreen(
                                 userCode = userCode
                             )
                         )
-                        tabNavController.navigate(Tab.Chat.route)
-                        selectedTabIndex = tabs.indexOf(Tab.Chat)
+                        tabNavController.navigateToTab(Tab.Chat)
                     },
                     onNavigateToQuiz = onNavigateToQuiz
                 )
             }
-            composable(Tab.Profile.route) {
+            composable<ProfileRoute> {
                 SettingsScreen(
                     chatViewModel = chatViewModel,
                     modelViewModel = modelViewModel,
-                    onNavigateBack = {
-                        // Navigate to Home when back is pressed from inline profile
-                        tabNavController.navigate(Tab.Home.route) {
-                            popUpTo(tabNavController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                        selectedTabIndex = 0
-                    }
+                    onNavigateBack = { tabNavController.navigateToTab(Tab.Home) }
                 )
             }
         }
@@ -380,11 +319,9 @@ fun MainScreen(
 
 @Composable
 private fun RustSenseiNavigationBar(
-    tabs: List<Tab>,
-    onTabSelected: (Int, Tab) -> Unit,
+    onTabSelected: (Tab) -> Unit,
     currentDestination: NavDestination?
 ) {
-    // M3 Navigation Bar spec: 80dp height, 24dp icons, 64x32dp active indicator
     val inactiveColor = Color(0xFF8B95A5)
     val activeIconColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -403,10 +340,8 @@ private fun RustSenseiNavigationBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            tabs.forEachIndexed { index, tab ->
-                val isSelected = currentDestination?.hierarchy?.any {
-                    it.route == tab.route
-                } == true
+            Tab.entries.forEach { tab ->
+                val isSelected = currentDestination?.hasRoute(tab.routeClass) == true
 
                 Box(
                     modifier = Modifier
@@ -415,26 +350,20 @@ private fun RustSenseiNavigationBar(
                         .clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            onTabSelected(index, tab)
-                        },
+                        ) { onTabSelected(tab) },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        // M3 active indicator pill: 64x32dp with 16dp corner radius
                         Box(
                             modifier = Modifier
                                 .size(width = 64.dp, height = 32.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .then(
-                                    if (isSelected) {
-                                        Modifier.background(primaryColor)
-                                    } else {
-                                        Modifier
-                                    }
+                                    if (isSelected) Modifier.background(primaryColor)
+                                    else Modifier
                                 ),
                             contentAlignment = Alignment.Center
                         ) {

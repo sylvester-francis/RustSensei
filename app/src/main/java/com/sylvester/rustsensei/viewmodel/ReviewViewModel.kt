@@ -1,5 +1,6 @@
 package com.sylvester.rustsensei.viewmodel
 
+import androidx.compose.runtime.Immutable
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,12 +8,15 @@ import com.sylvester.rustsensei.content.ContentRepository
 import com.sylvester.rustsensei.data.FlashCard
 import com.sylvester.rustsensei.data.FlashCardDao
 import com.sylvester.rustsensei.data.SpacedRepetition
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@Immutable
 data class ReviewUiState(
     val currentCard: FlashCard? = null,
     val isFlipped: Boolean = false,
@@ -24,7 +28,8 @@ data class ReviewUiState(
     val sessionComplete: Boolean = false
 )
 
-class ReviewViewModel(
+@HiltViewModel
+class ReviewViewModel @Inject constructor(
     private val flashCardDao: FlashCardDao,
     private val contentRepo: ContentRepository
 ) : ViewModel() {
