@@ -7,23 +7,25 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.sylvester.rustsensei.llm.InferenceConfig
 
-class PreferencesManager(context: Context) {
+open class PreferencesManager(private val context: Context) : InferenceConfigProvider {
 
-    private val prefs: SharedPreferences = try {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+    private val prefs: SharedPreferences by lazy {
+        try {
+            val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
-        EncryptedSharedPreferences.create(
-            "rustsensei_secure_prefs",
-            masterKeyAlias,
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    } catch (e: Exception) {
-        // Fallback to plain SharedPreferences if encryption fails
-        // (e.g., rooted device with broken KeyStore)
-        Log.w("PreferencesManager", "Encrypted prefs failed, falling back to plain", e)
-        context.getSharedPreferences("rustsensei_prefs", Context.MODE_PRIVATE)
+            EncryptedSharedPreferences.create(
+                "rustsensei_secure_prefs",
+                masterKeyAlias,
+                context,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            // Fallback to plain SharedPreferences if encryption fails
+            // (e.g., rooted device with broken KeyStore)
+            Log.w("PreferencesManager", "Encrypted prefs failed, falling back to plain", e)
+            context.getSharedPreferences("rustsensei_prefs", Context.MODE_PRIVATE)
+        }
     }
 
     fun saveInferenceConfig(config: InferenceConfig) {
@@ -35,7 +37,7 @@ class PreferencesManager(context: Context) {
             .apply()
     }
 
-    fun loadInferenceConfig(): InferenceConfig {
+    override fun loadInferenceConfig(): InferenceConfig {
         val modelId = getSelectedModelId()
         val defaults = InferenceConfig.forModel(modelId)
         return InferenceConfig(

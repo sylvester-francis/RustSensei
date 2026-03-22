@@ -8,6 +8,7 @@ import com.sylvester.rustsensei.data.AppDatabase
 import com.sylvester.rustsensei.data.ChatDao
 import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.data.FlashCardDao
+import com.sylvester.rustsensei.data.InferenceConfigProvider
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.data.ProgressDao
 import com.sylvester.rustsensei.data.ProgressRepository
@@ -67,5 +68,10 @@ abstract class DataModule {
         @Singleton
         fun providePreferencesManager(@ApplicationContext context: Context): PreferencesManager =
             PreferencesManager(context)
+
+        @Provides
+        @Singleton
+        fun provideInferenceConfigProvider(preferencesManager: PreferencesManager): InferenceConfigProvider =
+            preferencesManager
     }
 }

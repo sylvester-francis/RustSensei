@@ -8,7 +8,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.random.Random
 
-class GetDailyChallengeUseCase @Inject constructor(
+open class GetDailyChallengeUseCase @Inject constructor(
     private val contentProvider: ContentProvider,
     private val progressDao: ProgressDao
 ) {
@@ -18,7 +18,7 @@ class GetDailyChallengeUseCase @Inject constructor(
      * the exercise pool using the date as seed. Same challenge for everyone
      * on the same day, no server needed.
      */
-    suspend operator fun invoke(): DailyChallengeData {
+    open suspend operator fun invoke(): DailyChallengeData {
         val today = LocalDate.now()
         val todayStr = today.toString()
 

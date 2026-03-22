@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class SimulateExecutionUseCase @Inject constructor(
+open class SimulateExecutionUseCase @Inject constructor(
     private val engine: InferenceEngine,
     private val modelLifecycle: ModelLifecycle
 ) {
-    operator fun invoke(code: String, config: InferenceConfig): Flow<ExecutionEvent> = flow {
+    open operator fun invoke(code: String, config: InferenceConfig): Flow<ExecutionEvent> = flow {
         if (!modelLifecycle.ensureLoaded()) {
             emit(ExecutionEvent.Error("Model not available. Download from Settings."))
             return@flow

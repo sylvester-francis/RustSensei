@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.content.ContentRepository
+import com.sylvester.rustsensei.content.ContentProvider
 import com.sylvester.rustsensei.content.RefactoringChallenge
 import com.sylvester.rustsensei.data.ProgressDao
 import com.sylvester.rustsensei.data.RefactoringResult
@@ -36,7 +36,7 @@ data class RefactoringUiState(
 
 @HiltViewModel
 class RefactoringViewModel @Inject constructor(
-    private val contentRepo: ContentRepository,
+    private val contentRepo: ContentProvider,
     private val progressDao: ProgressDao,
     private val validateRefactoring: ValidateRefactoringUseCase
 ) : ViewModel() {

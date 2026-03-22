@@ -6,11 +6,11 @@ import com.sylvester.rustsensei.data.ProgressDao
 import java.time.LocalDate
 import javax.inject.Inject
 
-class CompleteDailyChallengeUseCase @Inject constructor(
+open class CompleteDailyChallengeUseCase @Inject constructor(
     private val progressDao: ProgressDao
 ) {
 
-    suspend operator fun invoke(exerciseId: String, timeTakenSeconds: Long) {
+    open suspend operator fun invoke(exerciseId: String, timeTakenSeconds: Long) {
         val todayStr = LocalDate.now().toString()
 
         // Record the daily challenge completion

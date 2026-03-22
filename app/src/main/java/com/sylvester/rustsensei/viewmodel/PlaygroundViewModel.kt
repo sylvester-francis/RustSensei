@@ -3,7 +3,7 @@ package com.sylvester.rustsensei.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.data.PreferencesManager
+import com.sylvester.rustsensei.data.InferenceConfigProvider
 import com.sylvester.rustsensei.domain.ExecutionEvent
 import com.sylvester.rustsensei.domain.SimulateExecutionUseCase
 import com.sylvester.rustsensei.llm.ModelLifecycle
@@ -32,7 +32,7 @@ data class PlaygroundUiState(
 @HiltViewModel
 class PlaygroundViewModel @Inject constructor(
     private val simulateExecution: SimulateExecutionUseCase,
-    private val preferencesManager: PreferencesManager,
+    private val configProvider: InferenceConfigProvider,
     private val modelLifecycle: ModelLifecycle
 ) : ViewModel() {
 
@@ -58,7 +58,7 @@ class PlaygroundViewModel @Inject constructor(
             elapsedMs = 0
         )
 
-        val config = preferencesManager.loadInferenceConfig()
+        val config = configProvider.loadInferenceConfig()
         runJob = viewModelScope.launch {
             simulateExecution(code, config).collect { event ->
                 when (event) {

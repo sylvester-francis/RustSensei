@@ -3,7 +3,7 @@ package com.sylvester.rustsensei.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sylvester.rustsensei.data.PreferencesManager
+import com.sylvester.rustsensei.data.InferenceConfigProvider
 import com.sylvester.rustsensei.domain.ErrorCodeParser
 import com.sylvester.rustsensei.domain.ErrorExplanationEvent
 import com.sylvester.rustsensei.domain.ExplainErrorUseCase
@@ -29,7 +29,7 @@ data class ExplainErrorUiState(
 @HiltViewModel
 class ExplainErrorViewModel @Inject constructor(
     private val explainError: ExplainErrorUseCase,
-    private val preferencesManager: PreferencesManager,
+    private val configProvider: InferenceConfigProvider,
     private val modelLifecycle: ModelLifecycle
 ) : ViewModel() {
 
@@ -58,7 +58,7 @@ class ExplainErrorViewModel @Inject constructor(
             errorMessage = null
         )
 
-        val config = preferencesManager.loadInferenceConfig()
+        val config = configProvider.loadInferenceConfig()
 
         explanationJob = viewModelScope.launch {
             explainError(input, config).collect { event ->

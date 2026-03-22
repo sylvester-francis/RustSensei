@@ -14,11 +14,11 @@ sealed interface RefactoringEvent {
     data class Error(val message: String) : RefactoringEvent
 }
 
-class ValidateRefactoringUseCase @Inject constructor(
+open class ValidateRefactoringUseCase @Inject constructor(
     private val engine: InferenceEngine,
     private val modelLifecycle: ModelLifecycle
 ) {
-    operator fun invoke(
+    open operator fun invoke(
         originalCode: String,
         userCode: String,
         idiomaticSolution: String,

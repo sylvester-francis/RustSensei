@@ -16,13 +16,13 @@ sealed interface ErrorExplanationEvent {
     data class Error(val message: String) : ErrorExplanationEvent
 }
 
-class ExplainErrorUseCase @Inject constructor(
+open class ExplainErrorUseCase @Inject constructor(
     private val contentProvider: ContentProvider,
     private val engine: InferenceEngine,
     private val modelLifecycle: ModelLifecycle
 ) {
 
-    operator fun invoke(
+    open operator fun invoke(
         rawError: String,
         config: InferenceConfig
     ): Flow<ErrorExplanationEvent> = flow {
