@@ -119,8 +119,8 @@ class ChatTemplateFormatterNewMethodsTest {
             idiomaticSolution = "let x = 1;",
             scoringCriteria = "correctness"
         )
-        assertTrue(result.startsWith("<|im_start|>system\n"))
-        assertTrue(result.endsWith("<|im_start|>assistant\n"))
+        assertTrue(result.startsWith("<start_of_turn>user\n"))
+        assertTrue(result.endsWith("<start_of_turn>model\n"))
     }
 
     // --- formatMessages with ChatMode tests ---

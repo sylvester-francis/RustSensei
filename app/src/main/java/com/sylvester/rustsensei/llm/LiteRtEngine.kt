@@ -173,6 +173,7 @@ class LiteRtEngine(private val context: Context) : InferenceEngine {
                                     text == "<|im_end|>" ||
                                     text == "<|im_start|>" ||
                                     text == "<|endoftext|>" ||
+                                    text == "<start_of_turn>" ||
                                     text == "<end_of_turn>" ||
                                     text.startsWith("<ctrl")
                                 ) return
