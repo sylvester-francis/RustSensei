@@ -1,5 +1,10 @@
 package com.sylvester.rustsensei
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -7,6 +12,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.content.ContextCompat
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -241,6 +248,20 @@ fun RustSenseiApp(
             var remindersEnabled by remember {
                 mutableStateOf(preferencesManager.areRemindersEnabled())
             }
+            val context = LocalContext.current
+
+            val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { granted ->
+                if (granted) {
+                    remindersEnabled = true
+                    preferencesManager.setRemindersEnabled(true)
+                    reminderScheduler.scheduleReminders()
+                } else {
+                    remindersEnabled = false
+                    preferencesManager.setRemindersEnabled(false)
+                }
+            }
 
             SettingsScreen(
                 chatViewModel = chatViewModel,
@@ -248,11 +269,23 @@ fun RustSenseiApp(
                 onNavigateBack = { navController.popBackStack() },
                 remindersEnabled = remindersEnabled,
                 onRemindersToggled = { enabled ->
-                    remindersEnabled = enabled
-                    preferencesManager.setRemindersEnabled(enabled)
                     if (enabled) {
-                        reminderScheduler.scheduleReminders()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                            ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.POST_NOTIFICATIONS
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            notificationPermissionLauncher.launch(
+                                Manifest.permission.POST_NOTIFICATIONS
+                            )
+                        } else {
+                            remindersEnabled = true
+                            preferencesManager.setRemindersEnabled(true)
+                            reminderScheduler.scheduleReminders()
+                        }
                     } else {
+                        remindersEnabled = false
+                        preferencesManager.setRemindersEnabled(false)
                         reminderScheduler.cancelReminders()
                     }
                 }

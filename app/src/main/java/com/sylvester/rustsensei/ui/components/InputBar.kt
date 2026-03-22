@@ -40,7 +40,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.PrimaryGlow
 import com.sylvester.rustsensei.ui.theme.AppColors
 
@@ -116,9 +115,9 @@ fun InputBar(
                     },
                     shape = pillShape,
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = DarkSurfaceContainer,
-                        unfocusedContainerColor = DarkSurfaceContainer,
-                        disabledContainerColor = DarkSurfaceContainer,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent,

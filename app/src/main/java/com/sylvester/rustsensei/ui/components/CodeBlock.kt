@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import com.sylvester.rustsensei.ui.theme.AppColors
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -57,10 +58,8 @@ internal val MacroColor = Color(0xFFD4D4AA)         // yellow - macros
 internal val FunctionColor = Color(0xFFDCDCAA)      // light yellow - functions
 internal val DefaultCodeColor = Color(0xFFD4D4D4)   // light gray - default
 
-// Code block structure colors — embedded terminal feel
-internal val CodeBgColor = Color(0xFF06080C)        // same as app background
-private val CodeHeaderColor = Color(0xFF0C1018)    // dark navy header
-private val NeonAccent = Color(0xFFCE412B)         // primary orange for accents
+// Legacy alias — used by CodeEditor.kt's non-Composable RustSyntaxTransformation
+internal val CodeBgColor = Color(0xFF06080C)
 
 internal val rustKeywords = setOf(
     "fn", "let", "mut", "pub", "struct", "enum", "impl", "trait", "use", "mod",
@@ -87,12 +86,14 @@ fun CodeBlock(
     var showCopied by remember { mutableStateOf(false) }
     val lines = code.lines()
     val primary = MaterialTheme.colorScheme.primary
+    val codeBg = AppColors.current.codeBg
+    val codeHeader = AppColors.current.codeHeader
 
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(CodeBgColor)
+            .background(codeBg)
             .semantics { contentDescription = "$language code block: $code" }
     ) {
         // Header with neon bottom border
@@ -100,7 +101,7 @@ fun CodeBlock(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(CodeHeaderColor)
+                    .background(codeHeader)
                     .padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -171,7 +172,7 @@ fun CodeBlock(
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .background(CodeBgColor)
+                    .background(codeBg)
                     .padding(start = 12.dp, top = 14.dp, bottom = 14.dp, end = 8.dp),
                 horizontalAlignment = Alignment.End
             ) {

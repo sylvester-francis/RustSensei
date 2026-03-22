@@ -695,14 +695,14 @@ private fun CodeCompletionAnswer(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF0A0E14))
+                .background(AppColors.current.codeBg)
                 .padding(16.dp)
         ) {
             Text(
                 text = question.code,
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
-                color = Color(0xFFE8ECF2),
+                color = AppColors.current.codeText,
                 lineHeight = 20.sp
             )
         }

@@ -39,10 +39,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
-import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
-
-// User bubble background: primaryContainer dark variant
-private val UserBubbleBackground = Color(0xFF2A1510)
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 // Bubble corner radii — M3 large shape (16dp) with tail corner at 4dp
 private val UserBubbleShape = RoundedCornerShape(
@@ -91,7 +88,7 @@ fun MessageBubble(
                 modifier = Modifier
                     .widthIn(max = screenWidth * 0.82f)
                     .clip(UserBubbleShape)
-                    .background(UserBubbleBackground)
+                    .background(AppColors.current.userBubbleBg)
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Text(
@@ -124,7 +121,7 @@ fun MessageBubble(
                 modifier = Modifier
                     .widthIn(max = screenWidth * 0.88f)
                     .clip(AiBubbleShape)
-                    .background(DarkSurfaceContainerHigh)
+                    .background(AppColors.current.aiBubbleBg)
                     .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Column {
@@ -146,6 +143,8 @@ fun MessageBubble(
 @Composable
 fun RichContent(text: String) {
     val blocks = splitCodeBlocks(text)
+    val inlineCodeBg = AppColors.current.inlineCodeBg
+    val inlineCodeText = AppColors.current.inlineCodeText
 
     blocks.forEachIndexed { index, block ->
         when (block) {
@@ -156,7 +155,7 @@ fun RichContent(text: String) {
             }
             is ContentBlock.Prose -> {
                 Text(
-                    text = renderInline(block.text),
+                    text = renderInline(block.text, inlineCodeBg, inlineCodeText),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     lineHeight = 23.sp
@@ -206,7 +205,11 @@ private fun splitCodeBlocks(text: String): List<ContentBlock> {
  * Handles: **bold**, *italic*, `inline code`, ### headings, - bullets.
  * All markdown syntax characters are consumed -- none leak to the user.
  */
-private fun renderInline(text: String): AnnotatedString {
+private fun renderInline(
+    text: String,
+    inlineCodeBg: Color = Color(0xFF1C2130),
+    inlineCodeText: Color = Color(0xFFE8975A)
+): AnnotatedString {
     // Pre-process: convert markdown headings to bold lines
     val processed = text
         .replace(Regex("^###\\s+(.+)", RegexOption.MULTILINE), "$1")
@@ -251,8 +254,8 @@ private fun renderInline(text: String): AnnotatedString {
                         withStyle(
                             SpanStyle(
                                 fontFamily = FontFamily.Monospace,
-                                background = Color(0xFF1A1F2A),
-                                color = Color(0xFFE8975A),
+                                background = inlineCodeBg,
+                                color = inlineCodeText,
                                 fontSize = 14.sp
                             )
                         ) {
@@ -286,4 +289,8 @@ fun parseMarkdownBlocks(text: String): List<MarkdownBlock> {
     }
 }
 
-fun parseInlineMarkdown(text: String): AnnotatedString = renderInline(text)
+fun parseInlineMarkdown(
+    text: String,
+    inlineCodeBg: Color = Color(0xFF1C2130),
+    inlineCodeText: Color = Color(0xFFE8975A)
+): AnnotatedString = renderInline(text, inlineCodeBg, inlineCodeText)

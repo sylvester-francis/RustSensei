@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 fun BookContentRenderer(
@@ -18,6 +19,8 @@ fun BookContentRenderer(
 ) {
     Column(modifier = modifier) {
         val blocks = parseBookContent(content)
+        val icBg = AppColors.current.inlineCodeBg
+        val icText = AppColors.current.inlineCodeText
         blocks.forEach { block ->
             when (block) {
                 is BookBlock.Heading -> {
@@ -36,7 +39,7 @@ fun BookContentRenderer(
                 }
                 is BookBlock.Paragraph -> {
                     Text(
-                        text = parseInlineMarkdown(block.text),
+                        text = parseInlineMarkdown(block.text, icBg, icText),
                         fontSize = 15.sp,
                         lineHeight = 24.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -50,7 +53,7 @@ fun BookContentRenderer(
                 is BookBlock.BulletList -> {
                     block.items.forEach { item ->
                         Text(
-                            text = parseInlineMarkdown("  \u2022 $item"),
+                            text = parseInlineMarkdown("  \u2022 $item", icBg, icText),
                             fontSize = 15.sp,
                             lineHeight = 24.sp,
                             color = MaterialTheme.colorScheme.onSurface

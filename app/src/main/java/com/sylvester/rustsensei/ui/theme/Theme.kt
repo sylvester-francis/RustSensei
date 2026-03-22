@@ -26,7 +26,14 @@ data class AppColorPalette(
     val error: Color,
     val codeBackground: Color,
     val inlineCodeBg: Color,
-    val inlineCodeText: Color
+    val inlineCodeText: Color,
+    val userBubbleBg: Color,
+    val aiBubbleBg: Color,
+    val codeBg: Color,
+    val codeHeader: Color,
+    val codeText: Color,
+    val pathAccentOrange: Color,
+    val pathAccentPurple: Color
 )
 
 private val DarkAccentPalette = AppColorPalette(
@@ -37,18 +44,32 @@ private val DarkAccentPalette = AppColorPalette(
     error = ErrorNeon,
     codeBackground = Color(0xFF0A0E14),
     inlineCodeBg = Color(0xFF1C2130),
-    inlineCodeText = Color(0xFFE8975A)
+    inlineCodeText = Color(0xFFE8975A),
+    userBubbleBg = Color(0xFF2A1510),
+    aiBubbleBg = DarkSurfaceContainerHigh,
+    codeBg = Color(0xFF06080C),
+    codeHeader = Color(0xFF0C1018),
+    codeText = Color(0xFFD4D4D4),
+    pathAccentOrange = NeonOrangeBright,
+    pathAccentPurple = Color(0xFFA78BFA)
 )
 
 private val LightAccentPalette = AppColorPalette(
-    accent = Color(0xFFC03820),       // deeper rust — readable on white
-    cyan = Color(0xFF0D9488),          // teal-600 — pleasant on light surfaces
-    amber = Color(0xFFB45309),         // amber-700 — warm but not glaring
-    success = Color(0xFF15803D),       // green-700 — rich without neon
-    error = Color(0xFFDC2626),         // red-600 — clear but not neon
+    accent = Color(0xFFC03820),        // deeper rust — readable on white
+    cyan = Color(0xFF0D9488),           // teal-600 — pleasant on light surfaces
+    amber = Color(0xFFB45309),          // amber-700 — warm but not glaring
+    success = Color(0xFF15803D),        // green-700 — rich without neon
+    error = Color(0xFFDC2626),          // red-600 — clear but not neon
     codeBackground = Color(0xFFF1F5F9), // slate-100 — soft code blocks
     inlineCodeBg = Color(0xFFE8EDF2),
-    inlineCodeText = Color(0xFFC05621)
+    inlineCodeText = Color(0xFFC05621),
+    userBubbleBg = Color(0xFFF4DDD6),   // soft peach — warm on white
+    aiBubbleBg = Color(0xFFE6E9EF),     // surfaceContainerHigh equivalent
+    codeBg = Color(0xFF06080C),         // code blocks stay dark
+    codeHeader = Color(0xFF0C1018),     // code blocks stay dark
+    codeText = Color(0xFFD4D4D4),       // code blocks stay dark
+    pathAccentOrange = Color(0xFFD4531F),
+    pathAccentPurple = Color(0xFF7C5CBF)
 )
 
 val LocalAppColors = staticCompositionLocalOf { DarkAccentPalette }

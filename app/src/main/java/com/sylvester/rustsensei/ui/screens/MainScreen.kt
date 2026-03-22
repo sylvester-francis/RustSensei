@@ -338,7 +338,7 @@ private fun RustSenseiNavigationBar(
     onTabSelected: (Tab) -> Unit,
     currentDestination: NavDestination?
 ) {
-    val inactiveColor = Color(0xFF8B95A5)
+    val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
     val activeIconColor = MaterialTheme.colorScheme.onPrimary
     val primaryColor = MaterialTheme.colorScheme.primary
     val containerColor = MaterialTheme.colorScheme.surfaceContainer

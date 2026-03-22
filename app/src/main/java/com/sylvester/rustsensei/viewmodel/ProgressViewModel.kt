@@ -17,6 +17,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 import javax.inject.Inject
 
 data class Achievement(
@@ -220,11 +223,12 @@ class ProgressViewModel @Inject constructor(
     }
 
     private fun buildWeekActivity(stats: List<LearningStats>): List<DayActivity> {
-        val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-        // Fill 7 slots from stats (most recent first in stats)
-        val reversed = stats.sortedBy { it.date }.takeLast(7)
-        return (0 until 7).map { i ->
-            val stat = reversed.getOrNull(i)
+        val today = LocalDate.now()
+        return (6 downTo 0).map { daysAgo ->
+            val date = today.minusDays(daysAgo.toLong())
+            val label = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+            val dateStr = date.toString() // yyyy-MM-dd
+            val stat = stats.find { it.date == dateStr }
             val activity = (stat?.sectionsRead ?: 0) + (stat?.exercisesCompleted ?: 0)
             val level = when {
                 activity >= 3 -> 2
@@ -232,7 +236,7 @@ class ProgressViewModel @Inject constructor(
                 else -> 0
             }
             DayActivity(
-                label = dayLabels.getOrElse(i) { "" },
+                label = label,
                 level = level
             )
         }

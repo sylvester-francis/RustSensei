@@ -67,27 +67,12 @@ import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.LearningPath
 import com.sylvester.rustsensei.data.PathStep
 import com.sylvester.rustsensei.ui.theme.Alpha
-import com.sylvester.rustsensei.ui.theme.CrispWhite
 import com.sylvester.rustsensei.ui.theme.Dimens
 
-import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
-import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.AppColors
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.PathMode
-
-// Accent colors per path index
-private val pathAccents = listOf(
-    RustOrange,
-    NeonCyan,
-    Color(0xFFFF6B35),
-    SuccessGreen,
-    Color(0xFFA78BFA),
-)
 
 private val pathIcons = listOf(
     Icons.Default.Rocket,
@@ -202,7 +187,14 @@ private fun PathListContent(
         items(paths.size) { index ->
             val path = paths[index]
             val percent = viewModel.getPathCompletionPercent(path)
-            val accent = pathAccents[index % pathAccents.size]
+            val accents = listOf(
+                AppColors.current.accent,
+                AppColors.current.cyan,
+                AppColors.current.pathAccentOrange,
+                AppColors.current.success,
+                AppColors.current.pathAccentPurple
+            )
+            val accent = accents[index % accents.size]
             val icon = pathIcons[index % pathIcons.size]
 
             PathCard(
