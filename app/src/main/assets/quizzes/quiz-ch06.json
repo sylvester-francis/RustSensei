@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch06",
+  "title": "Enums and Pattern Matching",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What makes Rust enums more powerful than enums in most other languages?",
+      "options": ["They are faster", "Each variant can hold different types and amounts of data", "They support inheritance", "They are always public"],
+      "correctIndex": 1,
+      "explanation": "Rust enums are algebraic data types. Variants like `Message::Write(String)` and `Message::Move { x: i32, y: i32 }` can carry different data."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "A `match` expression in Rust must handle every possible variant (it must be exhaustive).",
+      "correctAnswer": true,
+      "explanation": "The compiler enforces exhaustive matching. Use `_` as a catch-all if you don't need to handle every variant explicitly."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Complete the match to extract data from this enum variant:",
+      "code": "enum Coin {\n    Penny,\n    Nickel,\n    Dime,\n    Quarter(String),\n}\nfn value(coin: &Coin) -> u32 {\n    match coin {\n        Coin::Penny => 1,\n        Coin::Nickel => 5,\n        Coin::Dime => 10,\n        Coin::Quarter(___) => { println!(\"Quarter from {}\", state); 25 }\n    }\n}",
+      "correctAnswer": "state",
+      "acceptableAnswers": ["state", "s", "name"],
+      "explanation": "Pattern matching destructures the Quarter variant, binding the inner String to a variable you can use in the arm body."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is `Option<T>` in Rust?",
+      "options": ["A function that returns null", "An enum with Some(T) and None variants for nullable values", "A special pointer type", "A trait for optional behavior"],
+      "correctIndex": 1,
+      "explanation": "Option<T> replaces null with a type-safe enum: Some(value) when present, None when absent. The compiler forces you to handle both cases."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Use `if let` as a concise alternative to match for a single pattern:",
+      "code": "let config_max: Option<u8> = Some(3);\n___ Some(max) = config_max {\n    println!(\"Max is {}\", max);\n}",
+      "correctAnswer": "if let",
+      "acceptableAnswers": ["if let"],
+      "explanation": "`if let` is syntactic sugar for a match that handles one pattern and ignores the rest. Less verbose when you only care about one variant."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Enums in Rust can have methods defined in `impl` blocks, just like structs.",
+      "correctAnswer": true,
+      "explanation": "You can define methods and associated functions on enums with `impl`. For example, `Option<T>` has methods like `.map()`, `.unwrap()`, etc."
+    }
+  ]
+}

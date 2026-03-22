@@ -1,0 +1,71 @@
+{
+  "id": "quiz-ch10",
+  "title": "Generic Types, Traits, and Lifetimes",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is monomorphization in Rust?",
+      "options": ["A runtime type check", "The compiler generates specialized code for each concrete type used with a generic", "Converting traits to structs", "Removing unused code"],
+      "correctIndex": 1,
+      "explanation": "Rust's monomorphization replaces generic type parameters with concrete types at compile time, producing zero-cost abstractions."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "You can only implement a trait for a type if either the trait or the type is defined in your crate.",
+      "correctAnswer": true,
+      "explanation": "This is the orphan rule. It prevents conflicting implementations across crates and ensures trait coherence."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add a trait bound so this function can print the value:",
+      "code": "fn print_it<T: ___>(item: T) {\n    println!(\"{}\", item);\n}",
+      "correctAnswer": "std::fmt::Display",
+      "acceptableAnswers": ["std::fmt::Display", "Display", "fmt::Display"],
+      "explanation": "The Display trait enables formatting with `{}`. The bound `T: Display` ensures the type can be printed."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What do lifetime annotations describe?",
+      "options": ["How long a value lives in memory", "The relationship between the lifetimes of multiple references", "When memory is freed", "Thread safety"],
+      "correctIndex": 1,
+      "explanation": "Lifetime annotations don't change how long references live. They describe the relationships so the compiler can verify references are valid."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Add the lifetime annotation to make this function compile:",
+      "code": "fn longest<'a>(x: &'a str, y: &'a str) -> ___  {\n    if x.len() > y.len() { x } else { y }\n}",
+      "correctAnswer": "&'a str",
+      "acceptableAnswers": ["&'a str"],
+      "explanation": "The return type `&'a str` tells the compiler the returned reference lives at least as long as the shorter of the two input lifetimes."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Traits can provide default method implementations that types can optionally override.",
+      "correctAnswer": true,
+      "explanation": "Default implementations let you share common behavior. Types can override specific methods while keeping the defaults for others."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "What does `impl Trait` in a function parameter position mean?",
+      "options": ["It creates a new trait", "It means the parameter accepts any type implementing that trait", "It defines a trait object", "It removes the trait bound"],
+      "correctIndex": 1,
+      "explanation": "`fn notify(item: &impl Summary)` is syntactic sugar for `fn notify<T: Summary>(item: &T)`. It accepts any type that implements Summary."
+    },
+    {
+      "id": "q8",
+      "type": "code_completion",
+      "question": "Implement this trait for the struct:",
+      "code": "trait Describable {\n    fn describe(&self) -> String;\n}\nstruct Cat { name: String }\n\n___ Describable for Cat {\n    fn describe(&self) -> String {\n        format!(\"A cat named {}\", self.name)\n    }\n}",
+      "correctAnswer": "impl",
+      "acceptableAnswers": ["impl"],
+      "explanation": "`impl Trait for Type` is the syntax for implementing a trait. The impl block must provide all required methods."
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "quiz-ch21",
+  "title": "Appendix",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which of these is a reserved keyword that currently has no functionality in Rust?",
+      "options": ["fn", "let", "abstract", "match"],
+      "correctIndex": 2,
+      "explanation": "`abstract` is reserved for potential future use. Other reserved-but-unused keywords include `become`, `do`, `final`, `override`, and `yield`."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The `#[derive()]` attribute can automatically implement common traits like Debug, Clone, Copy, PartialEq, and Eq.",
+      "correctAnswer": true,
+      "explanation": "Derivable traits provide automatic implementations. Not all traits are derivable — only those where a mechanical implementation makes sense."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "What tool automatically formats your Rust code to the official style?",
+      "code": "cargo ___",
+      "correctAnswer": "fmt",
+      "acceptableAnswers": ["fmt", "format"],
+      "explanation": "`cargo fmt` runs rustfmt on your code, applying the official Rust style guide. It ensures consistent formatting across a project."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does the `..=` operator do?",
+      "options": ["Assignment", "Comparison", "Creates an inclusive range", "Spread operator"],
+      "correctIndex": 2,
+      "explanation": "`..=` creates an inclusive range. `1..=5` includes 1, 2, 3, 4, 5. Compare with `1..5` (exclusive) which excludes 5."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Clippy is a collection of lints that catch common mistakes and suggest more idiomatic Rust code.",
+      "correctAnswer": true,
+      "explanation": "`cargo clippy` analyzes your code for common pitfalls, performance issues, and non-idiomatic patterns, helping you write better Rust."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "What does the `=>` operator mean in Rust?",
+      "options": ["Greater than or equal", "Arrow for match arms and macro definitions", "Fat arrow function syntax", "Type constraint"],
+      "correctIndex": 1,
+      "explanation": "`=>` separates patterns from their associated code in match arms and macro_rules! definitions."
+    }
+  ]
+}

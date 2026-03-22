@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch12",
+  "title": "I/O Project: Building a CLI Program",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "How do you collect command-line arguments in Rust?",
+      "options": ["process.argv()", "std::env::args().collect()", "main(args: Vec<String>)", "sys::args()"],
+      "correctIndex": 1,
+      "explanation": "`std::env::args()` returns an iterator over CLI arguments. `.collect()` gathers them into a `Vec<String>`. The first element is the program name."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Separating logic into lib.rs and keeping main.rs thin is a Rust best practice for testability.",
+      "correctAnswer": true,
+      "explanation": "Putting logic in lib.rs makes it testable as a library. main.rs handles argument parsing and calls into the library. Integration tests can only test lib.rs."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Read the contents of a file into a String:",
+      "code": "use std::fs;\nlet contents = fs::___(\"poem.txt\")?;",
+      "correctAnswer": "read_to_string",
+      "acceptableAnswers": ["read_to_string"],
+      "explanation": "`fs::read_to_string()` reads the entire file into a String. It returns `io::Result<String>`, so you can use `?` to propagate errors."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Why is it better to return `Result<T, E>` from functions instead of calling `process::exit()`?",
+      "options": ["It's faster", "It allows callers to handle errors and makes the code testable", "process::exit doesn't work on all platforms", "There is no difference"],
+      "correctIndex": 1,
+      "explanation": "Returning Result lets callers decide how to handle errors. Tests can check for Err without the process actually exiting."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Write error messages to stderr instead of stdout:",
+      "code": "___!(\"Problem: {}\", error_message);",
+      "correctAnswer": "eprintln",
+      "acceptableAnswers": ["eprintln"],
+      "explanation": "`eprintln!` writes to stderr. This keeps error messages separate from normal output, which matters when piping stdout to a file."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Test-driven development (TDD) means writing tests before writing the implementation code.",
+      "correctAnswer": true,
+      "explanation": "TDD follows: write a failing test, implement just enough code to pass it, then refactor. The chapter demonstrates this with the search functionality."
+    }
+  ]
+}

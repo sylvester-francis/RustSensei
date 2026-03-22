@@ -1,0 +1,53 @@
+{
+  "id": "quiz-ch01",
+  "title": "Getting Started",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the entry point of every Rust program?",
+      "options": ["fn start()", "fn main()", "fn run()", "fn init()"],
+      "correctIndex": 1,
+      "explanation": "Every Rust program begins execution in the `fn main()` function. It takes no arguments and returns nothing by default."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "println! is a function in Rust.",
+      "correctAnswer": false,
+      "explanation": "println! is a macro, indicated by the `!`. Macros are expanded at compile time and can accept a variable number of arguments, unlike functions."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Complete the code to print a formatted greeting:",
+      "code": "fn main() {\n    let name = \"Rustacean\";\n    ___!(\"Hello, {}!\", name);\n}",
+      "correctAnswer": "println",
+      "acceptableAnswers": ["println"],
+      "explanation": "The `println!` macro uses `{}` as a placeholder for values, similar to format strings in other languages."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which command compiles and runs a Cargo project in one step?",
+      "options": ["cargo build", "cargo run", "cargo compile", "cargo exec"],
+      "correctIndex": 1,
+      "explanation": "`cargo run` compiles the project (if needed) and then executes the resulting binary."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "Cargo.toml is where you declare project dependencies and metadata.",
+      "correctAnswer": true,
+      "explanation": "Cargo.toml is the manifest file. Cargo.lock (auto-generated) records exact dependency versions for reproducible builds."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "What does `cargo build --release` do differently from `cargo build`?",
+      "options": ["It builds faster", "It enables optimizations for better runtime performance", "It skips type checking", "It publishes to crates.io"],
+      "correctIndex": 1,
+      "explanation": "The --release flag compiles with optimizations. Debug builds compile faster but run slower; release builds compile slower but produce optimized binaries."
+    }
+  ]
+}

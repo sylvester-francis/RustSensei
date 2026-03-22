@@ -1,9 +1,30 @@
 {
   "quizzes": [
-    {"id": "quiz-ownership", "title": "Ownership & Borrowing", "chapterId": "ch04-ownership", "questionCount": 8},
-    {"id": "quiz-structs-enums", "title": "Structs & Enums", "chapterId": "ch05-structs", "questionCount": 6},
-    {"id": "quiz-error-handling", "title": "Error Handling", "chapterId": "ch09-error-handling", "questionCount": 6},
-    {"id": "quiz-traits-generics", "title": "Traits & Generics", "chapterId": "ch10-generics-traits-lifetimes", "questionCount": 6},
-    {"id": "quiz-collections", "title": "Collections", "chapterId": "ch08-common-collections", "questionCount": 6}
+    {"id": "quiz-ch01", "title": "Ch 1: Getting Started", "chapterId": "ch01-getting-started", "questionCount": 6},
+    {"id": "quiz-ch02", "title": "Ch 2: Guessing Game", "chapterId": "ch02-guessing-game", "questionCount": 6},
+    {"id": "quiz-ch03", "title": "Ch 3: Common Programming Concepts", "chapterId": "ch03-common-concepts", "questionCount": 8},
+    {"id": "quiz-ch04", "title": "Ch 4: Understanding Ownership", "chapterId": "ch04-ownership", "questionCount": 8},
+    {"id": "quiz-ch05", "title": "Ch 5: Structs", "chapterId": "ch05-structs", "questionCount": 6},
+    {"id": "quiz-ch06", "title": "Ch 6: Enums and Pattern Matching", "chapterId": "ch06-enums", "questionCount": 6},
+    {"id": "quiz-ch07", "title": "Ch 7: Packages, Crates, and Modules", "chapterId": "ch07-packages-crates-modules", "questionCount": 6},
+    {"id": "quiz-ch08", "title": "Ch 8: Common Collections", "chapterId": "ch08-common-collections", "questionCount": 8},
+    {"id": "quiz-ch09", "title": "Ch 9: Error Handling", "chapterId": "ch09-error-handling", "questionCount": 6},
+    {"id": "quiz-ch10", "title": "Ch 10: Generics, Traits, and Lifetimes", "chapterId": "ch10-generics-traits-lifetimes", "questionCount": 8},
+    {"id": "quiz-ch11", "title": "Ch 11: Writing Automated Tests", "chapterId": "ch11-writing-tests", "questionCount": 6},
+    {"id": "quiz-ch12", "title": "Ch 12: Building a CLI Program", "chapterId": "ch12-io-project", "questionCount": 6},
+    {"id": "quiz-ch13", "title": "Ch 13: Closures and Iterators", "chapterId": "ch13-functional-features", "questionCount": 6},
+    {"id": "quiz-ch14", "title": "Ch 14: Cargo and Crates.io", "chapterId": "ch14-cargo-crates-io", "questionCount": 6},
+    {"id": "quiz-ch15", "title": "Ch 15: Smart Pointers", "chapterId": "ch15-smart-pointers", "questionCount": 6},
+    {"id": "quiz-ch16", "title": "Ch 16: Fearless Concurrency", "chapterId": "ch16-concurrency", "questionCount": 6},
+    {"id": "quiz-ch17", "title": "Ch 17: OOP Features of Rust", "chapterId": "ch17-oop", "questionCount": 6},
+    {"id": "quiz-ch18", "title": "Ch 18: Patterns and Matching", "chapterId": "ch18-patterns", "questionCount": 6},
+    {"id": "quiz-ch19", "title": "Ch 19: Advanced Features", "chapterId": "ch19-advanced-features", "questionCount": 8},
+    {"id": "quiz-ch20", "title": "Ch 20: Multithreaded Web Server", "chapterId": "ch20-web-server", "questionCount": 6},
+    {"id": "quiz-ch21", "title": "Ch 21: Appendix", "chapterId": "ch21-appendix", "questionCount": 6},
+    {"id": "quiz-ownership", "title": "Review: Ownership & Borrowing", "chapterId": "ch04-ownership", "questionCount": 8},
+    {"id": "quiz-structs-enums", "title": "Review: Structs & Enums", "chapterId": "ch05-structs", "questionCount": 6},
+    {"id": "quiz-error-handling", "title": "Review: Error Handling", "chapterId": "ch09-error-handling", "questionCount": 6},
+    {"id": "quiz-traits-generics", "title": "Review: Traits & Generics", "chapterId": "ch10-generics-traits-lifetimes", "questionCount": 6},
+    {"id": "quiz-collections", "title": "Review: Collections", "chapterId": "ch08-common-collections", "questionCount": 6}
   ]
 }

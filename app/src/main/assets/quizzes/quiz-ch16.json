@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch16",
+  "title": "Fearless Concurrency",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Why is the `move` keyword needed when spawning a thread with a closure that uses external variables?",
+      "options": ["It makes the thread faster", "It transfers ownership of captured variables to the thread", "It's always required with thread::spawn", "It copies the variables"],
+      "correctIndex": 1,
+      "explanation": "The spawned thread might outlive the scope where variables were created. `move` transfers ownership to the closure so references remain valid."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Rust prevents data races at compile time through its ownership and type system.",
+      "correctAnswer": true,
+      "explanation": "The Send and Sync traits, combined with ownership rules, prevent data races. Types that aren't thread-safe won't compile in concurrent contexts."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Create a channel and send a message between threads:",
+      "code": "use std::sync::mpsc;\nuse std::thread;\n\nlet (tx, rx) = mpsc::___();\nthread::spawn(move || {\n    tx.send(String::from(\"hello\")).unwrap();\n});\nlet msg = rx.recv().unwrap();",
+      "correctAnswer": "channel",
+      "acceptableAnswers": ["channel"],
+      "explanation": "`mpsc::channel()` creates a multiple-producer, single-consumer channel. `tx` sends values, `rx` receives them."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `Mutex<T>` provide?",
+      "options": ["Immutable shared access", "Mutual exclusion — only one thread can access the inner data at a time", "Asynchronous data sharing", "Lock-free concurrency"],
+      "correctIndex": 1,
+      "explanation": "Mutex ensures only one thread holds the lock at a time. `.lock()` returns a MutexGuard that auto-releases when dropped."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Share a Mutex across threads using Arc:",
+      "code": "use std::sync::{Arc, Mutex};\nuse std::thread;\n\nlet counter = Arc::new(Mutex::new(0));\nlet c = Arc::___(& counter);\nthread::spawn(move || {\n    let mut num = c.lock().unwrap();\n    *num += 1;\n});",
+      "correctAnswer": "clone",
+      "acceptableAnswers": ["clone"],
+      "explanation": "Arc::clone increments the atomic reference count. Each thread gets its own Arc handle to the shared Mutex."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The Send trait marks types whose ownership can be transferred between threads.",
+      "correctAnswer": true,
+      "explanation": "Send means ownership can move across thread boundaries. Almost all Rust types are Send. Rc<T> is a notable exception (use Arc<T> instead)."
+    }
+  ]
+}

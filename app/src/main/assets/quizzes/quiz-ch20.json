@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch20",
+  "title": "Building a Multithreaded Web Server",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does `TcpListener::bind()` do?",
+      "options": ["Sends a TCP packet", "Listens for incoming TCP connections on an address and port", "Connects to a remote server", "Creates a UDP socket"],
+      "correctIndex": 1,
+      "explanation": "TcpListener::bind(\"127.0.0.1:7878\") creates a listener that accepts incoming TCP connections on the specified address."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "A thread pool limits the number of threads to protect against denial-of-service attacks.",
+      "correctAnswer": true,
+      "explanation": "Without a pool, each request could spawn a new thread, exhausting system resources. A pool caps the number of concurrent workers."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Accept an incoming connection from the listener:",
+      "code": "use std::net::TcpListener;\nlet listener = TcpListener::bind(\"127.0.0.1:7878\").unwrap();\nfor stream in listener.___() {\n    let stream = stream.unwrap();\n    handle_connection(stream);\n}",
+      "correctAnswer": "incoming",
+      "acceptableAnswers": ["incoming"],
+      "explanation": "`.incoming()` returns an iterator of connection attempts. Each yields a TcpStream wrapped in a Result."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Why use `Arc<Mutex<mpsc::Receiver<Job>>>` in the thread pool?",
+      "options": ["For performance", "Arc provides thread-safe shared ownership, Mutex provides exclusive access to the receiver", "It's the only way to share data", "To avoid using channels"],
+      "correctIndex": 1,
+      "explanation": "Multiple worker threads need to share one Receiver. Arc<Mutex<...>> lets them safely share ownership and take turns accessing it."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "HTTP responses must include a status line, headers, and optionally a body separated by a blank line.",
+      "correctAnswer": true,
+      "explanation": "An HTTP response has: `HTTP/1.1 200 OK\\r\\n` (status), headers, `\\r\\n` (blank line), then the body content."
+    },
+    {
+      "id": "q6",
+      "type": "code_completion",
+      "question": "Send an HTTP response over the TCP stream:",
+      "code": "use std::io::Write;\nuse std::net::TcpStream;\n\nfn respond(mut stream: TcpStream) {\n    let response = \"HTTP/1.1 200 OK\\r\\n\\r\\nHello!\";\n    stream.___(response.as_bytes()).unwrap();\n}",
+      "correctAnswer": "write_all",
+      "acceptableAnswers": ["write_all", "write"],
+      "explanation": "The Write trait's `write_all()` sends all bytes to the stream. `write()` may write only some bytes and should be used in a loop."
+    }
+  ]
+}

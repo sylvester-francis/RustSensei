@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch02",
+  "title": "Guessing Game",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which statement brings the `io` module into scope from the standard library?",
+      "options": ["import std::io", "use std::io", "include std::io", "require std::io"],
+      "correctIndex": 1,
+      "explanation": "Rust uses `use` to bring items into scope. `use std::io;` makes io's types and functions available."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The `mut` keyword is required when you want to modify a variable's value after its initial binding.",
+      "correctAnswer": true,
+      "explanation": "Variables are immutable by default in Rust. `let mut guess = String::new();` creates a mutable binding that can be changed."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Read a line of user input into a mutable String:",
+      "code": "let mut input = String::new();\nio::stdin()\n    .read_line(&mut input)\n    .___();",
+      "correctAnswer": "expect",
+      "acceptableAnswers": ["expect", "unwrap"],
+      "explanation": "read_line returns a Result. `.expect(\"message\")` unwraps the Ok value or panics with the message on Err."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "In the guessing game, how do you convert a String to a number?",
+      "options": ["guess.to_int()", "int(guess)", "guess.trim().parse()", "Number.from(guess)"],
+      "correctIndex": 2,
+      "explanation": "`.trim()` removes whitespace (including the newline from read_line), then `.parse()` converts the string to the target numeric type."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Handle the comparison result using match:",
+      "code": "use std::cmp::Ordering;\n\nmatch guess.cmp(&secret) {\n    Ordering::Less => println!(\"Too small!\"),\n    Ordering::Greater => println!(\"Too big!\"),\n    Ordering::___ => println!(\"You win!\"),\n}",
+      "correctAnswer": "Equal",
+      "acceptableAnswers": ["Equal"],
+      "explanation": "std::cmp::Ordering has three variants: Less, Greater, and Equal. The match must cover all three."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "External crate dependencies are added to the [dependencies] section of Cargo.toml.",
+      "correctAnswer": true,
+      "explanation": "Adding `rand = \"0.8\"` to [dependencies] tells Cargo to download and compile the rand crate. Cargo handles the rest."
+    }
+  ]
+}

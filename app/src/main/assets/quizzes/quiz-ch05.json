@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch05",
+  "title": "Structs",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `&self` and `self` as a method's first parameter?",
+      "options": ["No difference", "&self borrows, self takes ownership", "&self is mutable, self is immutable", "self borrows, &self takes ownership"],
+      "correctIndex": 1,
+      "explanation": "`&self` borrows the struct immutably, allowing continued use. `self` takes ownership, consuming the struct."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "All fields of a struct must be initialized when creating an instance.",
+      "correctAnswer": true,
+      "explanation": "Rust requires every field to have a value. There are no null or undefined defaults — you must provide all values explicitly."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use field init shorthand when the variable name matches the field:",
+      "code": "struct User {\n    name: String,\n    active: bool,\n}\nlet name = String::from(\"Alice\");\nlet user = User { ___, active: true };",
+      "correctAnswer": "name",
+      "acceptableAnswers": ["name"],
+      "explanation": "When a variable has the same name as a field, you can use shorthand: `name` instead of `name: name`."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does #[derive(Debug)] do for a struct?",
+      "options": ["Makes it printable with {:?} and {:#?}", "Adds comparison operators", "Makes fields public", "Enables serialization"],
+      "correctIndex": 0,
+      "explanation": "#[derive(Debug)] auto-implements the Debug trait, allowing the struct to be formatted with {:?} (compact) or {:#?} (pretty-printed)."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Define an associated function (constructor) for this struct:",
+      "code": "struct Rectangle {\n    width: f64,\n    height: f64,\n}\nimpl Rectangle {\n    fn square(size: f64) -> ___ {\n        Rectangle { width: size, height: size }\n    }\n}",
+      "correctAnswer": "Self",
+      "acceptableAnswers": ["Self", "Rectangle"],
+      "explanation": "The return type `Self` (or the struct name) is used for associated functions. `Self` is idiomatic and adapts if the type is renamed."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "A tuple struct like `struct Color(u8, u8, u8);` can be destructured in a let binding.",
+      "correctAnswer": true,
+      "explanation": "Tuple structs support destructuring: `let Color(r, g, b) = my_color;` binds each positional field."
+    }
+  ]
+}

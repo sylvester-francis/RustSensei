@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch07",
+  "title": "Packages, Crates, and Modules",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the crate root in a Rust binary project?",
+      "options": ["Cargo.toml", "src/lib.rs", "src/main.rs", "src/mod.rs"],
+      "correctIndex": 2,
+      "explanation": "For a binary crate, `src/main.rs` is the crate root. For a library crate, it's `src/lib.rs`. The crate root is where the compiler starts."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Items in a module are private by default — even to parent modules.",
+      "correctAnswer": true,
+      "explanation": "Rust's privacy rules default to private. You must add `pub` to make items accessible outside their defining module."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Bring a module's function into scope:",
+      "code": "___ crate::garden::vegetables::harvest;\n\nfn main() {\n    harvest();\n}",
+      "correctAnswer": "use",
+      "acceptableAnswers": ["use"],
+      "explanation": "The `use` keyword creates a shortcut so you don't need to write the full path every time."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the idiomatic way to bring a function's parent module into scope?",
+      "options": ["use the function directly: use crate::module::function", "use the parent: use crate::module — then call module::function", "Always use the full path", "Import everything with *"],
+      "correctIndex": 1,
+      "explanation": "For functions, it's idiomatic to `use` the parent module so the call site shows the module name, clarifying where the function comes from."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Make this function accessible from outside the module:",
+      "code": "mod math {\n    ___ fn add(a: i32, b: i32) -> i32 {\n        a + b\n    }\n}",
+      "correctAnswer": "pub",
+      "acceptableAnswers": ["pub"],
+      "explanation": "The `pub` keyword makes the function accessible to code outside the module."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Making a struct `pub` automatically makes all its fields public.",
+      "correctAnswer": false,
+      "explanation": "A pub struct still has private fields by default. Each field must be individually marked `pub` to be accessible outside the module."
+    }
+  ]
+}

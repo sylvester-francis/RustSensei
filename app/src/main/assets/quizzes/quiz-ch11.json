@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch11",
+  "title": "Writing Automated Tests",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which attribute marks a function as a test in Rust?",
+      "options": ["#[test]", "#[testing]", "#[unit_test]", "@Test"],
+      "correctIndex": 0,
+      "explanation": "The `#[test]` attribute tells `cargo test` to run this function as a test. Test functions take no arguments and return ()."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The `assert_eq!` macro panics when its two arguments are not equal.",
+      "correctAnswer": true,
+      "explanation": "assert_eq!(left, right) panics with a helpful message showing both values if they differ. assert_ne! does the opposite."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Write a test assertion that checks a value is greater than 10:",
+      "code": "#[test]\nfn check_result() {\n    let result = 42;\n    ___!(result > 10, \"result was {}\", result);\n}",
+      "correctAnswer": "assert",
+      "acceptableAnswers": ["assert"],
+      "explanation": "The `assert!` macro takes a boolean expression and panics if it's false. Optional format arguments provide a custom failure message."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does the `#[should_panic]` attribute do?",
+      "options": ["Skips the test", "Marks the test as expected to panic — it passes if it panics", "Makes the test run in a separate thread", "Catches all errors"],
+      "correctIndex": 1,
+      "explanation": "#[should_panic] inverts the expectation: the test passes if the code panics and fails if it doesn't. You can add `expected = \"msg\"` to match the panic message."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Write a test that returns a Result instead of panicking:",
+      "code": "#[test]\nfn it_works() -> Result<(), String> {\n    let result = 2 + 2;\n    if result == 4 {\n        ___(())\n    } else {\n        Err(String::from(\"two plus two does not equal four\"))\n    }\n}",
+      "correctAnswer": "Ok",
+      "acceptableAnswers": ["Ok"],
+      "explanation": "Tests can return `Result<(), E>`. Returning Ok(()) passes the test; returning Err fails it. This enables using the `?` operator in tests."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Integration tests in Rust live in a `tests/` directory at the project root, separate from `src/`.",
+      "correctAnswer": true,
+      "explanation": "Integration tests go in the `tests/` directory. Each file is compiled as a separate crate and can only access the public API of your library."
+    }
+  ]
+}

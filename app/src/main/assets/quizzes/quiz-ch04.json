@@ -1,0 +1,71 @@
+{
+  "id": "quiz-ch04",
+  "title": "Understanding Ownership",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What happens when you assign a String from one variable to another?",
+      "options": ["The value is deep-copied", "Ownership is moved and the original is invalidated", "Both variables share the same heap data", "A compile error always occurs"],
+      "correctIndex": 1,
+      "explanation": "For heap-allocated types like String, assignment moves ownership. The original variable becomes invalid to prevent double-free."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "You can have multiple mutable references to the same data in the same scope.",
+      "correctAnswer": false,
+      "explanation": "Rust allows either one mutable reference OR any number of immutable references at a time — never both. This prevents data races at compile time."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Fix this code by borrowing instead of moving:",
+      "code": "fn calculate_length(s: ___) -> usize {\n    s.len()\n}\nfn main() {\n    let s1 = String::from(\"hello\");\n    let len = calculate_length(&s1);\n    println!(\"'{}' is {} bytes\", s1, len);\n}",
+      "correctAnswer": "&String",
+      "acceptableAnswers": ["&String", "&str"],
+      "explanation": "Using `&String` (or idiomatically `&str`) borrows the value without taking ownership, so s1 remains valid after the call."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which types implement the Copy trait and are NOT moved on assignment?",
+      "options": ["String and Vec", "All types by default", "Scalar types like i32, bool, f64, and char", "Only references"],
+      "correctIndex": 2,
+      "explanation": "Simple stack-only types implement Copy: integers, floats, booleans, characters, and tuples containing only Copy types."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Keep both variables valid by creating a deep copy:",
+      "code": "let s1 = String::from(\"hello\");\nlet s2 = s1.___();\nprintln!(\"{} {}\", s1, s2);",
+      "correctAnswer": "clone",
+      "acceptableAnswers": ["clone"],
+      "explanation": "clone() performs a deep copy of the heap data, so both s1 and s2 own independent copies."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "A slice (&[T] or &str) takes ownership of the data it references.",
+      "correctAnswer": false,
+      "explanation": "Slices are references — they borrow a contiguous section of a collection without taking ownership."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "What does the borrow checker primarily prevent?",
+      "options": ["Memory leaks", "Data races at compile time", "Stack overflow", "Integer overflow"],
+      "correctIndex": 1,
+      "explanation": "The borrow checker enforces ownership and reference rules at compile time, preventing data races and use-after-free bugs."
+    },
+    {
+      "id": "q8",
+      "type": "code_completion",
+      "question": "Create a string slice of the first 5 characters:",
+      "code": "let s = String::from(\"hello world\");\nlet hello = &s[___];",
+      "correctAnswer": "0..5",
+      "acceptableAnswers": ["0..5", "..5"],
+      "explanation": "String slices use byte ranges. `&s[0..5]` (or `&s[..5]`) creates a &str referencing the first 5 bytes."
+    }
+  ]
+}

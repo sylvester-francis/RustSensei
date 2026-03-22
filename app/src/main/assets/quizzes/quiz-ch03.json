@@ -1,0 +1,71 @@
+{
+  "id": "quiz-ch03",
+  "title": "Common Programming Concepts",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "How do you make a variable mutable in Rust?",
+      "options": ["var x = 5", "let mutable x = 5", "let mut x = 5", "mut let x = 5"],
+      "correctIndex": 2,
+      "explanation": "The `mut` keyword after `let` enables mutability: `let mut x = 5;` allows x to be reassigned."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Shadowing lets you reuse a variable name with a different type, unlike `mut`.",
+      "correctAnswer": true,
+      "explanation": "With shadowing (`let x = ...` again), you create a new variable that can have a different type. Mutation only allows changing the value, not the type."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Declare a constant in Rust:",
+      "code": "___ MAX_POINTS: u32 = 100_000;",
+      "correctAnswer": "const",
+      "acceptableAnswers": ["const"],
+      "explanation": "Constants use `const`, must have a type annotation, and can only be set to a constant expression (not computed at runtime)."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the difference between a statement and an expression in Rust?",
+      "options": ["There is no difference", "Statements return values, expressions don't", "Expressions evaluate to a value, statements don't", "Expressions use semicolons, statements don't"],
+      "correctIndex": 2,
+      "explanation": "Expressions evaluate to a value (e.g., `5 + 3`, a block `{ x + 1 }`). Statements perform an action but don't return a value (e.g., `let x = 5;`)."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Add the return type to this function:",
+      "code": "fn add(a: i32, b: i32) -> ___ {\n    a + b\n}",
+      "correctAnswer": "i32",
+      "acceptableAnswers": ["i32"],
+      "explanation": "The return type is declared after `->`. The last expression without a semicolon is the implicit return value."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "In Rust, `if` conditions must be explicitly of type `bool` — there is no implicit truthiness.",
+      "correctAnswer": true,
+      "explanation": "Unlike C or JavaScript, Rust requires `if` conditions to be `bool`. `if x { ... }` won't compile if x is an integer."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "How large is a `char` type in Rust?",
+      "options": ["1 byte (ASCII)", "2 bytes (UTF-16)", "4 bytes (Unicode Scalar Value)", "Variable size"],
+      "correctIndex": 2,
+      "explanation": "A Rust `char` is 4 bytes and represents a Unicode Scalar Value, supporting characters far beyond ASCII."
+    },
+    {
+      "id": "q8",
+      "type": "code_completion",
+      "question": "Use `if` as an expression to assign a value:",
+      "code": "let number = 7;\nlet label = if number > 5 { \"big\" } ___ { \"small\" };",
+      "correctAnswer": "else",
+      "acceptableAnswers": ["else"],
+      "explanation": "Since `if` is an expression in Rust, both branches must return the same type. The result can be bound to a variable."
+    }
+  ]
+}

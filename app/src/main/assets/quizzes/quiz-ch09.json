@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch09",
+  "title": "Error Handling",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `panic!` and returning `Err`?",
+      "options": ["They are the same", "panic! is recoverable, Err is not", "panic! is unrecoverable by default, Err lets the caller decide how to handle it", "Err always exits the program"],
+      "correctIndex": 2,
+      "explanation": "panic! aborts the current thread (unrecoverable). Returning Err propagates a Result, giving callers the choice to handle or propagate further."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Using unwrap() in production code is generally considered best practice.",
+      "correctAnswer": false,
+      "explanation": "unwrap() panics on Err/None. In production, prefer `match`, `if let`, `?`, or `unwrap_or` for graceful error handling."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Propagate errors using the ? operator:",
+      "code": "use std::fs;\nuse std::io;\n\nfn read_config() -> Result<String, io::Error> {\n    let contents = fs::read_to_string(\"config.toml\")___;\n    Ok(contents)\n}",
+      "correctAnswer": "?",
+      "acceptableAnswers": ["?"],
+      "explanation": "The `?` operator returns early with the Err if the Result is Err, or unwraps the Ok value to continue."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "When should you use `panic!` instead of `Result`?",
+      "options": ["For all errors", "When the error is a bug in the program (unrecoverable logic error)", "When dealing with user input", "When reading files"],
+      "correctIndex": 1,
+      "explanation": "Use panic! for bugs and violated invariants — situations that should never happen. Use Result for expected failures like I/O errors."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Handle the Option value, providing a default:",
+      "code": "fn greet(name: Option<&str>) -> String {\n    let n = name.unwrap_or(___);\n    format!(\"Hello, {}!\", n)\n}",
+      "correctAnswer": "\"stranger\"",
+      "acceptableAnswers": ["\"stranger\"", "\"World\"", "\"world\"", "\"Guest\"", "\"guest\""],
+      "explanation": "unwrap_or() returns the contained value or a provided default when None, avoiding a panic."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The `?` operator can only be used in functions that return `Result` or `Option`.",
+      "correctAnswer": true,
+      "explanation": "The `?` operator needs a compatible return type to propagate the error. The function must return Result<T, E> or Option<T>."
+    }
+  ]
+}

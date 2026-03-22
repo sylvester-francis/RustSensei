@@ -1,0 +1,53 @@
+{
+  "id": "quiz-ch14",
+  "title": "Cargo and Crates.io",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is a Cargo workspace?",
+      "options": ["A single crate", "A set of related packages that share a Cargo.lock and output directory", "A remote repository", "A build cache"],
+      "correctIndex": 1,
+      "explanation": "Workspaces let you manage multiple related packages together. They share a single Cargo.lock for consistent dependency versions."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The `[profile.release]` section in Cargo.toml lets you customize optimization settings for release builds.",
+      "correctAnswer": true,
+      "explanation": "Release profiles control optimizations. For example, `opt-level = 3` maximizes optimization, while `opt-level = 0` compiles fastest."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add a documentation comment above this function:",
+      "code": "___ Adds two numbers together.\n///\n/// # Examples\n/// ```\n/// let result = my_crate::add(2, 3);\n/// assert_eq!(result, 5);\n/// ```\npub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}",
+      "correctAnswer": "///",
+      "acceptableAnswers": ["///"],
+      "explanation": "Triple-slash `///` creates documentation comments processed by `cargo doc`. Code blocks in examples are run as tests by `cargo test`."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What command installs a binary crate from crates.io?",
+      "options": ["cargo get", "cargo install", "cargo add", "cargo download"],
+      "correctIndex": 1,
+      "explanation": "`cargo install` downloads, compiles, and installs binary crates locally (to ~/.cargo/bin by default)."
+    },
+    {
+      "id": "q5",
+      "type": "true_false",
+      "question": "You can re-export items with `pub use` to create a more convenient public API.",
+      "correctAnswer": true,
+      "explanation": "`pub use` re-exports items at a different level. This lets you reorganize internal structure without affecting the public API users see."
+    },
+    {
+      "id": "q6",
+      "type": "multiple_choice",
+      "question": "What does `cargo add` do?",
+      "options": ["Creates a new file", "Adds a dependency to Cargo.toml", "Publishes a crate", "Adds a new module"],
+      "correctIndex": 1,
+      "explanation": "`cargo add <crate>` modifies Cargo.toml to include the specified dependency with the latest compatible version."
+    }
+  ]
+}

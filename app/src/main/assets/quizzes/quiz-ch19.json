@@ -1,0 +1,71 @@
+{
+  "id": "quiz-ch19",
+  "title": "Advanced Features",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which of these operations requires an `unsafe` block?",
+      "options": ["Calling a regular function", "Dereferencing a raw pointer", "Using a generic type", "Pattern matching"],
+      "correctIndex": 1,
+      "explanation": "Unsafe lets you: dereference raw pointers, call unsafe functions, access mutable statics, implement unsafe traits, and access union fields."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Using `unsafe` turns off all of Rust's safety checks.",
+      "correctAnswer": false,
+      "explanation": "unsafe only unlocks the five superpowers. The borrow checker, type system, and other safety features still work inside unsafe blocks."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Define a type alias for a complex type:",
+      "code": "___ Thunk = Box<dyn Fn() + Send + 'static>;",
+      "correctAnswer": "type",
+      "acceptableAnswers": ["type"],
+      "explanation": "The `type` keyword creates a type alias. It doesn't create a new type — just a shorter name for an existing one."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What are associated types in traits?",
+      "options": ["Types defined inside a module", "Placeholder types specified by the implementor, allowing one implementation per type", "Generic type parameters", "Static variables in traits"],
+      "correctIndex": 1,
+      "explanation": "Associated types (e.g., `type Item;` in Iterator) differ from generics: each type gets one implementation with one associated type, not multiple."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Define a simple declarative macro:",
+      "code": "___! say_hello {\n    () => {\n        println!(\"Hello!\");\n    };\n}",
+      "correctAnswer": "macro_rules",
+      "acceptableAnswers": ["macro_rules"],
+      "explanation": "`macro_rules!` defines a declarative (by example) macro. The pattern `()` matches empty input and expands to the println! call."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The never type `!` indicates a function that never returns (like functions that always panic or loop forever).",
+      "correctAnswer": true,
+      "explanation": "Functions returning `!` (the never type) are called diverging functions. `panic!`, `loop {}` without break, and `process::exit()` all have type `!`."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "What is fully qualified syntax used for?",
+      "options": ["Importing modules", "Disambiguating when multiple traits define methods with the same name", "Defining macros", "Creating modules"],
+      "correctIndex": 1,
+      "explanation": "When a type implements multiple traits with the same method name, `<Type as Trait>::method()` specifies exactly which implementation to call."
+    },
+    {
+      "id": "q8",
+      "type": "code_completion",
+      "question": "Use a function pointer as a parameter:",
+      "code": "fn apply(f: ___(i32) -> i32, x: i32) -> i32 {\n    f(x)\n}",
+      "correctAnswer": "fn",
+      "acceptableAnswers": ["fn"],
+      "explanation": "The `fn` type (lowercase) is a function pointer. Unlike closures (Fn/FnMut/FnOnce traits), fn pointers don't capture environment."
+    }
+  ]
+}

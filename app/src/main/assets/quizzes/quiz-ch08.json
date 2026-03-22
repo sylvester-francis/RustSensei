@@ -1,0 +1,71 @@
+{
+  "id": "quiz-ch08",
+  "title": "Common Collections",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `&str` and `String` in Rust?",
+      "options": ["They are the same type", "&str is a borrowed slice of string data, String is an owned heap-allocated string", "&str is mutable, String is immutable", "String is stack-allocated, &str is heap-allocated"],
+      "correctIndex": 1,
+      "explanation": "`&str` is a borrowed reference to UTF-8 string data. `String` owns its data on the heap and can grow or be modified."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "A HashMap automatically preserves the insertion order of its keys.",
+      "correctAnswer": false,
+      "explanation": "HashMap does not guarantee key order. Use BTreeMap if you need sorted keys, or IndexMap for insertion order."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Insert a value only if the key doesn't exist using the entry API:",
+      "code": "use std::collections::HashMap;\nlet mut scores = HashMap::new();\nscores.insert(\"Blue\", 10);\nscores.entry(\"Red\")\n    .___( 50);",
+      "correctAnswer": "or_insert",
+      "acceptableAnswers": ["or_insert"],
+      "explanation": "The `entry().or_insert()` pattern checks if the key exists. If not, it inserts the provided default value."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Why can't you index a String with `s[0]` in Rust?",
+      "options": ["Strings don't support any indexing", "Strings are stored as UTF-8 bytes, so a single index might not be a valid character boundary", "Indexing starts at 1 in Rust", "You need to use s.at(0) instead"],
+      "correctIndex": 1,
+      "explanation": "Strings are UTF-8 encoded. A byte index might land in the middle of a multi-byte character. Use `.chars().nth(0)` or slices with care."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Create a Vec and add elements to it:",
+      "code": "let mut v = ___::new();\nv.push(1);\nv.push(2);\nv.push(3);",
+      "correctAnswer": "Vec",
+      "acceptableAnswers": ["Vec", "Vec::<i32>"],
+      "explanation": "`Vec::new()` creates an empty vector. The type is inferred from the first push. You can also use `vec![1, 2, 3]`."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Rust Strings are always valid UTF-8.",
+      "correctAnswer": true,
+      "explanation": "Rust enforces UTF-8 validity. Operations that would create invalid UTF-8 either won't compile or return a Result."
+    },
+    {
+      "id": "q7",
+      "type": "multiple_choice",
+      "question": "What does `v.get(10)` return on a Vec with only 3 elements?",
+      "options": ["0", "An error", "None", "The program panics"],
+      "correctIndex": 2,
+      "explanation": "`.get()` returns `Option<&T>` — `Some(&value)` if the index exists, `None` if out of bounds. Unlike `v[10]`, it doesn't panic."
+    },
+    {
+      "id": "q8",
+      "type": "code_completion",
+      "question": "Iterate over a HashMap's key-value pairs:",
+      "code": "use std::collections::HashMap;\nlet scores = HashMap::from([(\"Alice\", 100), (\"Bob\", 85)]);\nfor (name, score) in ___ {\n    println!(\"{}: {}\", name, score);\n}",
+      "correctAnswer": "&scores",
+      "acceptableAnswers": ["&scores", "scores.iter()", "&scores"],
+      "explanation": "Iterating over `&map` (or `map.iter()`) yields (&key, &value) pairs without consuming the HashMap."
+    }
+  ]
+}

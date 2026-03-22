@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch13",
+  "title": "Closures and Iterators",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "How do closures differ from functions in Rust?",
+      "options": ["They can't return values", "They can capture variables from their surrounding environment", "They must always have type annotations", "They are slower than functions"],
+      "correctIndex": 1,
+      "explanation": "Closures capture their environment — they can use variables from the scope where they're defined. Functions cannot."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Iterators in Rust are lazy — they produce values only when consumed.",
+      "correctAnswer": true,
+      "explanation": "Iterator adaptors like `.map()` and `.filter()` are lazy. Nothing happens until a consuming adaptor like `.collect()`, `.sum()`, or `.for_each()` drives the chain."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use map and collect to double all values:",
+      "code": "let nums = vec![1, 2, 3, 4];\nlet doubled: Vec<i32> = nums.iter()\n    .map(|x| x * 2)\n    .___();",
+      "correctAnswer": "collect",
+      "acceptableAnswers": ["collect", "collect::<Vec<i32>>()"],
+      "explanation": "`.collect()` consumes the iterator and gathers results into a collection. The type annotation on `doubled` guides type inference."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the difference between `iter()`, `into_iter()`, and `iter_mut()`?",
+      "options": ["They are all the same", "iter() borrows, into_iter() takes ownership, iter_mut() borrows mutably", "iter() is for arrays only", "into_iter() is slower"],
+      "correctIndex": 1,
+      "explanation": "`iter()` yields &T (borrows), `iter_mut()` yields &mut T (mutable borrows), `into_iter()` yields T (takes ownership and consumes the collection)."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Filter a vector to keep only even numbers:",
+      "code": "let numbers = vec![1, 2, 3, 4, 5, 6];\nlet evens: Vec<&i32> = numbers.iter()\n    .___(|x| *x % 2 == 0)\n    .collect();",
+      "correctAnswer": "filter",
+      "acceptableAnswers": ["filter"],
+      "explanation": "`.filter()` takes a closure that returns bool. Only items where the closure returns `true` are included in the output."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The three closure traits — Fn, FnMut, and FnOnce — relate to how the closure captures environment variables.",
+      "correctAnswer": true,
+      "explanation": "FnOnce takes ownership of captured variables (can be called once). FnMut borrows mutably. Fn borrows immutably. The compiler infers which trait a closure implements."
+    }
+  ]
+}

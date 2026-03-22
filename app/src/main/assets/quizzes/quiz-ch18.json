@@ -1,0 +1,54 @@
+{
+  "id": "quiz-ch18",
+  "title": "Patterns and Matching",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "In which of these places can patterns NOT be used in Rust?",
+      "options": ["let statements", "function parameters", "match arms", "Type definitions"],
+      "correctIndex": 3,
+      "explanation": "Patterns are used in let, match, if let, while let, for loops, and function parameters — but not in type definitions."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "An irrefutable pattern is one that matches any possible value.",
+      "correctAnswer": true,
+      "explanation": "Irrefutable patterns always match (e.g., `let x = 5;`). Refutable patterns can fail (e.g., `if let Some(x) = opt`). `let` requires irrefutable patterns."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use a match guard to add a condition to this pattern:",
+      "code": "let num = Some(4);\nmatch num {\n    Some(x) ___ x < 5 => println!(\"less than five: {}\", x),\n    Some(x) => println!(\"{}\", x),\n    None => (),\n}",
+      "correctAnswer": "if",
+      "acceptableAnswers": ["if"],
+      "explanation": "Match guards add an extra condition with `if` after the pattern: `Some(x) if x < 5`. The arm only matches if both the pattern and guard are true."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does the `@` operator do in a pattern?",
+      "options": ["It creates an alias", "It binds a value to a variable while also testing it against a pattern", "It dereferences a pointer", "It creates a reference"],
+      "correctIndex": 1,
+      "explanation": "The `@` binding lets you capture a value and test it: `id @ 3..=7` matches if id is 3-7 and binds the value to `id`."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Destructure this struct in the match arm:",
+      "code": "struct Point { x: i32, y: i32 }\nlet p = Point { x: 0, y: 7 };\nmatch p {\n    Point { x, y: 0 } => println!(\"On x-axis at {}\", x),\n    Point { x: 0, ___ } => println!(\"On y-axis at {}\", y),\n    Point { x, y } => println!(\"({}, {})\", x, y),\n}",
+      "correctAnswer": "y",
+      "acceptableAnswers": ["y"],
+      "explanation": "Struct patterns can match literal values (`y: 0`) or bind fields to variables (`y`). Here we match x: 0 and bind y."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The `..` syntax in a pattern ignores remaining fields or elements you don't need.",
+      "correctAnswer": true,
+      "explanation": "`Point { x, .. }` matches a Point and ignores all fields except x. In tuples, `(first, .., last)` captures only the first and last elements."
+    }
+  ]
+}
