@@ -1,0 +1,54 @@
+{
+  "id": "quiz-intro",
+  "title": "Introduction Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the entry point of every Rust program?",
+      "options": ["fn start()", "fn main()", "fn run()", "fn init()"],
+      "correctIndex": 1,
+      "explanation": "Every Rust program begins execution in `fn main()`."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The `!` in `println!` indicates it is a macro, not a function.",
+      "correctAnswer": true,
+      "explanation": "Macros use `!` in Rust. `println!` is a macro that supports format strings with variable arguments."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Print a greeting using a format placeholder:",
+      "code": "fn main() {\n    let name = \"Rustacean\";\n    println!(\"Hello, ___!\", name);\n}",
+      "correctAnswer": "{}",
+      "acceptableAnswers": ["{}"],
+      "explanation": "`{}` is the placeholder for Display formatting in `println!`. The value of `name` is inserted at runtime."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which command creates a new Cargo project?",
+      "options": ["cargo build", "cargo new", "cargo init", "Both cargo new and cargo init"],
+      "correctIndex": 3,
+      "explanation": "`cargo new` creates a new directory with a project; `cargo init` initializes a project in the current directory. Both work."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Complete the macro call to print to the console:",
+      "code": "fn main() {\n    ___!(\"Hello, world!\");\n}",
+      "correctAnswer": "println",
+      "acceptableAnswers": ["println"],
+      "explanation": "`println!` prints text followed by a newline to standard output."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Cargo.toml is where you declare project dependencies and metadata.",
+      "correctAnswer": true,
+      "explanation": "Cargo.toml is the manifest file. Cargo.lock (auto-generated) records exact dependency versions for reproducible builds."
+    }
+  ]
+}

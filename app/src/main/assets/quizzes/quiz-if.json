@@ -1,0 +1,54 @@
+{
+  "id": "quiz-if",
+  "title": "Conditionals Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What must the condition in an `if` expression evaluate to in Rust?",
+      "options": ["Any integer", "A bool", "Any truthy value", "A String"],
+      "correctIndex": 1,
+      "explanation": "Rust requires `if` conditions to be explicitly `bool`. There's no implicit truthiness."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "In Rust, `if` is an expression that can return a value.",
+      "correctAnswer": true,
+      "explanation": "You can use it on the right side of a `let`: `let x = if cond { 5 } else { 10 };`"
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use `if` as an expression to assign a value:",
+      "code": "let temp = 35;\nlet weather = if temp > 30 { \"hot\" } ___ { \"cool\" };",
+      "correctAnswer": "else",
+      "acceptableAnswers": ["else"],
+      "explanation": "Both branches must return the same type. `else` provides the alternative value."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What happens if `if` and `else` branches return different types when used as an expression?",
+      "options": ["The compiler picks the broader type", "It compiles but may panic", "It causes a compile-time error", "The value is automatically converted"],
+      "correctIndex": 2,
+      "explanation": "Rust requires both branches to return the same type. Mismatched types cause a compile error."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Chain conditions with else if:",
+      "code": "let n = 15;\nif n % 15 == 0 {\n    println!(\"FizzBuzz\");\n} else ___ n % 3 == 0 {\n    println!(\"Fizz\");\n}",
+      "correctAnswer": "if",
+      "acceptableAnswers": ["if"],
+      "explanation": "Rust uses `else if` for chaining conditions."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Rust has a ternary operator (`condition ? a : b`) like C and Java.",
+      "correctAnswer": false,
+      "explanation": "Rust doesn't have a ternary operator. Use `if/else` expressions instead: `let x = if cond { a } else { b };`"
+    }
+  ]
+}

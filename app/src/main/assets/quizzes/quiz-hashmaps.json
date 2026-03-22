@@ -1,0 +1,54 @@
+{
+  "id": "quiz-hashmaps",
+  "title": "HashMaps Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What happens when you insert a duplicate key into a HashMap?",
+      "options": ["It panics", "The old value is overwritten", "The insert is ignored", "Both values are stored"],
+      "correctIndex": 1,
+      "explanation": "Inserting with an existing key replaces the old value. Use `entry().or_insert()` to insert only if absent."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "HashMap keys must implement the Hash and Eq traits.",
+      "correctAnswer": true,
+      "explanation": "Hash computes the bucket; Eq resolves collisions. Most standard types implement both."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Insert a value only if the key doesn't already exist:",
+      "code": "use std::collections::HashMap;\nlet mut map = HashMap::new();\nmap.entry(\"key\").___( 42);",
+      "correctAnswer": "or_insert",
+      "acceptableAnswers": ["or_insert"],
+      "explanation": "`entry().or_insert()` checks if the key exists. If not, it inserts the default value."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which module contains HashMap?",
+      "options": ["std::map", "std::collections", "std::hash", "std::container"],
+      "correctIndex": 1,
+      "explanation": "`use std::collections::HashMap;` brings it into scope."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Create a HashMap and insert a key-value pair:",
+      "code": "use std::collections::HashMap;\nlet mut scores = HashMap::new();\nscores.___(\"Alice\", 100);",
+      "correctAnswer": "insert",
+      "acceptableAnswers": ["insert"],
+      "explanation": "`insert(key, value)` adds a key-value pair to the HashMap."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "HashMap preserves the insertion order of its entries.",
+      "correctAnswer": false,
+      "explanation": "HashMap does not guarantee order. Use BTreeMap for sorted keys or IndexMap for insertion order."
+    }
+  ]
+}

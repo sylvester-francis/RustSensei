@@ -1,0 +1,54 @@
+{
+  "id": "quiz-enums",
+  "title": "Enums Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What makes Rust enums more powerful than enums in most other languages?",
+      "options": ["They are faster", "Each variant can hold different types and amounts of data", "They support inheritance", "They are always public"],
+      "correctIndex": 1,
+      "explanation": "Rust enums are algebraic data types. Variants can carry structs, tuples, or no data at all."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "A `match` expression must handle every possible variant (exhaustive matching).",
+      "correctAnswer": true,
+      "explanation": "The compiler enforces exhaustive matching. Use `_` as a catch-all for remaining variants."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Destructure the enum variant in this match arm:",
+      "code": "enum Shape {\n    Circle(f64),\n    Rect(f64, f64),\n}\nfn area(s: &Shape) -> f64 {\n    match s {\n        Shape::Circle(r) => 3.14159 * r * r,\n        Shape::Rect(w, ___) => w * h,\n    }\n}",
+      "correctAnswer": "h",
+      "acceptableAnswers": ["h"],
+      "explanation": "Pattern matching destructures the Rect variant, binding its fields to `w` and `h`."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `if let` do?",
+      "options": ["Declares a variable", "Matches a single pattern concisely, ignoring the rest", "Creates an if statement", "Loops over a collection"],
+      "correctIndex": 1,
+      "explanation": "`if let` is syntactic sugar for a match that handles one pattern. Less verbose when you only care about one variant."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Use `if let` to handle an Option:",
+      "code": "___ Some(value) = some_option {\n    println!(\"Got: {}\", value);\n}",
+      "correctAnswer": "if let",
+      "acceptableAnswers": ["if let"],
+      "explanation": "`if let Some(value) = opt` extracts the value if present, skipping None."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Enums in Rust can have methods defined in `impl` blocks.",
+      "correctAnswer": true,
+      "explanation": "You can define methods on enums just like structs. `Option<T>` has `.map()`, `.unwrap()`, etc."
+    }
+  ]
+}

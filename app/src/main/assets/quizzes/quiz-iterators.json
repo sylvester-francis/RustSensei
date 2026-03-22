@@ -1,0 +1,54 @@
+{
+  "id": "quiz-iterators",
+  "title": "Iterators Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `iter()`, `into_iter()`, and `iter_mut()`?",
+      "options": ["They are the same", "iter() borrows, into_iter() takes ownership, iter_mut() borrows mutably", "iter() is for arrays only", "into_iter() is slower"],
+      "correctIndex": 1,
+      "explanation": "`iter()` yields &T, `iter_mut()` yields &mut T, `into_iter()` yields T (consumes the collection)."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Iterators in Rust are lazy — they do nothing until consumed.",
+      "correctAnswer": true,
+      "explanation": "Adaptors like `.map()` and `.filter()` build a chain. A consumer like `.collect()` or `.sum()` drives it."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Consume the iterator to collect results into a Vec:",
+      "code": "let nums = vec![1, 2, 3];\nlet doubled: Vec<i32> = nums.iter().map(|x| x * 2).___();",
+      "correctAnswer": "collect",
+      "acceptableAnswers": ["collect"],
+      "explanation": "`.collect()` consumes the iterator and gathers results. The type annotation guides inference."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which method keeps only elements matching a predicate?",
+      "options": ["map()", "filter()", "find()", "take()"],
+      "correctIndex": 1,
+      "explanation": "`.filter(|x| predicate)` yields only items where the closure returns true."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Sum all elements of this iterator:",
+      "code": "let total: i32 = vec![1, 2, 3, 4].iter().___();",
+      "correctAnswer": "sum",
+      "acceptableAnswers": ["sum", "sum()"],
+      "explanation": "`.sum()` consumes the iterator and adds up all elements."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Iterator is a trait, and you can implement it for your own types.",
+      "correctAnswer": true,
+      "explanation": "Implement `Iterator` by defining `fn next(&mut self) -> Option<Self::Item>`. All adaptor methods come free."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "quiz-structs",
+  "title": "Structs Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `&self` and `self` as a method parameter?",
+      "options": ["No difference", "&self borrows, self takes ownership", "&self is mutable, self is immutable", "self borrows, &self takes ownership"],
+      "correctIndex": 1,
+      "explanation": "`&self` borrows immutably, allowing continued use. `self` takes ownership, consuming the struct."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "All fields of a struct must be initialized when creating an instance.",
+      "correctAnswer": true,
+      "explanation": "Rust has no null or undefined defaults. Every field must have a value."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use field init shorthand when the variable matches the field name:",
+      "code": "struct User { name: String, active: bool }\nlet name = String::from(\"Alice\");\nlet user = User { ___, active: true };",
+      "correctAnswer": "name",
+      "acceptableAnswers": ["name"],
+      "explanation": "When variable and field names match, use shorthand: `name` instead of `name: name`."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does #[derive(Debug)] do for a struct?",
+      "options": ["Makes it printable with {:?}", "Adds comparison operators", "Makes fields public", "Enables serialization"],
+      "correctIndex": 0,
+      "explanation": "#[derive(Debug)] auto-implements Debug, allowing `{:?}` (compact) or `{:#?}` (pretty) formatting."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Define an associated function (constructor):",
+      "code": "impl Rectangle {\n    fn square(size: f64) -> ___ {\n        Rectangle { width: size, height: size }\n    }\n}",
+      "correctAnswer": "Self",
+      "acceptableAnswers": ["Self", "Rectangle"],
+      "explanation": "`Self` refers to the implementing type. It's idiomatic and adapts if the type is renamed."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Tuple structs like `struct Color(u8, u8, u8);` can be destructured.",
+      "correctAnswer": true,
+      "explanation": "Tuple structs support destructuring: `let Color(r, g, b) = my_color;`"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "quiz-primitive-types",
+  "title": "Primitive Types Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "How do you access the second element of a tuple `let t = (1, 2.0, 'a');`?",
+      "options": ["t[1]", "t.1", "t.get(1)", "t(1)"],
+      "correctIndex": 1,
+      "explanation": "Tuple elements are accessed with dot notation and a zero-based index: `t.0`, `t.1`, `t.2`."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Arrays in Rust have a fixed length determined at compile time.",
+      "correctAnswer": true,
+      "explanation": "Arrays are `[T; N]` with fixed size. For growable collections, use `Vec<T>`."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Create a slice from this array containing indices 1, 2, and 3:",
+      "code": "let a = [10, 20, 30, 40, 50];\nlet slice = &a[___];",
+      "correctAnswer": "1..4",
+      "acceptableAnswers": ["1..4", "1..=3"],
+      "explanation": "`1..4` is a half-open range (indices 1, 2, 3). `1..=3` is the inclusive equivalent."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "How large is a `char` in Rust?",
+      "options": ["1 byte", "2 bytes", "4 bytes", "Depends on the character"],
+      "correctIndex": 2,
+      "explanation": "A Rust `char` is always 4 bytes and represents a Unicode Scalar Value."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Destructure this tuple into individual variables:",
+      "code": "let point = (3, 5);\nlet (___, y) = point;",
+      "correctAnswer": "x",
+      "acceptableAnswers": ["x"],
+      "explanation": "Tuple destructuring binds each element: `let (x, y) = point;`"
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The type `[i32; 3]` and `[i32; 5]` are the same type in Rust.",
+      "correctAnswer": false,
+      "explanation": "Array types include their length. `[i32; 3]` and `[i32; 5]` are distinct types."
+    }
+  ]
+}

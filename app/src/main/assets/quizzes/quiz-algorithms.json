@@ -1,0 +1,54 @@
+{
+  "id": "quiz-algorithms",
+  "title": "Algorithms Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the time complexity of `Vec::push` in Rust (amortized)?",
+      "options": ["O(n)", "O(1) amortized", "O(log n)", "O(n log n)"],
+      "correctIndex": 1,
+      "explanation": "Vec doubles its capacity when full, so push is O(1) amortized. Occasional resizes are O(n)."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Rust's standard `.sort()` method is a stable sort.",
+      "correctAnswer": true,
+      "explanation": "`.sort()` is stable (preserves order of equal elements). `.sort_unstable()` may reorder equals but can be faster."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Sort a vector of integers in descending order:",
+      "code": "let mut nums = vec![3, 1, 4, 1, 5];\nnums.sort_by(|a, b| b.___(a));",
+      "correctAnswer": "cmp",
+      "acceptableAnswers": ["cmp"],
+      "explanation": "`b.cmp(a)` reverses the comparison, producing descending order."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `HashMap::get` return?",
+      "options": ["The value directly", "Option<&V>", "Result<V, Error>", "A boolean"],
+      "correctIndex": 1,
+      "explanation": "`.get(&key)` returns `Option<&V>` — `Some(&value)` if found, `None` if the key doesn't exist."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Use binary search on a sorted slice:",
+      "code": "let data = [1, 3, 5, 7, 9, 11];\nlet result = data.___(& 7);",
+      "correctAnswer": "binary_search",
+      "acceptableAnswers": ["binary_search"],
+      "explanation": "`.binary_search()` returns `Ok(index)` if found, `Err(insert_index)` if not. Requires sorted data."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Iterator chains like `.filter().map().collect()` typically create intermediate collections.",
+      "correctAnswer": false,
+      "explanation": "Iterators are lazy and fused. No intermediate collections are created — each element flows through the chain."
+    }
+  ]
+}

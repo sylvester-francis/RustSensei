@@ -1,0 +1,54 @@
+{
+  "id": "quiz-macros",
+  "title": "Macros Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does the `!` in `println!` signify?",
+      "options": ["It's a function", "It's a macro invocation", "It means the function can fail", "It's an operator"],
+      "correctIndex": 1,
+      "explanation": "The `!` indicates a macro call. Macros are expanded at compile time before the code is compiled."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "`macro_rules!` creates declarative (by-example) macros.",
+      "correctAnswer": true,
+      "explanation": "`macro_rules!` defines pattern-matching macros. They match input against patterns and expand to code."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Define a simple macro that prints hello:",
+      "code": "___! say_hello {\n    () => {\n        println!(\"Hello!\");\n    };\n}",
+      "correctAnswer": "macro_rules",
+      "acceptableAnswers": ["macro_rules"],
+      "explanation": "`macro_rules!` followed by the name defines a declarative macro with match arms."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "How do macros differ from functions?",
+      "options": ["Macros are slower", "Macros are expanded at compile time and can accept variable arguments", "Functions are more powerful", "No difference"],
+      "correctIndex": 1,
+      "explanation": "Macros expand at compile time, can take variable arguments, and generate code. Functions run at runtime."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Use repetition to match zero or more expressions:",
+      "code": "macro_rules! make_vec {\n    ( $( $x:expr ),* ) => {\n        {\n            let mut v = Vec::new();\n            $( v.push($___); )*\n            v\n        }\n    };\n}",
+      "correctAnswer": "x",
+      "acceptableAnswers": ["x"],
+      "explanation": "The `$( ... )*` repetition expands once for each matched `$x`. Each captured expression is pushed."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Macros must be defined or imported before they are used in a file.",
+      "correctAnswer": true,
+      "explanation": "Unlike functions, macros are order-dependent. They must appear before (or be #[macro_use] imported) their call site."
+    }
+  ]
+}

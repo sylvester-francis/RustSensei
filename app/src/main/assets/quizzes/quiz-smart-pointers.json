@@ -1,0 +1,54 @@
+{
+  "id": "quiz-smart-pointers",
+  "title": "Smart Pointers Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does Box<T> provide?",
+      "options": ["Thread-safe reference counting", "Heap allocation with single ownership", "Interior mutability", "Shared ownership"],
+      "correctIndex": 1,
+      "explanation": "Box<T> puts data on the heap with single ownership. Essential for recursive types."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Rc<T> is safe to use across multiple threads.",
+      "correctAnswer": false,
+      "explanation": "Rc uses non-atomic reference counting — not thread-safe. Use Arc<T> for multithreaded shared ownership."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Create a Box to enable a recursive type:",
+      "code": "enum List {\n    Cons(i32, ___(List)),\n    Nil,\n}",
+      "correctAnswer": "Box",
+      "acceptableAnswers": ["Box"],
+      "explanation": "Box gives the recursive List a known size (one pointer) so the compiler accepts it."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does Arc<T> stand for?",
+      "options": ["Automatic Reference Counter", "Atomically Reference Counted", "Allocated Reference Container", "Async Runtime Context"],
+      "correctIndex": 1,
+      "explanation": "Arc = Atomically Reference Counted. Thread-safe version of Rc with atomic operations."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Share ownership with Rc by cloning the handle:",
+      "code": "use std::rc::Rc;\nlet a = Rc::new(5);\nlet b = Rc::___(&a);",
+      "correctAnswer": "clone",
+      "acceptableAnswers": ["clone"],
+      "explanation": "Rc::clone increments the reference count without deep-copying the data."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The Deref trait lets smart pointers be used like regular references.",
+      "correctAnswer": true,
+      "explanation": "Deref enables deref coercion: &Box<T> automatically becomes &T."
+    }
+  ]
+}

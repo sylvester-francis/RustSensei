@@ -1,0 +1,54 @@
+{
+  "id": "quiz-tests",
+  "title": "Tests Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which attribute marks a function as a test?",
+      "options": ["#[test]", "#[testing]", "#[unit_test]", "@Test"],
+      "correctIndex": 0,
+      "explanation": "`#[test]` tells `cargo test` to run this function as a test."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "assert_eq!(a, b) panics when a and b are not equal.",
+      "correctAnswer": true,
+      "explanation": "assert_eq! panics with a message showing both values if they differ. assert_ne! does the opposite."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Write a test assertion that checks a boolean condition:",
+      "code": "#[test]\nfn check() {\n    let result = 42;\n    ___!(result > 10);\n}",
+      "correctAnswer": "assert",
+      "acceptableAnswers": ["assert"],
+      "explanation": "`assert!` takes a boolean and panics if false."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `#[should_panic]` do?",
+      "options": ["Skips the test", "The test passes if the code panics", "Runs the test in a thread", "Catches all errors"],
+      "correctIndex": 1,
+      "explanation": "#[should_panic] inverts the expectation: pass on panic, fail on no panic."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Return a Result from a test to use the ? operator:",
+      "code": "#[test]\nfn it_works() -> Result<(), String> {\n    if 2 + 2 == 4 { ___(()) } else { Err(String::from(\"math broken\")) }\n}",
+      "correctAnswer": "Ok",
+      "acceptableAnswers": ["Ok"],
+      "explanation": "Tests can return `Result<(), E>`. Ok(()) passes; Err fails. Enables `?` in tests."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Integration tests in Rust go in a `tests/` directory at the project root.",
+      "correctAnswer": true,
+      "explanation": "Each file in `tests/` is compiled as a separate crate and can only test the public API."
+    }
+  ]
+}

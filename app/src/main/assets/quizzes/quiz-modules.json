@@ -1,0 +1,54 @@
+{
+  "id": "quiz-modules",
+  "title": "Modules Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does `pub` do in Rust?",
+      "options": ["Makes an item mutable", "Makes an item accessible outside its module", "Creates a new module", "Imports a module"],
+      "correctIndex": 1,
+      "explanation": "`pub` makes items public. Without it, items are private to their defining module."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Module contents are private by default.",
+      "correctAnswer": true,
+      "explanation": "Rust defaults to private. You must add `pub` to expose items outside the module."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Bring a function into scope from another module:",
+      "code": "___ crate::utils::helper;\nfn main() { helper(); }",
+      "correctAnswer": "use",
+      "acceptableAnswers": ["use"],
+      "explanation": "`use` creates a shortcut so you don't need the full path every time."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is the crate root for a binary project?",
+      "options": ["Cargo.toml", "src/lib.rs", "src/main.rs", "src/mod.rs"],
+      "correctIndex": 2,
+      "explanation": "`src/main.rs` is the crate root for binaries; `src/lib.rs` for libraries."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Make this function accessible outside the module:",
+      "code": "mod math {\n    ___ fn add(a: i32, b: i32) -> i32 { a + b }\n}",
+      "correctAnswer": "pub",
+      "acceptableAnswers": ["pub"],
+      "explanation": "`pub` makes the function visible to code outside the `math` module."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Making a struct `pub` automatically makes all its fields public.",
+      "correctAnswer": false,
+      "explanation": "A pub struct still has private fields by default. Each field needs its own `pub` keyword."
+    }
+  ]
+}

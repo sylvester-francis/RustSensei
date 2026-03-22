@@ -1,0 +1,54 @@
+{
+  "id": "quiz-variables",
+  "title": "Variables Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "How do you make a variable mutable in Rust?",
+      "options": ["var x = 5", "let mutable x = 5", "let mut x = 5", "mut let x = 5"],
+      "correctIndex": 2,
+      "explanation": "The `mut` keyword after `let` enables mutability: `let mut x = 5;`"
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Variables in Rust are immutable by default.",
+      "correctAnswer": true,
+      "explanation": "Rust defaults to immutable. You must explicitly opt into mutability with `mut`."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Fix this code so it compiles:",
+      "code": "fn main() {\n    let ___ x = 5;\n    x = 10;\n    println!(\"{}\", x);\n}",
+      "correctAnswer": "mut",
+      "acceptableAnswers": ["mut"],
+      "explanation": "Adding `mut` allows the variable to be reassigned."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is variable shadowing?",
+      "options": ["Hiding a variable from other modules", "Declaring a new variable with the same name, replacing the old binding", "Making a variable private", "Creating a copy of a variable"],
+      "correctIndex": 1,
+      "explanation": "Shadowing lets you reuse a name with a new `let`, even changing the type."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Declare a constant with the correct keyword:",
+      "code": "___ MAX_POINTS: u32 = 100_000;",
+      "correctAnswer": "const",
+      "acceptableAnswers": ["const"],
+      "explanation": "Constants use `const`, must have a type annotation, and are always immutable."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Shadowing allows you to change the type of a variable name, unlike `mut`.",
+      "correctAnswer": true,
+      "explanation": "With shadowing you create a new binding, so `let x = \"hello\"; let x = x.len();` is valid. Mutation cannot change the type."
+    }
+  ]
+}

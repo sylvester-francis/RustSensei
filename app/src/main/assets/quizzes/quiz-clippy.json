@@ -1,0 +1,54 @@
+{
+  "id": "quiz-clippy",
+  "title": "Clippy Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is Clippy?",
+      "options": ["A text editor", "A collection of lints that catch common mistakes and suggest idiomatic Rust", "A build tool", "A testing framework"],
+      "correctIndex": 1,
+      "explanation": "`cargo clippy` analyzes code for common pitfalls, performance issues, and non-idiomatic patterns."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Clippy warnings must always be fixed — they are hard errors.",
+      "correctAnswer": false,
+      "explanation": "Clippy lints are warnings by default. You can allow specific lints with `#[allow(clippy::lint_name)]`."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Run Clippy on your project using Cargo:",
+      "code": "cargo ___",
+      "correctAnswer": "clippy",
+      "acceptableAnswers": ["clippy"],
+      "explanation": "`cargo clippy` runs all Clippy lints. Add `-- -D warnings` to treat warnings as errors in CI."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which is more idiomatic Rust according to Clippy?",
+      "options": ["if x >= 1 && x <= 10", "(1..=10).contains(&x)", "x > 0 && x < 11", "match x { 1..=10 => true, _ => false }"],
+      "correctIndex": 1,
+      "explanation": "Clippy suggests `(1..=10).contains(&x)` as more readable than manual range checks."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Allow a specific Clippy lint on a function:",
+      "code": "#[allow(clippy::___)]",
+      "correctAnswer": "needless_return",
+      "acceptableAnswers": ["needless_return", "too_many_arguments", "unused_variable"],
+      "explanation": "`#[allow(clippy::lint_name)]` suppresses a specific Clippy warning on the annotated item."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Clippy can suggest replacing `.iter().map(|x| x.clone()).collect()` with `.to_vec()`.",
+      "correctAnswer": true,
+      "explanation": "Clippy catches verbose patterns and suggests simpler equivalents like `.to_vec()` for cloning a slice."
+    }
+  ]
+}

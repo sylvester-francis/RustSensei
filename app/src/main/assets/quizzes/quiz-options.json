@@ -1,0 +1,54 @@
+{
+  "id": "quiz-options",
+  "title": "Options Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What does `Option<T>` represent in Rust?",
+      "options": ["An error type", "A value that might be present (Some) or absent (None)", "A boolean flag", "A nullable pointer"],
+      "correctIndex": 1,
+      "explanation": "Option<T> replaces null with a type-safe enum: `Some(value)` or `None`. The compiler forces you to handle both."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Calling `.unwrap()` on `None` will cause a panic at runtime.",
+      "correctAnswer": true,
+      "explanation": "unwrap() extracts the Some value or panics on None. Prefer `match`, `if let`, or `unwrap_or` in production."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Transform the inner value of an Option without unwrapping:",
+      "code": "let num: Option<i32> = Some(5);\nlet doubled = num.___(|x| x * 2);",
+      "correctAnswer": "map",
+      "acceptableAnswers": ["map"],
+      "explanation": "`.map()` applies a function to the Some value, returning `Some(result)`. None stays None."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `unwrap_or(default)` do?",
+      "options": ["Always returns the default", "Returns Some value if present, otherwise returns the default", "Panics if None", "Converts Option to Result"],
+      "correctIndex": 1,
+      "explanation": "`unwrap_or(default)` returns the inner value for Some, or the provided default for None — no panic."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Use pattern matching to handle an Option:",
+      "code": "let name: Option<&str> = Some(\"Alice\");\nmatch name {\n    ___(n) => println!(\"Hello, {}\", n),\n    None => println!(\"No name\"),\n}",
+      "correctAnswer": "Some",
+      "acceptableAnswers": ["Some"],
+      "explanation": "Match on `Some(n)` to extract the value, and `None` for the absent case."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Option<T> is defined in the standard prelude and does not need to be imported.",
+      "correctAnswer": true,
+      "explanation": "Option, Some, and None are all in the prelude — they're available everywhere without `use`."
+    }
+  ]
+}

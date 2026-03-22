@@ -1,0 +1,54 @@
+{
+  "id": "quiz-move-semantics",
+  "title": "Move Semantics Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What happens when you pass a String to a function without a reference?",
+      "options": ["The String is copied", "Ownership is transferred to the function", "The original variable is still valid", "A compile error occurs"],
+      "correctIndex": 1,
+      "explanation": "Non-Copy types like String are moved. The caller can no longer use the original variable."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Types like i32, f64, and bool implement Copy and are copied instead of moved.",
+      "correctAnswer": true,
+      "explanation": "Simple stack-only scalar types implement Copy. Assignment creates a bitwise copy."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Fix this code by borrowing instead of moving:",
+      "code": "fn len(s: ___) -> usize { s.len() }\nfn main() {\n    let s1 = String::from(\"hello\");\n    let l = len(&s1);\n    println!(\"{}: {}\", s1, l);\n}",
+      "correctAnswer": "&String",
+      "acceptableAnswers": ["&String", "&str"],
+      "explanation": "`&String` borrows without taking ownership, so `s1` remains valid."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "How many mutable references to the same data can exist in the same scope?",
+      "options": ["Unlimited", "Two", "One", "Zero"],
+      "correctIndex": 2,
+      "explanation": "Rust allows at most one mutable reference at a time to prevent data races."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Keep both variables valid by creating a deep copy:",
+      "code": "let s1 = String::from(\"hello\");\nlet s2 = s1.___();\nprintln!(\"{} {}\", s1, s2);",
+      "correctAnswer": "clone",
+      "acceptableAnswers": ["clone"],
+      "explanation": "clone() creates a deep copy of the heap data so both variables own independent copies."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "You can have an immutable and a mutable reference to the same data at the same time.",
+      "correctAnswer": false,
+      "explanation": "Rust prevents this. You can have multiple immutable references OR one mutable reference, never both."
+    }
+  ]
+}

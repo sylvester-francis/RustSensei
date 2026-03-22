@@ -1,0 +1,54 @@
+{
+  "id": "quiz-threads",
+  "title": "Threads Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Why is `move` needed when spawning a thread with a closure?",
+      "options": ["It makes the thread faster", "It transfers ownership of captured variables to the thread", "It's always required", "It copies the variables"],
+      "correctIndex": 1,
+      "explanation": "The spawned thread may outlive the current scope. `move` transfers ownership so references stay valid."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Rust prevents data races at compile time through ownership and the type system.",
+      "correctAnswer": true,
+      "explanation": "Send and Sync traits, combined with ownership rules, prevent data races. Non-thread-safe types won't compile in concurrent contexts."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Create a channel for message passing:",
+      "code": "use std::sync::mpsc;\nlet (tx, rx) = mpsc::___();",
+      "correctAnswer": "channel",
+      "acceptableAnswers": ["channel"],
+      "explanation": "`mpsc::channel()` creates a multi-producer, single-consumer channel. tx sends, rx receives."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does Mutex<T> provide?",
+      "options": ["Immutable access", "Mutual exclusion — only one thread accesses data at a time", "Async data sharing", "Lock-free concurrency"],
+      "correctIndex": 1,
+      "explanation": "`.lock()` returns a MutexGuard providing exclusive access. The lock is released when the guard drops."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Share a Mutex across threads using Arc:",
+      "code": "use std::sync::{Arc, Mutex};\nlet counter = Arc::new(Mutex::new(0));\nlet c = Arc::___(&counter);",
+      "correctAnswer": "clone",
+      "acceptableAnswers": ["clone"],
+      "explanation": "Arc::clone increments the atomic reference count. Each thread gets its own Arc handle."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The Send trait marks types whose ownership can safely transfer between threads.",
+      "correctAnswer": true,
+      "explanation": "Almost all types are Send. Rc<T> is a notable exception — use Arc<T> instead."
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "id": "quiz-lifetimes",
+  "title": "Lifetimes Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What do lifetime annotations describe?",
+      "options": ["How long a value lives", "The relationship between lifetimes of multiple references", "When memory is freed", "Thread safety"],
+      "correctIndex": 1,
+      "explanation": "Lifetime annotations don't change how long things live. They describe relationships so the compiler can verify validity."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Every reference in Rust has a lifetime, even if it's not written explicitly.",
+      "correctAnswer": true,
+      "explanation": "Lifetimes are always present. The compiler infers most of them through lifetime elision rules."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add the lifetime annotation to the return type:",
+      "code": "fn longest<'a>(x: &'a str, y: &'a str) -> ___ {\n    if x.len() > y.len() { x } else { y }\n}",
+      "correctAnswer": "&'a str",
+      "acceptableAnswers": ["&'a str"],
+      "explanation": "The return type `&'a str` tells the compiler the result lives at least as long as the shorter input lifetime."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is `'static`?",
+      "options": ["A mutable reference", "A lifetime that lasts for the entire program duration", "A type annotation", "A module name"],
+      "correctIndex": 1,
+      "explanation": "`'static` means the reference is valid for the entire program. String literals have `'static` lifetime."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Add a lifetime to this struct so it can hold a reference:",
+      "code": "struct Excerpt<___> {\n    text: &'a str,\n}",
+      "correctAnswer": "'a",
+      "acceptableAnswers": ["'a"],
+      "explanation": "Structs holding references need lifetime parameters to ensure the reference outlives the struct."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Lifetime elision rules let you omit lifetime annotations in many common cases.",
+      "correctAnswer": true,
+      "explanation": "The compiler applies three elision rules automatically. You only annotate when the rules can't determine lifetimes."
+    }
+  ]
+}

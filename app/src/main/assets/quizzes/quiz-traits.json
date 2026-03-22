@@ -1,0 +1,54 @@
+{
+  "id": "quiz-traits",
+  "title": "Traits Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is a trait in Rust?",
+      "options": ["A concrete type", "A way to define shared behavior that types can implement", "A module system feature", "A macro"],
+      "correctIndex": 1,
+      "explanation": "Traits define shared behavior (like interfaces). Different types can implement the same trait."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "The orphan rule prevents implementing an external trait for an external type.",
+      "correctAnswer": true,
+      "explanation": "Either the trait or the type must be local to your crate. This ensures coherence across the ecosystem."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Implement this trait for the struct:",
+      "code": "trait Greet {\n    fn hello(&self) -> String;\n}\nstruct Bot;\n___ Greet for Bot {\n    fn hello(&self) -> String { String::from(\"Beep!\") }\n}",
+      "correctAnswer": "impl",
+      "acceptableAnswers": ["impl"],
+      "explanation": "`impl Trait for Type` implements a trait's methods for a specific type."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What does `impl Trait` in a function parameter mean?",
+      "options": ["It creates a new trait", "The parameter accepts any type that implements the trait", "It defines a trait object", "It removes the trait bound"],
+      "correctIndex": 1,
+      "explanation": "`fn foo(item: &impl Summary)` is sugar for `fn foo<T: Summary>(item: &T)`."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Provide a default implementation in a trait definition:",
+      "code": "trait Summary {\n    fn summarize(&self) -> String {\n        String::from(\"(Read more___)\")\n    }\n}",
+      "correctAnswer": "...",
+      "acceptableAnswers": ["...", "..", ""],
+      "explanation": "Default implementations provide fallback behavior. Types can override them or use the default."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Generic type parameters with trait bounds are resolved at compile time (static dispatch).",
+      "correctAnswer": true,
+      "explanation": "Generics use static dispatch via monomorphization. `dyn Trait` uses dynamic dispatch at runtime."
+    }
+  ]
+}

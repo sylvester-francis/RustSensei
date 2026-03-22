@@ -1,0 +1,54 @@
+{
+  "id": "quiz-vecs",
+  "title": "Vectors Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "Which macro creates a new Vec with initial values?",
+      "options": ["array![]", "vec![]", "list![]", "vector![]"],
+      "correctIndex": 1,
+      "explanation": "`vec![1, 2, 3]` creates a new Vec with the given values."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Vec<T> stores its elements on the heap.",
+      "correctAnswer": true,
+      "explanation": "A Vec allocates its buffer on the heap. The struct itself (pointer, length, capacity) lives on the stack."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add an element to this vector:",
+      "code": "let mut v = Vec::new();\nv.___(42);",
+      "correctAnswer": "push",
+      "acceptableAnswers": ["push"],
+      "explanation": "`push` appends an element to the end of the vector."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What happens when you access a Vec with an out-of-bounds index using `v[i]`?",
+      "options": ["Returns a default value", "Returns None", "The program panics", "Returns the last element"],
+      "correctIndex": 2,
+      "explanation": "Indexing with `[]` panics on out-of-bounds. Use `.get(i)` for safe access returning `Option<&T>`."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Safely access element at index 5, returning None if out of bounds:",
+      "code": "let v = vec![1, 2, 3];\nlet element = v.___(5);",
+      "correctAnswer": "get",
+      "acceptableAnswers": ["get"],
+      "explanation": "`.get()` returns `Option<&T>` — `Some(&value)` if present, `None` if out of bounds."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "You can hold elements of different types directly in a single Vec<T>.",
+      "correctAnswer": false,
+      "explanation": "A Vec holds a single type T. For mixed types, use an enum or trait objects."
+    }
+  ]
+}

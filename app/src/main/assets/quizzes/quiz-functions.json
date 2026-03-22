@@ -1,0 +1,54 @@
+{
+  "id": "quiz-functions",
+  "title": "Functions Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What happens when you add a semicolon to the last expression in a function body?",
+      "options": ["Nothing, it's optional", "It turns the expression into a statement, so the function returns ()", "It causes a compile error", "It makes the return explicit"],
+      "correctIndex": 1,
+      "explanation": "A semicolon turns an expression into a statement. The function then implicitly returns `()` instead of the value."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "All function parameters in Rust must have explicit type annotations.",
+      "correctAnswer": true,
+      "explanation": "Unlike `let` bindings, Rust requires type annotations for every function parameter."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Add the return type to this function:",
+      "code": "fn add(a: i32, b: i32) -> ___ {\n    a + b\n}",
+      "correctAnswer": "i32",
+      "acceptableAnswers": ["i32"],
+      "explanation": "The return type is declared after `->`. The last expression without a semicolon is the implicit return value."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Which of these is an expression, not a statement?",
+      "options": ["let x = 5;", "x + 1", "fn foo() {}", "use std::io;"],
+      "correctIndex": 1,
+      "explanation": "Expressions evaluate to a value. `x + 1` produces a value. The others are statements."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Complete this function that returns the square of a number:",
+      "code": "fn square(num: i32) -> i32 {\n    ___ * num\n}",
+      "correctAnswer": "num",
+      "acceptableAnswers": ["num"],
+      "explanation": "The last expression `num * num` is the implicit return value."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "Rust uses snake_case as the conventional naming style for functions.",
+      "correctAnswer": true,
+      "explanation": "By convention, Rust functions and variable names use snake_case (e.g., `my_function`)."
+    }
+  ]
+}

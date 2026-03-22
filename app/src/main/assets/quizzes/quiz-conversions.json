@@ -1,0 +1,54 @@
+{
+  "id": "quiz-conversions",
+  "title": "Type Conversions Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What trait does the `from()` method come from?",
+      "options": ["Into", "From", "Convert", "Cast"],
+      "correctIndex": 1,
+      "explanation": "`From<T>` defines how to create a type from another. `String::from(\"hello\")` uses this trait."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Implementing `From<T>` for a type automatically provides `Into<T>` for free.",
+      "correctAnswer": true,
+      "explanation": "The standard library has a blanket impl: `impl<T, U> Into<U> for T where U: From<T>`. Always implement From."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Use `as` to cast an integer to a different size:",
+      "code": "let x: i32 = 42;\nlet y: i64 = x ___ i64;",
+      "correctAnswer": "as",
+      "acceptableAnswers": ["as"],
+      "explanation": "`as` performs primitive numeric casts. For more complex conversions, use From/Into."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "What is `TryFrom` for?",
+      "options": ["Always-succeeding conversions", "Conversions that might fail, returning Result", "Async conversions", "Trait object conversions"],
+      "correctIndex": 1,
+      "explanation": "TryFrom returns `Result<T, Error>` for conversions that can fail, like `i32::try_from(300u16)`."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Parse a string into a number using FromStr:",
+      "code": "let n: i32 = \"42\".___().unwrap();",
+      "correctAnswer": "parse",
+      "acceptableAnswers": ["parse", "parse()"],
+      "explanation": "`.parse()` uses the `FromStr` trait. The target type is inferred from the type annotation."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "The `AsRef<T>` trait provides cheap reference-to-reference conversions.",
+      "correctAnswer": true,
+      "explanation": "AsRef converts &Self to &T cheaply. `fn open(path: impl AsRef<Path>)` accepts both &str and &Path."
+    }
+  ]
+}

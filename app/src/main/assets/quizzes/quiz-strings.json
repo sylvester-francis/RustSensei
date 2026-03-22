@@ -1,0 +1,54 @@
+{
+  "id": "quiz-strings",
+  "title": "Strings Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is the difference between `String` and `&str`?",
+      "options": ["They are the same", "String is owned and heap-allocated; &str is a borrowed slice", "&str is mutable, String is immutable", "String is stack-allocated"],
+      "correctIndex": 1,
+      "explanation": "`String` owns heap data and can grow. `&str` is a borrowed view into string data."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Rust Strings are always valid UTF-8.",
+      "correctAnswer": true,
+      "explanation": "Rust enforces UTF-8 validity at all times. Invalid UTF-8 operations won't compile or return a Result."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Convert a &str to an owned String:",
+      "code": "let s: &str = \"hello\";\nlet owned: String = s.___();",
+      "correctAnswer": "to_string",
+      "acceptableAnswers": ["to_string", "to_owned", "to_string()", "to_owned()"],
+      "explanation": "`.to_string()` or `.to_owned()` or `String::from(s)` all create an owned String from a &str."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Why can't you index a String with `s[0]` in Rust?",
+      "options": ["Strings don't support indexing", "UTF-8 bytes might not align with character boundaries", "Indexing starts at 1", "You need s.at(0)"],
+      "correctIndex": 1,
+      "explanation": "Strings are UTF-8. A byte index might land in the middle of a multi-byte character."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Append a string slice to an owned String:",
+      "code": "let mut greeting = String::from(\"Hello\");\ngreeting.___(\", world!\");",
+      "correctAnswer": "push_str",
+      "acceptableAnswers": ["push_str"],
+      "explanation": "`push_str` appends a &str to a String without taking ownership of the argument."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "String literals like \"hello\" have type String.",
+      "correctAnswer": false,
+      "explanation": "String literals are `&str` (specifically `&'static str`). They are baked into the binary."
+    }
+  ]
+}

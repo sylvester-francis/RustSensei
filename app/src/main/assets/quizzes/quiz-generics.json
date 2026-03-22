@@ -1,0 +1,54 @@
+{
+  "id": "quiz-generics",
+  "title": "Generics Quiz",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple_choice",
+      "question": "What is monomorphization?",
+      "options": ["A runtime type check", "The compiler generates specialized code for each concrete type used with a generic", "Converting traits to structs", "Removing unused code"],
+      "correctIndex": 1,
+      "explanation": "Rust generates specialized code at compile time for each concrete type, yielding zero-cost abstractions."
+    },
+    {
+      "id": "q2",
+      "type": "true_false",
+      "question": "Generics in Rust have runtime overhead due to type erasure.",
+      "correctAnswer": false,
+      "explanation": "Monomorphization creates specialized code at compile time. There is no runtime overhead."
+    },
+    {
+      "id": "q3",
+      "type": "code_completion",
+      "question": "Write a generic function that works for any type:",
+      "code": "fn largest<___>(list: &[T]) -> &T\nwhere T: PartialOrd {\n    let mut max = &list[0];\n    for item in list { if item > max { max = item; } }\n    max\n}",
+      "correctAnswer": "T",
+      "acceptableAnswers": ["T"],
+      "explanation": "`<T>` declares a generic type parameter. The `where T: PartialOrd` bound ensures `>` works."
+    },
+    {
+      "id": "q4",
+      "type": "multiple_choice",
+      "question": "Can a struct have multiple generic type parameters?",
+      "options": ["No, only one is allowed", "Yes, like Point<T, U>", "Only with trait bounds", "Only in nightly Rust"],
+      "correctIndex": 1,
+      "explanation": "`struct Point<T, U> { x: T, y: U }` is valid. You can use as many type parameters as needed."
+    },
+    {
+      "id": "q5",
+      "type": "code_completion",
+      "question": "Add a trait bound so this generic function can print the value:",
+      "code": "fn show<T: ___>(item: T) {\n    println!(\"{}\", item);\n}",
+      "correctAnswer": "std::fmt::Display",
+      "acceptableAnswers": ["std::fmt::Display", "Display", "fmt::Display"],
+      "explanation": "The `Display` trait enables formatting with `{}`. The bound ensures T can be printed."
+    },
+    {
+      "id": "q6",
+      "type": "true_false",
+      "question": "You can implement methods only for specific concrete types of a generic struct.",
+      "correctAnswer": true,
+      "explanation": "`impl Point<f64> { ... }` adds methods only when T is f64, not for other types."
+    }
+  ]
+}
