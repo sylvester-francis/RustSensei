@@ -37,6 +37,19 @@
 -dontwarn okhttp3.**
 -dontwarn okio.**
 
+# Kotlin Serialization (required by Navigation Compose + Glance)
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.**
+-keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
+-keepclasseswithmembers class kotlinx.serialization.json.** { kotlinx.serialization.KSerializer serializer(...); }
+-keep,includedescriptorclasses class com.sylvester.rustsensei.**$$serializer { *; }
+-keepclassmembers class com.sylvester.rustsensei.** { *** Companion; }
+-keepclasseswithmembers class com.sylvester.rustsensei.** { kotlinx.serialization.KSerializer serializer(...); }
+
+# Glance AppWidget (uses protobuf + serialization internally)
+-keep class androidx.glance.** { *; }
+-keep class androidx.glance.appwidget.** { *; }
+
 # Keep line numbers for crash reporting
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
