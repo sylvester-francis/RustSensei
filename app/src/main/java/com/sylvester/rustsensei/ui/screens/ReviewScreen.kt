@@ -299,7 +299,7 @@ private fun FlashCardView(
             .clickable(onClick = onFlip),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = DarkSurfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {

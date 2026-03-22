@@ -143,7 +143,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                 Text(
                     text = "Test your understanding of each topic",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = SecondaryText
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -160,7 +160,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                         Icons.Default.EmojiEvents,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = SecondaryText.copy(alpha = 0.3f)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -171,7 +171,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                     Text(
                         text = "Quizzes couldn't be loaded",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 }
             }
@@ -190,7 +190,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                     .clickable { viewModel.startQuiz(quiz.id) },
                 shape = MaterialTheme.shapes.large,
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Row(
@@ -292,14 +292,14 @@ private fun QuizListView(viewModel: QuizViewModel) {
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
-                                    .background(DarkSurfaceContainer)
+                                    .background(MaterialTheme.colorScheme.surfaceContainer)
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = "${quiz.questionCount} questions",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontFamily = FontFamily.Monospace,
-                                    color = SecondaryText
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             if (bestResult != null) {
@@ -356,7 +356,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 Icon(
                     Icons.Default.Close,
                     contentDescription = "Close quiz",
-                    tint = SecondaryText
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -369,7 +369,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                     .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(4.dp)),
                 color = RustOrange,
-                trackColor = DarkSurfaceContainerHigh,
+                trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 strokeCap = StrokeCap.Round
             )
 
@@ -379,7 +379,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 style = MaterialTheme.typography.labelMedium,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
-                color = SecondaryText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(end = 12.dp)
             )
         }
@@ -563,7 +563,7 @@ private fun MultipleChoiceAnswers(
                 !answered && isSelected -> RustOrange.copy(alpha = 0.10f)
                 answered && isCorrect -> SuccessGreen.copy(alpha = 0.08f)
                 answered && isSelected -> ErrorNeon.copy(alpha = 0.08f)
-                else -> DarkSurfaceContainer
+                else -> MaterialTheme.colorScheme.surfaceContainer
             }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
 
@@ -644,7 +644,7 @@ private fun TrueFalseAnswers(
                 !answered && isSelected -> RustOrange.copy(alpha = 0.10f)
                 answered && isCorrect -> SuccessGreen.copy(alpha = 0.08f)
                 answered && isSelected -> ErrorNeon.copy(alpha = 0.08f)
-                else -> DarkSurfaceContainer
+                else -> MaterialTheme.colorScheme.surfaceContainer
             }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
 
@@ -730,7 +730,7 @@ private fun CodeCompletionAnswer(
         if (answered && !isCorrect) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Correct answer: ", style = MaterialTheme.typography.labelSmall, color = SecondaryText)
+                Text("Correct answer: ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
                     text = question.correctAnswer,
                     style = MaterialTheme.typography.labelMedium,
@@ -824,7 +824,7 @@ private fun QuizCompleteView(
         Text(
             text = quiz.title,
             style = MaterialTheme.typography.bodyMedium,
-            color = SecondaryText,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
 

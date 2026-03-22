@@ -186,7 +186,7 @@ internal fun ExerciseDetailView(
                 Icon(
                     Icons.Default.Refresh,
                     contentDescription = "Reset exercise",
-                    tint = SecondaryText
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -211,7 +211,7 @@ internal fun ExerciseDetailView(
                 text = exercise.instructions,
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 22.sp,
-                color = SecondaryText
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(Spacing.LG))
@@ -234,7 +234,7 @@ internal fun ExerciseDetailView(
                     .fillMaxWidth()
                     .height(Dimens.CompactTopBarHeight)
                     .clip(RoundedCornerShape(0.dp, 0.dp, Dimens.CardRadius, Dimens.CardRadius))
-                    .background(DarkSurfaceContainerHigh)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.XXS),
                 verticalAlignment = Alignment.CenterVertically
@@ -263,7 +263,7 @@ internal fun ExerciseDetailView(
                         color = if (undoRedoManager.canUndo())
                             RustOrange
                         else
-                            SecondaryText.copy(alpha = 0.4f)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 }
 
@@ -289,7 +289,7 @@ internal fun ExerciseDetailView(
                         color = if (undoRedoManager.canRedo())
                             RustOrange
                         else
-                            SecondaryText.copy(alpha = 0.4f)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 }
 
@@ -298,7 +298,7 @@ internal fun ExerciseDetailView(
                     modifier = Modifier
                         .height(Spacing.XXL)
                         .width(Dimens.Divider)
-                        .background(SecondaryText.copy(alpha = Alpha.DIVIDER))
+                        .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.DIVIDER))
                 )
 
                 // Symbol buttons
@@ -329,7 +329,7 @@ internal fun ExerciseDetailView(
                             text = symbol,
                             fontFamily = FontFamily.Monospace,
                             fontSize = 14.sp,
-                            color = SecondaryText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -469,7 +469,7 @@ internal fun ExerciseDetailView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(DarkSurfaceContainerHigh)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                             .padding(Dimens.CardPadding)
                     ) {
                         Column {
@@ -494,7 +494,7 @@ internal fun ExerciseDetailView(
                                 text = uiState.llmValidationResult.ifEmpty { "Analyzing your code..." },
                                 style = MaterialTheme.typography.bodyMedium,
                                 lineHeight = 20.sp,
-                                color = SecondaryText
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (uiState.isValidating) {
                                 Spacer(modifier = Modifier.height(Spacing.SM))
@@ -591,7 +591,7 @@ internal fun ExerciseDetailView(
                         Text(
                             text = exercise.hints[i],
                             style = MaterialTheme.typography.bodyMedium,
-                            color = SecondaryText,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             lineHeight = 20.sp
                         )
                     }
@@ -645,7 +645,7 @@ internal fun ExerciseDetailView(
                         text = exercise.explanation,
                         style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 20.sp,
-                        color = SecondaryText
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

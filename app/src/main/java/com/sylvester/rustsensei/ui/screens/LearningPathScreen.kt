@@ -233,7 +233,7 @@ private fun PathCard(
             .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
-            containerColor = DarkSurfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     ) {
         Row(
@@ -278,7 +278,7 @@ private fun PathCard(
                     text = path.title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = CrispWhite
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(Spacing.XS))
                 Text(
@@ -359,7 +359,7 @@ private fun PathDetailContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(Dimens.CardRadius))
-                    .background(DarkSurfaceContainer)
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -369,7 +369,7 @@ private fun PathDetailContent(
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = CrispWhite
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(Spacing.SM))
                     LinearProgressIndicator(
@@ -455,7 +455,7 @@ private fun NodeStepItem(
                             Icons.Default.Check,
                             contentDescription = "Completed",
                             modifier = Modifier.size(Dimens.IconMD),
-                            tint = CrispWhite
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -585,7 +585,7 @@ private fun NodeStepItem(
                 fontWeight = if (isCurrentStep) FontWeight.Bold else FontWeight.Medium,
                 color = when {
                     isCompleted -> MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.HINT)
-                    isCurrentStep -> CrispWhite
+                    isCurrentStep -> MaterialTheme.colorScheme.onSurface
                     else -> MaterialTheme.colorScheme.onSurface.copy(alpha = Alpha.SECONDARY)
                 }
             )

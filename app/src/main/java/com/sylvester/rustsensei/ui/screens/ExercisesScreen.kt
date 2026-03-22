@@ -243,7 +243,7 @@ private fun CategoriesView(
             Text(
                 text = "$totalExercises exercises from Rustlings",
                 style = MaterialTheme.typography.bodyMedium,
-                color = SecondaryText
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(Spacing.LG))
         }
@@ -257,7 +257,7 @@ private fun CategoriesView(
                     Text(
                         "Search exercises...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = SecondaryText.copy(alpha = Alpha.HINT)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     )
                 },
                 modifier = Modifier
@@ -266,8 +266,8 @@ private fun CategoriesView(
                 singleLine = true,
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = DarkSurfaceContainerHigh,
-                    unfocusedContainerColor = DarkSurfaceContainerHigh,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     cursorColor = RustOrange
@@ -281,7 +281,7 @@ private fun CategoriesView(
                         Icons.Default.Search,
                         contentDescription = null,
                         modifier = Modifier.size(Dimens.IconSM),
-                        tint = SecondaryText
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 trailingIcon = {
@@ -291,7 +291,7 @@ private fun CategoriesView(
                                 Icons.Default.Close,
                                 contentDescription = "Clear search",
                                 modifier = Modifier.size(Dimens.IconSM),
-                                tint = SecondaryText
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -334,9 +334,9 @@ private fun CategoriesView(
                         },
                         shape = RoundedCornerShape(Spacing.SM),
                         colors = FilterChipDefaults.filterChipColors(
-                            containerColor = DarkSurfaceContainerHigh,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                             selectedContainerColor = chipColor.copy(alpha = Alpha.BORDER),
-                            labelColor = SecondaryText,
+                            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             selectedLabelColor = chipColor
                         ),
                         border = if (isSelected) {
@@ -366,7 +366,7 @@ private fun CategoriesView(
                         .clickable { viewModel.openExercise(lastExerciseId) },
                     shape = MaterialTheme.shapes.medium,
                     colors = CardDefaults.cardColors(
-                        containerColor = DarkSurfaceContainerHigh
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                 ) {
                     Row(
@@ -405,7 +405,7 @@ private fun CategoriesView(
                                 text = lastExerciseId,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontFamily = FontFamily.Monospace,
-                                color = SecondaryText
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         Icon(
@@ -515,7 +515,7 @@ private fun CategoriesView(
                         Icons.Default.Code,
                         contentDescription = null,
                         modifier = Modifier.size(Spacing.Section),
-                        tint = SecondaryText.copy(alpha = Alpha.MUTED)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.MUTED)
                     )
                     Spacer(modifier = Modifier.height(Spacing.LG))
                     Text(
@@ -526,7 +526,7 @@ private fun CategoriesView(
                     Text(
                         text = if (isFiltering) "Try a different search or filter" else "Content may still be loading",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 }
             }
@@ -566,13 +566,13 @@ private fun CategoriesView(
                             text = "${category.exercises.size} exercises \u00B7 $completedCount done",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
-                            color = SecondaryText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Icon(
                         Icons.Default.ExpandMore,
                         contentDescription = if (isExpanded) "Collapse category" else "Expand category",
-                        tint = SecondaryText,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .size(Dimens.IconSM)
                             .rotate(chevronRotation)
@@ -627,7 +627,7 @@ private fun CategoriesView(
                                     text = exerciseId,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = if (isCompleted)
-                                        SecondaryText
+                                        MaterialTheme.colorScheme.onSurfaceVariant
                                     else
                                         MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.weight(1f)

@@ -242,7 +242,7 @@ fun PlaygroundScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(Dimens.CardRadius),
                     colors = CardDefaults.cardColors(
-                        containerColor = CodeBlockBackground
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest
                     ),
                     border = BorderStroke(
                         Dimens.Divider,

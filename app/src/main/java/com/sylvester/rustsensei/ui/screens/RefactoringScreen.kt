@@ -159,13 +159,13 @@ private fun RefactoringListView(
                     Icons.Default.Code,
                     contentDescription = null,
                     modifier = Modifier.size(Spacing.Section),
-                    tint = SecondaryText.copy(alpha = Alpha.MUTED)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.MUTED)
                 )
                 Spacer(modifier = Modifier.height(Spacing.LG))
                 Text(
                     text = stringResource(R.string.refactoring_no_challenges),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = SecondaryText
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -180,7 +180,7 @@ private fun RefactoringListView(
             Text(
                 text = stringResource(R.string.refactoring_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
-                color = SecondaryText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = Spacing.LG)
             )
         }
@@ -199,7 +199,7 @@ private fun RefactoringListView(
                     .clickable { viewModel.openChallenge(challenge.id) },
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Row(
@@ -259,7 +259,7 @@ private fun RefactoringListView(
                     Icon(
                         Icons.Default.ChevronRight,
                         contentDescription = null,
-                        tint = SecondaryText.copy(alpha = Alpha.SECONDARY),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SECONDARY),
                         modifier = Modifier.size(Dimens.IconSM)
                     )
                 }
@@ -346,7 +346,7 @@ private fun RefactoringDetailView(
                     Icon(
                         Icons.Default.Refresh,
                         contentDescription = null,
-                        tint = SecondaryText
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -409,7 +409,7 @@ private fun RefactoringDetailView(
                                 bottomEnd = Dimens.CardRadius
                             )
                         )
-                        .background(DarkSurfaceContainerHigh)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(Spacing.XXS),
                     verticalAlignment = Alignment.CenterVertically
@@ -441,7 +441,7 @@ private fun RefactoringDetailView(
                             color = if (undoRedoManager.canUndo())
                                 RustOrange
                             else
-                                SecondaryText.copy(alpha = Alpha.HINT)
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
                     }
 
@@ -470,7 +470,7 @@ private fun RefactoringDetailView(
                             color = if (undoRedoManager.canRedo())
                                 RustOrange
                             else
-                                SecondaryText.copy(alpha = Alpha.HINT)
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
                     }
 
@@ -479,7 +479,7 @@ private fun RefactoringDetailView(
                         modifier = Modifier
                             .height(Spacing.XXL)
                             .width(Dimens.Divider)
-                            .background(SecondaryText.copy(alpha = Alpha.DIVIDER))
+                            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.DIVIDER))
                     )
 
                     // Symbol buttons
@@ -513,7 +513,7 @@ private fun RefactoringDetailView(
                                 text = symbol,
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 14.sp,
-                                color = SecondaryText
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -592,7 +592,7 @@ private fun RefactoringDetailView(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(DarkSurfaceContainerHigh)
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                                 .padding(Dimens.CardPadding)
                         ) {
                             Column {
@@ -619,7 +619,7 @@ private fun RefactoringDetailView(
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
                                     lineHeight = 20.sp,
-                                    color = SecondaryText
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 if (uiState.isValidating) {
                                     Spacer(modifier = Modifier.height(Spacing.SM))
@@ -728,7 +728,7 @@ private fun RefactoringDetailView(
                             Text(
                                 text = challenge.hints[i],
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = SecondaryText,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 lineHeight = 20.sp
                             )
                         }

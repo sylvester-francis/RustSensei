@@ -124,7 +124,9 @@ fun MainScreen(
     onNavigateToDailyChallenge: () -> Unit = {},
     onNavigateToPlayground: () -> Unit = {},
     onNavigateToRefactoring: () -> Unit = {},
-    onNavigateToDocs: () -> Unit = {}
+    onNavigateToDocs: () -> Unit = {},
+    onNavigateToVisualizer: () -> Unit = {},
+    onNavigateToProjects: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -271,7 +273,9 @@ fun MainScreen(
                     onNavigateToDailyChallenge = onNavigateToDailyChallenge,
                     onNavigateToPlayground = onNavigateToPlayground,
                     onNavigateToRefactoring = onNavigateToRefactoring,
-                    onNavigateToDocs = onNavigateToDocs
+                    onNavigateToDocs = onNavigateToDocs,
+                    onNavigateToVisualizer = onNavigateToVisualizer,
+                    onNavigateToProjects = onNavigateToProjects
                 )
             }
             composable<LearnRoute> {

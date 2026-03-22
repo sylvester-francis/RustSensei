@@ -130,7 +130,9 @@ fun RustSenseiApp(
                 onNavigateToDailyChallenge = { navController.navigate(DailyChallengeRoute) },
                 onNavigateToPlayground = { navController.navigate(PlaygroundRoute) },
                 onNavigateToRefactoring = { navController.navigate(RefactoringRoute) },
-                onNavigateToDocs = { navController.navigate(DocsRoute) }
+                onNavigateToDocs = { navController.navigate(DocsRoute) },
+                onNavigateToVisualizer = { navController.navigate(VisualizerRoute) },
+                onNavigateToProjects = { navController.navigate(ProjectRoute) }
             )
         }
 

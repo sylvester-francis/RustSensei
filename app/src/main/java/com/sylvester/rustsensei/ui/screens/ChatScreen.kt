@@ -494,7 +494,7 @@ private fun ChatModeSelector(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (isSelected) RustOrange else SecondaryText,
+                        color = if (isSelected) RustOrange else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         maxLines = 1
                     )

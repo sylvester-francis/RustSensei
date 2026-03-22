@@ -28,7 +28,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
@@ -111,7 +113,9 @@ fun DashboardScreen(
     onNavigateToDailyChallenge: () -> Unit = {},
     onNavigateToPlayground: () -> Unit = {},
     onNavigateToRefactoring: () -> Unit = {},
-    onNavigateToDocs: () -> Unit = {}
+    onNavigateToDocs: () -> Unit = {},
+    onNavigateToVisualizer: () -> Unit = {},
+    onNavigateToProjects: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val reviewUiState by reviewViewModel.uiState.collectAsState()
@@ -555,6 +559,26 @@ fun DashboardScreen(
                         accentColor = NeonCyan,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToDocs() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.visualizer_title),
+                        subtitle = stringResource(R.string.visualizer_card_subtitle),
+                        icon = Icons.Default.Memory,
+                        accentColor = NeonCyan,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToVisualizer() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.projects_title),
+                        subtitle = stringResource(R.string.projects_card_subtitle),
+                        icon = Icons.Default.Build,
+                        accentColor = WarningAmber,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToProjects() }
                     )
                 }
             }

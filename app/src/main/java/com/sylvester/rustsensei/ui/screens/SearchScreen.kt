@@ -105,7 +105,7 @@ fun SearchScreen(
                     Text(
                         "Search sections, exercises, glossary...",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = SecondaryText.copy(alpha = Alpha.HINT)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     )
                 },
                 modifier = Modifier
@@ -114,8 +114,8 @@ fun SearchScreen(
                 singleLine = true,
                 shape = RoundedCornerShape(Dimens.PillRadius),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = DarkSurfaceContainer,
-                    unfocusedContainerColor = DarkSurfaceContainer,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
                     cursorColor = RustOrange
@@ -128,7 +128,7 @@ fun SearchScreen(
                         Icons.Default.Search,
                         contentDescription = null,
                         modifier = Modifier.size(Dimens.IconSM),
-                        tint = SecondaryText
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
                 trailingIcon = {
@@ -138,7 +138,7 @@ fun SearchScreen(
                                 Icons.Default.Clear,
                                 contentDescription = "Clear",
                                 modifier = Modifier.size(Dimens.IconSM),
-                                tint = SecondaryText
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -187,7 +187,7 @@ fun SearchScreen(
                                     Icons.Default.History,
                                     contentDescription = null,
                                     modifier = Modifier.size(Spacing.LG),
-                                    tint = SecondaryText
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.width(Spacing.SM))
                                 Text(
@@ -218,7 +218,7 @@ fun SearchScreen(
                                 Icons.Default.History,
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp),
-                                tint = SecondaryText.copy(alpha = Alpha.HINT)
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                             )
                             Spacer(modifier = Modifier.width(Spacing.MD))
                             Text(
@@ -243,19 +243,19 @@ fun SearchScreen(
                             Icons.Default.Search,
                             contentDescription = null,
                             modifier = Modifier.size(56.dp),
-                            tint = SecondaryText.copy(alpha = 0.25f)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
                         )
                         Spacer(modifier = Modifier.height(Spacing.LG))
                         Text(
                             text = "Search across all content",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = SecondaryText.copy(alpha = Alpha.HINT)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
                         Spacer(modifier = Modifier.height(Spacing.XS))
                         Text(
                             text = "Chapters, exercises, reference guides",
                             style = MaterialTheme.typography.bodySmall,
-                            color = SecondaryText.copy(alpha = 0.35f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
                         )
                     }
                 }
@@ -273,7 +273,7 @@ fun SearchScreen(
                         Icons.Default.Search,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
-                        tint = SecondaryText.copy(alpha = 0.25f)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)
                     )
                     Spacer(modifier = Modifier.height(Spacing.LG))
                     Text(
@@ -286,7 +286,7 @@ fun SearchScreen(
                     Text(
                         text = "Try different keywords",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText.copy(alpha = 0.4f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
                 }
             }
@@ -358,7 +358,7 @@ private fun SearchResultRow(result: SearchResult) {
             Text(
                 text = result.subtitle,
                 style = MaterialTheme.typography.labelSmall,
-                color = SecondaryText.copy(alpha = Alpha.SECONDARY),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SECONDARY),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -366,7 +366,7 @@ private fun SearchResultRow(result: SearchResult) {
                 Text(
                     text = result.matchSnippet,
                     style = MaterialTheme.typography.bodySmall,
-                    color = SecondaryText.copy(alpha = 0.45f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 16.sp
