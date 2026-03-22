@@ -51,8 +51,7 @@ class VisualizerViewModel @Inject constructor(
     private fun loadScenarios() {
         viewModelScope.launch {
             try {
-                val indexJson = contentProvider.getReferenceItem("../visualizations", "index")
-                    ?: loadVisualizationIndex()
+                val indexJson = contentProvider.loadVisualizationJson("index")
                 val scenarios = parseIndex(indexJson)
                 _uiState.value = _uiState.value.copy(
                     scenarios = scenarios,
@@ -63,11 +62,6 @@ class VisualizerViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(isLoading = false)
             }
         }
-    }
-
-    private suspend fun loadVisualizationIndex(): JSONObject? {
-        // Fallback: load directly from content provider
-        return null
     }
 
     private suspend fun parseIndex(indexJson: JSONObject?): List<OwnershipScenario> {
@@ -82,7 +76,7 @@ class VisualizerViewModel @Inject constructor(
 
     private suspend fun loadScenario(id: String): OwnershipScenario? {
         return try {
-            val json = contentProvider.getReferenceItem("../visualizations", id) ?: return null
+            val json = contentProvider.loadVisualizationJson(id) ?: return null
             OwnershipScenario(
                 id = json.getString("id"),
                 title = json.getString("title"),

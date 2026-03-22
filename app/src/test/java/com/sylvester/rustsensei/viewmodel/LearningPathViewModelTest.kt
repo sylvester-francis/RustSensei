@@ -250,6 +250,8 @@ class LearningPathViewModelTest {
         override suspend fun getRefactoringChallenge(id: String) = null
         override suspend fun getDocIndex() = emptyList<com.sylvester.rustsensei.content.DocIndexEntry>()
         override suspend fun getDoc(typeId: String) = null
+        override suspend fun loadVisualizationJson(filename: String) = null
+        override suspend fun loadProjectJson(filename: String) = null
     }
 
     private class FakeProgressDao : ProgressDao {

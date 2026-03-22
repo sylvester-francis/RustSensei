@@ -95,6 +95,8 @@ interface ContentProvider {
     suspend fun getRefactoringChallenge(id: String): RefactoringChallenge?
     suspend fun getDocIndex(): List<DocIndexEntry>
     suspend fun getDoc(typeId: String): DocEntry?
+    suspend fun loadVisualizationJson(filename: String): org.json.JSONObject?
+    suspend fun loadProjectJson(filename: String): org.json.JSONObject?
 }
 
 class ContentRepository(private val context: Context) : ContentProvider {
@@ -550,6 +552,24 @@ class ContentRepository(private val context: Context) : ContentProvider {
             list.add(array.getString(i))
         }
         return list
+    }
+
+    override suspend fun loadVisualizationJson(filename: String): JSONObject? {
+        return try {
+            loadAssetJson("visualizations/$filename.json")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading visualization $filename: ${e.message}", e)
+            null
+        }
+    }
+
+    override suspend fun loadProjectJson(filename: String): JSONObject? {
+        return try {
+            loadAssetJson("projects/$filename.json")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading project $filename: ${e.message}", e)
+            null
+        }
     }
 
     private suspend fun loadAssetJson(path: String): JSONObject = withContext(Dispatchers.IO) {

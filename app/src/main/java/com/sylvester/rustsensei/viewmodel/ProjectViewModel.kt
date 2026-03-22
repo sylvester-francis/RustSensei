@@ -61,7 +61,7 @@ class ProjectViewModel @Inject constructor(
     }
 
     private suspend fun loadProjectsFromAssets(): List<Project> {
-        val indexJson = contentProvider.getReferenceItem("../projects", "index") ?: return emptyList()
+        val indexJson = contentProvider.loadProjectJson( "index") ?: return emptyList()
         val arr = indexJson.optJSONArray("projects") ?: return emptyList()
         return (0 until arr.length()).mapNotNull { i ->
             val entry = arr.getJSONObject(i)
@@ -71,7 +71,7 @@ class ProjectViewModel @Inject constructor(
 
     private suspend fun loadProject(id: String): Project? {
         return try {
-            val json = contentProvider.getReferenceItem("../projects", id) ?: return null
+            val json = contentProvider.loadProjectJson( id) ?: return null
             Project(
                 id = json.getString("id"),
                 title = json.getString("title"),
