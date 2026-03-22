@@ -44,6 +44,8 @@ data class ProgressUiState(
     val totalSections: Int = 0,
     val completedExercises: Int = 0,
     val totalExercises: Int = 0,
+    val completedQuizzes: Int = 0,
+    val totalQuizzes: Int = 0,
     val totalStudyTimeSeconds: Long = 0,
     val weeklyStats: List<LearningStats> = emptyList(),
     val studyStreak: Int = 0,
@@ -79,10 +81,12 @@ class ProgressViewModel @Inject constructor(
             try {
                 val totalSections = contentRepo.getTotalSectionsCount()
                 val totalExercises = contentRepo.getTotalExercisesCount()
+                val totalQuizzes = contentRepo.getQuizIndex().size
 
                 _uiState.value = _uiState.value.copy(
                     totalSections = totalSections,
-                    totalExercises = totalExercises
+                    totalExercises = totalExercises,
+                    totalQuizzes = totalQuizzes
                 )
 
                 // Optimization #7: Combine all four flows into one emission so the
@@ -93,18 +97,22 @@ class ProgressViewModel @Inject constructor(
                             progressRepo.getCompletedSectionsCount(),
                             progressRepo.getCompletedExercisesCount(),
                             progressRepo.getTotalStudyTime(),
-                            progressRepo.getRecentStats(7)
-                        ) { sections, exercises, studyTime, stats ->
+                            progressRepo.getRecentStats(7),
+                            progressRepo.getAllQuizResults()
+                        ) { sections, exercises, studyTime, stats, quizResults ->
                             val streak = calculateStreak(stats)
+                            val completedQuizIds = quizResults.map { it.quizId }.distinct()
                             _uiState.value.copy(
                                 completedSections = sections,
                                 completedExercises = exercises,
+                                completedQuizzes = completedQuizIds.size,
                                 totalStudyTimeSeconds = studyTime ?: 0,
                                 weeklyStats = stats,
                                 studyStreak = streak,
                                 weekActivity = buildWeekActivity(stats),
                                 totalSections = totalSections,
-                                totalExercises = totalExercises
+                                totalExercises = totalExercises,
+                                totalQuizzes = totalQuizzes
                             )
                         }
                         // Optimization #2: Debounce so rapid DB changes (e.g. completing

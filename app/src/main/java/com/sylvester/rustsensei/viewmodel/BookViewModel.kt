@@ -243,7 +243,29 @@ class BookViewModel @Inject constructor(
         if (currentIdx < chapter.sections.lastIndex) {
             val next = chapter.sections[currentIdx + 1]
             openSection(chapterId, next.id)
+        } else {
+            // Last section of chapter — navigate to next chapter
+            viewModelScope.launch {
+                try {
+                    val bookIndex = contentRepo.getBookIndex()
+                    val chapterIds = bookIndex.chapters.map { it.id }
+                    val currentChapterIdx = chapterIds.indexOf(chapterId)
+                    if (currentChapterIdx in 0 until chapterIds.lastIndex) {
+                        val nextChapterId = chapterIds[currentChapterIdx + 1]
+                        openChapter(nextChapterId)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error navigating to next chapter: ${e.message}", e)
+                }
+            }
         }
+    }
+
+    fun isLastSectionOfChapter(): Boolean {
+        val state = _uiState.value
+        val chapter = state.currentChapter ?: return false
+        val currentIdx = chapter.sections.indexOfFirst { it.id == state.currentSectionId }
+        return currentIdx == chapter.sections.lastIndex
     }
 
     fun navigateToPreviousSection() {

@@ -110,7 +110,7 @@ fun SettingsScreen(
             Text(
                 text = "Model, inference & account",
                 style = MaterialTheme.typography.bodyMedium,
-                color = SecondaryText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = Spacing.SM)
             )
 
@@ -255,7 +255,7 @@ fun SettingsScreen(
                                 Text(
                                     text = "${activeModel.parameterSize} parameters",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = SecondaryText
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             Icon(
@@ -270,7 +270,7 @@ fun SettingsScreen(
                             text = "Size: ${modelViewModel.getModelSizeMB(activeModel)} MB",
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = SecondaryText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         val backend = modelViewModel.getActiveBackend()
                         val backendLabel = if (backend == "GPU") "GPU-accelerated" else "CPU mode (slower)"
@@ -278,7 +278,7 @@ fun SettingsScreen(
                             text = "Q8 | LiteRT | $backendLabel",
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = if (backend == "GPU") SecondaryText.copy(alpha = Alpha.SOFT)
+                            color = if (backend == "GPU") MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT)
                                     else AppColors.current.amber.copy(alpha = Alpha.SOFT)
                         )
                     } else {
@@ -286,13 +286,13 @@ fun SettingsScreen(
                             text = "No model loaded",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
-                            color = SecondaryText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(Spacing.XS))
                         Text(
                             text = "Download and load a model to start chatting",
                             style = MaterialTheme.typography.bodySmall,
-                            color = SecondaryText.copy(alpha = Alpha.SOFT)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.SOFT)
                         )
                     }
                 }
@@ -355,7 +355,7 @@ fun SettingsScreen(
                             Text(
                                 text = "${model.ramRequired} \u00B7 ${sizeMb} MB",
                                 fontSize = 12.sp,
-                                color = SecondaryText
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
                             // Download progress bar
@@ -486,7 +486,7 @@ fun SettingsScreen(
                         text = "Context Length: ${config.contextLength} tokens",
                         fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = SecondaryText
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
 
                     Spacer(modifier = Modifier.height(Spacing.LG))
@@ -503,12 +503,12 @@ fun SettingsScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(Spacing.SM),
-                        border = BorderStroke(Dimens.Divider, SecondaryText.copy(alpha = Alpha.MUTED))
+                        border = BorderStroke(Dimens.Divider, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.MUTED))
                     ) {
                         Text(
                             "Reset to Defaults",
                             style = MaterialTheme.typography.labelLarge,
-                            color = SecondaryText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -603,13 +603,13 @@ fun SettingsScreen(
                         text = "RustSensei v${com.sylvester.rustsensei.BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = CrispWhite
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "Your offline Rust programming tutor powered by on-device AI",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(Spacing.MD))
@@ -617,7 +617,7 @@ fun SettingsScreen(
                         text = "Content version: ${chatViewModel.getContentVersion()}",
                         style = MaterialTheme.typography.bodySmall,
                         fontFamily = FontFamily.Monospace,
-                        color = SecondaryText
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -644,7 +644,7 @@ fun SettingsScreen(
                         text = "Sylvester Ranjith Francis",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = CrispWhite
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(Spacing.MD))
 
@@ -709,7 +709,7 @@ fun SettingsScreen(
                     Text(
                         text = "Book content adapted from The Rust Programming Language by Steve Klabnik and Carol Nichols, licensed under MIT/Apache 2.0.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(Spacing.XS))
@@ -727,7 +727,7 @@ fun SettingsScreen(
                     Text(
                         text = "Exercises inspired by Rustlings by the Rust Community, licensed under MIT.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(Spacing.XS))
@@ -745,7 +745,7 @@ fun SettingsScreen(
                     Text(
                         text = "AI model powered by Google LiteRT, running entirely on-device.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = SecondaryText,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 18.sp
                     )
                 }
@@ -839,7 +839,7 @@ private fun SettingSlider(
                 text = label,
                 modifier = Modifier.weight(1f),
                 fontSize = 14.sp,
-                color = CrispWhite
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = valueLabel,
