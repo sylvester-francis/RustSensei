@@ -39,7 +39,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +71,15 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import com.sylvester.rustsensei.data.PreferencesManager
+import com.sylvester.rustsensei.work.ReminderScheduler
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
@@ -114,6 +126,8 @@ fun MainScreen(
     reviewViewModel: ReviewViewModel,
     learningPathViewModel: LearningPathViewModel,
     modelViewModel: ModelViewModel,
+    preferencesManager: PreferencesManager,
+    reminderScheduler: ReminderScheduler,
     onNavigateToSettings: () -> Unit,
     onNavigateToSetup: () -> Unit = {},
     onNavigateToReview: () -> Unit = {},
@@ -323,10 +337,46 @@ fun MainScreen(
                 )
             }
             composable<ProfileRoute> {
+                var remindersEnabled by remember {
+                    mutableStateOf(preferencesManager.areRemindersEnabled())
+                }
+                val context = LocalContext.current
+                val notifPermLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { granted ->
+                    if (granted) {
+                        remindersEnabled = true
+                        preferencesManager.setRemindersEnabled(true)
+                        reminderScheduler.scheduleReminders()
+                    } else {
+                        remindersEnabled = false
+                        preferencesManager.setRemindersEnabled(false)
+                    }
+                }
                 SettingsScreen(
                     chatViewModel = chatViewModel,
                     modelViewModel = modelViewModel,
-                    onNavigateBack = { tabNavController.navigateToTab(Tab.Home) }
+                    onNavigateBack = { tabNavController.navigateToTab(Tab.Home) },
+                    remindersEnabled = remindersEnabled,
+                    onRemindersToggled = { enabled ->
+                        if (enabled) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(
+                                    context, Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                remindersEnabled = true
+                                preferencesManager.setRemindersEnabled(true)
+                                reminderScheduler.scheduleReminders()
+                            }
+                        } else {
+                            remindersEnabled = false
+                            preferencesManager.setRemindersEnabled(false)
+                            reminderScheduler.cancelReminders()
+                        }
+                    }
                 )
             }
         }

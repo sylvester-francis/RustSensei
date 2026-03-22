@@ -127,6 +127,8 @@ fun RustSenseiApp(
                 reviewViewModel = reviewViewModel,
                 learningPathViewModel = learningPathViewModel,
                 modelViewModel = modelViewModel,
+                preferencesManager = preferencesManager,
+                reminderScheduler = reminderScheduler,
                 onNavigateToSettings = { navController.navigate(SettingsRoute) },
                 onNavigateToSetup = { navController.navigate(SetupRoute) },
                 onNavigateToReview = { navController.navigate(ReviewRoute) },
