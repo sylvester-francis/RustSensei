@@ -645,6 +645,13 @@ private fun TrueFalseAnswers(
                 answered && isSelected -> AppColors.current.error.copy(alpha = 0.08f)
                 else -> MaterialTheme.colorScheme.surfaceContainer
             }
+            val textColor = when {
+                !answered && isSelected -> AppColors.current.accent
+                !answered -> MaterialTheme.colorScheme.onSurface
+                isCorrect -> AppColors.current.success
+                isSelected -> AppColors.current.error
+                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
 
             Box(
@@ -665,7 +672,7 @@ private fun TrueFalseAnswers(
                         text = if (value) "True" else "False",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = borderColor
+                        color = textColor
                     )
                     if (answered) {
                         Spacer(modifier = Modifier.height(4.dp))
