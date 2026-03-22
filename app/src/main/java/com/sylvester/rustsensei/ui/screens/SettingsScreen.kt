@@ -604,7 +604,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Text(
-                        text = "RustSensei v1.0",
+                        text = "RustSensei v${com.sylvester.rustsensei.BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = CrispWhite

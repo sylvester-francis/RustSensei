@@ -1,0 +1,14 @@
+{
+  "id": "future",
+  "typeName": "Future",
+  "module": "std::future",
+  "signature": "pub trait Future",
+  "description": "A trait representing an asynchronous computation that may not have completed yet. Futures are the foundation of Rust's async/await system. When you write an async fn, the compiler transforms it into a state machine that implements Future. You rarely call poll() directly; instead, use .await to drive a Future to completion. Python equivalent: asyncio coroutines (awaitable objects).",
+  "methods": [
+    { "name": "poll", "signature": "fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>", "description": "Attempts to resolve the future to its final value. Returns Poll::Ready(value) if done, or Poll::Pending if still waiting. You almost never call this directly; use .await instead.", "example": "// Typically you use async/await:\nasync fn fetch_data() -> String {\n    String::from(\"data\")\n}\n\nasync fn main_task() {\n    let data = fetch_data().await;\n    println!(\"{}\", data);\n}" },
+    { "name": "await", "signature": ".await", "description": "Syntax for waiting on a Future to complete. Suspends the current async function until the future resolves. Can only be used inside async functions or blocks. Python equivalent: await.", "example": "async fn get_value() -> i32 {\n    42\n}\n\nasync fn example() {\n    let val = get_value().await;\n    assert_eq!(val, 42);\n}" },
+    { "name": "async fn", "signature": "async fn name() -> T", "description": "Declares an asynchronous function. The compiler transforms it into a function that returns impl Future<Output = T>. Python equivalent: async def.", "example": "async fn compute() -> i32 {\n    let a = fetch_a().await;\n    let b = fetch_b().await;\n    a + b\n}" },
+    { "name": "async block", "signature": "async { ... }", "description": "Creates an anonymous future from a block of code. Useful for creating futures inline without defining a separate async function.", "example": "let future = async {\n    let val = some_async_fn().await;\n    val + 1\n};" },
+    { "name": "Output", "signature": "type Output", "description": "The associated type representing the value produced when the Future completes. For async fn foo() -> i32, the Output type is i32.", "example": "// Future<Output = String> means\n// this future produces a String\nasync fn greeting() -> String {\n    String::from(\"hello\")\n}" }
+  ]
+}

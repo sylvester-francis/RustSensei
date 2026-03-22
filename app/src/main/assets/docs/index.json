@@ -9,6 +9,21 @@
     { "id": "box", "name": "Box<T>", "module": "std::boxed" },
     { "id": "rc", "name": "Rc<T>", "module": "std::rc" },
     { "id": "arc", "name": "Arc<T>", "module": "std::sync" },
-    { "id": "mutex", "name": "Mutex<T>", "module": "std::sync" }
+    { "id": "mutex", "name": "Mutex<T>", "module": "std::sync" },
+    { "id": "str", "name": "&str", "module": "std::primitive" },
+    { "id": "cow", "name": "Cow<'a, B>", "module": "std::borrow" },
+    { "id": "btreemap", "name": "BTreeMap<K,V>", "module": "std::collections" },
+    { "id": "hashset", "name": "HashSet<T>", "module": "std::collections" },
+    { "id": "vecdeque", "name": "VecDeque<T>", "module": "std::collections" },
+    { "id": "cell", "name": "Cell<T>", "module": "std::cell" },
+    { "id": "refcell", "name": "RefCell<T>", "module": "std::cell" },
+    { "id": "pin", "name": "Pin<P>", "module": "std::pin" },
+    { "id": "future", "name": "Future", "module": "std::future" },
+    { "id": "channel", "name": "mpsc::channel", "module": "std::sync::mpsc" },
+    { "id": "path", "name": "Path / PathBuf", "module": "std::path" },
+    { "id": "file", "name": "File", "module": "std::fs" },
+    { "id": "bufreader", "name": "BufReader<R>", "module": "std::io" },
+    { "id": "thread", "name": "thread", "module": "std::thread" },
+    { "id": "process", "name": "Command", "module": "std::process" }
   ]
 }

@@ -1,0 +1,14 @@
+{
+  "id": "bufreader",
+  "typeName": "BufReader<R>",
+  "module": "std::io",
+  "signature": "pub struct BufReader<R>",
+  "description": "Wraps a reader (like File) and adds buffering, which reduces the number of system calls. Essential for reading files line-by-line efficiently. Without BufReader, each read call goes directly to the OS. Python equivalent: io.BufferedReader (Python's open() uses buffering by default).",
+  "methods": [
+    { "name": "new", "signature": "fn new(inner: R) -> BufReader<R>", "description": "Creates a new BufReader with a default buffer size (8 KB) wrapping the given reader.", "example": "use std::fs::File;\nuse std::io::BufReader;\nlet file = File::open(\"data.txt\")?;\nlet reader = BufReader::new(file);" },
+    { "name": "lines", "signature": "fn lines(self) -> Lines<BufReader<R>>", "description": "Returns an iterator over the lines of the reader. Each line is a Result<String> with the newline stripped. Python equivalent: for line in file.", "example": "use std::fs::File;\nuse std::io::{BufRead, BufReader};\nlet file = File::open(\"data.txt\")?;\nlet reader = BufReader::new(file);\nfor line in reader.lines() {\n    println!(\"{}\", line?);\n}" },
+    { "name": "read_line", "signature": "fn read_line(&mut self, buf: &mut String) -> Result<usize>", "description": "Reads a single line including the newline character into the provided buffer. Returns the number of bytes read. From the BufRead trait.", "example": "use std::fs::File;\nuse std::io::{BufRead, BufReader};\nlet file = File::open(\"data.txt\")?;\nlet mut reader = BufReader::new(file);\nlet mut line = String::new();\nreader.read_line(&mut line)?;" },
+    { "name": "read_until", "signature": "fn read_until(&mut self, byte: u8, buf: &mut Vec<u8>) -> Result<usize>", "description": "Reads bytes until the specified delimiter byte is found, appending them to buf. Useful for reading until a custom separator.", "example": "use std::fs::File;\nuse std::io::{BufRead, BufReader};\nlet file = File::open(\"data.txt\")?;\nlet mut reader = BufReader::new(file);\nlet mut buf = Vec::new();\nreader.read_until(b'\\n', &mut buf)?;" },
+    { "name": "with_capacity", "signature": "fn with_capacity(capacity: usize, inner: R) -> BufReader<R>", "description": "Creates a new BufReader with the specified buffer capacity. Use this when the default 8 KB buffer is not optimal for your use case.", "example": "use std::fs::File;\nuse std::io::BufReader;\nlet file = File::open(\"big_data.txt\")?;\nlet reader = BufReader::with_capacity(64 * 1024, file); // 64 KB buffer" }
+  ]
+}

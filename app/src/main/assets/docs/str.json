@@ -1,0 +1,19 @@
+{
+  "id": "str",
+  "typeName": "&str",
+  "module": "std::primitive",
+  "signature": "primitive type str",
+  "description": "A string slice, the most primitive string type in Rust. It is usually seen in its borrowed form &str. Unlike String, a &str is a reference to an existing UTF-8 encoded string and does not own its data. Python equivalent: str (but immutable and borrowed).",
+  "methods": [
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the length of the string slice in bytes (not characters). For ASCII strings, this equals the number of characters.", "example": "let s = \"hello\";\nassert_eq!(s.len(), 5);" },
+    { "name": "is_empty", "signature": "fn is_empty(&self) -> bool", "description": "Returns true if the string slice has a length of zero.", "example": "assert!(!\"\".is_empty() == false);\nassert!(\"\".is_empty());" },
+    { "name": "contains", "signature": "fn contains<P: Pattern>(&self, pat: P) -> bool", "description": "Returns true if the given pattern matches a sub-slice of this string. Python equivalent: 'world' in 'hello world'.", "example": "assert!(\"hello world\".contains(\"world\"));" },
+    { "name": "starts_with", "signature": "fn starts_with<P: Pattern>(&self, pat: P) -> bool", "description": "Returns true if this string slice begins with the given pattern. Python equivalent: str.startswith().", "example": "assert!(\"hello world\".starts_with(\"hello\"));" },
+    { "name": "ends_with", "signature": "fn ends_with<P: Pattern>(&self, pat: P) -> bool", "description": "Returns true if this string slice ends with the given pattern. Python equivalent: str.endswith().", "example": "assert!(\"hello world\".ends_with(\"world\"));" },
+    { "name": "split", "signature": "fn split<P: Pattern>(&self, pat: P) -> Split<P>", "description": "Returns an iterator over substrings separated by the given pattern. Python equivalent: str.split().", "example": "let parts: Vec<&str> = \"a,b,c\".split(',').collect();\nassert_eq!(parts, [\"a\", \"b\", \"c\"]);" },
+    { "name": "trim", "signature": "fn trim(&self) -> &str", "description": "Returns a string slice with leading and trailing whitespace removed. Python equivalent: str.strip().", "example": "assert_eq!(\"  hello  \".trim(), \"hello\");" },
+    { "name": "to_uppercase", "signature": "fn to_uppercase(&self) -> String", "description": "Returns a new String with all characters converted to uppercase. Python equivalent: str.upper().", "example": "assert_eq!(\"hello\".to_uppercase(), \"HELLO\");" },
+    { "name": "chars", "signature": "fn chars(&self) -> Chars", "description": "Returns an iterator over the characters (char values) of the string slice. Use this to iterate character-by-character.", "example": "for c in \"hello\".chars() {\n    println!(\"{}\", c);\n}" },
+    { "name": "bytes", "signature": "fn bytes(&self) -> Bytes", "description": "Returns an iterator over the bytes of the string slice. Each element is a u8.", "example": "for b in \"hi\".bytes() {\n    println!(\"{}\", b); // 104, 105\n}" }
+  ]
+}

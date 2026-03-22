@@ -1,0 +1,15 @@
+{
+  "id": "refcell",
+  "typeName": "RefCell<T>",
+  "module": "std::cell",
+  "signature": "pub struct RefCell<T>",
+  "description": "A mutable memory location with dynamically checked borrow rules. Unlike Cell, RefCell works with non-Copy types by lending references. It enforces Rust's borrowing rules at runtime instead of compile time: you can have many shared borrows OR one mutable borrow, but not both. Panics if the rules are violated.",
+  "methods": [
+    { "name": "new", "signature": "fn new(value: T) -> RefCell<T>", "description": "Creates a new RefCell containing the given value.", "example": "use std::cell::RefCell;\nlet cell = RefCell::new(vec![1, 2, 3]);" },
+    { "name": "borrow", "signature": "fn borrow(&self) -> Ref<T>", "description": "Returns an immutable reference to the inner value. Panics if the value is currently mutably borrowed.", "example": "let cell = RefCell::new(5);\nlet val = cell.borrow();\nprintln!(\"Value: {}\", *val);" },
+    { "name": "borrow_mut", "signature": "fn borrow_mut(&self) -> RefMut<T>", "description": "Returns a mutable reference to the inner value. Panics if the value is currently borrowed (either mutably or immutably).", "example": "let cell = RefCell::new(vec![1, 2]);\ncell.borrow_mut().push(3);" },
+    { "name": "try_borrow", "signature": "fn try_borrow(&self) -> Result<Ref<T>, BorrowError>", "description": "Tries to immutably borrow the value. Returns Err instead of panicking if the value is currently mutably borrowed.", "example": "let cell = RefCell::new(5);\nif let Ok(val) = cell.try_borrow() {\n    println!(\"Value: {}\", *val);\n}" },
+    { "name": "try_borrow_mut", "signature": "fn try_borrow_mut(&self) -> Result<RefMut<T>, BorrowMutError>", "description": "Tries to mutably borrow the value. Returns Err instead of panicking if the value is already borrowed.", "example": "let cell = RefCell::new(5);\nif let Ok(mut val) = cell.try_borrow_mut() {\n    *val = 10;\n}" },
+    { "name": "into_inner", "signature": "fn into_inner(self) -> T", "description": "Consumes the RefCell and returns the wrapped value.", "example": "let cell = RefCell::new(String::from(\"hello\"));\nlet s = cell.into_inner();" }
+  ]
+}

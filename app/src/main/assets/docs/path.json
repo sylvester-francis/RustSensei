@@ -1,0 +1,19 @@
+{
+  "id": "path",
+  "typeName": "Path / PathBuf",
+  "module": "std::path",
+  "signature": "pub struct Path; pub struct PathBuf",
+  "description": "Types for working with file system paths. Path is a borrowed reference to a path (like &str), while PathBuf is an owned, mutable path (like String). Path handles platform-specific path separators automatically. Python equivalent: pathlib.Path.",
+  "methods": [
+    { "name": "new", "signature": "fn new<S: AsRef<OsStr> + ?Sized>(s: &S) -> &Path", "description": "Creates a new Path from a string slice. For an owned path, use PathBuf::from().", "example": "use std::path::{Path, PathBuf};\nlet p = Path::new(\"/usr/local/bin\");\nlet pb = PathBuf::from(\"/usr/local/bin\");" },
+    { "name": "join", "signature": "fn join<P: AsRef<Path>>(&self, path: P) -> PathBuf", "description": "Joins a path component onto this path. Returns a new PathBuf. Python equivalent: pathlib.Path / 'subdir'.", "example": "let path = Path::new(\"/usr\").join(\"local\").join(\"bin\");\n// /usr/local/bin" },
+    { "name": "parent", "signature": "fn parent(&self) -> Option<&Path>", "description": "Returns the parent directory of this path, or None if there is no parent. Python equivalent: path.parent.", "example": "let p = Path::new(\"/usr/local/bin\");\nassert_eq!(p.parent(), Some(Path::new(\"/usr/local\")));" },
+    { "name": "file_name", "signature": "fn file_name(&self) -> Option<&OsStr>", "description": "Returns the final component of the path (the file name). Python equivalent: path.name.", "example": "let p = Path::new(\"/tmp/foo.txt\");\nassert_eq!(p.file_name().unwrap(), \"foo.txt\");" },
+    { "name": "extension", "signature": "fn extension(&self) -> Option<&OsStr>", "description": "Returns the file extension, if any. Python equivalent: path.suffix (without the dot).", "example": "let p = Path::new(\"photo.png\");\nassert_eq!(p.extension().unwrap(), \"png\");" },
+    { "name": "exists", "signature": "fn exists(&self) -> bool", "description": "Returns true if the path points to an existing file or directory. Python equivalent: path.exists().", "example": "if Path::new(\"/tmp\").exists() {\n    println!(\"Directory exists\");\n}" },
+    { "name": "is_file", "signature": "fn is_file(&self) -> bool", "description": "Returns true if the path points to a regular file. Python equivalent: path.is_file().", "example": "if Path::new(\"data.txt\").is_file() {\n    println!(\"It's a file\");\n}" },
+    { "name": "is_dir", "signature": "fn is_dir(&self) -> bool", "description": "Returns true if the path points to a directory. Python equivalent: path.is_dir().", "example": "if Path::new(\"/tmp\").is_dir() {\n    println!(\"It's a directory\");\n}" },
+    { "name": "display", "signature": "fn display(&self) -> Display", "description": "Returns a displayable representation of the path for printing.", "example": "let p = Path::new(\"/tmp/foo.txt\");\nprintln!(\"Path: {}\", p.display());" },
+    { "name": "to_str", "signature": "fn to_str(&self) -> Option<&str>", "description": "Returns the path as a UTF-8 string slice, or None if the path is not valid UTF-8.", "example": "let p = Path::new(\"/tmp/hello.txt\");\nif let Some(s) = p.to_str() {\n    println!(\"Path string: {}\", s);\n}" }
+  ]
+}

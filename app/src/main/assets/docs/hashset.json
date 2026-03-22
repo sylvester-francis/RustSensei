@@ -1,0 +1,19 @@
+{
+  "id": "hashset",
+  "typeName": "HashSet<T>",
+  "module": "std::collections",
+  "signature": "pub struct HashSet<T, S = RandomState>",
+  "description": "A hash set implemented as a HashMap where the value is (). Stores unique values with O(1) lookup. Python equivalent: set.",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> HashSet<T>", "description": "Creates an empty HashSet.", "example": "use std::collections::HashSet;\nlet mut set: HashSet<i32> = HashSet::new();" },
+    { "name": "insert", "signature": "fn insert(&mut self, value: T) -> bool", "description": "Adds a value to the set. Returns true if the value was newly inserted, false if it already existed. Python equivalent: set.add().", "example": "let mut set = HashSet::new();\nassert!(set.insert(42));\nassert!(!set.insert(42)); // already present" },
+    { "name": "remove", "signature": "fn remove<Q>(&mut self, value: &Q) -> bool", "description": "Removes a value from the set. Returns true if the value was present. Python equivalent: set.discard().", "example": "set.remove(&42);" },
+    { "name": "contains", "signature": "fn contains<Q>(&self, value: &Q) -> bool", "description": "Returns true if the set contains the value. Python equivalent: value in set.", "example": "assert!(set.contains(&42));" },
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the number of elements in the set.", "example": "assert_eq!(set.len(), 1);" },
+    { "name": "is_empty", "signature": "fn is_empty(&self) -> bool", "description": "Returns true if the set contains no elements.", "example": "let set: HashSet<i32> = HashSet::new();\nassert!(set.is_empty());" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<T>", "description": "Returns an iterator over the values in the set (in arbitrary order).", "example": "for val in set.iter() {\n    println!(\"{}\", val);\n}" },
+    { "name": "union", "signature": "fn union<'a>(&'a self, other: &'a HashSet<T>) -> Union<'a, T>", "description": "Returns an iterator of values that are in either set. Python equivalent: set1 | set2.", "example": "let a: HashSet<_> = [1, 2, 3].into();\nlet b: HashSet<_> = [3, 4, 5].into();\nlet union: HashSet<_> = a.union(&b).collect();" },
+    { "name": "intersection", "signature": "fn intersection<'a>(&'a self, other: &'a HashSet<T>) -> Intersection<'a, T>", "description": "Returns an iterator of values that are in both sets. Python equivalent: set1 & set2.", "example": "let common: HashSet<_> = a.intersection(&b).collect();" },
+    { "name": "difference", "signature": "fn difference<'a>(&'a self, other: &'a HashSet<T>) -> Difference<'a, T>", "description": "Returns an iterator of values in self but not in other. Python equivalent: set1 - set2.", "example": "let diff: HashSet<_> = a.difference(&b).collect();" }
+  ]
+}

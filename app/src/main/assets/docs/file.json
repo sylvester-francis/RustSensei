@@ -1,0 +1,15 @@
+{
+  "id": "file",
+  "typeName": "File",
+  "module": "std::fs",
+  "signature": "pub struct File",
+  "description": "A reference to an open file on the filesystem. File implements Read and Write traits for I/O operations. Files are automatically closed when they go out of scope. Python equivalent: open() built-in function.",
+  "methods": [
+    { "name": "open", "signature": "fn open<P: AsRef<Path>>(path: P) -> Result<File>", "description": "Opens a file in read-only mode. Returns an error if the file does not exist. Python equivalent: open('file.txt', 'r').", "example": "use std::fs::File;\nlet file = File::open(\"data.txt\")?;" },
+    { "name": "create", "signature": "fn create<P: AsRef<Path>>(path: P) -> Result<File>", "description": "Creates a file for writing, truncating it if it already exists. Python equivalent: open('file.txt', 'w').", "example": "use std::fs::File;\nuse std::io::Write;\nlet mut file = File::create(\"output.txt\")?;\nfile.write_all(b\"Hello, world!\")?;" },
+    { "name": "read_to_string", "signature": "fn read_to_string<P: AsRef<Path>>(path: P) -> Result<String>", "description": "A convenience function on std::fs (not File) that reads the entire contents of a file into a String. Python equivalent: Path('file.txt').read_text().", "example": "use std::fs;\nlet contents = fs::read_to_string(\"data.txt\")?;\nprintln!(\"{}\", contents);" },
+    { "name": "write", "signature": "fn write<P: AsRef<Path>, C: AsRef<[u8]>>(path: P, contents: C) -> Result<()>", "description": "A convenience function on std::fs that writes bytes to a file, creating or overwriting it. Python equivalent: Path('file.txt').write_text().", "example": "use std::fs;\nfs::write(\"output.txt\", \"Hello, world!\")?;" },
+    { "name": "metadata", "signature": "fn metadata(&self) -> Result<Metadata>", "description": "Queries metadata about the file such as size, permissions, and modification time. Python equivalent: os.stat().", "example": "use std::fs::File;\nlet file = File::open(\"data.txt\")?;\nlet meta = file.metadata()?;\nprintln!(\"Size: {} bytes\", meta.len());" },
+    { "name": "write_all", "signature": "fn write_all(&mut self, buf: &[u8]) -> Result<()>", "description": "Writes the entire buffer to the file (from the Write trait). Ensures all bytes are written.", "example": "use std::fs::File;\nuse std::io::Write;\nlet mut file = File::create(\"out.txt\")?;\nfile.write_all(b\"Hello!\")?;" }
+  ]
+}

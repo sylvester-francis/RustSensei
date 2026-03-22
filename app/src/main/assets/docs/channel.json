@@ -1,0 +1,15 @@
+{
+  "id": "channel",
+  "typeName": "mpsc::channel",
+  "module": "std::sync::mpsc",
+  "signature": "pub fn channel<T>() -> (Sender<T>, Receiver<T>)",
+  "description": "A multi-producer, single-consumer (mpsc) channel for sending values between threads. channel() returns a (Sender, Receiver) pair. Multiple Senders can be cloned and moved to different threads, but there is only one Receiver. Python equivalent: queue.Queue (but type-safe and designed for threads).",
+  "methods": [
+    { "name": "channel", "signature": "fn channel<T>() -> (Sender<T>, Receiver<T>)", "description": "Creates a new asynchronous (unbounded) channel. Returns a Sender and Receiver pair. The channel can buffer an unlimited number of messages.", "example": "use std::sync::mpsc;\nlet (tx, rx) = mpsc::channel();\ntx.send(42).unwrap();\nassert_eq!(rx.recv().unwrap(), 42);" },
+    { "name": "send", "signature": "fn send(&self, t: T) -> Result<(), SendError<T>>", "description": "Sends a value through the channel. Returns Err if the Receiver has been dropped (no one is listening).", "example": "use std::sync::mpsc;\nuse std::thread;\n\nlet (tx, rx) = mpsc::channel();\nthread::spawn(move || {\n    tx.send(\"hello from thread\").unwrap();\n});\nprintln!(\"{}\", rx.recv().unwrap());" },
+    { "name": "recv", "signature": "fn recv(&self) -> Result<T, RecvError>", "description": "Blocks the current thread until a value is received. Returns Err if all Senders have been dropped.", "example": "let (tx, rx) = mpsc::channel();\ntx.send(42).unwrap();\nlet val = rx.recv().unwrap();" },
+    { "name": "try_recv", "signature": "fn try_recv(&self) -> Result<T, TryRecvError>", "description": "Attempts to receive a value without blocking. Returns Err(Empty) if no message is available, or Err(Disconnected) if all senders are dropped.", "example": "let (tx, rx) = mpsc::channel::<i32>();\nmatch rx.try_recv() {\n    Ok(val) => println!(\"Got: {}\", val),\n    Err(_) => println!(\"No message yet\"),\n}" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<T>", "description": "Returns a blocking iterator over received values. The iterator ends when all Senders are dropped.", "example": "let (tx, rx) = mpsc::channel();\ntx.send(1).unwrap();\ntx.send(2).unwrap();\ndrop(tx);\nfor val in rx.iter() {\n    println!(\"{}\", val);\n}" },
+    { "name": "clone (Sender)", "signature": "fn clone(&self) -> Sender<T>", "description": "Clones the Sender so multiple threads can send to the same channel. This is the 'multi-producer' part of mpsc.", "example": "let (tx, rx) = mpsc::channel();\nlet tx2 = tx.clone();\ntx.send(1).unwrap();\ntx2.send(2).unwrap();" }
+  ]
+}

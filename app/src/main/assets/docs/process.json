@@ -1,0 +1,15 @@
+{
+  "id": "process",
+  "typeName": "Command",
+  "module": "std::process",
+  "signature": "pub struct Command",
+  "description": "A builder for spawning external processes. Command lets you configure and run system commands, capture their output, and check exit status. Python equivalent: subprocess.run() / subprocess.Popen.",
+  "methods": [
+    { "name": "new", "signature": "fn new<S: AsRef<OsStr>>(program: S) -> Command", "description": "Creates a new Command for the given program. The program is searched in PATH if not an absolute path. Python equivalent: subprocess.Popen(['program']).", "example": "use std::process::Command;\nlet mut cmd = Command::new(\"ls\");" },
+    { "name": "arg", "signature": "fn arg<S: AsRef<OsStr>>(&mut self, arg: S) -> &mut Command", "description": "Adds a single argument to the command. Arguments are passed directly (no shell expansion). Can be chained.", "example": "Command::new(\"echo\")\n    .arg(\"hello\")\n    .arg(\"world\");" },
+    { "name": "args", "signature": "fn args<I, S>(&mut self, args: I) -> &mut Command where I: IntoIterator<Item = S>, S: AsRef<OsStr>", "description": "Adds multiple arguments at once from an iterator.", "example": "Command::new(\"git\")\n    .args([\"commit\", \"-m\", \"initial commit\"]);" },
+    { "name": "output", "signature": "fn output(&mut self) -> Result<Output>", "description": "Runs the command and captures stdout, stderr, and the exit status. Waits for the process to finish. Python equivalent: subprocess.run(capture_output=True).", "example": "let output = Command::new(\"echo\")\n    .arg(\"hello\")\n    .output()?;\nlet stdout = String::from_utf8_lossy(&output.stdout);\nprintln!(\"{}\", stdout);" },
+    { "name": "spawn", "signature": "fn spawn(&mut self) -> Result<Child>", "description": "Starts the command as a child process without waiting for it to finish. Returns a Child handle for managing the process. Python equivalent: subprocess.Popen().", "example": "let mut child = Command::new(\"sleep\")\n    .arg(\"5\")\n    .spawn()?;\n// Do other work...\nchild.wait()?;" },
+    { "name": "status", "signature": "fn status(&mut self) -> Result<ExitStatus>", "description": "Runs the command and returns its exit status. Inherits stdin, stdout, and stderr from the parent process.", "example": "let status = Command::new(\"mkdir\")\n    .arg(\"new_dir\")\n    .status()?;\nprintln!(\"Success: {}\", status.success());" }
+  ]
+}

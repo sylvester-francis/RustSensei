@@ -57,7 +57,7 @@ Most programming tutors require a constant internet connection and send your dat
 - **110+ Spaced Repetition Flashcards** — SM2-scheduled review system for long-term retention
 - **5 Guided Learning Paths** — structured step-by-step progression through Rust concepts
 - **Ownership Visualizer** — interactive step-by-step memory diagrams for moves, borrows, clones, drops, and Rc
-- **Offline Rust Docs** — bundled searchable stdlib reference for 10 core types (String, Vec, Option, Result, etc.)
+- **Offline Rust Docs** — bundled searchable stdlib reference for 25 core types (String, Vec, Option, Result, HashMap, Iterator, Path, File, Future, Channel, and more)
 - **12 Reference Guides** — cheat sheets, compiler errors, language comparisons, design patterns, glossary
 - **Study Reminders** — push notifications for due flashcards and streak-at-risk via WorkManager
 - **Home Screen Widget** — glanceable Glance AppWidget showing streak count and due flashcards

@@ -1,0 +1,14 @@
+{
+  "id": "pin",
+  "typeName": "Pin<P>",
+  "module": "std::pin",
+  "signature": "pub struct Pin<P>",
+  "description": "A wrapper that pins a value in memory, preventing it from being moved. Pin is essential for self-referential types and is used extensively with async/await and Futures. When a value is pinned, it is guaranteed to stay at the same memory address until it is dropped.",
+  "methods": [
+    { "name": "new", "signature": "fn new(pointer: P) -> Pin<P>", "description": "Creates a new Pin wrapping a pointer. Only works if the pointer's target implements Unpin (safe to move).", "example": "use std::pin::Pin;\nlet val = 42;\nlet pinned = Pin::new(&val);" },
+    { "name": "as_ref", "signature": "fn as_ref(&self) -> Pin<&<P as Deref>::Target>", "description": "Returns a Pin of a shared reference to the pinned value. Useful for passing pinned references without consuming the Pin.", "example": "use std::pin::Pin;\nlet val = String::from(\"hello\");\nlet pinned = Pin::new(&val);\nlet pin_ref = pinned.as_ref();" },
+    { "name": "as_mut", "signature": "fn as_mut(&mut self) -> Pin<&mut <P as Deref>::Target>", "description": "Returns a Pin of a mutable reference to the pinned value.", "example": "use std::pin::Pin;\nlet mut val = String::from(\"hello\");\nlet mut pinned = Pin::new(&mut val);\nlet pin_mut = pinned.as_mut();" },
+    { "name": "get_ref", "signature": "fn get_ref(&self) -> &<P as Deref>::Target", "description": "Returns a shared reference to the pinned value. This is safe because a shared reference cannot move the value.", "example": "use std::pin::Pin;\nlet val = 42;\nlet pinned = Pin::new(&val);\nassert_eq!(*pinned.get_ref(), 42);" },
+    { "name": "into_inner", "signature": "fn into_inner(pin: Pin<P>) -> P", "description": "Unwraps the Pin and returns the underlying pointer. Only available when the target type implements Unpin.", "example": "use std::pin::Pin;\nlet val = 42;\nlet pinned = Pin::new(&val);\nlet reference = Pin::into_inner(pinned);" }
+  ]
+}

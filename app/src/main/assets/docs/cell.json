@@ -1,0 +1,14 @@
+{
+  "id": "cell",
+  "typeName": "Cell<T>",
+  "module": "std::cell",
+  "signature": "pub struct Cell<T>",
+  "description": "A mutable memory location that provides interior mutability. Cell allows you to mutate a value even when you only have a shared (immutable) reference. It works by copying the value in and out, so T must implement Copy. Use Cell when you need to mutate data inside an otherwise immutable struct.",
+  "methods": [
+    { "name": "new", "signature": "fn new(value: T) -> Cell<T>", "description": "Creates a new Cell containing the given value.", "example": "use std::cell::Cell;\nlet cell = Cell::new(42);" },
+    { "name": "get", "signature": "fn get(&self) -> T", "description": "Returns a copy of the contained value. Requires T: Copy.", "example": "let cell = Cell::new(5);\nassert_eq!(cell.get(), 5);" },
+    { "name": "set", "signature": "fn set(&self, val: T)", "description": "Sets the contained value. Notice this takes &self, not &mut self, which is the point of interior mutability.", "example": "let cell = Cell::new(5);\ncell.set(10);\nassert_eq!(cell.get(), 10);" },
+    { "name": "replace", "signature": "fn replace(&self, val: T) -> T", "description": "Replaces the contained value and returns the old value.", "example": "let cell = Cell::new(5);\nlet old = cell.replace(10);\nassert_eq!(old, 5);" },
+    { "name": "into_inner", "signature": "fn into_inner(self) -> T", "description": "Consumes the Cell and returns the wrapped value.", "example": "let cell = Cell::new(42);\nlet val = cell.into_inner();\nassert_eq!(val, 42);" }
+  ]
+}

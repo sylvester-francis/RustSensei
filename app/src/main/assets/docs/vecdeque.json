@@ -1,0 +1,16 @@
+{
+  "id": "vecdeque",
+  "typeName": "VecDeque<T>",
+  "module": "std::collections",
+  "signature": "pub struct VecDeque<T>",
+  "description": "A double-ended queue implemented with a growable ring buffer. Supports efficient push and pop at both ends. Python equivalent: collections.deque.",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> VecDeque<T>", "description": "Creates an empty VecDeque.", "example": "use std::collections::VecDeque;\nlet mut deque: VecDeque<i32> = VecDeque::new();" },
+    { "name": "push_back", "signature": "fn push_back(&mut self, value: T)", "description": "Appends an element to the back of the deque. Python equivalent: deque.append().", "example": "let mut deque = VecDeque::new();\ndeque.push_back(1);\ndeque.push_back(2);" },
+    { "name": "push_front", "signature": "fn push_front(&mut self, value: T)", "description": "Prepends an element to the front of the deque. Python equivalent: deque.appendleft().", "example": "deque.push_front(0);" },
+    { "name": "pop_back", "signature": "fn pop_back(&mut self) -> Option<T>", "description": "Removes and returns the last element, or None if the deque is empty. Python equivalent: deque.pop().", "example": "let last = deque.pop_back(); // Some(2)" },
+    { "name": "pop_front", "signature": "fn pop_front(&mut self) -> Option<T>", "description": "Removes and returns the first element, or None if the deque is empty. Python equivalent: deque.popleft().", "example": "let first = deque.pop_front(); // Some(0)" },
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the number of elements in the deque.", "example": "assert_eq!(deque.len(), 1);" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<T>", "description": "Returns a front-to-back iterator over the elements.", "example": "for val in deque.iter() {\n    println!(\"{}\", val);\n}" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "id": "cow",
+  "typeName": "Cow<'a, B>",
+  "module": "std::borrow",
+  "signature": "pub enum Cow<'a, B: ?Sized + ToOwned>",
+  "description": "A clone-on-write smart pointer. Cow can hold either a borrowed reference or an owned value. It clones the data only when mutation is needed, making it great for avoiding unnecessary allocations. This is useful when you sometimes need to modify data and sometimes just read it.",
+  "methods": [
+    { "name": "into_owned", "signature": "fn into_owned(self) -> <B as ToOwned>::Owned", "description": "Extracts the owned data. If the Cow is Borrowed, the data is cloned. If it is already Owned, no clone occurs.", "example": "use std::borrow::Cow;\nlet borrowed: Cow<str> = Cow::Borrowed(\"hello\");\nlet owned: String = borrowed.into_owned();" },
+    { "name": "to_mut", "signature": "fn to_mut(&mut self) -> &mut <B as ToOwned>::Owned", "description": "Returns a mutable reference to the owned data. Clones the data if it is currently borrowed (this is the 'clone-on-write' behavior).", "example": "use std::borrow::Cow;\nlet mut cow: Cow<str> = Cow::Borrowed(\"hello\");\ncow.to_mut().push_str(\" world\");" },
+    { "name": "is_borrowed", "signature": "fn is_borrowed(&self) -> bool", "description": "Returns true if the Cow currently holds a borrowed reference rather than owned data.", "example": "use std::borrow::Cow;\nlet cow: Cow<str> = Cow::Borrowed(\"hello\");\nassert!(cow.is_borrowed());" },
+    { "name": "is_owned", "signature": "fn is_owned(&self) -> bool", "description": "Returns true if the Cow currently holds owned data rather than a borrowed reference.", "example": "use std::borrow::Cow;\nlet cow: Cow<str> = Cow::Owned(String::from(\"hello\"));\nassert!(cow.is_owned());" },
+    { "name": "Borrowed", "signature": "Cow::Borrowed(data: &'a B)", "description": "Creates a Cow that holds a borrowed reference. No allocation occurs.", "example": "use std::borrow::Cow;\nlet cow: Cow<str> = Cow::Borrowed(\"hello\");" },
+    { "name": "Owned", "signature": "Cow::Owned(data: <B as ToOwned>::Owned)", "description": "Creates a Cow that holds owned data.", "example": "use std::borrow::Cow;\nlet cow: Cow<str> = Cow::Owned(String::from(\"hello\"));" }
+  ]
+}

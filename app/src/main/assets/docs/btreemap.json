@@ -1,0 +1,18 @@
+{
+  "id": "btreemap",
+  "typeName": "BTreeMap<K,V>",
+  "module": "std::collections",
+  "signature": "pub struct BTreeMap<K, V>",
+  "description": "An ordered map based on a B-Tree. Unlike HashMap, keys in a BTreeMap are always sorted. Use this when you need your keys in a consistent order. Python equivalent: dict (but always sorted by key, similar to sorted(dict.items())).",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> BTreeMap<K, V>", "description": "Creates an empty BTreeMap.", "example": "use std::collections::BTreeMap;\nlet mut map: BTreeMap<String, i32> = BTreeMap::new();" },
+    { "name": "insert", "signature": "fn insert(&mut self, key: K, value: V) -> Option<V>", "description": "Inserts a key-value pair. If the key already existed, the old value is returned.", "example": "use std::collections::BTreeMap;\nlet mut map = BTreeMap::new();\nmap.insert(\"apple\", 3);" },
+    { "name": "get", "signature": "fn get<Q>(&self, key: &Q) -> Option<&V>", "description": "Returns a reference to the value for the given key, or None if the key is not present.", "example": "let val = map.get(\"apple\"); // Some(&3)" },
+    { "name": "remove", "signature": "fn remove<Q>(&mut self, key: &Q) -> Option<V>", "description": "Removes a key from the map and returns its value if the key was present.", "example": "let removed = map.remove(\"apple\"); // Some(3)" },
+    { "name": "contains_key", "signature": "fn contains_key<Q>(&self, key: &Q) -> bool", "description": "Returns true if the map contains the specified key.", "example": "assert!(map.contains_key(\"apple\"));" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<K, V>", "description": "Returns an iterator over key-value pairs, sorted by key.", "example": "for (key, value) in map.iter() {\n    println!(\"{}: {}\", key, value);\n}" },
+    { "name": "keys", "signature": "fn keys(&self) -> Keys<K, V>", "description": "Returns an iterator over the keys, in sorted order. Python equivalent: dict.keys().", "example": "let keys: Vec<&str> = map.keys().cloned().collect();" },
+    { "name": "values", "signature": "fn values(&self) -> Values<K, V>", "description": "Returns an iterator over the values, ordered by their corresponding keys. Python equivalent: dict.values().", "example": "let vals: Vec<&i32> = map.values().collect();" },
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the number of key-value pairs in the map.", "example": "assert_eq!(map.len(), 1);" }
+  ]
+}

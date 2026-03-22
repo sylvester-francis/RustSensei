@@ -1,0 +1,15 @@
+{
+  "id": "thread",
+  "typeName": "thread",
+  "module": "std::thread",
+  "signature": "pub mod thread",
+  "description": "The standard library's threading module. Rust threads are OS-level threads (1:1 threading model). Each thread has its own stack and runs in parallel. Data shared between threads must be Send and Sync. Python equivalent: threading.Thread (but without the GIL, so true parallelism).",
+  "methods": [
+    { "name": "spawn", "signature": "fn spawn<F, T>(f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static", "description": "Spawns a new OS thread and returns a JoinHandle to wait for it. The closure must own all captured data (use move). Python equivalent: threading.Thread(target=fn).start().", "example": "use std::thread;\nlet handle = thread::spawn(|| {\n    println!(\"Hello from a thread!\");\n    42\n});\nlet result = handle.join().unwrap();\nassert_eq!(result, 42);" },
+    { "name": "sleep", "signature": "fn sleep(dur: Duration)", "description": "Puts the current thread to sleep for the specified duration. Python equivalent: time.sleep().", "example": "use std::thread;\nuse std::time::Duration;\nthread::sleep(Duration::from_secs(2));" },
+    { "name": "current", "signature": "fn current() -> Thread", "description": "Returns a handle to the current thread. You can use this to get the thread's name or ID.", "example": "use std::thread;\nlet current = thread::current();\nprintln!(\"Thread: {:?}\", current.id());" },
+    { "name": "park", "signature": "fn park()", "description": "Blocks the current thread until it receives an unpark() signal from another thread. Useful for building custom synchronization.", "example": "use std::thread;\nlet handle = thread::current();\n// Another thread can call handle.unpark()\n// to wake this thread from park()." },
+    { "name": "Builder::new", "signature": "fn new() -> Builder", "description": "Creates a new thread builder for configuring a thread (name, stack size) before spawning it.", "example": "use std::thread;\nlet builder = thread::Builder::new()\n    .name(\"worker\".into())\n    .stack_size(1024 * 1024);\nlet handle = builder.spawn(|| {\n    println!(\"Named thread!\");\n}).unwrap();\nhandle.join().unwrap();" },
+    { "name": "JoinHandle::join", "signature": "fn join(self) -> Result<T>", "description": "Waits for the thread to finish and returns its result. Returns Err if the thread panicked. Python equivalent: thread.join().", "example": "let handle = thread::spawn(|| 42);\nlet result = handle.join().unwrap();" }
+  ]
+}
