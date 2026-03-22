@@ -11,13 +11,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 private data class Particle(
     val angle: Float,
@@ -34,7 +31,7 @@ fun ConfettiOverlay(
 ) {
     if (!isVisible) return
 
-    val colors = listOf(RustOrange, NeonCyan, WarningAmber, SuccessGreen)
+    val colors = listOf(AppColors.current.accent, AppColors.current.cyan, AppColors.current.amber, AppColors.current.success)
 
     val particles = remember {
         List(25) {

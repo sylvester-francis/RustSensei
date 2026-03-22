@@ -50,13 +50,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceScreenMode
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 internal fun BookIndexView(
@@ -444,7 +444,7 @@ private fun ReviewPromptCard(
                     .width(4.dp)
                     .height(40.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(NeonCyan)
+                    .background(AppColors.current.cyan)
             )
             Spacer(modifier = Modifier.width(Spacing.MD))
             Column(modifier = Modifier.weight(1f)) {
@@ -462,7 +462,7 @@ private fun ReviewPromptCard(
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = NeonCyan,
+                tint = AppColors.current.cyan,
                 modifier = Modifier.size(Dimens.IconSM)
             )
         }

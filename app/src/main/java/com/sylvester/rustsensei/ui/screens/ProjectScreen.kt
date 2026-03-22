@@ -48,11 +48,9 @@ import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.content.Project
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.ProjectViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,7 +137,7 @@ private fun ProjectListView(
                     Icon(
                         Icons.Default.Build,
                         contentDescription = null,
-                        tint = RustOrange,
+                        tint = AppColors.current.accent,
                         modifier = Modifier.size(Dimens.IconLG)
                     )
                     Spacer(modifier = Modifier.width(Spacing.MD))
@@ -161,7 +159,7 @@ private fun ProjectListView(
                         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.SM)) {
                             Card(
                                 colors = CardDefaults.cardColors(
-                                    containerColor = RustOrange.copy(alpha = Alpha.BORDER)
+                                    containerColor = AppColors.current.accent.copy(alpha = Alpha.BORDER)
                                 ),
                                 shape = RoundedCornerShape(Spacing.XS)
                             ) {
@@ -169,7 +167,7 @@ private fun ProjectListView(
                                     text = project.difficulty.replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.labelSmall,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange,
+                                    color = AppColors.current.accent,
                                     modifier = Modifier.padding(horizontal = Spacing.SM, vertical = Spacing.XXS)
                                 )
                             }
@@ -177,7 +175,7 @@ private fun ProjectListView(
                                 text = "${project.steps.size} steps \u00B7 ~${project.estimatedHours}h",
                                 style = MaterialTheme.typography.labelSmall,
                                 fontFamily = FontFamily.Monospace,
-                                color = NeonCyan
+                                color = AppColors.current.cyan
                             )
                         }
                     }
@@ -208,7 +206,7 @@ private fun ProjectDetailView(
             style = MaterialTheme.typography.labelLarge,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
-            color = RustOrange,
+            color = AppColors.current.accent,
             modifier = Modifier.padding(bottom = Spacing.SM)
         )
 
@@ -224,10 +222,10 @@ private fun ProjectDetailView(
                 shape = RoundedCornerShape(Spacing.SM),
                 colors = CardDefaults.cardColors(
                     containerColor = if (isActive)
-                        RustOrange.copy(alpha = Alpha.BORDER)
+                        AppColors.current.accent.copy(alpha = Alpha.BORDER)
                     else MaterialTheme.colorScheme.surfaceContainer
                 ),
-                border = if (isActive) BorderStroke(Dimens.Divider, RustOrange.copy(alpha = Alpha.MUTED)) else null
+                border = if (isActive) BorderStroke(Dimens.Divider, AppColors.current.accent.copy(alpha = Alpha.MUTED)) else null
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = Spacing.MD, vertical = Spacing.SM),
@@ -237,7 +235,7 @@ private fun ProjectDetailView(
                         if (isCompleted) Icons.Default.CheckCircle
                         else Icons.Default.RadioButtonUnchecked,
                         contentDescription = null,
-                        tint = if (isCompleted) SuccessGreen
+                        tint = if (isCompleted) AppColors.current.success
                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT),
                         modifier = Modifier.size(Dimens.IconSM)
                     )
@@ -246,7 +244,7 @@ private fun ProjectDetailView(
                         text = "${index + 1}. ${projectStep.title}",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isActive) RustOrange
+                        color = if (isActive) AppColors.current.accent
                                else MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -270,9 +268,9 @@ private fun ProjectDetailView(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = NeonCyan.copy(alpha = Alpha.BORDER)
+                    containerColor = AppColors.current.cyan.copy(alpha = Alpha.BORDER)
                 ),
-                border = BorderStroke(Dimens.Divider, NeonCyan.copy(alpha = Alpha.MUTED))
+                border = BorderStroke(Dimens.Divider, AppColors.current.cyan.copy(alpha = Alpha.MUTED))
             ) {
                 Text(
                     text = step.instructions,
@@ -290,7 +288,7 @@ private fun ProjectDetailView(
                 text = stringResource(R.string.projects_starter_code),
                 style = MaterialTheme.typography.labelMedium,
                 fontFamily = FontFamily.Monospace,
-                color = RustOrange,
+                color = AppColors.current.accent,
                 modifier = Modifier.padding(bottom = Spacing.XS)
             )
             Card(
@@ -319,7 +317,7 @@ private fun ProjectDetailView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(Dimens.ButtonHeight),
-                    colors = ButtonDefaults.buttonColors(containerColor = RustOrange),
+                    colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent),
                     shape = RoundedCornerShape(Dimens.CardRadius)
                 ) {
                     Text(

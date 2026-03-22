@@ -41,8 +41,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
 import com.sylvester.rustsensei.ui.theme.PrimaryGlow
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 fun InputBar(
@@ -144,18 +144,18 @@ fun InputBar(
                             elevation = 8.dp,
                             shape = CircleShape,
                             spotColor = if (isGenerating)
-                                ErrorNeon.copy(alpha = 0.4f)
+                                AppColors.current.error.copy(alpha = 0.4f)
                             else
                                 PrimaryGlow,
                             ambientColor = if (isGenerating)
-                                ErrorNeon.copy(alpha = 0.2f)
+                                AppColors.current.error.copy(alpha = 0.2f)
                             else
                                 PrimaryGlow.copy(alpha = 0.4f)
                         ),
                     shape = CircleShape,
                     colors = IconButtonDefaults.filledIconButtonColors(
                         containerColor = if (isGenerating)
-                            ErrorNeon
+                            AppColors.current.error
                         else
                             primary
                     )

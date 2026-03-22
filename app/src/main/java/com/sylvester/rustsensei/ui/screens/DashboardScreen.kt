@@ -83,10 +83,7 @@ import com.sylvester.rustsensei.ui.components.ProgressRing
 import com.sylvester.rustsensei.ui.components.SkeletonBox
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.Achievement
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
@@ -96,6 +93,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 fun DashboardScreen(
@@ -300,14 +298,14 @@ fun DashboardScreen(
                             number = "2",
                             title = "Practice Exercises",
                             description = "213 exercises from Rustlings — with hints and AI code review",
-                            accentColor = NeonCyan
+                            accentColor = AppColors.current.cyan
                         )
                         Spacer(modifier = Modifier.height(Spacing.SM))
                         OnboardingStep(
                             number = "3",
                             title = "Test Yourself",
                             description = "Take quizzes and review flashcards to lock in what you learn",
-                            accentColor = WarningAmber
+                            accentColor = AppColors.current.amber
                         )
 
                         Spacer(modifier = Modifier.height(Spacing.LG))
@@ -488,7 +486,7 @@ fun DashboardScreen(
                         title = "Exercises",
                         subtitle = "${uiState.totalExercises - uiState.completedExercises} pending",
                         icon = Icons.Default.Code,
-                        accentColor = NeonCyan,
+                        accentColor = AppColors.current.cyan,
                         cardBackground = cardBackground,
                         onClick = {
                             val target = uiState.continueTarget
@@ -506,7 +504,7 @@ fun DashboardScreen(
                         title = "Start Quiz",
                         subtitle = "Test your knowledge",
                         icon = Icons.Default.Quiz,
-                        accentColor = WarningAmber,
+                        accentColor = AppColors.current.amber,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToQuiz() }
                     )
@@ -516,7 +514,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.explain_error_title),
                         subtitle = stringResource(R.string.explain_error_card_subtitle),
                         icon = Icons.Default.BugReport,
-                        accentColor = ErrorNeon,
+                        accentColor = AppColors.current.error,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToExplainError() }
                     )
@@ -526,7 +524,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.daily_challenge_title),
                         subtitle = stringResource(R.string.daily_challenge_card_subtitle),
                         icon = Icons.Default.Timer,
-                        accentColor = WarningAmber,
+                        accentColor = AppColors.current.amber,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToDailyChallenge() }
                     )
@@ -536,7 +534,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.playground_title),
                         subtitle = stringResource(R.string.playground_card_subtitle),
                         icon = Icons.Default.PlayArrow,
-                        accentColor = NeonCyan,
+                        accentColor = AppColors.current.cyan,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToPlayground() }
                     )
@@ -546,7 +544,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.refactoring_title),
                         subtitle = stringResource(R.string.refactoring_card_subtitle),
                         icon = Icons.Default.Code,
-                        accentColor = WarningAmber,
+                        accentColor = AppColors.current.amber,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToRefactoring() }
                     )
@@ -556,7 +554,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.docs_title),
                         subtitle = stringResource(R.string.docs_card_subtitle),
                         icon = Icons.Default.MenuBook,
-                        accentColor = NeonCyan,
+                        accentColor = AppColors.current.cyan,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToDocs() }
                     )
@@ -566,7 +564,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.visualizer_title),
                         subtitle = stringResource(R.string.visualizer_card_subtitle),
                         icon = Icons.Default.Memory,
-                        accentColor = NeonCyan,
+                        accentColor = AppColors.current.cyan,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToVisualizer() }
                     )
@@ -576,7 +574,7 @@ fun DashboardScreen(
                         title = stringResource(R.string.projects_title),
                         subtitle = stringResource(R.string.projects_card_subtitle),
                         icon = Icons.Default.Build,
-                        accentColor = WarningAmber,
+                        accentColor = AppColors.current.amber,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToProjects() }
                     )
@@ -609,13 +607,13 @@ fun DashboardScreen(
                     progress = exerciseProgress,
                     label = "Exercises",
                     fraction = "${uiState.completedExercises}/${uiState.totalExercises}",
-                    color = NeonCyan
+                    color = AppColors.current.cyan
                 )
                 ProgressRingWithLabel(
                     progress = quizProgress,
                     label = "Quizzes",
                     fraction = "$goalsCompleted/3",
-                    color = WarningAmber
+                    color = AppColors.current.amber
                 )
             }
         }

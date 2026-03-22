@@ -71,13 +71,9 @@ import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.CrispWhite
 import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.AppColors
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import com.sylvester.rustsensei.viewmodel.ModelState
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
@@ -139,7 +135,7 @@ fun SettingsScreen(
                         text = stringResource(R.string.theme),
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = RustOrange
+                        color = AppColors.current.accent
                     )
                     Spacer(modifier = Modifier.height(Spacing.MD))
                     Row(
@@ -156,11 +152,11 @@ fun SettingsScreen(
                             Surface(
                                 onClick = { activity?.updateThemePreference(pref) },
                                 shape = RoundedCornerShape(Spacing.SM),
-                                color = if (isSelected) RustOrange.copy(alpha = Alpha.BORDER)
+                                color = if (isSelected) AppColors.current.accent.copy(alpha = Alpha.BORDER)
                                         else Color.Transparent,
                                 border = BorderStroke(
                                     Dimens.Divider,
-                                    if (isSelected) RustOrange.copy(alpha = Alpha.MUTED)
+                                    if (isSelected) AppColors.current.accent.copy(alpha = Alpha.MUTED)
                                     else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER)
                                 ),
                                 modifier = Modifier.weight(1f)
@@ -168,7 +164,7 @@ fun SettingsScreen(
                                 Text(
                                     text = label,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (isSelected) RustOrange
+                                    color = if (isSelected) AppColors.current.accent
                                             else MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     modifier = Modifier.padding(vertical = Spacing.MD, horizontal = Spacing.SM),
@@ -216,8 +212,8 @@ fun SettingsScreen(
                         checked = remindersEnabled,
                         onCheckedChange = onRemindersToggled,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = RustOrange,
-                            checkedTrackColor = RustOrange.copy(alpha = Alpha.MUTED)
+                            checkedThumbColor = AppColors.current.accent,
+                            checkedTrackColor = AppColors.current.accent.copy(alpha = Alpha.MUTED)
                         )
                     )
                 }
@@ -247,7 +243,7 @@ fun SettingsScreen(
                                     text = "Active Model",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange
+                                    color = AppColors.current.accent
                                 )
                                 Spacer(modifier = Modifier.height(Spacing.XS))
                                 Text(
@@ -265,7 +261,7 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = "Active",
-                                tint = SuccessGreen,
+                                tint = AppColors.current.success,
                                 modifier = Modifier.size(Dimens.IconMD)
                             )
                         }
@@ -283,7 +279,7 @@ fun SettingsScreen(
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             color = if (backend == "GPU") SecondaryText.copy(alpha = Alpha.SOFT)
-                                    else WarningAmber.copy(alpha = Alpha.SOFT)
+                                    else AppColors.current.amber.copy(alpha = Alpha.SOFT)
                         )
                     } else {
                         Text(
@@ -349,7 +345,7 @@ fun SettingsScreen(
                                     Text(
                                         text = "Active",
                                         fontSize = 11.sp,
-                                        color = SuccessGreen,
+                                        color = AppColors.current.success,
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontFamily.Monospace
                                     )
@@ -371,7 +367,7 @@ fun SettingsScreen(
                                         .fillMaxWidth()
                                         .height(Spacing.XS)
                                         .clip(RoundedCornerShape(Spacing.XXS)),
-                                    color = RustOrange,
+                                    color = AppColors.current.accent,
                                     trackColor = MaterialTheme.colorScheme.surfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(Spacing.XS))
@@ -379,7 +375,7 @@ fun SettingsScreen(
                                     text = "${modelState.downloadedMB} / ${modelState.totalMB} MB \u00B7 ${"%.1f".format(modelState.downloadSpeedMBps)} MB/s",
                                     fontSize = 10.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange.copy(alpha = Alpha.SOFT)
+                                    color = AppColors.current.accent.copy(alpha = Alpha.SOFT)
                                 )
                             }
 
@@ -389,7 +385,7 @@ fun SettingsScreen(
                                     text = "Initializing...",
                                     fontSize = 10.sp,
                                     fontFamily = FontFamily.Monospace,
-                                    color = RustOrange.copy(alpha = Alpha.SOFT)
+                                    color = AppColors.current.accent.copy(alpha = Alpha.SOFT)
                                 )
                             }
                         }
@@ -400,21 +396,21 @@ fun SettingsScreen(
                                 fontSize = 12.sp,
                                 fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Bold,
-                                color = RustOrange
+                                color = AppColors.current.accent
                             )
                         } else if (isDownloaded) {
                             if (isLoaded) {
                                 Icon(
                                     Icons.Default.CheckCircle,
                                     contentDescription = "Active",
-                                    tint = SuccessGreen,
+                                    tint = AppColors.current.success,
                                     modifier = Modifier.size(Dimens.IconSM)
                                 )
                             } else {
                                 Text(
                                     text = "Tap to load",
                                     fontSize = 11.sp,
-                                    color = NeonCyan
+                                    color = AppColors.current.cyan
                                 )
                             }
                         } else {
@@ -424,9 +420,9 @@ fun SettingsScreen(
                                     modelViewModel.startDownload()
                                 },
                                 shape = RoundedCornerShape(Spacing.SM),
-                                border = BorderStroke(Dimens.Divider, RustOrange.copy(alpha = 0.4f)),
+                                border = BorderStroke(Dimens.Divider, AppColors.current.accent.copy(alpha = 0.4f)),
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = RustOrange
+                                    contentColor = AppColors.current.accent
                                 )
                             ) {
                                 Icon(
@@ -528,7 +524,7 @@ fun SettingsScreen(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
-                border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = Alpha.BORDER))
+                border = BorderStroke(Dimens.Divider, AppColors.current.error.copy(alpha = Alpha.BORDER))
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
                     Row(
@@ -539,13 +535,13 @@ fun SettingsScreen(
                             Icons.Default.Warning,
                             contentDescription = null,
                             modifier = Modifier.size(Spacing.LG),
-                            tint = ErrorNeon.copy(alpha = Alpha.SOFT)
+                            tint = AppColors.current.error.copy(alpha = Alpha.SOFT)
                         )
                         Spacer(modifier = Modifier.width(Spacing.SM))
                         Text(
                             text = "Destructive actions",
                             style = MaterialTheme.typography.labelMedium,
-                            color = ErrorNeon.copy(alpha = Alpha.SOFT)
+                            color = AppColors.current.error.copy(alpha = Alpha.SOFT)
                         )
                     }
 
@@ -553,9 +549,9 @@ fun SettingsScreen(
                         onClick = { showClearDialog = true },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(Spacing.SM),
-                        border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = 0.4f)),
+                        border = BorderStroke(Dimens.Divider, AppColors.current.error.copy(alpha = 0.4f)),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = ErrorNeon
+                            contentColor = AppColors.current.error
                         )
                     ) {
                         Icon(
@@ -573,9 +569,9 @@ fun SettingsScreen(
                         onClick = { showDeleteModelDialog = true },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(Spacing.SM),
-                        border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = 0.4f)),
+                        border = BorderStroke(Dimens.Divider, AppColors.current.error.copy(alpha = 0.4f)),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = ErrorNeon
+                            contentColor = AppColors.current.error
                         )
                     ) {
                         Icon(
@@ -641,7 +637,7 @@ fun SettingsScreen(
                         text = "Created by",
                         style = MaterialTheme.typography.labelMedium,
                         fontFamily = FontFamily.Monospace,
-                        color = RustOrange
+                        color = AppColors.current.accent
                     )
                     Spacer(modifier = Modifier.height(Spacing.SM))
                     Text(
@@ -678,13 +674,13 @@ fun SettingsScreen(
                                 painter = painterResource(id = link.iconRes),
                                 contentDescription = link.label,
                                 modifier = Modifier.size(Dimens.IconSM),
-                                tint = NeonCyan
+                                tint = AppColors.current.cyan
                             )
                             Spacer(modifier = Modifier.width(Spacing.MD))
                             Text(
                                 text = link.label,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = NeonCyan,
+                                color = AppColors.current.cyan,
                                 fontFamily = FontFamily.Monospace
                             )
                         }
@@ -707,7 +703,7 @@ fun SettingsScreen(
                         text = "Acknowledgments",
                         style = MaterialTheme.typography.labelMedium,
                         fontFamily = FontFamily.Monospace,
-                        color = RustOrange
+                        color = AppColors.current.accent
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
@@ -721,7 +717,7 @@ fun SettingsScreen(
                         text = "github.com/rust-lang/book",
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         modifier = Modifier.clickable {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rust-lang/book"))
                             aboutContext.startActivity(intent)
@@ -739,7 +735,7 @@ fun SettingsScreen(
                         text = "github.com/rust-lang/rustlings",
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         modifier = Modifier.clickable {
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/rust-lang/rustlings"))
                             aboutContext.startActivity(intent)
@@ -776,7 +772,7 @@ fun SettingsScreen(
                     chatViewModel.clearAllConversations()
                     showClearDialog = false
                 }) {
-                    Text("Clear", color = ErrorNeon, fontWeight = FontWeight.Bold)
+                    Text("Clear", color = AppColors.current.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -804,7 +800,7 @@ fun SettingsScreen(
                     modelViewModel.deleteModel()
                     showDeleteModelDialog = false
                 }) {
-                    Text("Delete", color = ErrorNeon, fontWeight = FontWeight.Bold)
+                    Text("Delete", color = AppColors.current.error, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -819,7 +815,7 @@ private fun SectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelLarge,
-        color = RustOrange,
+        color = AppColors.current.accent,
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(top = 28.dp, bottom = Spacing.XS)
@@ -850,7 +846,7 @@ private fun SettingSlider(
                 fontSize = 14.sp,
                 fontFamily = FontFamily.Monospace,
                 fontWeight = FontWeight.Bold,
-                color = RustOrange
+                color = AppColors.current.accent
             )
         }
         Spacer(modifier = Modifier.height(Spacing.XS))
@@ -860,8 +856,8 @@ private fun SettingSlider(
             valueRange = valueRange,
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
-                thumbColor = RustOrange,
-                activeTrackColor = RustOrange,
+                thumbColor = AppColors.current.accent,
+                activeTrackColor = AppColors.current.accent,
                 inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
             )
         )

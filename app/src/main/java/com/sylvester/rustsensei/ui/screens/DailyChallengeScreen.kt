@@ -41,11 +41,9 @@ import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.DailyChallengeViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +101,7 @@ fun DailyChallengeScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = SuccessGreen.copy(alpha = Alpha.BORDER)
+                            containerColor = AppColors.current.success.copy(alpha = Alpha.BORDER)
                         ),
                         shape = RoundedCornerShape(Dimens.CardRadius)
                     ) {
@@ -114,7 +112,7 @@ fun DailyChallengeScreen(
                             Icon(
                                 Icons.Default.CheckCircle,
                                 contentDescription = null,
-                                tint = SuccessGreen,
+                                tint = AppColors.current.success,
                                 modifier = Modifier.size(Dimens.IconMD)
                             )
                             Spacer(modifier = Modifier.width(Spacing.SM))
@@ -123,7 +121,7 @@ fun DailyChallengeScreen(
                                     text = stringResource(R.string.daily_challenge_completed),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = SuccessGreen
+                                    color = AppColors.current.success
                                 )
                                 if (uiState.completionTimeSeconds != null) {
                                     val mins = uiState.completionTimeSeconds!! / 60
@@ -132,7 +130,7 @@ fun DailyChallengeScreen(
                                         text = stringResource(R.string.daily_challenge_time, mins, secs),
                                         style = MaterialTheme.typography.bodySmall,
                                         fontFamily = FontFamily.Monospace,
-                                        color = SuccessGreen.copy(alpha = Alpha.SOFT)
+                                        color = AppColors.current.success.copy(alpha = Alpha.SOFT)
                                     )
                                 }
                             }
@@ -152,7 +150,7 @@ fun DailyChallengeScreen(
                 Spacer(modifier = Modifier.height(Spacing.XS))
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = RustOrange.copy(alpha = Alpha.BORDER)
+                        containerColor = AppColors.current.accent.copy(alpha = Alpha.BORDER)
                     ),
                     shape = RoundedCornerShape(Spacing.XS)
                 ) {
@@ -160,7 +158,7 @@ fun DailyChallengeScreen(
                         text = exercise.difficulty.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = RustOrange,
+                        color = AppColors.current.accent,
                         modifier = Modifier.padding(horizontal = Spacing.SM, vertical = Spacing.XXS)
                     )
                 }
@@ -184,13 +182,13 @@ fun DailyChallengeScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     ),
-                    border = BorderStroke(Dimens.Divider, NeonCyan.copy(alpha = Alpha.BORDER))
+                    border = BorderStroke(Dimens.Divider, AppColors.current.cyan.copy(alpha = Alpha.BORDER))
                 ) {
                     Text(
                         text = exercise.instructions,
                         style = MaterialTheme.typography.bodySmall,
                         fontFamily = FontFamily.Monospace,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         lineHeight = 20.sp,
                         modifier = Modifier.padding(Dimens.CardPadding)
                     )
@@ -204,7 +202,7 @@ fun DailyChallengeScreen(
                     style = MaterialTheme.typography.labelLarge,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = RustOrange,
+                    color = AppColors.current.accent,
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
                 Card(
@@ -233,7 +231,7 @@ fun DailyChallengeScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(Dimens.ButtonHeight),
-                        colors = ButtonDefaults.buttonColors(containerColor = RustOrange),
+                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent),
                         shape = RoundedCornerShape(Dimens.CardRadius)
                     ) {
                         Icon(

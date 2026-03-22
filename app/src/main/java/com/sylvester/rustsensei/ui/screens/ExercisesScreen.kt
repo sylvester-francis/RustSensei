@@ -68,13 +68,11 @@ import com.sylvester.rustsensei.ui.theme.DifficultyAdvanced
 import com.sylvester.rustsensei.ui.theme.DifficultyBeginner
 import com.sylvester.rustsensei.ui.theme.DifficultyIntermediate
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.ExerciseScreenMode
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 // ── Python parallel descriptions (data map) ─────────────────────────
 
@@ -270,7 +268,7 @@ private fun CategoriesView(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = RustOrange
+                    cursorColor = AppColors.current.accent
                 ),
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     fontFamily = FontFamily.Monospace,
@@ -317,7 +315,7 @@ private fun CategoriesView(
                         "Beginner" -> DifficultyBeginner
                         "Intermediate" -> DifficultyIntermediate
                         "Advanced" -> DifficultyAdvanced
-                        else -> RustOrange
+                        else -> AppColors.current.accent
                     }
                     FilterChip(
                         selected = isSelected,
@@ -382,13 +380,13 @@ private fun CategoriesView(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(RustOrange.copy(alpha = Alpha.BORDER)),
+                                .background(AppColors.current.accent.copy(alpha = Alpha.BORDER)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Default.PlayArrow,
                                 contentDescription = "Continue exercise",
-                                tint = RustOrange,
+                                tint = AppColors.current.accent,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -398,7 +396,7 @@ private fun CategoriesView(
                                 text = "Continue where you left off",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = RustOrange
+                                color = AppColors.current.accent
                             )
                             Spacer(modifier = Modifier.height(Spacing.XXS))
                             Text(
@@ -411,7 +409,7 @@ private fun CategoriesView(
                         Icon(
                             Icons.Default.ChevronRight,
                             contentDescription = null,
-                            tint = RustOrange.copy(alpha = Alpha.SECONDARY),
+                            tint = AppColors.current.accent.copy(alpha = Alpha.SECONDARY),
                             modifier = Modifier.size(Dimens.IconSM)
                         )
                     }
@@ -432,10 +430,10 @@ private fun CategoriesView(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(Dimens.CardRadius))
-                        .background(RustOrange.copy(alpha = Alpha.BORDER))
+                        .background(AppColors.current.accent.copy(alpha = Alpha.BORDER))
                         .border(
                             Dimens.Divider,
-                            RustOrange.copy(alpha = Alpha.MUTED),
+                            AppColors.current.accent.copy(alpha = Alpha.MUTED),
                             RoundedCornerShape(Dimens.CardRadius)
                         )
                         .padding(14.dp)
@@ -444,7 +442,7 @@ private fun CategoriesView(
                         Icon(
                             Icons.Default.Code,
                             contentDescription = null,
-                            tint = RustOrange,
+                            tint = AppColors.current.accent,
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.height(Spacing.SM))
@@ -452,13 +450,13 @@ private fun CategoriesView(
                             text = "Exercises",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = RustOrange
+                            color = AppColors.current.accent
                         )
                         Text(
                             text = "$totalExercises Rustlings",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
-                            color = RustOrange.copy(alpha = Alpha.SOFT)
+                            color = AppColors.current.accent.copy(alpha = Alpha.SOFT)
                         )
                     }
                 }
@@ -468,10 +466,10 @@ private fun CategoriesView(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(Dimens.CardRadius))
-                        .background(NeonCyan.copy(alpha = 0.08f))
+                        .background(AppColors.current.cyan.copy(alpha = 0.08f))
                         .border(
                             Dimens.Divider,
-                            NeonCyan.copy(alpha = Alpha.DIVIDER),
+                            AppColors.current.cyan.copy(alpha = Alpha.DIVIDER),
                             RoundedCornerShape(Dimens.CardRadius)
                         )
                         .clickable { onNavigateToQuiz() }
@@ -481,7 +479,7 @@ private fun CategoriesView(
                         Icon(
                             Icons.Default.Quiz,
                             contentDescription = null,
-                            tint = NeonCyan,
+                            tint = AppColors.current.cyan,
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.height(Spacing.SM))
@@ -489,13 +487,13 @@ private fun CategoriesView(
                             text = "Quizzes",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = NeonCyan
+                            color = AppColors.current.cyan
                         )
                         Text(
                             text = "Test knowledge",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
-                            color = NeonCyan.copy(alpha = Alpha.SOFT)
+                            color = AppColors.current.cyan.copy(alpha = Alpha.SOFT)
                         )
                     }
                 }
@@ -609,14 +607,14 @@ private fun CategoriesView(
                                     Icon(
                                         Icons.Default.CheckCircle,
                                         contentDescription = "Completed",
-                                        tint = SuccessGreen,
+                                        tint = AppColors.current.success,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 } else {
                                     Icon(
                                         Icons.Default.ChevronRight,
                                         contentDescription = "Not completed",
-                                        tint = RustOrange,
+                                        tint = AppColors.current.accent,
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }

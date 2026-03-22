@@ -67,13 +67,10 @@ import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.DifficultyAdvanced
 import com.sylvester.rustsensei.ui.theme.DifficultyBeginner
 import com.sylvester.rustsensei.ui.theme.DifficultyIntermediate
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 // ---- EXERCISE DETAIL VIEW ---------------------------------------------------
 
@@ -261,7 +258,7 @@ internal fun ExerciseDetailView(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         color = if (undoRedoManager.canUndo())
-                            RustOrange
+                            AppColors.current.accent
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
@@ -287,7 +284,7 @@ internal fun ExerciseDetailView(
                         fontFamily = FontFamily.Monospace,
                         fontSize = 12.sp,
                         color = if (undoRedoManager.canRedo())
-                            RustOrange
+                            AppColors.current.accent
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                     )
@@ -342,19 +339,19 @@ internal fun ExerciseDetailView(
             // -- Check result --
             uiState.checkResult?.let { result ->
                 val resultBg = when (result) {
-                    "correct" -> SuccessGreen.copy(alpha = 0.10f)
-                    "uncertain" -> WarningAmber.copy(alpha = 0.10f)
-                    else -> ErrorNeon.copy(alpha = 0.10f)
+                    "correct" -> AppColors.current.success.copy(alpha = 0.10f)
+                    "uncertain" -> AppColors.current.amber.copy(alpha = 0.10f)
+                    else -> AppColors.current.error.copy(alpha = 0.10f)
                 }
                 val resultBorder = when (result) {
-                    "correct" -> SuccessGreen.copy(alpha = Alpha.MUTED)
-                    "uncertain" -> WarningAmber.copy(alpha = Alpha.MUTED)
-                    else -> ErrorNeon.copy(alpha = Alpha.MUTED)
+                    "correct" -> AppColors.current.success.copy(alpha = Alpha.MUTED)
+                    "uncertain" -> AppColors.current.amber.copy(alpha = Alpha.MUTED)
+                    else -> AppColors.current.error.copy(alpha = Alpha.MUTED)
                 }
                 val resultColor = when (result) {
-                    "correct" -> SuccessGreen
-                    "uncertain" -> WarningAmber
-                    else -> ErrorNeon
+                    "correct" -> AppColors.current.success
+                    "uncertain" -> AppColors.current.amber
+                    else -> AppColors.current.error
                 }
 
                 Box(
@@ -404,7 +401,7 @@ internal fun ExerciseDetailView(
                                     enabled = !uiState.isValidating,
                                     shape = RoundedCornerShape(Dimens.CardRadius),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = RustOrange
+                                        containerColor = AppColors.current.accent
                                     )
                                 ) {
                                     if (uiState.isValidating) {
@@ -464,7 +461,7 @@ internal fun ExerciseDetailView(
                         modifier = Modifier
                             .width(3.dp)
                             .fillMaxHeight()
-                            .background(RustOrange)
+                            .background(AppColors.current.accent)
                     )
                     Box(
                         modifier = Modifier
@@ -478,14 +475,14 @@ internal fun ExerciseDetailView(
                                     text = "AI Review",
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = RustOrange
+                                    color = AppColors.current.accent
                                 )
                                 if (uiState.isValidating) {
                                     Spacer(modifier = Modifier.width(Spacing.SM))
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(14.dp),
                                         strokeWidth = Spacing.XXS,
-                                        color = RustOrange
+                                        color = AppColors.current.accent
                                     )
                                 }
                             }
@@ -529,7 +526,7 @@ internal fun ExerciseDetailView(
                         .height(Dimens.CompactTopBarHeight),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = RustOrange
+                        containerColor = AppColors.current.accent
                     )
                 ) {
                     Icon(
@@ -572,7 +569,7 @@ internal fun ExerciseDetailView(
                     text = "Hints:",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = WarningAmber
+                    color = AppColors.current.amber
                 )
                 Spacer(modifier = Modifier.height(Spacing.XS))
                 for (i in 0 until uiState.hintsRevealed.coerceAtMost(exercise.hints.size)) {
@@ -585,7 +582,7 @@ internal fun ExerciseDetailView(
                             text = "${i + 1}.",
                             style = MaterialTheme.typography.bodyMedium,
                             fontFamily = FontFamily.Monospace,
-                            color = WarningAmber,
+                            color = AppColors.current.amber,
                             modifier = Modifier.width(Spacing.XXL)
                         )
                         Text(
@@ -608,7 +605,7 @@ internal fun ExerciseDetailView(
                         .height(Dimens.CompactTopBarHeight),
                     shape = RoundedCornerShape(Dimens.CardRadius),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = ErrorNeon
+                        contentColor = AppColors.current.error
                     )
                 ) {
                     Icon(
@@ -636,7 +633,7 @@ internal fun ExerciseDetailView(
                         text = "Solution:",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = RustOrange
+                        color = AppColors.current.accent
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     CodeBlock(code = exercise.solution, language = "rust")

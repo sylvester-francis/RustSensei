@@ -75,13 +75,10 @@ import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.DifficultyBeginner
 import com.sylvester.rustsensei.ui.theme.DifficultyIntermediate
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.RefactoringViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -142,7 +139,7 @@ private fun RefactoringListView(
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                color = RustOrange,
+                color = AppColors.current.accent,
                 modifier = Modifier.size(Dimens.IconLG)
             )
         }
@@ -373,7 +370,7 @@ private fun RefactoringDetailView(
                     text = stringResource(R.string.refactoring_original_code),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = RustOrange,
+                    color = AppColors.current.accent,
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
                 CodeBlock(code = challenge.uglyCode, language = "rust")
@@ -384,7 +381,7 @@ private fun RefactoringDetailView(
                     text = stringResource(R.string.refactoring_your_version),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = RustOrange,
+                    color = AppColors.current.accent,
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
                 CodeEditor(
@@ -439,7 +436,7 @@ private fun RefactoringDetailView(
                             fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
                             color = if (undoRedoManager.canUndo())
-                                RustOrange
+                                AppColors.current.accent
                             else
                                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
@@ -468,7 +465,7 @@ private fun RefactoringDetailView(
                             fontFamily = FontFamily.Monospace,
                             fontSize = 12.sp,
                             color = if (undoRedoManager.canRedo())
-                                RustOrange
+                                AppColors.current.accent
                             else
                                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                         )
@@ -526,19 +523,19 @@ private fun RefactoringDetailView(
                 // Score display
                 uiState.score?.let { score ->
                     val scoreBg = when {
-                        score >= 80 -> SuccessGreen.copy(alpha = Alpha.BORDER)
-                        score >= 50 -> WarningAmber.copy(alpha = Alpha.BORDER)
-                        else -> ErrorNeon.copy(alpha = Alpha.BORDER)
+                        score >= 80 -> AppColors.current.success.copy(alpha = Alpha.BORDER)
+                        score >= 50 -> AppColors.current.amber.copy(alpha = Alpha.BORDER)
+                        else -> AppColors.current.error.copy(alpha = Alpha.BORDER)
                     }
                     val scoreBorder = when {
-                        score >= 80 -> SuccessGreen.copy(alpha = Alpha.MUTED)
-                        score >= 50 -> WarningAmber.copy(alpha = Alpha.MUTED)
-                        else -> ErrorNeon.copy(alpha = Alpha.MUTED)
+                        score >= 80 -> AppColors.current.success.copy(alpha = Alpha.MUTED)
+                        score >= 50 -> AppColors.current.amber.copy(alpha = Alpha.MUTED)
+                        else -> AppColors.current.error.copy(alpha = Alpha.MUTED)
                     }
                     val scoreTextColor = when {
-                        score >= 80 -> SuccessGreen
-                        score >= 50 -> WarningAmber
-                        else -> ErrorNeon
+                        score >= 80 -> AppColors.current.success
+                        score >= 50 -> AppColors.current.amber
+                        else -> AppColors.current.error
                     }
 
                     Box(
@@ -587,7 +584,7 @@ private fun RefactoringDetailView(
                             modifier = Modifier
                                 .width(Spacing.XXS + Dimens.Divider)
                                 .fillMaxHeight()
-                                .background(RustOrange)
+                                .background(AppColors.current.accent)
                         )
                         Box(
                             modifier = Modifier
@@ -601,14 +598,14 @@ private fun RefactoringDetailView(
                                         text = stringResource(R.string.refactoring_score_label),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = RustOrange
+                                        color = AppColors.current.accent
                                     )
                                     if (uiState.isValidating) {
                                         Spacer(modifier = Modifier.width(Spacing.SM))
                                         CircularProgressIndicator(
                                             modifier = Modifier.size(Spacing.LG),
                                             strokeWidth = Spacing.XXS,
-                                            color = RustOrange
+                                            color = AppColors.current.accent
                                         )
                                     }
                                 }
@@ -655,7 +652,7 @@ private fun RefactoringDetailView(
                         enabled = !uiState.isValidating,
                         shape = MaterialTheme.shapes.medium,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = RustOrange
+                            containerColor = AppColors.current.accent
                         )
                     ) {
                         if (uiState.isValidating) {
@@ -709,7 +706,7 @@ private fun RefactoringDetailView(
                         text = "Hints:",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
-                        color = WarningAmber
+                        color = AppColors.current.amber
                     )
                     Spacer(modifier = Modifier.height(Spacing.XS))
                     for (i in 0 until uiState.hintsRevealed.coerceAtMost(challenge.hints.size)) {
@@ -722,7 +719,7 @@ private fun RefactoringDetailView(
                                 text = "${i + 1}.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontFamily = FontFamily.Monospace,
-                                color = WarningAmber,
+                                color = AppColors.current.amber,
                                 modifier = Modifier.width(Spacing.XXL)
                             )
                             Text(
@@ -745,7 +742,7 @@ private fun RefactoringDetailView(
                             .height(Dimens.CompactTopBarHeight),
                         shape = RoundedCornerShape(Dimens.CardRadius),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = ErrorNeon
+                            contentColor = AppColors.current.error
                         )
                     ) {
                         Icon(
@@ -773,7 +770,7 @@ private fun RefactoringDetailView(
                             text = "Idiomatic Solution:",
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
-                            color = RustOrange
+                            color = AppColors.current.accent
                         )
                         Spacer(modifier = Modifier.height(Spacing.SM))
                         CodeBlock(
@@ -790,13 +787,13 @@ private fun RefactoringDetailView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(Dimens.CardRadius))
-                            .background(ErrorNeon.copy(alpha = Alpha.BORDER))
+                            .background(AppColors.current.error.copy(alpha = Alpha.BORDER))
                             .padding(Dimens.CardPadding)
                     ) {
                         Text(
                             text = error,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = ErrorNeon
+                            color = AppColors.current.error
                         )
                     }
                 }
@@ -809,7 +806,7 @@ private fun RefactoringDetailView(
 
 @Composable
 private fun scoreColor(score: Int) = when {
-    score >= 80 -> SuccessGreen
-    score >= 50 -> WarningAmber
-    else -> ErrorNeon
+    score >= 80 -> AppColors.current.success
+    score >= 50 -> AppColors.current.amber
+    else -> AppColors.current.error
 }

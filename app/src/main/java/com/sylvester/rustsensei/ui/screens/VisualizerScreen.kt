@@ -65,13 +65,9 @@ import com.sylvester.rustsensei.content.VariableStatus
 import com.sylvester.rustsensei.content.VisualizationStep
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.VisualizerViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,7 +161,7 @@ private fun ScenarioListView(
                     Icon(
                         Icons.Default.Memory,
                         contentDescription = null,
-                        tint = RustOrange,
+                        tint = AppColors.current.accent,
                         modifier = Modifier.size(Dimens.IconLG)
                     )
                     Spacer(modifier = Modifier.width(Spacing.MD))
@@ -188,7 +184,7 @@ private fun ScenarioListView(
                             text = "${scenario.steps.size} steps",
                             style = MaterialTheme.typography.labelSmall,
                             fontFamily = FontFamily.Monospace,
-                            color = NeonCyan
+                            color = AppColors.current.cyan
                         )
                     }
                     Icon(
@@ -227,7 +223,7 @@ private fun StepVisualizationView(
             text = stringResource(R.string.visualizer_step, stepIndex + 1, totalSteps),
             style = MaterialTheme.typography.labelMedium,
             fontFamily = FontFamily.Monospace,
-            color = RustOrange,
+            color = AppColors.current.accent,
             modifier = Modifier.padding(bottom = Spacing.SM)
         )
 
@@ -243,7 +239,7 @@ private fun StepVisualizationView(
                 text = step.code,
                 style = MaterialTheme.typography.bodySmall,
                 fontFamily = FontFamily.Monospace,
-                color = NeonCyan,
+                color = AppColors.current.cyan,
                 lineHeight = 18.sp,
                 modifier = Modifier.padding(Dimens.CardPadding)
             )
@@ -257,7 +253,7 @@ private fun StepVisualizationView(
             style = MaterialTheme.typography.labelLarge,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
-            color = RustOrange,
+            color = AppColors.current.accent,
             modifier = Modifier.padding(bottom = Spacing.SM)
         )
 
@@ -300,9 +296,9 @@ private fun StepVisualizationView(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(Dimens.CardRadius),
             colors = CardDefaults.cardColors(
-                containerColor = NeonCyan.copy(alpha = Alpha.BORDER)
+                containerColor = AppColors.current.cyan.copy(alpha = Alpha.BORDER)
             ),
-            border = BorderStroke(Dimens.Divider, NeonCyan.copy(alpha = Alpha.MUTED))
+            border = BorderStroke(Dimens.Divider, AppColors.current.cyan.copy(alpha = Alpha.MUTED))
         ) {
             Text(
                 text = step.annotation,
@@ -325,7 +321,7 @@ private fun StepVisualizationView(
                 enabled = hasPrevious,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(Dimens.CardRadius),
-                border = BorderStroke(Dimens.Divider, if (hasPrevious) RustOrange.copy(alpha = Alpha.MUTED) else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER))
+                border = BorderStroke(Dimens.Divider, if (hasPrevious) AppColors.current.accent.copy(alpha = Alpha.MUTED) else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER))
             ) {
                 Text(stringResource(R.string.visualizer_previous))
             }
@@ -333,7 +329,7 @@ private fun StepVisualizationView(
                 onClick = onNext,
                 enabled = hasNext,
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = RustOrange),
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent),
                 shape = RoundedCornerShape(Dimens.CardRadius)
             ) {
                 Text(stringResource(R.string.visualizer_next))
@@ -348,10 +344,10 @@ private fun StepVisualizationView(
 private fun StackVariableCard(variable: StackVariable) {
     val statusColor by animateColorAsState(
         targetValue = when (variable.status) {
-            VariableStatus.ACTIVE -> SuccessGreen
-            VariableStatus.MOVED -> WarningAmber
-            VariableStatus.DROPPED -> ErrorNeon
-            VariableStatus.BORROWED -> NeonCyan
+            VariableStatus.ACTIVE -> AppColors.current.success
+            VariableStatus.MOVED -> AppColors.current.amber
+            VariableStatus.DROPPED -> AppColors.current.error
+            VariableStatus.BORROWED -> AppColors.current.cyan
         },
         label = "statusColor"
     )
@@ -396,7 +392,7 @@ private fun StackVariableCard(variable: StackVariable) {
 
 @Composable
 private fun HeapAllocationCard(alloc: HeapAllocation) {
-    val statusColor = if (alloc.status == AllocationStatus.ALIVE) SuccessGreen else ErrorNeon
+    val statusColor = if (alloc.status == AllocationStatus.ALIVE) AppColors.current.success else AppColors.current.error
 
     Card(
         modifier = Modifier.fillMaxWidth(),

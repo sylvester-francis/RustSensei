@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.BookViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 internal fun BookChapterView(viewModel: BookViewModel) {
@@ -123,7 +123,7 @@ internal fun BookChapterView(viewModel: BookViewModel) {
                                 Icon(
                                     Icons.Default.CheckCircle,
                                     contentDescription = "Completed",
-                                    tint = SuccessGreen,
+                                    tint = AppColors.current.success,
                                     modifier = Modifier.size(22.dp)
                                 )
                             } else {

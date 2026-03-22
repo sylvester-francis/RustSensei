@@ -57,10 +57,9 @@ import com.sylvester.rustsensei.content.DocMethod
 import com.sylvester.rustsensei.ui.components.CodeBlock
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.DocsViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -156,8 +155,8 @@ private fun DocIndexView(
                     fontFamily = FontFamily.Monospace
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RustOrange,
-                    cursorColor = RustOrange
+                    focusedBorderColor = AppColors.current.accent,
+                    cursorColor = AppColors.current.accent
                 ),
                 shape = RoundedCornerShape(Dimens.CardRadius)
             )
@@ -214,7 +213,7 @@ private fun DocTypeCard(
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    color = NeonCyan
+                    color = AppColors.current.cyan
                 )
                 Spacer(modifier = Modifier.height(Spacing.XXS))
                 Text(
@@ -269,7 +268,7 @@ private fun DocDetailView(
                         style = MaterialTheme.typography.bodyMedium,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = NeonCyan
+                        color = AppColors.current.cyan
                     )
                     Spacer(modifier = Modifier.height(Spacing.MD))
                     Text(
@@ -288,7 +287,7 @@ private fun DocDetailView(
                 text = stringResource(R.string.docs_methods),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = RustOrange,
+                color = AppColors.current.accent,
                 modifier = Modifier.padding(bottom = Spacing.SM)
             )
         }
@@ -339,7 +338,7 @@ private fun MethodItem(method: DocMethod) {
                         text = method.signature,
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         maxLines = if (expanded) Int.MAX_VALUE else 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -385,7 +384,7 @@ private fun MethodItem(method: DocMethod) {
                         text = stringResource(R.string.docs_example),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = RustOrange,
+                        color = AppColors.current.accent,
                         modifier = Modifier.padding(bottom = Spacing.SM)
                     )
 

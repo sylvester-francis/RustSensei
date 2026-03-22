@@ -48,12 +48,10 @@ import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
-import com.sylvester.rustsensei.ui.theme.CodeBlockBackground
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.viewmodel.PlaygroundViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,8 +113,8 @@ fun PlaygroundScreen(
                     fontSize = 13.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RustOrange,
-                    cursorColor = RustOrange
+                    focusedBorderColor = AppColors.current.accent,
+                    cursorColor = AppColors.current.accent
                 ),
                 shape = RoundedCornerShape(Dimens.CardRadius)
             )
@@ -141,7 +139,7 @@ fun PlaygroundScreen(
                         containerColor = if (uiState.isRunning)
                             MaterialTheme.colorScheme.error
                         else
-                            RustOrange
+                            AppColors.current.accent
                     ),
                     shape = RoundedCornerShape(Dimens.CardRadius)
                 ) {
@@ -234,7 +232,7 @@ fun PlaygroundScreen(
                     style = MaterialTheme.typography.labelLarge,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = RustOrange,
+                    color = AppColors.current.accent,
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
 
@@ -246,7 +244,7 @@ fun PlaygroundScreen(
                     ),
                     border = BorderStroke(
                         Dimens.Divider,
-                        RustOrange.copy(alpha = Alpha.BORDER)
+                        AppColors.current.accent.copy(alpha = Alpha.BORDER)
                     )
                 ) {
                     Box(modifier = Modifier.padding(Dimens.CardPadding)) {
@@ -259,7 +257,7 @@ fun PlaygroundScreen(
                                 fontSize = 13.sp,
                                 lineHeight = 20.sp
                             ),
-                            color = SuccessGreen
+                            color = AppColors.current.success
                         )
                     }
                 }

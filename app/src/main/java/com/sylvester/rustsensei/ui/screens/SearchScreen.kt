@@ -56,11 +56,11 @@ import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.SearchResult
 import com.sylvester.rustsensei.viewmodel.SearchViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 fun SearchScreen(
@@ -118,7 +118,7 @@ fun SearchScreen(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = RustOrange
+                    cursorColor = AppColors.current.accent
                 ),
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = FontFamily.Monospace
@@ -153,7 +153,7 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(Dimens.Divider)
-                .background(RustOrange.copy(alpha = 0.08f))
+                .background(AppColors.current.accent.copy(alpha = 0.08f))
         )
 
         if (uiState.isSearching) {
@@ -166,7 +166,7 @@ fun SearchScreen(
                 CircularProgressIndicator(
                     modifier = Modifier.size(Dimens.IconMD),
                     strokeWidth = Spacing.XXS,
-                    color = RustOrange
+                    color = AppColors.current.accent
                 )
             }
         } else if (uiState.query.isBlank()) {
@@ -201,7 +201,7 @@ fun SearchScreen(
                                 Text(
                                     "Clear All",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = RustOrange
+                                    color = AppColors.current.accent
                                 )
                             }
                         }
@@ -308,7 +308,7 @@ fun SearchScreen(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.Monospace,
-                            color = RustOrange,
+                            color = AppColors.current.accent,
                             modifier = Modifier.padding(bottom = Spacing.XS)
                         )
                     }
@@ -316,7 +316,7 @@ fun SearchScreen(
                         SearchResultRow(result = result)
                         HorizontalDivider(
                             thickness = 0.5.dp,
-                            color = RustOrange.copy(alpha = 0.06f),
+                            color = AppColors.current.accent.copy(alpha = 0.06f),
                             modifier = Modifier.padding(start = Spacing.Section)
                         )
                     }
@@ -344,7 +344,7 @@ private fun SearchResultRow(result: SearchResult) {
             modifier = Modifier
                 .size(Dimens.IconSM)
                 .padding(top = Spacing.XXS),
-            tint = RustOrange.copy(alpha = Alpha.SOFT)
+            tint = AppColors.current.accent.copy(alpha = Alpha.SOFT)
         )
         Spacer(modifier = Modifier.width(Spacing.MD))
         Column(modifier = Modifier.weight(1f)) {

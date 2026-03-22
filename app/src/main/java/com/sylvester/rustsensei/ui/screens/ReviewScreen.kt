@@ -65,12 +65,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.ui.components.ConfettiOverlay
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
-import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
-import com.sylvester.rustsensei.ui.theme.SuccessGreen
-import com.sylvester.rustsensei.ui.theme.WarningAmber
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -121,7 +117,7 @@ fun ReviewScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp)
-                        .background(RustOrange.copy(alpha = 0.10f))
+                        .background(AppColors.current.accent.copy(alpha = 0.10f))
                 )
             }
         }
@@ -137,7 +133,7 @@ fun ReviewScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = RustOrange)
+                        CircularProgressIndicator(color = AppColors.current.accent)
                     }
                 }
 
@@ -172,7 +168,7 @@ fun ReviewScreen(
                                 text = card.category,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontFamily = FontFamily.Monospace,
-                                color = RustOrange.copy(alpha = 0.7f)
+                                color = AppColors.current.accent.copy(alpha = 0.7f)
                             )
                         }
 
@@ -186,7 +182,7 @@ fun ReviewScreen(
                                 .fillMaxWidth()
                                 .height(4.dp)
                                 .clip(RoundedCornerShape(8.dp)),
-                            color = RustOrange,
+                            color = AppColors.current.accent,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                             strokeCap = StrokeCap.Round
                         )
@@ -286,7 +282,7 @@ private fun FlashCardView(
 
     // Determine which face to show based on rotation angle
     val showBack = rotation > 90f
-    val accentColor = if (showBack) NeonCyan else RustOrange
+    val accentColor = if (showBack) AppColors.current.cyan else AppColors.current.accent
 
     Card(
         modifier = modifier
@@ -413,7 +409,7 @@ private fun RatingButtons(
         ) {
             RatingButton(
                 label = "Again",
-                color = ErrorNeon,
+                color = AppColors.current.error,
                 modifier = Modifier.weight(1f),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -422,7 +418,7 @@ private fun RatingButtons(
             )
             RatingButton(
                 label = "Hard",
-                color = WarningAmber,
+                color = AppColors.current.amber,
                 modifier = Modifier.weight(1f),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -431,7 +427,7 @@ private fun RatingButtons(
             )
             RatingButton(
                 label = "Good",
-                color = RustOrange,
+                color = AppColors.current.accent,
                 modifier = Modifier.weight(1f),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -440,7 +436,7 @@ private fun RatingButtons(
             )
             RatingButton(
                 label = "Easy",
-                color = NeonCyan,
+                color = AppColors.current.cyan,
                 modifier = Modifier.weight(1f),
                 onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -493,14 +489,14 @@ private fun SessionCompleteScreen(
         Box(
             modifier = Modifier
                 .size(96.dp)
-                .background(SuccessGreen.copy(alpha = 0.10f), CircleShape),
+                .background(AppColors.current.success.copy(alpha = 0.10f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.Check,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
-                tint = SuccessGreen
+                tint = AppColors.current.success
             )
         }
 
@@ -546,9 +542,9 @@ private fun SessionCompleteScreen(
         OutlinedButton(
             onClick = onNavigateBack,
             shape = RoundedCornerShape(10.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, RustOrange.copy(alpha = 0.5f)),
+            border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.current.accent.copy(alpha = 0.5f)),
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = RustOrange
+                contentColor = AppColors.current.accent
             )
         ) {
             Icon(

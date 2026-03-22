@@ -72,8 +72,6 @@ import com.sylvester.rustsensei.llm.ChatMode
 import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.components.InputBar
@@ -82,6 +80,7 @@ import com.sylvester.rustsensei.ui.components.StreamingIndicator
 import com.sylvester.rustsensei.viewmodel.ChatContext
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
 import kotlinx.coroutines.launch
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,7 +239,7 @@ fun ChatScreen(
                         else -> ""
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = NeonCyan.copy(alpha = Alpha.SECONDARY),
+                    color = AppColors.current.cyan.copy(alpha = Alpha.SECONDARY),
                     modifier = Modifier.padding(horizontal = Dimens.ScreenPadding, vertical = Spacing.XS),
                     fontFamily = FontFamily.Monospace,
                     fontSize = 11.sp
@@ -476,11 +475,11 @@ private fun ChatModeSelector(
             Surface(
                 onClick = { onModeSelected(mode) },
                 shape = RoundedCornerShape(Spacing.SM),
-                color = if (isSelected) RustOrange.copy(alpha = Alpha.BORDER)
+                color = if (isSelected) AppColors.current.accent.copy(alpha = Alpha.BORDER)
                         else Color.Transparent,
                 border = BorderStroke(
                     Dimens.Divider,
-                    if (isSelected) RustOrange.copy(alpha = Alpha.MUTED)
+                    if (isSelected) AppColors.current.accent.copy(alpha = Alpha.MUTED)
                     else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER)
                 ),
                 modifier = Modifier.weight(1f)
@@ -494,7 +493,7 @@ private fun ChatModeSelector(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (isSelected) RustOrange else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isSelected) AppColors.current.accent else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         maxLines = 1
                     )

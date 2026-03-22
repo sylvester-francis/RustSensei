@@ -43,10 +43,9 @@ import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.viewmodel.ExplainErrorViewModel
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,8 +109,8 @@ fun ExplainErrorScreen(
                     fontSize = 13.sp
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = RustOrange,
-                    cursorColor = RustOrange
+                    focusedBorderColor = AppColors.current.accent,
+                    cursorColor = AppColors.current.accent
                 ),
                 shape = RoundedCornerShape(Dimens.CardRadius)
             )
@@ -121,7 +120,7 @@ fun ExplainErrorScreen(
                 Spacer(modifier = Modifier.height(Spacing.SM))
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = NeonCyan.copy(alpha = Alpha.BORDER)
+                        containerColor = AppColors.current.cyan.copy(alpha = Alpha.BORDER)
                     ),
                     shape = RoundedCornerShape(Spacing.SM)
                 ) {
@@ -129,7 +128,7 @@ fun ExplainErrorScreen(
                         text = stringResource(R.string.explain_error_detected, uiState.detectedCode!!),
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         modifier = Modifier.padding(
                             horizontal = Spacing.MD,
                             vertical = Spacing.XS
@@ -150,7 +149,7 @@ fun ExplainErrorScreen(
                     .fillMaxWidth()
                     .height(Dimens.ButtonHeight),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = RustOrange
+                    containerColor = AppColors.current.accent
                 ),
                 shape = RoundedCornerShape(Dimens.CardRadius)
             ) {
@@ -206,7 +205,7 @@ fun ExplainErrorScreen(
                     style = MaterialTheme.typography.labelLarge,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = RustOrange,
+                    color = AppColors.current.accent,
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
 
@@ -218,7 +217,7 @@ fun ExplainErrorScreen(
                     ),
                     border = BorderStroke(
                         Dimens.Divider,
-                        RustOrange.copy(alpha = Alpha.BORDER)
+                        AppColors.current.accent.copy(alpha = Alpha.BORDER)
                     )
                 ) {
                     Text(

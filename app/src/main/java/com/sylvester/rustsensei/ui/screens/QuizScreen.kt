@@ -83,11 +83,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.data.QuizQuestion
 import com.sylvester.rustsensei.ui.components.ConfettiOverlay
+import com.sylvester.rustsensei.ui.theme.AppColors
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
 import com.sylvester.rustsensei.ui.theme.ErrorNeon
-import com.sylvester.rustsensei.ui.theme.NeonCyan
-import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.SuccessGreen
 import com.sylvester.rustsensei.ui.theme.WarningAmber
@@ -247,13 +246,13 @@ private fun QuizListView(viewModel: QuizViewModel) {
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .clip(CircleShape)
-                                    .background(RustOrange.copy(alpha = 0.10f)),
+                                    .background(AppColors.current.accent.copy(alpha = 0.10f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
                                     Icons.Default.PlayArrow,
                                     contentDescription = "Start quiz",
-                                    tint = RustOrange,
+                                    tint = AppColors.current.accent,
                                     modifier = Modifier.size(28.dp)
                                 )
                             }
@@ -278,7 +277,7 @@ private fun QuizListView(viewModel: QuizViewModel) {
                                 Icon(
                                     Icons.Default.CheckCircle,
                                     contentDescription = "Passed",
-                                    tint = SuccessGreen,
+                                    tint = AppColors.current.success,
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
@@ -368,7 +367,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                     .height(8.dp)
                     .padding(horizontal = 8.dp)
                     .clip(RoundedCornerShape(4.dp)),
-                color = RustOrange,
+                color = AppColors.current.accent,
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 strokeCap = StrokeCap.Round
             )
@@ -411,7 +410,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                     style = MaterialTheme.typography.labelSmall,
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 1.5.sp,
-                    color = RustOrange.copy(alpha = 0.7f)
+                    color = AppColors.current.accent.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -455,7 +454,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                 if (uiState.answeredCurrent) {
                     Spacer(modifier = Modifier.height(16.dp))
                     val isCorrect = uiState.currentAnswerCorrect
-                    val accentColor = if (isCorrect) SuccessGreen else ErrorNeon
+                    val accentColor = if (isCorrect) AppColors.current.success else AppColors.current.error
 
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -517,7 +516,7 @@ private fun QuizInProgressView(viewModel: QuizViewModel) {
                     .padding(horizontal = 20.dp, vertical = 12.dp)
                     .height(56.dp),
                 shape = MaterialTheme.shapes.large,
-                colors = ButtonDefaults.buttonColors(containerColor = RustOrange)
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent)
             ) {
                 Text(
                     text = if (isLast) "See Results" else "Continue",
@@ -553,16 +552,16 @@ private fun MultipleChoiceAnswers(
             val isCorrect = index == question.correctIndex
 
             val borderColor = when {
-                !answered && isSelected -> RustOrange
+                !answered && isSelected -> AppColors.current.accent
                 !answered -> MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-                isCorrect -> SuccessGreen
-                isSelected -> ErrorNeon
+                isCorrect -> AppColors.current.success
+                isSelected -> AppColors.current.error
                 else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
             }
             val bgColor = when {
-                !answered && isSelected -> RustOrange.copy(alpha = 0.10f)
-                answered && isCorrect -> SuccessGreen.copy(alpha = 0.08f)
-                answered && isSelected -> ErrorNeon.copy(alpha = 0.08f)
+                !answered && isSelected -> AppColors.current.accent.copy(alpha = 0.10f)
+                answered && isCorrect -> AppColors.current.success.copy(alpha = 0.08f)
+                answered && isSelected -> AppColors.current.error.copy(alpha = 0.08f)
                 else -> MaterialTheme.colorScheme.surfaceContainer
             }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
@@ -607,9 +606,9 @@ private fun MultipleChoiceAnswers(
                         modifier = Modifier.weight(1f)
                     )
                     if (answered && isCorrect) {
-                        Icon(Icons.Default.CheckCircle, null, tint = SuccessGreen, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.CheckCircle, null, tint = AppColors.current.success, modifier = Modifier.size(20.dp))
                     } else if (answered && isSelected && !isCorrect) {
-                        Icon(Icons.Default.Close, null, tint = ErrorNeon, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Close, null, tint = AppColors.current.error, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -634,16 +633,16 @@ private fun TrueFalseAnswers(
             val isCorrect = value == question.correctAnswer
 
             val borderColor = when {
-                !answered && isSelected -> RustOrange
+                !answered && isSelected -> AppColors.current.accent
                 !answered -> MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-                isCorrect -> SuccessGreen
-                isSelected -> ErrorNeon
+                isCorrect -> AppColors.current.success
+                isSelected -> AppColors.current.error
                 else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
             }
             val bgColor = when {
-                !answered && isSelected -> RustOrange.copy(alpha = 0.10f)
-                answered && isCorrect -> SuccessGreen.copy(alpha = 0.08f)
-                answered && isSelected -> ErrorNeon.copy(alpha = 0.08f)
+                !answered && isSelected -> AppColors.current.accent.copy(alpha = 0.10f)
+                answered && isCorrect -> AppColors.current.success.copy(alpha = 0.08f)
+                answered && isSelected -> AppColors.current.error.copy(alpha = 0.08f)
                 else -> MaterialTheme.colorScheme.surfaceContainer
             }
             val borderW = if ((answered && (isCorrect || isSelected)) || (!answered && isSelected)) 2.dp else 1.dp
@@ -671,9 +670,9 @@ private fun TrueFalseAnswers(
                     if (answered) {
                         Spacer(modifier = Modifier.height(4.dp))
                         if (isCorrect) {
-                            Icon(Icons.Default.CheckCircle, null, tint = SuccessGreen, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.CheckCircle, null, tint = AppColors.current.success, modifier = Modifier.size(18.dp))
                         } else if (isSelected) {
-                            Icon(Icons.Default.Close, null, tint = ErrorNeon, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Close, null, tint = AppColors.current.error, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
@@ -720,10 +719,10 @@ private fun CodeCompletionAnswer(
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = RustOrange,
+                focusedBorderColor = AppColors.current.accent,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                focusedLabelColor = RustOrange,
-                cursorColor = RustOrange
+                focusedLabelColor = AppColors.current.accent,
+                cursorColor = AppColors.current.accent
             )
         )
 
@@ -736,7 +735,7 @@ private fun CodeCompletionAnswer(
                     style = MaterialTheme.typography.labelMedium,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = SuccessGreen
+                    color = AppColors.current.success
                 )
             }
         }
@@ -748,7 +747,7 @@ private fun CodeCompletionAnswer(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 enabled = codeInput.isNotBlank(),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = RustOrange)
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent)
             ) {
                 Text("Submit", fontWeight = FontWeight.Bold)
             }
@@ -879,7 +878,7 @@ private fun QuizCompleteView(
             onClick = { viewModel.startQuiz(quiz.id) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = MaterialTheme.shapes.large,
-            colors = ButtonDefaults.buttonColors(containerColor = RustOrange)
+            colors = ButtonDefaults.buttonColors(containerColor = AppColors.current.accent)
         ) {
             Icon(Icons.Default.Refresh, null, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(10.dp))
@@ -907,13 +906,13 @@ private fun QuizCompleteView(
                 Icons.Default.AutoStories,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
-                tint = NeonCyan
+                tint = AppColors.current.cyan
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 "Continue Learning Path",
                 style = MaterialTheme.typography.labelLarge,
-                color = NeonCyan,
+                color = AppColors.current.cyan,
                 fontWeight = FontWeight.Medium
             )
         }

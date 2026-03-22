@@ -7,8 +7,56 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+
+// ── Theme-aware accent colors ─────────────────────────────────────
+// Neon accents look great on dark backgrounds but are harsh on white.
+// This palette provides toned-down variants for light mode.
+
+@Immutable
+data class AppColorPalette(
+    val accent: Color,
+    val cyan: Color,
+    val amber: Color,
+    val success: Color,
+    val error: Color,
+    val codeBackground: Color,
+    val inlineCodeBg: Color,
+    val inlineCodeText: Color
+)
+
+private val DarkAccentPalette = AppColorPalette(
+    accent = RustOrange,
+    cyan = NeonCyan,
+    amber = WarningAmber,
+    success = SuccessGreen,
+    error = ErrorNeon,
+    codeBackground = Color(0xFF0A0E14),
+    inlineCodeBg = Color(0xFF1C2130),
+    inlineCodeText = Color(0xFFE8975A)
+)
+
+private val LightAccentPalette = AppColorPalette(
+    accent = Color(0xFFC03820),       // deeper rust — readable on white
+    cyan = Color(0xFF0D9488),          // teal-600 — pleasant on light surfaces
+    amber = Color(0xFFB45309),         // amber-700 — warm but not glaring
+    success = Color(0xFF15803D),       // green-700 — rich without neon
+    error = Color(0xFFDC2626),         // red-600 — clear but not neon
+    codeBackground = Color(0xFFF1F5F9), // slate-100 — soft code blocks
+    inlineCodeBg = Color(0xFFE8EDF2),
+    inlineCodeText = Color(0xFFC05621)
+)
+
+val LocalAppColors = staticCompositionLocalOf { DarkAccentPalette }
+
+object AppColors {
+    val current: AppColorPalette
+        @Composable get() = LocalAppColors.current
+}
 
 private val DarkColorScheme = darkColorScheme(
     primary = RustOrange,
@@ -94,11 +142,14 @@ fun RustSenseiTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val accentPalette = if (darkTheme) DarkAccentPalette else LightAccentPalette
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = RustSenseiTypography,
-        shapes = RustSenseiShapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalAppColors provides accentPalette) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = RustSenseiTypography,
+            shapes = RustSenseiShapes,
+            content = content
+        )
+    }
 }

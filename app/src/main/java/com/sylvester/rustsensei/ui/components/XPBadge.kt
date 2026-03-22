@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sylvester.rustsensei.ui.theme.WarningAmber
+import com.sylvester.rustsensei.ui.theme.AppColors
 
 @Composable
 fun XPBadge(
@@ -65,7 +65,7 @@ fun XPBadge(
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold
                 ),
-                color = WarningAmber
+                color = AppColors.current.amber
             )
 
             Spacer(modifier = Modifier.width(4.dp))

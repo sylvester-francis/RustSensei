@@ -72,6 +72,7 @@ import com.sylvester.rustsensei.ui.theme.Dimens
 
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainer
 import com.sylvester.rustsensei.ui.theme.DarkSurfaceContainerHigh
+import com.sylvester.rustsensei.ui.theme.AppColors
 import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.RustOrange
 import com.sylvester.rustsensei.ui.theme.Spacing
@@ -141,7 +142,7 @@ fun LearningPathScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(Dimens.Divider)
-                        .background(RustOrange.copy(alpha = Alpha.BORDER))
+                        .background(AppColors.current.accent.copy(alpha = Alpha.BORDER))
                 )
             }
         }
@@ -318,7 +319,7 @@ private fun PathCard(
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = if (percentInt == 100) SuccessGreen
+                        color = if (percentInt == 100) AppColors.current.success
                         else if (percentInt > 0) accent
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -378,7 +379,7 @@ private fun PathDetailContent(
                             .fillMaxWidth()
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
-                        color = RustOrange,
+                        color = AppColors.current.accent,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         strokeCap = StrokeCap.Round
                     )
@@ -389,7 +390,7 @@ private fun PathDetailContent(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.Monospace,
-                    color = RustOrange
+                    color = AppColors.current.accent
                 )
             }
 
@@ -448,7 +449,7 @@ private fun NodeStepItem(
                     Box(
                         modifier = Modifier
                             .size(Spacing.Section)
-                            .background(RustOrange, CircleShape),
+                            .background(AppColors.current.accent, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -475,10 +476,10 @@ private fun NodeStepItem(
                     Box(
                         modifier = Modifier
                             .size(Spacing.Section)
-                            .background(RustOrange.copy(alpha = Alpha.BORDER), CircleShape)
+                            .background(AppColors.current.accent.copy(alpha = Alpha.BORDER), CircleShape)
                             .border(
                                 width = 3.dp,
-                                color = RustOrange.copy(alpha = pulseAlpha),
+                                color = AppColors.current.accent.copy(alpha = pulseAlpha),
                                 shape = CircleShape
                             ),
                         contentAlignment = Alignment.Center
@@ -487,7 +488,7 @@ private fun NodeStepItem(
                             Icons.Default.PlayArrow,
                             contentDescription = "Current",
                             modifier = Modifier.size(Dimens.IconMD),
-                            tint = RustOrange
+                            tint = AppColors.current.accent
                         )
                     }
                 }
@@ -515,8 +516,8 @@ private fun NodeStepItem(
             if (!isLastStep) {
                 val nextStep = step // We determine line style based on current node state
                 val lineColor = when {
-                    isCompleted -> RustOrange
-                    isCurrentStep -> RustOrange.copy(alpha = Alpha.MUTED)
+                    isCompleted -> AppColors.current.accent
+                    isCurrentStep -> AppColors.current.accent.copy(alpha = Alpha.MUTED)
                     else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.BORDER)
                 }
                 Box(
@@ -546,8 +547,8 @@ private fun NodeStepItem(
                     contentDescription = null,
                     modifier = Modifier.size(14.dp),
                     tint = when {
-                        isCompleted -> RustOrange
-                        isCurrentStep -> RustOrange
+                        isCompleted -> AppColors.current.accent
+                        isCurrentStep -> AppColors.current.accent
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     }
                 )
@@ -558,8 +559,8 @@ private fun NodeStepItem(
                     fontFamily = FontFamily.Monospace,
                     letterSpacing = 0.5.sp,
                     color = when {
-                        isCompleted -> RustOrange.copy(alpha = Alpha.SOFT)
-                        isCurrentStep -> RustOrange
+                        isCompleted -> AppColors.current.accent.copy(alpha = Alpha.SOFT)
+                        isCurrentStep -> AppColors.current.accent
                         else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
                     }
                 )
@@ -571,7 +572,7 @@ private fun NodeStepItem(
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp,
-                        color = NeonCyan,
+                        color = AppColors.current.cyan,
                         fontSize = 9.sp
                     )
                 }
