@@ -95,6 +95,42 @@
     <string name="no_results_found">No results found</string>
     <string name="try_different_keywords">Try different keywords</string>
 
+    <!-- Appearance -->
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+
+    <!-- Explain Error -->
+    <string name="explain_error_title">Explain Error</string>
+    <string name="explain_error_subtitle">Paste a Rust compiler error and get a clear explanation</string>
+    <string name="explain_error_input_label">Compiler error</string>
+    <string name="explain_error_input_hint">error[E0382]: borrow of moved value…</string>
+    <string name="explain_error_detected">Detected: %1$s — bundled reference available</string>
+    <string name="explain_error_button">Explain This Error</string>
+    <string name="explain_error_explaining">Explaining…</string>
+    <string name="explain_error_model_needed">AI model required. Download from Settings.</string>
+    <string name="explain_error_result_header">Explanation</string>
+    <string name="explain_error_card_subtitle">Decode compiler errors</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">Daily Challenge</string>
+    <string name="daily_challenge_card_subtitle">New challenge every day</string>
+    <string name="daily_challenge_loading">Loading today\'s challenge…</string>
+    <string name="daily_challenge_unavailable">No challenge available today</string>
+    <string name="daily_challenge_completed">Challenge completed!</string>
+    <string name="daily_challenge_time">Completed in %1$dm %2$ds</string>
+    <string name="daily_challenge_starter_code">Starter Code</string>
+    <string name="daily_challenge_submit">Submit Challenge</string>
+
+    <!-- Chat Modes -->
+    <string name="chat_mode_direct">Direct</string>
+    <string name="chat_mode_socratic">Socratic</string>
+    <string name="chat_mode_rubber_duck">Rubber Duck</string>
+    <string name="socratic_description">I\'ll guide you with questions instead of giving direct answers</string>
+    <string name="rubber_duck_description">Explain concepts to me — I\'ll ask follow-ups and correct misconceptions</string>
+
     <!-- Settings -->
     <string name="settings_subtitle">Model, inference &amp; account</string>
     <string name="model_management">Model Management</string>
@@ -107,4 +143,76 @@
     <string name="destructive_actions">Destructive actions</string>
     <string name="clear_all_conversations">Clear All Conversations</string>
     <string name="delete_active_model">Delete Active Model</string>
+
+    <!-- Study Reminders -->
+    <string name="study_reminders">Study Reminders</string>
+    <string name="study_reminders_desc">Get notified when flashcards are due or your streak is at risk</string>
+    <string name="study_reminders_channel">Study Reminders</string>
+    <string name="study_reminders_channel_desc">Reminders for flashcard reviews and study streaks</string>
+    <string name="reminder_flashcards_title">Flashcards waiting for you</string>
+    <string name="reminder_streak_title">Don\'t break your streak!</string>
+    <string name="reminder_streak_body">You have a %1$d-day streak. Study today to keep it going!</string>
+
+    <plurals name="reminder_flashcards_body">
+        <item quantity="one">You have %1$d flashcard due for review</item>
+        <item quantity="other">You have %1$d flashcards due for review</item>
+    </plurals>
+
+    <!-- Refactoring Challenges -->
+    <string name="refactoring_title">Refactoring</string>
+    <string name="refactoring_subtitle">Make ugly code idiomatic</string>
+    <string name="refactoring_original_code">Original Code</string>
+    <string name="refactoring_your_version">Your Version</string>
+    <string name="refactoring_submit">Score My Code</string>
+    <string name="refactoring_scoring">Scoring\u2026</string>
+    <string name="refactoring_score_label">Score</string>
+    <string name="refactoring_show_solution">Show Solution</string>
+    <string name="refactoring_no_challenges">No refactoring challenges available</string>
+    <string name="refactoring_card_subtitle">Improve code style</string>
+
+    <!-- Playground -->
+    <string name="playground_title">Playground</string>
+    <string name="playground_subtitle">Write and simulate Rust code</string>
+    <string name="playground_run">Run</string>
+    <string name="playground_stop">Stop</string>
+    <string name="playground_running">Running\u2026</string>
+    <string name="playground_output">Output</string>
+    <string name="playground_simulated_disclaimer">Simulated output \u2014 results are AI-generated approximations</string>
+    <string name="playground_model_needed">AI model required to simulate execution</string>
+    <string name="playground_clear">Clear</string>
+    <string name="playground_card_subtitle">Run Rust code</string>
+
+    <!-- Ownership Visualizer -->
+    <string name="visualizer_title">Ownership Visualizer</string>
+    <string name="visualizer_subtitle">Interactive diagrams showing how ownership, borrowing, and lifetimes work</string>
+    <string name="visualizer_step">Step %1$d of %2$d</string>
+    <string name="visualizer_memory">Memory Layout</string>
+    <string name="visualizer_stack">Stack</string>
+    <string name="visualizer_heap">Heap</string>
+    <string name="visualizer_previous">Previous</string>
+    <string name="visualizer_next">Next</string>
+    <string name="visualizer_card_subtitle">See ownership in action</string>
+
+    <!-- Docs Browser -->
+    <string name="docs_title">Rust Docs</string>
+    <string name="docs_subtitle">Offline stdlib reference</string>
+    <string name="docs_search_hint">Search types\u2026</string>
+    <string name="docs_methods">Methods</string>
+    <string name="docs_example">Example</string>
+    <string name="docs_no_results">No matching types found</string>
+    <string name="docs_card_subtitle">Browse stdlib docs</string>
+
+    <!-- Projects -->
+    <string name="projects_title">Projects</string>
+    <string name="projects_subtitle">Build real Rust projects step by step</string>
+    <string name="projects_steps">Steps</string>
+    <string name="projects_starter_code">Starter Code</string>
+    <string name="projects_mark_complete">Mark Step Complete</string>
+    <string name="projects_card_subtitle">Guided mini-projects</string>
+
+    <!-- Widget -->
+    <string name="widget_description">Shows your study streak and due flashcards at a glance</string>
+    <string name="widget_streak_label">day streak</string>
+    <string name="widget_cards_due">cards due</string>
+    <string name="widget_continue">Tap to continue learning \u2192</string>
 </resources>

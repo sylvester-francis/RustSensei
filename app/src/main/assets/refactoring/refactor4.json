@@ -1,0 +1,10 @@
+{
+  "id": "refactor4",
+  "title": "Manual Iterator",
+  "difficulty": "intermediate",
+  "description": "This code manually iterates with an index where iterator methods would be cleaner. Refactor to use iterator combinators.",
+  "uglyCode": "fn sum_even_squares(numbers: &Vec<i32>) -> i32 {\n    let mut result = 0;\n    let mut i = 0;\n    while i < numbers.len() {\n        if numbers[i] % 2 == 0 {\n            result += numbers[i] * numbers[i];\n        }\n        i += 1;\n    }\n    result\n}",
+  "hints": ["Use .iter().filter().map().sum()", "Iterator combinators replace the manual loop and index"],
+  "idiomaticSolution": "fn sum_even_squares(numbers: &[i32]) -> i32 {\n    numbers.iter()\n        .filter(|&&n| n % 2 == 0)\n        .map(|&n| n * n)\n        .sum()\n}",
+  "scoringCriteria": "Uses iterator combinators (filter, map, sum). No manual indexing. Uses &[i32] instead of &Vec<i32>."
+}

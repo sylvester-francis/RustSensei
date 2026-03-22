@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -50,14 +54,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import com.sylvester.rustsensei.MainActivity
 import com.sylvester.rustsensei.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.data.ThemePreference
 import com.sylvester.rustsensei.llm.ModelManager
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.CrispWhite
@@ -79,7 +87,9 @@ import com.sylvester.rustsensei.viewmodel.ModelViewModel
 fun SettingsScreen(
     chatViewModel: ChatViewModel,
     modelViewModel: ModelViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    remindersEnabled: Boolean = false,
+    onRemindersToggled: (Boolean) -> Unit = {}
 ) {
     val config by chatViewModel.config.collectAsState()
     val modelState by modelViewModel.uiState.collectAsState()
@@ -108,6 +118,111 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = Spacing.SM)
             )
 
+            // --- Appearance Section ---
+            SectionHeader(stringResource(R.string.appearance))
+            Spacer(modifier = Modifier.height(Spacing.MD))
+
+            val activity = LocalContext.current as? MainActivity
+            val currentTheme by (activity?.themePreference
+                ?: kotlinx.coroutines.flow.MutableStateFlow(ThemePreference.SYSTEM))
+                .collectAsState()
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Dimens.CardRadius),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
+            ) {
+                Column(modifier = Modifier.padding(Dimens.CardPadding)) {
+                    Text(
+                        text = stringResource(R.string.theme),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        color = RustOrange
+                    )
+                    Spacer(modifier = Modifier.height(Spacing.MD))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.SM)
+                    ) {
+                        ThemePreference.entries.forEach { pref ->
+                            val isSelected = pref == currentTheme
+                            val label = when (pref) {
+                                ThemePreference.SYSTEM -> stringResource(R.string.theme_system)
+                                ThemePreference.DARK -> stringResource(R.string.theme_dark)
+                                ThemePreference.LIGHT -> stringResource(R.string.theme_light)
+                            }
+                            Surface(
+                                onClick = { activity?.updateThemePreference(pref) },
+                                shape = RoundedCornerShape(Spacing.SM),
+                                color = if (isSelected) RustOrange.copy(alpha = Alpha.BORDER)
+                                        else Color.Transparent,
+                                border = BorderStroke(
+                                    Dimens.Divider,
+                                    if (isSelected) RustOrange.copy(alpha = Alpha.MUTED)
+                                    else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER)
+                                ),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (isSelected) RustOrange
+                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    modifier = Modifier.padding(vertical = Spacing.MD, horizontal = Spacing.SM),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // --- Study Reminders Section ---
+            SectionHeader(stringResource(R.string.study_reminders))
+            Spacer(modifier = Modifier.height(Spacing.MD))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(Dimens.CardRadius),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(Dimens.CardPadding),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.study_reminders),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.height(Spacing.XS))
+                        Text(
+                            text = stringResource(R.string.study_reminders_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = remindersEnabled,
+                        onCheckedChange = onRemindersToggled,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = RustOrange,
+                            checkedTrackColor = RustOrange.copy(alpha = Alpha.MUTED)
+                        )
+                    )
+                }
+            }
+
             // --- Model Management Section ---
             SectionHeader("Model Management")
             Spacer(modifier = Modifier.height(Spacing.MD))
@@ -116,7 +231,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
@@ -139,7 +254,7 @@ fun SettingsScreen(
                                     text = activeModel.displayName,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = CrispWhite
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = "${activeModel.parameterSize} parameters",
@@ -212,7 +327,7 @@ fun SettingsScreen(
                         },
                     shape = RoundedCornerShape(Dimens.CardRadius),
                     colors = CardDefaults.cardColors(
-                        containerColor = DarkSurfaceContainerHigh
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                     )
                 ) {
                     Row(
@@ -227,7 +342,7 @@ fun SettingsScreen(
                                     text = model.displayName,
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Medium,
-                                    color = CrispWhite
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 if (isLoaded) {
                                     Spacer(modifier = Modifier.width(Spacing.SM))
@@ -335,7 +450,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
@@ -411,7 +526,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
                 border = BorderStroke(Dimens.Divider, ErrorNeon.copy(alpha = Alpha.BORDER))
             ) {
@@ -484,7 +599,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
@@ -518,7 +633,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {
@@ -584,7 +699,7 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(Dimens.CardRadius),
                 colors = CardDefaults.cardColors(
-                    containerColor = DarkSurfaceContainerHigh
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 )
             ) {
                 Column(modifier = Modifier.padding(Dimens.CardPadding)) {

@@ -1,0 +1,10 @@
+{
+  "id": "refactor2",
+  "title": "Clone Abuse",
+  "difficulty": "beginner",
+  "description": "This code clones values unnecessarily. Refactor to use references where possible.",
+  "uglyCode": "fn longest_word(words: &Vec<String>) -> String {\n    let mut longest = words[0].clone();\n    for word in words {\n        if word.len() > longest.len() {\n            longest = word.clone();\n        }\n    }\n    longest\n}",
+  "hints": ["Can you return a reference instead of an owned String?", "The function signature might need to change"],
+  "idiomaticSolution": "fn longest_word(words: &[String]) -> &str {\n    let mut longest = &words[0];\n    for word in words {\n        if word.len() > longest.len() {\n            longest = word;\n        }\n    }\n    longest\n}",
+  "scoringCriteria": "Returns a reference instead of cloning. Uses &[String] instead of &Vec<String>. No .clone() calls."
+}

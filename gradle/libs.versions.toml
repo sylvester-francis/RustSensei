@@ -22,6 +22,8 @@ composeRichtext = "1.0.0-alpha01"
 litertlm = "0.9.0-alpha06"
 hilt = "2.56.2"
 hiltNavigationCompose = "1.2.0"
+hiltWork = "1.2.0"
+glance = "1.1.1"
 kotlinxSerializationJson = "1.7.3"
 
 [libraries]
@@ -69,6 +71,11 @@ litertlm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", v
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
+
+# Glance (App Widgets)
+glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 
 # Kotlin Serialization
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

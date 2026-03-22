@@ -246,6 +246,10 @@ class LearningPathViewModelTest {
         override suspend fun getTotalExercisesCount() = throw NotImplementedError()
         override suspend fun getQuizIndex() = throw NotImplementedError()
         override suspend fun getQuiz(quizId: String) = throw NotImplementedError()
+        override suspend fun getRefactoringChallenges() = emptyList<com.sylvester.rustsensei.content.RefactoringChallenge>()
+        override suspend fun getRefactoringChallenge(id: String) = null
+        override suspend fun getDocIndex() = emptyList<com.sylvester.rustsensei.content.DocIndexEntry>()
+        override suspend fun getDoc(typeId: String) = null
     }
 
     private class FakeProgressDao : ProgressDao {
@@ -294,5 +298,15 @@ class LearningPathViewModelTest {
         override suspend fun getCompletedExerciseCountByCategory(category: String) = 0
         override suspend fun getCompletedExercisesCountSync() = 0
         override suspend fun getCompletedSectionsCountSync() = 0
+        override suspend fun getStatsForDate(date: String) = null
+        override suspend fun insertDailyChallengeResult(result: com.sylvester.rustsensei.data.DailyChallengeResult) = Unit
+        override suspend fun getDailyChallengeResult(date: String) = null
+        override suspend fun getDailyChallengeCompletedCount() = 0
+        override suspend fun insertRefactoringResult(result: com.sylvester.rustsensei.data.RefactoringResult) = Unit
+        override suspend fun getBestRefactoringResult(challengeId: String) = null
+        override fun getAllRefactoringResults(): Flow<List<com.sylvester.rustsensei.data.RefactoringResult>> = MutableStateFlow(emptyList())
+        override suspend fun upsertProjectProgress(progress: com.sylvester.rustsensei.data.ProjectProgress) = Unit
+        override suspend fun getProjectProgress(projectId: String) = emptyList<com.sylvester.rustsensei.data.ProjectProgress>()
+        override fun observeProjectProgress(projectId: String): Flow<List<com.sylvester.rustsensei.data.ProjectProgress>> = MutableStateFlow(emptyList())
     }
 }

@@ -4,25 +4,44 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sylvester.rustsensei.ui.screens.DailyChallengeScreen
+import com.sylvester.rustsensei.ui.screens.DocsScreen
+import com.sylvester.rustsensei.ui.screens.ExplainErrorScreen
 import com.sylvester.rustsensei.ui.screens.LearningPathScreen
 import com.sylvester.rustsensei.ui.screens.MainScreen
 import com.sylvester.rustsensei.ui.screens.ModelSetupScreen
+import com.sylvester.rustsensei.ui.screens.PlaygroundScreen
+import com.sylvester.rustsensei.ui.screens.ProjectScreen
+import com.sylvester.rustsensei.ui.screens.RefactoringScreen
+import com.sylvester.rustsensei.ui.screens.VisualizerScreen
 import com.sylvester.rustsensei.ui.screens.QuizScreen
 import com.sylvester.rustsensei.ui.screens.ReviewScreen
 import com.sylvester.rustsensei.ui.screens.SearchScreen
 import com.sylvester.rustsensei.ui.screens.SettingsScreen
+import com.sylvester.rustsensei.data.PreferencesManager
+import com.sylvester.rustsensei.work.ReminderScheduler
 import com.sylvester.rustsensei.viewmodel.BookViewModel
 import com.sylvester.rustsensei.viewmodel.ChatViewModel
+import com.sylvester.rustsensei.viewmodel.DailyChallengeViewModel
+import com.sylvester.rustsensei.viewmodel.DocsViewModel
+import com.sylvester.rustsensei.viewmodel.ExplainErrorViewModel
 import com.sylvester.rustsensei.viewmodel.ExerciseViewModel
 import com.sylvester.rustsensei.viewmodel.LearningPathViewModel
 import com.sylvester.rustsensei.viewmodel.ModelViewModel
 import com.sylvester.rustsensei.viewmodel.ProgressViewModel
 import com.sylvester.rustsensei.viewmodel.QuizViewModel
 import com.sylvester.rustsensei.viewmodel.ReferenceViewModel
+import com.sylvester.rustsensei.viewmodel.PlaygroundViewModel
+import com.sylvester.rustsensei.viewmodel.ProjectViewModel
+import com.sylvester.rustsensei.viewmodel.RefactoringViewModel
+import com.sylvester.rustsensei.viewmodel.VisualizerViewModel
 import com.sylvester.rustsensei.viewmodel.ReviewViewModel
 import com.sylvester.rustsensei.viewmodel.SearchViewModel
 import kotlinx.serialization.Serializable
@@ -38,9 +57,19 @@ import kotlinx.serialization.Serializable
 @Serializable object LearningPathRoute
 @Serializable object QuizRoute
 @Serializable object SearchRoute
+@Serializable object ExplainErrorRoute
+@Serializable object DailyChallengeRoute
+@Serializable object PlaygroundRoute
+@Serializable object VisualizerRoute
+@Serializable object ProjectRoute
+@Serializable object RefactoringRoute
+@Serializable object DocsRoute
 
 @Composable
-fun RustSenseiApp() {
+fun RustSenseiApp(
+    preferencesManager: PreferencesManager,
+    reminderScheduler: ReminderScheduler
+) {
     val navController = rememberNavController()
 
     val chatViewModel: ChatViewModel = hiltViewModel()
@@ -53,6 +82,13 @@ fun RustSenseiApp() {
     val learningPathViewModel: LearningPathViewModel = hiltViewModel()
     val quizViewModel: QuizViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
+    val explainErrorViewModel: ExplainErrorViewModel = hiltViewModel()
+    val dailyChallengeViewModel: DailyChallengeViewModel = hiltViewModel()
+    val playgroundViewModel: PlaygroundViewModel = hiltViewModel()
+    val refactoringViewModel: RefactoringViewModel = hiltViewModel()
+    val visualizerViewModel: VisualizerViewModel = hiltViewModel()
+    val projectViewModel: ProjectViewModel = hiltViewModel()
+    val docsViewModel: DocsViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
@@ -89,7 +125,61 @@ fun RustSenseiApp() {
                 onNavigateToReview = { navController.navigate(ReviewRoute) },
                 onNavigateToLearningPaths = { navController.navigate(LearningPathRoute) },
                 onNavigateToQuiz = { navController.navigate(QuizRoute) },
-                onNavigateToSearch = { navController.navigate(SearchRoute) }
+                onNavigateToSearch = { navController.navigate(SearchRoute) },
+                onNavigateToExplainError = { navController.navigate(ExplainErrorRoute) },
+                onNavigateToDailyChallenge = { navController.navigate(DailyChallengeRoute) },
+                onNavigateToPlayground = { navController.navigate(PlaygroundRoute) },
+                onNavigateToRefactoring = { navController.navigate(RefactoringRoute) },
+                onNavigateToDocs = { navController.navigate(DocsRoute) }
+            )
+        }
+
+        composable<RefactoringRoute> {
+            RefactoringScreen(
+                viewModel = refactoringViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<DocsRoute> {
+            DocsScreen(
+                viewModel = docsViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<ExplainErrorRoute> {
+            ExplainErrorScreen(
+                viewModel = explainErrorViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<DailyChallengeRoute> {
+            DailyChallengeScreen(
+                viewModel = dailyChallengeViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<PlaygroundRoute> {
+            PlaygroundScreen(
+                viewModel = playgroundViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<VisualizerRoute> {
+            VisualizerScreen(
+                viewModel = visualizerViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<ProjectRoute> {
+            ProjectScreen(
+                viewModel = projectViewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -146,10 +236,24 @@ fun RustSenseiApp() {
         }
 
         composable<SettingsRoute> {
+            var remindersEnabled by remember {
+                mutableStateOf(preferencesManager.areRemindersEnabled())
+            }
+
             SettingsScreen(
                 chatViewModel = chatViewModel,
                 modelViewModel = modelViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                remindersEnabled = remindersEnabled,
+                onRemindersToggled = { enabled ->
+                    remindersEnabled = enabled
+                    preferencesManager.setRemindersEnabled(enabled)
+                    if (enabled) {
+                        reminderScheduler.scheduleReminders()
+                    } else {
+                        reminderScheduler.cancelReminders()
+                    }
+                }
             )
         }
     }

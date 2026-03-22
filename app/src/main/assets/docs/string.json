@@ -1,0 +1,17 @@
+{
+  "id": "string",
+  "typeName": "String",
+  "module": "std::string",
+  "signature": "pub struct String",
+  "description": "A UTF-8 encoded, growable string. This is the most common string type in Rust. Python equivalent: str (but owned and mutable).",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> String", "description": "Creates a new empty String.", "example": "let s = String::new();" },
+    { "name": "from", "signature": "fn from(s: &str) -> String", "description": "Creates a String from a string slice.", "example": "let s = String::from(\"hello\");" },
+    { "name": "push_str", "signature": "fn push_str(&mut self, string: &str)", "description": "Appends a string slice to this String.", "example": "let mut s = String::from(\"hello\");\ns.push_str(\" world\");" },
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the length in bytes.", "example": "let len = String::from(\"hello\").len(); // 5" },
+    { "name": "is_empty", "signature": "fn is_empty(&self) -> bool", "description": "Returns true if the string has zero length.", "example": "assert!(String::new().is_empty());" },
+    { "name": "contains", "signature": "fn contains(&self, pat: &str) -> bool", "description": "Returns true if the pattern matches a sub-slice.", "example": "assert!(\"hello world\".contains(\"world\"));" },
+    { "name": "replace", "signature": "fn replace(&self, from: &str, to: &str) -> String", "description": "Replaces all matches of a pattern with another string.", "example": "let s = \"hello\".replace(\"l\", \"r\"); // \"herro\"" },
+    { "name": "trim", "signature": "fn trim(&self) -> &str", "description": "Returns a string slice with leading and trailing whitespace removed.", "example": "let s = \" hello \".trim(); // \"hello\"" }
+  ]
+}

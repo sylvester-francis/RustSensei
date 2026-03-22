@@ -1,0 +1,9 @@
+{
+  "challenges": [
+    { "id": "refactor1", "title": "Verbose Match", "difficulty": "beginner" },
+    { "id": "refactor2", "title": "Clone Abuse", "difficulty": "beginner" },
+    { "id": "refactor3", "title": "Unwrap Everything", "difficulty": "intermediate" },
+    { "id": "refactor4", "title": "Manual Iterator", "difficulty": "intermediate" },
+    { "id": "refactor5", "title": "String Concatenation", "difficulty": "beginner" }
+  ]
+}

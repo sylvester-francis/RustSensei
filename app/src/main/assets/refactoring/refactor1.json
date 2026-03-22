@@ -1,0 +1,10 @@
+{
+  "id": "refactor1",
+  "title": "Verbose Match",
+  "difficulty": "beginner",
+  "description": "This code uses a verbose match expression where a simpler if-let or map would suffice. Make it idiomatic.",
+  "uglyCode": "fn get_name(user: &Option<String>) -> String {\n    match user {\n        Some(name) => name.clone(),\n        None => String::from(\"Anonymous\"),\n    }\n}",
+  "hints": ["Consider using unwrap_or or cloned()", "Option has a method that provides a default value"],
+  "idiomaticSolution": "fn get_name(user: &Option<String>) -> String {\n    user.clone().unwrap_or_else(|| String::from(\"Anonymous\"))\n}",
+  "scoringCriteria": "Uses unwrap_or, unwrap_or_else, or map_or instead of explicit match. Avoids unnecessary cloning if possible."
+}

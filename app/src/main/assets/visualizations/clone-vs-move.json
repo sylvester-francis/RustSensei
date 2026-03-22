@@ -1,0 +1,45 @@
+{
+  "id": "clone-vs-move",
+  "title": "Clone vs Move",
+  "description": "Clone creates a deep copy on the heap, so both variables remain valid. Move transfers ownership without copying.",
+  "relatedChapter": "ch04-ownership",
+  "steps": [
+    {
+      "label": "Create String",
+      "code": "let s1 = String::from(\"hello\");",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "s1 owns the heap-allocated string."
+    },
+    {
+      "label": "Clone s1",
+      "code": "let s2 = s1.clone();",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "s2", "type": "String", "status": "ACTIVE", "pointsTo": "heap2" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" },
+        { "id": "heap2", "value": "\"hello\"", "type": "String data (clone)", "status": "ALIVE" }
+      ],
+      "annotation": "clone() creates a new heap allocation with the same data. Both s1 and s2 are independent owners."
+    },
+    {
+      "label": "Both still valid",
+      "code": "println!(\"{} {}\", s1, s2);",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "s2", "type": "String", "status": "ACTIVE", "pointsTo": "heap2" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" },
+        { "id": "heap2", "value": "\"hello\"", "type": "String data (clone)", "status": "ALIVE" }
+      ],
+      "annotation": "Unlike move, both variables are valid after clone. The tradeoff: clone costs memory and CPU."
+    }
+  ]
+}

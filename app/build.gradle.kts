@@ -27,8 +27,8 @@ android {
         applicationId = "com.sylvester.rustsensei"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.1.0"
+        versionCode = 6
+        versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -114,6 +114,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
+
+    // Glance (App Widgets)
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
 
     // Kotlin Serialization
     implementation(libs.kotlinx.serialization.json)

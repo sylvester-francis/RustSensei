@@ -1,0 +1,15 @@
+{
+  "id": "iterator",
+  "typeName": "Iterator",
+  "module": "std::iter",
+  "signature": "pub trait Iterator { type Item; fn next(&mut self) -> Option<Self::Item>; }",
+  "description": "The trait for dealing with iterators. Iterators are lazy and composable. Python equivalent: iterator protocol (__iter__, __next__).",
+  "methods": [
+    { "name": "map", "signature": "fn map<B>(self, f: FnMut(Self::Item) -> B) -> Map<Self, F>", "description": "Transforms each element by applying a closure.", "example": "let doubled: Vec<_> = vec![1, 2, 3].iter().map(|x| x * 2).collect();" },
+    { "name": "filter", "signature": "fn filter(self, predicate: FnMut(&Self::Item) -> bool) -> Filter<Self, P>", "description": "Yields only elements that satisfy the predicate.", "example": "let evens: Vec<_> = (0..10).filter(|x| x % 2 == 0).collect();" },
+    { "name": "collect", "signature": "fn collect<B: FromIterator<Self::Item>>(self) -> B", "description": "Transforms an iterator into a collection.", "example": "let v: Vec<i32> = (1..=5).collect();" },
+    { "name": "enumerate", "signature": "fn enumerate(self) -> Enumerate<Self>", "description": "Creates an iterator that yields (index, value) pairs.", "example": "for (i, val) in v.iter().enumerate() {\n    println!(\"{}: {}\", i, val);\n}" },
+    { "name": "fold", "signature": "fn fold<B>(self, init: B, f: FnMut(B, Self::Item) -> B) -> B", "description": "Reduces the iterator to a single value (like Python reduce).", "example": "let sum = vec![1, 2, 3].iter().fold(0, |acc, x| acc + x);" },
+    { "name": "any", "signature": "fn any(&mut self, f: FnMut(Self::Item) -> bool) -> bool", "description": "Tests if any element matches the predicate.", "example": "assert!(vec![1, 2, 3].iter().any(|&x| x > 2));" }
+  ]
+}

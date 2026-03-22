@@ -2,6 +2,7 @@ package com.sylvester.rustsensei.domain
 
 import com.sylvester.rustsensei.content.RagRetriever
 import com.sylvester.rustsensei.data.ChatRepository
+import com.sylvester.rustsensei.llm.ChatMode
 import com.sylvester.rustsensei.llm.ChatTemplateFormatter
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
@@ -32,7 +33,8 @@ class SendChatMessageUseCase @Inject constructor(
         conversationId: Long,
         message: String,
         chatContext: ChatContext,
-        config: InferenceConfig
+        config: InferenceConfig,
+        chatMode: ChatMode = ChatMode.DIRECT
     ): Flow<ChatStreamEvent> = flow {
         if (!modelLifecycle.ensureLoaded()) {
             emit(ChatStreamEvent.Error("Model not available. Download from Settings."))
@@ -44,7 +46,7 @@ class SendChatMessageUseCase @Inject constructor(
         val ragContext = resolveContext(message, chatContext)
         val allMessages = chatRepository.getMessagesOnce(conversationId)
         val prompt = ChatTemplateFormatter.formatMessages(
-            allMessages, config.contextLength, ragContext = ragContext
+            allMessages, config.contextLength, ragContext = ragContext, chatMode = chatMode
         )
 
         engine.clearCache()

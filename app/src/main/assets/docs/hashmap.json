@@ -1,0 +1,16 @@
+{
+  "id": "hashmap",
+  "typeName": "HashMap<K,V>",
+  "module": "std::collections",
+  "signature": "pub struct HashMap<K, V, S = RandomState>",
+  "description": "A hash map implemented with quadratic probing and SIMD lookup. Python equivalent: dict.",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> HashMap<K, V>", "description": "Creates an empty HashMap.", "example": "let mut map: HashMap<String, i32> = HashMap::new();" },
+    { "name": "insert", "signature": "fn insert(&mut self, k: K, v: V) -> Option<V>", "description": "Inserts a key-value pair. Returns the old value if the key was already present.", "example": "let mut map = HashMap::new();\nmap.insert(\"key\", 42);" },
+    { "name": "get", "signature": "fn get(&self, k: &Q) -> Option<&V>", "description": "Returns a reference to the value for the given key.", "example": "let val = map.get(\"key\"); // Some(&42)" },
+    { "name": "contains_key", "signature": "fn contains_key(&self, k: &Q) -> bool", "description": "Returns true if the map contains the given key.", "example": "assert!(map.contains_key(\"key\"));" },
+    { "name": "remove", "signature": "fn remove(&mut self, k: &Q) -> Option<V>", "description": "Removes a key and returns its value if present.", "example": "let removed = map.remove(\"key\"); // Some(42)" },
+    { "name": "entry", "signature": "fn entry(&mut self, key: K) -> Entry<K, V>", "description": "Gets the entry for in-place manipulation.", "example": "map.entry(\"key\").or_insert(0);" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<K, V>", "description": "Returns an iterator over key-value pairs.", "example": "for (k, v) in map.iter() {\n    println!(\"{}: {}\", k, v);\n}" }
+  ]
+}

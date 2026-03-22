@@ -1,0 +1,13 @@
+{
+  "id": "box",
+  "typeName": "Box<T>",
+  "module": "std::boxed",
+  "signature": "pub struct Box<T: ?Sized>(Unique<T>)",
+  "description": "A pointer type that uniquely owns a heap allocation. Used for heap allocation, recursive types, and trait objects. No direct Python equivalent -- closest is a regular variable (Python always heap-allocates).",
+  "methods": [
+    { "name": "new", "signature": "fn new(x: T) -> Box<T>", "description": "Allocates memory on the heap and places x into it.", "example": "let b = Box::new(5);\nprintln!(\"{}\", b); // 5" },
+    { "name": "into_raw", "signature": "fn into_raw(b: Box<T>) -> *mut T", "description": "Consumes the Box and returns a raw pointer. The caller is responsible for freeing.", "example": "let ptr = Box::into_raw(Box::new(42));" },
+    { "name": "from_raw", "signature": "unsafe fn from_raw(raw: *mut T) -> Box<T>", "description": "Constructs a Box from a raw pointer. Unsafe because the pointer must be valid.", "example": "let b = unsafe { Box::from_raw(ptr) };" },
+    { "name": "leak", "signature": "fn leak(b: Box<T>) -> &'static mut T", "description": "Consumes the Box and leaks it, returning a mutable reference with static lifetime.", "example": "let r: &'static mut i32 = Box::leak(Box::new(42));" }
+  ]
+}

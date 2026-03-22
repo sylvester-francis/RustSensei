@@ -34,6 +34,7 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -63,12 +64,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.data.Conversation
+import com.sylvester.rustsensei.llm.ChatMode
 import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
+import com.sylvester.rustsensei.ui.theme.NeonCyan
+import com.sylvester.rustsensei.ui.theme.RustOrange
+import com.sylvester.rustsensei.ui.theme.SecondaryText
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.components.InputBar
 import com.sylvester.rustsensei.ui.components.MessageBubble
@@ -88,6 +94,7 @@ fun ChatScreen(
     val modelState by viewModel.modelState.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val chatContext by viewModel.chatContext.collectAsState()
+    val chatMode by viewModel.chatMode.collectAsState()
     val conversations by viewModel.getConversations().collectAsState(initial = emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -217,6 +224,28 @@ fun ChatScreen(
                 thickness = Dimens.Divider,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = Alpha.BORDER)
             )
+
+            // Chat mode selector
+            ChatModeSelector(
+                currentMode = chatMode,
+                onModeSelected = { viewModel.setChatMode(it) }
+            )
+
+            // Mode description banner (non-DIRECT modes only)
+            if (chatMode != ChatMode.DIRECT) {
+                Text(
+                    text = when (chatMode) {
+                        ChatMode.SOCRATIC -> stringResource(R.string.socratic_description)
+                        ChatMode.RUBBER_DUCK -> stringResource(R.string.rubber_duck_description)
+                        else -> ""
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NeonCyan.copy(alpha = Alpha.SECONDARY),
+                    modifier = Modifier.padding(horizontal = Dimens.ScreenPadding, vertical = Spacing.XS),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 11.sp
+                )
+            }
 
             // Messages list
             LazyColumn(
@@ -410,6 +439,66 @@ fun ChatScreen(
                     onStop = { viewModel.stopGeneration() },
                     isGenerating = uiState.isGenerating
                 )
+            }
+        }
+    }
+}
+
+/**
+ * Row of 3 selectable chips for switching between chat tutor modes:
+ * DIRECT (default), SOCRATIC (guiding questions), and RUBBER_DUCK (student explains).
+ */
+@Composable
+private fun ChatModeSelector(
+    currentMode: ChatMode,
+    onModeSelected: (ChatMode) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimens.ScreenPadding, vertical = Spacing.SM),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.SM)
+    ) {
+        ChatMode.entries.forEach { mode ->
+            val isSelected = mode == currentMode
+            val label = when (mode) {
+                ChatMode.DIRECT -> stringResource(R.string.chat_mode_direct)
+                ChatMode.SOCRATIC -> stringResource(R.string.chat_mode_socratic)
+                ChatMode.RUBBER_DUCK -> stringResource(R.string.chat_mode_rubber_duck)
+            }
+            val icon = when (mode) {
+                ChatMode.DIRECT -> "\uD83D\uDCAC"
+                ChatMode.SOCRATIC -> "\uD83E\uDDE0"
+                ChatMode.RUBBER_DUCK -> "\uD83E\uDD86"
+            }
+
+            Surface(
+                onClick = { onModeSelected(mode) },
+                shape = RoundedCornerShape(Spacing.SM),
+                color = if (isSelected) RustOrange.copy(alpha = Alpha.BORDER)
+                        else Color.Transparent,
+                border = BorderStroke(
+                    Dimens.Divider,
+                    if (isSelected) RustOrange.copy(alpha = Alpha.MUTED)
+                    else MaterialTheme.colorScheme.outline.copy(alpha = Alpha.BORDER)
+                ),
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(vertical = Spacing.SM, horizontal = Spacing.XS)
+                ) {
+                    Text(text = icon, fontSize = 16.sp)
+                    Spacer(modifier = Modifier.height(Spacing.XXS))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isSelected) RustOrange else SecondaryText,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }

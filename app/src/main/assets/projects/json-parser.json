@@ -1,0 +1,38 @@
+{
+  "id": "json-parser",
+  "title": "Simple JSON Parser",
+  "description": "Build a JSON parser from scratch. Practice enums, pattern matching, error handling, and recursive data structures.",
+  "difficulty": "intermediate",
+  "estimatedHours": 3,
+  "concepts": ["enums", "pattern matching", "error handling", "recursion", "Box"],
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Define JSON value types",
+      "instructions": "Create a JsonValue enum representing all JSON types: Null, Bool, Number, String, Array, and Object. Use Box for recursive types.",
+      "starterCode": "use std::collections::HashMap;\n\n#[derive(Debug, Clone, PartialEq)]\nenum JsonValue {\n    // Define variants here\n    // Hint: Array needs Vec<JsonValue>\n    // Hint: Object needs HashMap<String, JsonValue>\n    todo!()\n}",
+      "relatedChapter": "ch06-enums"
+    },
+    {
+      "id": "step-2",
+      "title": "Parse primitives",
+      "instructions": "Implement parsing for null, true, false, numbers, and strings. Return Result<(JsonValue, &str), String> where the &str is the remaining input.",
+      "starterCode": "fn parse_null(input: &str) -> Result<(JsonValue, &str), String> {\n    todo!()\n}\n\nfn parse_bool(input: &str) -> Result<(JsonValue, &str), String> {\n    todo!()\n}\n\nfn parse_string(input: &str) -> Result<(JsonValue, &str), String> {\n    todo!()\n}\n\nfn parse_number(input: &str) -> Result<(JsonValue, &str), String> {\n    todo!()\n}",
+      "relatedChapter": "ch09-error-handling"
+    },
+    {
+      "id": "step-3",
+      "title": "Parse arrays and objects",
+      "instructions": "Implement array and object parsing. These are recursive — they call parse_value for each element.",
+      "starterCode": "fn parse_array(input: &str) -> Result<(JsonValue, &str), String> {\n    // Parse '[', then values separated by ',', then ']'\n    todo!()\n}\n\nfn parse_object(input: &str) -> Result<(JsonValue, &str), String> {\n    // Parse '{', then key:value pairs separated by ',', then '}'\n    todo!()\n}",
+      "relatedChapter": "ch15-smart-pointers"
+    },
+    {
+      "id": "step-4",
+      "title": "Main parse function and tests",
+      "instructions": "Create the top-level parse() function and test it with sample JSON. Handle whitespace skipping between tokens.",
+      "starterCode": "fn parse(input: &str) -> Result<JsonValue, String> {\n    let trimmed = input.trim();\n    let (value, remaining) = parse_value(trimmed)?;\n    if remaining.trim().is_empty() {\n        Ok(value)\n    } else {\n        Err(format!(\"Unexpected trailing content: {}\", remaining))\n    }\n}\n\nfn main() {\n    let json = r#\"{\"name\": \"Rust\", \"version\": 2024, \"awesome\": true}\"#;\n    match parse(json) {\n        Ok(value) => println!(\"Parsed: {:?}\", value),\n        Err(e) => println!(\"Error: {}\", e),\n    }\n}",
+      "relatedChapter": "ch09-error-handling"
+    }
+  ]
+}

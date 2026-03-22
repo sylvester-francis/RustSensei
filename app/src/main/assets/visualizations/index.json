@@ -1,0 +1,10 @@
+{
+  "scenarios": [
+    { "id": "move-basic", "title": "Basic Move", "relatedChapter": "ch04-ownership" },
+    { "id": "clone-vs-move", "title": "Clone vs Move", "relatedChapter": "ch04-ownership" },
+    { "id": "borrow-immutable", "title": "Immutable Borrow", "relatedChapter": "ch04-ownership" },
+    { "id": "borrow-mutable", "title": "Mutable Borrow", "relatedChapter": "ch04-ownership" },
+    { "id": "drop-order", "title": "Drop Order", "relatedChapter": "ch04-ownership" },
+    { "id": "rc-shared", "title": "Rc Shared Ownership", "relatedChapter": "ch15-smart-pointers" }
+  ]
+}

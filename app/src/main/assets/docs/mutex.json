@@ -1,0 +1,14 @@
+{
+  "id": "mutex",
+  "typeName": "Mutex<T>",
+  "module": "std::sync",
+  "signature": "pub struct Mutex<T: ?Sized>",
+  "description": "A mutual exclusion primitive for protecting shared data. Only one thread can access the data at a time. Python equivalent: threading.Lock(), but Rust enforces it at compile time.",
+  "methods": [
+    { "name": "new", "signature": "fn new(t: T) -> Mutex<T>", "description": "Creates a new mutex wrapping the given value.", "example": "let m = Mutex::new(5);" },
+    { "name": "lock", "signature": "fn lock(&self) -> LockResult<MutexGuard<T>>", "description": "Acquires the mutex, blocking until it is available. Returns a guard that releases on drop.", "example": "let mut num = m.lock().unwrap();\n*num = 6;" },
+    { "name": "try_lock", "signature": "fn try_lock(&self) -> TryLockResult<MutexGuard<T>>", "description": "Attempts to acquire the mutex without blocking.", "example": "if let Ok(mut num) = m.try_lock() {\n    *num += 1;\n}" },
+    { "name": "is_poisoned", "signature": "fn is_poisoned(&self) -> bool", "description": "Returns true if the mutex has been poisoned (a thread panicked while holding it).", "example": "assert!(!m.is_poisoned());" },
+    { "name": "into_inner", "signature": "fn into_inner(self) -> LockResult<T>", "description": "Consumes the mutex and returns the inner value.", "example": "let val = m.into_inner().unwrap();" }
+  ]
+}

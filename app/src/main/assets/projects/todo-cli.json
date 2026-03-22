@@ -1,0 +1,38 @@
+{
+  "id": "todo-cli",
+  "title": "CLI Todo App",
+  "description": "Build a command-line todo list manager. Practice structs, enums, vectors, and file I/O.",
+  "difficulty": "beginner",
+  "estimatedHours": 2,
+  "concepts": ["structs", "enums", "vectors", "file I/O", "pattern matching"],
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Define the Todo struct",
+      "instructions": "Create a Todo struct with fields: id (u32), title (String), and completed (bool). Implement Display for it.",
+      "starterCode": "use std::fmt;\n\n// Define your Todo struct here\n\nimpl fmt::Display for Todo {\n    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {\n        todo!()\n    }\n}",
+      "relatedChapter": "ch05-structs"
+    },
+    {
+      "id": "step-2",
+      "title": "Create a TodoList manager",
+      "instructions": "Create a TodoList struct that holds a Vec<Todo>. Add methods: add(title), complete(id), remove(id), and list() -> &[Todo].",
+      "starterCode": "struct TodoList {\n    todos: Vec<Todo>,\n    next_id: u32,\n}\n\nimpl TodoList {\n    fn new() -> Self {\n        todo!()\n    }\n\n    fn add(&mut self, title: &str) {\n        todo!()\n    }\n\n    fn complete(&mut self, id: u32) -> bool {\n        todo!()\n    }\n\n    fn list(&self) -> &[Todo] {\n        todo!()\n    }\n}",
+      "relatedChapter": "ch05-structs"
+    },
+    {
+      "id": "step-3",
+      "title": "Parse user commands",
+      "instructions": "Create a Command enum with variants: Add(String), Complete(u32), List, Remove(u32), Quit. Write a parse function that converts a string input into a Command.",
+      "starterCode": "enum Command {\n    Add(String),\n    Complete(u32),\n    List,\n    Remove(u32),\n    Quit,\n}\n\nfn parse_command(input: &str) -> Option<Command> {\n    todo!()\n}",
+      "relatedChapter": "ch06-enums"
+    },
+    {
+      "id": "step-4",
+      "title": "Wire it all together",
+      "instructions": "Create a main() function that reads user input in a loop, parses commands, and executes them on a TodoList. Print the todo list after each command.",
+      "starterCode": "use std::io;\n\nfn main() {\n    let mut list = TodoList::new();\n    println!(\"Todo CLI — type 'help' for commands\");\n    \n    loop {\n        // Read input, parse command, execute\n        todo!()\n    }\n}",
+      "relatedChapter": "ch03-common-concepts"
+    }
+  ]
+}

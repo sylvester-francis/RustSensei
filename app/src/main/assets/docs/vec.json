@@ -1,0 +1,16 @@
+{
+  "id": "vec",
+  "typeName": "Vec<T>",
+  "module": "std::vec",
+  "signature": "pub struct Vec<T>",
+  "description": "A contiguous growable array type. Python equivalent: list.",
+  "methods": [
+    { "name": "new", "signature": "fn new() -> Vec<T>", "description": "Constructs a new, empty Vec<T>.", "example": "let v: Vec<i32> = Vec::new();" },
+    { "name": "push", "signature": "fn push(&mut self, value: T)", "description": "Appends an element to the back.", "example": "let mut v = vec![1, 2];\nv.push(3);" },
+    { "name": "pop", "signature": "fn pop(&mut self) -> Option<T>", "description": "Removes the last element and returns it.", "example": "let mut v = vec![1, 2];\nlet last = v.pop(); // Some(2)" },
+    { "name": "len", "signature": "fn len(&self) -> usize", "description": "Returns the number of elements.", "example": "let v = vec![1, 2, 3];\nassert_eq!(v.len(), 3);" },
+    { "name": "iter", "signature": "fn iter(&self) -> Iter<T>", "description": "Returns an iterator over the slice.", "example": "for val in v.iter() {\n    println!(\"{}\", val);\n}" },
+    { "name": "contains", "signature": "fn contains(&self, x: &T) -> bool", "description": "Returns true if the slice contains the value.", "example": "assert!(vec![1, 2, 3].contains(&2));" },
+    { "name": "sort", "signature": "fn sort(&mut self)", "description": "Sorts the slice in ascending order.", "example": "let mut v = vec![3, 1, 2];\nv.sort();" }
+  ]
+}

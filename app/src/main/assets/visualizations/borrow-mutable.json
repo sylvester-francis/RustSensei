@@ -1,0 +1,43 @@
+{
+  "id": "borrow-mutable",
+  "title": "Mutable Borrow",
+  "description": "A mutable reference (&mut) gives exclusive access. Only one mutable borrow can exist at a time.",
+  "relatedChapter": "ch04-ownership",
+  "steps": [
+    {
+      "label": "Create mutable owner",
+      "code": "let mut s = String::from(\"hello\");",
+      "stackVariables": [
+        { "name": "s", "type": "mut String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "s owns a mutable String."
+    },
+    {
+      "label": "Mutable borrow",
+      "code": "let r = &mut s;",
+      "stackVariables": [
+        { "name": "s", "type": "mut String", "status": "BORROWED", "pointsTo": "heap1" },
+        { "name": "r", "type": "&mut String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "r has exclusive mutable access. s cannot be read or written while r exists."
+    },
+    {
+      "label": "Mutate through reference",
+      "code": "r.push_str(\" world\");",
+      "stackVariables": [
+        { "name": "s", "type": "mut String", "status": "BORROWED", "pointsTo": "heap1" },
+        { "name": "r", "type": "&mut String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello world\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "The heap data is modified through the mutable reference. This is safe because no other reference exists."
+    }
+  ]
+}

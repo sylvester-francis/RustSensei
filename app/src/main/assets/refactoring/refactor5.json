@@ -1,0 +1,10 @@
+{
+  "id": "refactor5",
+  "title": "String Concatenation",
+  "difficulty": "beginner",
+  "description": "This code builds a string with repeated push_str/format! calls. Refactor to be more efficient and readable.",
+  "uglyCode": "fn build_greeting(names: &Vec<String>) -> String {\n    let mut result = String::new();\n    result.push_str(\"Hello \");\n    let mut first = true;\n    for name in names {\n        if !first {\n            result.push_str(\", \");\n        }\n        result.push_str(name);\n        first = false;\n    }\n    result.push_str(\"!\");\n    result\n}",
+  "hints": ["The join() method on slices can combine strings with a separator", "format! macro can combine it all in one expression"],
+  "idiomaticSolution": "fn build_greeting(names: &[String]) -> String {\n    format!(\"Hello {}!\", names.join(\", \"))\n}",
+  "scoringCriteria": "Uses join() or itertools intersperse. Uses format! macro. Uses &[String] instead of &Vec<String>. Single expression if possible."
+}

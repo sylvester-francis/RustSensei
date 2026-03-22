@@ -1,0 +1,47 @@
+{
+  "id": "drop-order",
+  "title": "Drop Order",
+  "description": "Variables are dropped in reverse order of declaration. Understanding this prevents use-after-free bugs.",
+  "relatedChapter": "ch04-ownership",
+  "steps": [
+    {
+      "label": "Create two Strings",
+      "code": "let a = String::from(\"first\");\nlet b = String::from(\"second\");",
+      "stackVariables": [
+        { "name": "a", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "b", "type": "String", "status": "ACTIVE", "pointsTo": "heap2" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"first\"", "type": "String data", "status": "ALIVE" },
+        { "id": "heap2", "value": "\"second\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "Two independent String owners, each with their own heap allocation."
+    },
+    {
+      "label": "b drops first (LIFO)",
+      "code": "} // b drops",
+      "stackVariables": [
+        { "name": "a", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "b", "type": "String", "status": "DROPPED", "pointsTo": null }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"first\"", "type": "String data", "status": "ALIVE" },
+        { "id": "heap2", "value": "\"second\"", "type": "String data", "status": "FREED" }
+      ],
+      "annotation": "b was declared last, so it drops first (LIFO — last in, first out). Its heap memory is freed."
+    },
+    {
+      "label": "a drops second",
+      "code": "} // a drops",
+      "stackVariables": [
+        { "name": "a", "type": "String", "status": "DROPPED", "pointsTo": null },
+        { "name": "b", "type": "String", "status": "DROPPED", "pointsTo": null }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"first\"", "type": "String data", "status": "FREED" },
+        { "id": "heap2", "value": "\"second\"", "type": "String data", "status": "FREED" }
+      ],
+      "annotation": "a drops next. All memory is clean. Rust guarantees no leaks, no double-frees."
+    }
+  ]
+}

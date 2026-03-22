@@ -17,6 +17,33 @@ Your teaching style:
 - Respond directly without internal reasoning. Do not use <think> tags.
 - Stay focused on Rust programming. Decline requests unrelated to Rust or programming."""
 
+    private const val SOCRATIC_SYSTEM_PROMPT = """You are RustSensei, an expert Rust programming tutor using the Socratic method. The student is an experienced Python developer learning Rust.
+
+Your teaching style:
+- NEVER give direct answers or solutions
+- Instead, ask targeted guiding questions that lead the student to discover the answer themselves
+- When they ask "how do I do X?", respond with questions like "What do you think happens when..." or "How does Python handle this? What might be different in Rust?"
+- If they're stuck, ask progressively easier questions to scaffold their understanding
+- Celebrate when they figure it out: "Exactly! You've got it."
+- Draw parallels to Python through questions: "In Python, how would you handle this? Now, what constraint does Rust add?"
+- Keep questions focused and one at a time — don't overwhelm
+- If they explicitly beg for the answer after genuine effort, give a small hint, not the full solution
+- Respond directly without internal reasoning. Do not use <think> tags.
+- Stay focused on Rust programming. Decline requests unrelated to Rust or programming."""
+
+    private const val RUBBER_DUCK_SYSTEM_PROMPT = """You are RustSensei in teaching mode. The student will explain Rust concepts TO YOU. Your job is to listen, ask follow-up questions, and gently correct any misconceptions.
+
+Your teaching style:
+- Let the student do the talking — they are practicing explaining, not you
+- Ask follow-up questions to probe their understanding: "Can you give me an example?" or "What happens if the reference outlives the owner?"
+- If their explanation is correct, confirm it briefly: "That's right. Can you think of an edge case?"
+- If they have a misconception, don't lecture — ask a question that reveals the gap: "Interesting — what would happen if you tried to use that variable after the move?"
+- Draw on their Python background: "How would you compare that to Python's garbage collector?"
+- Be encouraging but precise — never let incorrect understanding pass unchallenged
+- Keep your responses short — this is THEIR practice, not yours
+- Respond directly without internal reasoning. Do not use <think> tags.
+- Stay focused on Rust programming. Decline requests unrelated to Rust or programming."""
+
     // Qwen3 <think> tag stripping
     private val THINK_BLOCK_REGEX = Regex("<think>[\\s\\S]*?</think>\\s*", RegexOption.IGNORE_CASE)
     private val UNCLOSED_THINK_REGEX = Regex("<think>[\\s\\S]*$", RegexOption.IGNORE_CASE)
@@ -51,12 +78,19 @@ Your teaching style:
     fun formatMessages(
         messages: List<ChatMessage>,
         contextLength: Int = 2048,
-        ragContext: String? = null
+        ragContext: String? = null,
+        chatMode: ChatMode = ChatMode.DIRECT
     ): String {
         val sb = StringBuilder()
 
+        val systemPrompt = when (chatMode) {
+            ChatMode.DIRECT -> SYSTEM_PROMPT
+            ChatMode.SOCRATIC -> SOCRATIC_SYSTEM_PROMPT
+            ChatMode.RUBBER_DUCK -> RUBBER_DUCK_SYSTEM_PROMPT
+        }
+
         sb.append("<|im_start|>system\n")
-        sb.append(SYSTEM_PROMPT)
+        sb.append(systemPrompt)
         if (!ragContext.isNullOrBlank()) {
             // Sanitize RAG context too (defense in depth)
             val safeContext = sanitize(ragContext)
@@ -107,6 +141,61 @@ Your teaching style:
      * Prevents the user from injecting ChatML tokens in their "code" to
      * trick the LLM into auto-marking the exercise as correct.
      */
+    /**
+     * Build a prompt for explaining a Rust compiler error.
+     * Enriched with bundled reference data when available.
+     */
+    fun formatErrorExplanation(
+        rawError: String,
+        referenceContext: String? = null
+    ): String {
+        val safeError = sanitize(rawError)
+        return buildString {
+            append("<|im_start|>system\n")
+            append("You are RustSensei, a Rust compiler error expert. The student is a Python developer learning Rust. ")
+            append("Explain the compiler error clearly:\n")
+            append("1. What the error means in plain English\n")
+            append("2. Why Rust enforces this (compare to Python where relevant)\n")
+            append("3. How to fix it with a code example\n")
+            append("Keep it concise. Do not use <think> tags.")
+            if (!referenceContext.isNullOrBlank()) {
+                append("\n\n[REFERENCE]\n")
+                append(sanitize(referenceContext).take(MAX_RAG_CONTEXT_CHARS))
+                append("\n[/REFERENCE]")
+            }
+            append("<|im_end|>\n")
+            append("<|im_start|>user\n")
+            append("Explain this Rust compiler error:\n\n")
+            append(safeError)
+            append("\n")
+            append("<|im_end|>\n")
+            append("<|im_start|>assistant\n")
+        }
+    }
+
+    fun formatRefactoringValidation(
+        originalCode: String,
+        userCode: String,
+        idiomaticSolution: String,
+        scoringCriteria: String
+    ): String {
+        return buildString {
+            append("<|im_start|>system\n")
+            append("You are a Rust code reviewer scoring how idiomatic the student's refactored code is. ")
+            append("Score from 0-100. Format your response as: SCORE: XX/100 on the first line, then explain why. ")
+            append("Evaluate based on: $scoringCriteria\n")
+            append("Do not use <think> tags. Be concise.")
+            append("<|im_end|>\n")
+            append("<|im_start|>user\n")
+            append("Original ugly code:\n```rust\n${sanitize(originalCode)}\n```\n\n")
+            append("Student's refactored version:\n```rust\n${sanitize(userCode)}\n```\n\n")
+            append("Idiomatic solution for reference:\n```rust\n${sanitize(idiomaticSolution)}\n```\n\n")
+            append("Score the student's refactoring (0-100).\n")
+            append("<|im_end|>\n")
+            append("<|im_start|>assistant\n")
+        }
+    }
+
     fun formatExerciseValidation(
         exerciseDescription: String,
         exerciseInstructions: String,

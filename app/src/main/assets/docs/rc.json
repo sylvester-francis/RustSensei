@@ -1,0 +1,14 @@
+{
+  "id": "rc",
+  "typeName": "Rc<T>",
+  "module": "std::rc",
+  "signature": "pub struct Rc<T: ?Sized>",
+  "description": "A single-threaded reference-counting pointer. Multiple owners of the same data on the heap. Dropped when the last Rc goes out of scope. Python equivalent: default object semantics (reference counting under the hood).",
+  "methods": [
+    { "name": "new", "signature": "fn new(value: T) -> Rc<T>", "description": "Constructs a new Rc<T>.", "example": "let a = Rc::new(5);" },
+    { "name": "clone", "signature": "fn clone(&self) -> Rc<T>", "description": "Increments the reference count and returns a new Rc pointing to the same data.", "example": "let a = Rc::new(5);\nlet b = Rc::clone(&a);" },
+    { "name": "strong_count", "signature": "fn strong_count(this: &Rc<T>) -> usize", "description": "Returns the number of strong (owning) pointers to this allocation.", "example": "let a = Rc::new(5);\nlet b = Rc::clone(&a);\nassert_eq!(Rc::strong_count(&a), 2);" },
+    { "name": "try_unwrap", "signature": "fn try_unwrap(this: Rc<T>) -> Result<T, Rc<T>>", "description": "Returns the inner value if the Rc has exactly one strong reference.", "example": "let a = Rc::new(5);\nassert_eq!(Rc::try_unwrap(a), Ok(5));" },
+    { "name": "downgrade", "signature": "fn downgrade(this: &Rc<T>) -> Weak<T>", "description": "Creates a Weak pointer that does not prevent deallocation.", "example": "let weak = Rc::downgrade(&a);" }
+  ]
+}

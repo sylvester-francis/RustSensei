@@ -111,4 +111,38 @@ interface ProgressDao {
 
     @Query("SELECT COUNT(*) FROM book_progress WHERE isCompleted = 1")
     suspend fun getCompletedSectionsCountSync(): Int
+
+    // Study streak helper
+    @Query("SELECT * FROM learning_stats WHERE date = :date")
+    suspend fun getStatsForDate(date: String): LearningStats?
+
+    // Daily Challenge Results
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDailyChallengeResult(result: DailyChallengeResult)
+
+    @Query("SELECT * FROM daily_challenge_results WHERE date = :date LIMIT 1")
+    suspend fun getDailyChallengeResult(date: String): DailyChallengeResult?
+
+    @Query("SELECT COUNT(*) FROM daily_challenge_results")
+    suspend fun getDailyChallengeCompletedCount(): Int
+
+    // Refactoring Results
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRefactoringResult(result: RefactoringResult)
+
+    @Query("SELECT * FROM refactoring_results WHERE challengeId = :challengeId ORDER BY score DESC LIMIT 1")
+    suspend fun getBestRefactoringResult(challengeId: String): RefactoringResult?
+
+    @Query("SELECT * FROM refactoring_results ORDER BY completedAt DESC")
+    fun getAllRefactoringResults(): Flow<List<RefactoringResult>>
+
+    // Project Progress
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertProjectProgress(progress: ProjectProgress)
+
+    @Query("SELECT * FROM project_progress WHERE projectId = :projectId")
+    suspend fun getProjectProgress(projectId: String): List<ProjectProgress>
+
+    @Query("SELECT * FROM project_progress WHERE projectId = :projectId")
+    fun observeProjectProgress(projectId: String): Flow<List<ProjectProgress>>
 }

@@ -9,6 +9,7 @@ import com.sylvester.rustsensei.data.ChatRepository
 import com.sylvester.rustsensei.data.PreferencesManager
 import com.sylvester.rustsensei.domain.ChatStreamEvent
 import com.sylvester.rustsensei.domain.SendChatMessageUseCase
+import com.sylvester.rustsensei.llm.ChatMode
 import com.sylvester.rustsensei.llm.InferenceConfig
 import com.sylvester.rustsensei.llm.InferenceEngine
 import com.sylvester.rustsensei.llm.ModelLifecycle
@@ -65,6 +66,9 @@ class ChatViewModel @Inject constructor(
     private val _config = MutableStateFlow(prefsManager.loadInferenceConfig())
     val config: StateFlow<InferenceConfig> = _config.asStateFlow()
 
+    private val _chatMode = MutableStateFlow(ChatMode.fromString(prefsManager.getChatMode()))
+    val chatMode: StateFlow<ChatMode> = _chatMode.asStateFlow()
+
     private val _chatContext = MutableStateFlow<ChatContext>(ChatContext.General)
     val chatContext: StateFlow<ChatContext> = _chatContext.asStateFlow()
 
@@ -88,6 +92,11 @@ class ChatViewModel @Inject constructor(
         )
         _config.value = updated
         prefsManager.saveInferenceConfig(updated)
+    }
+
+    fun setChatMode(mode: ChatMode) {
+        _chatMode.value = mode
+        prefsManager.setChatMode(mode.name)
     }
 
     fun setChatContext(context: ChatContext) { _chatContext.value = context }
@@ -166,7 +175,7 @@ class ChatViewModel @Inject constructor(
         )
 
         generationJob = viewModelScope.launch {
-            sendChatMessage(convId, message, context, _config.value)
+            sendChatMessage(convId, message, context, _config.value, chatMode = _chatMode.value)
                 .onCompletion {
                     sendingGate.set(false)
                     modelLifecycle.scheduleIdleUnload()

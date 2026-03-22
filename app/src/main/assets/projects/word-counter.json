@@ -1,0 +1,31 @@
+{
+  "id": "word-counter",
+  "title": "Word Frequency Counter",
+  "description": "Build a tool that counts word frequencies in text. Practice HashMaps, iterators, and string processing.",
+  "difficulty": "beginner",
+  "estimatedHours": 1,
+  "concepts": ["HashMap", "iterators", "strings", "sorting"],
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Count words with HashMap",
+      "instructions": "Write a function that takes a &str and returns a HashMap<String, usize> with word frequencies. Normalize to lowercase and strip punctuation.",
+      "starterCode": "use std::collections::HashMap;\n\nfn count_words(text: &str) -> HashMap<String, usize> {\n    todo!()\n}",
+      "relatedChapter": "ch08-collections"
+    },
+    {
+      "id": "step-2",
+      "title": "Sort by frequency",
+      "instructions": "Write a function that takes the word frequency map and returns a Vec of (word, count) pairs sorted by count (descending), then alphabetically for ties.",
+      "starterCode": "fn sorted_frequencies(counts: &HashMap<String, usize>) -> Vec<(&str, usize)> {\n    todo!()\n}",
+      "relatedChapter": "ch13-functional-features"
+    },
+    {
+      "id": "step-3",
+      "title": "Display results",
+      "instructions": "Write a main function that processes a sample text and displays the top 10 most frequent words with a bar chart using '#' characters.",
+      "starterCode": "fn main() {\n    let text = \"the quick brown fox jumps over the lazy dog the fox\";\n    let counts = count_words(text);\n    let sorted = sorted_frequencies(&counts);\n    \n    // Display top 10 with bar chart\n    todo!()\n}",
+      "relatedChapter": "ch08-collections"
+    }
+  ]
+}

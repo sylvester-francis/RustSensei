@@ -119,7 +119,12 @@ fun MainScreen(
     onNavigateToReview: () -> Unit = {},
     onNavigateToLearningPaths: () -> Unit = {},
     onNavigateToQuiz: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {}
+    onNavigateToSearch: () -> Unit = {},
+    onNavigateToExplainError: () -> Unit = {},
+    onNavigateToDailyChallenge: () -> Unit = {},
+    onNavigateToPlayground: () -> Unit = {},
+    onNavigateToRefactoring: () -> Unit = {},
+    onNavigateToDocs: () -> Unit = {}
 ) {
     val tabNavController = rememberNavController()
     val navBackStackEntry by tabNavController.currentBackStackEntryAsState()
@@ -261,7 +266,12 @@ fun MainScreen(
                     onContinueExercise = { exerciseId ->
                         exerciseViewModel.openExercise(exerciseId)
                         tabNavController.navigateToTab(Tab.Practice)
-                    }
+                    },
+                    onNavigateToExplainError = onNavigateToExplainError,
+                    onNavigateToDailyChallenge = onNavigateToDailyChallenge,
+                    onNavigateToPlayground = onNavigateToPlayground,
+                    onNavigateToRefactoring = onNavigateToRefactoring,
+                    onNavigateToDocs = onNavigateToDocs
                 )
             }
             composable<LearnRoute> {

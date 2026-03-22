@@ -67,4 +67,16 @@ class PreferencesManager(context: Context) {
         val raw = prefs.getString("recent_searches", "") ?: ""
         return if (raw.isBlank()) emptyList() else raw.split(",").filter { it.isNotBlank() }
     }
+
+    // Chat Mode
+    fun getChatMode(): String = prefs.getString("chat_mode", "DIRECT") ?: "DIRECT"
+    fun setChatMode(mode: String) = prefs.edit().putString("chat_mode", mode).apply()
+
+    // Theme
+    fun getThemePreference(): String = prefs.getString("theme_preference", "SYSTEM") ?: "SYSTEM"
+    fun setThemePreference(preference: String) = prefs.edit().putString("theme_preference", preference).apply()
+
+    // Study Reminders
+    fun areRemindersEnabled(): Boolean = prefs.getBoolean("reminders_enabled", false)
+    fun setRemindersEnabled(enabled: Boolean) = prefs.edit().putBoolean("reminders_enabled", enabled).apply()
 }

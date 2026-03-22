@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Edit
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -79,6 +81,7 @@ import com.sylvester.rustsensei.ui.components.ProgressRing
 import com.sylvester.rustsensei.ui.components.SkeletonBox
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
+import com.sylvester.rustsensei.ui.theme.ErrorNeon
 import com.sylvester.rustsensei.ui.theme.NeonCyan
 import com.sylvester.rustsensei.ui.theme.Spacing
 import com.sylvester.rustsensei.ui.theme.WarningAmber
@@ -103,7 +106,12 @@ fun DashboardScreen(
     onNavigateToLearn: () -> Unit = {},
     onNavigateToExercises: () -> Unit = {},
     onContinueReading: ((chapterId: String, sectionId: String) -> Unit)? = null,
-    onContinueExercise: ((exerciseId: String) -> Unit)? = null
+    onContinueExercise: ((exerciseId: String) -> Unit)? = null,
+    onNavigateToExplainError: () -> Unit = {},
+    onNavigateToDailyChallenge: () -> Unit = {},
+    onNavigateToPlayground: () -> Unit = {},
+    onNavigateToRefactoring: () -> Unit = {},
+    onNavigateToDocs: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val reviewUiState by reviewViewModel.uiState.collectAsState()
@@ -497,6 +505,56 @@ fun DashboardScreen(
                         accentColor = WarningAmber,
                         cardBackground = cardBackground,
                         onClick = { onNavigateToQuiz() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.explain_error_title),
+                        subtitle = stringResource(R.string.explain_error_card_subtitle),
+                        icon = Icons.Default.BugReport,
+                        accentColor = ErrorNeon,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToExplainError() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.daily_challenge_title),
+                        subtitle = stringResource(R.string.daily_challenge_card_subtitle),
+                        icon = Icons.Default.Timer,
+                        accentColor = WarningAmber,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToDailyChallenge() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.playground_title),
+                        subtitle = stringResource(R.string.playground_card_subtitle),
+                        icon = Icons.Default.PlayArrow,
+                        accentColor = NeonCyan,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToPlayground() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.refactoring_title),
+                        subtitle = stringResource(R.string.refactoring_card_subtitle),
+                        icon = Icons.Default.Code,
+                        accentColor = WarningAmber,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToRefactoring() }
+                    )
+                }
+                item {
+                    QuickActionCard(
+                        title = stringResource(R.string.docs_title),
+                        subtitle = stringResource(R.string.docs_card_subtitle),
+                        icon = Icons.Default.MenuBook,
+                        accentColor = NeonCyan,
+                        cardBackground = cardBackground,
+                        onClick = { onNavigateToDocs() }
                     )
                 }
             }

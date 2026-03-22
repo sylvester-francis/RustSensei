@@ -1,0 +1,10 @@
+{
+  "id": "refactor3",
+  "title": "Unwrap Everything",
+  "difficulty": "intermediate",
+  "description": "This code uses unwrap() everywhere, which will panic on None/Err. Refactor to handle errors properly.",
+  "uglyCode": "fn parse_config(input: &str) -> (String, u32) {\n    let parts: Vec<&str> = input.split(':').collect();\n    let name = parts.get(0).unwrap().to_string();\n    let port = parts.get(1).unwrap().parse::<u32>().unwrap();\n    (name, port)\n}",
+  "hints": ["Use the ? operator with a Result return type", "Consider what should happen when parsing fails"],
+  "idiomaticSolution": "fn parse_config(input: &str) -> Result<(String, u32), Box<dyn std::error::Error>> {\n    let (name, port_str) = input.split_once(':').ok_or(\"missing delimiter\")?;\n    let port = port_str.parse::<u32>()?;\n    Ok((name.to_string(), port))\n}",
+  "scoringCriteria": "Returns Result instead of panicking. Uses ? operator. Handles missing delimiter gracefully. No unwrap() calls."
+}

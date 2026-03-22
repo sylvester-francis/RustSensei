@@ -1,0 +1,7 @@
+{
+  "projects": [
+    { "id": "todo-cli", "title": "CLI Todo App", "difficulty": "beginner", "estimatedHours": 2 },
+    { "id": "word-counter", "title": "Word Frequency Counter", "difficulty": "beginner", "estimatedHours": 1 },
+    { "id": "json-parser", "title": "Simple JSON Parser", "difficulty": "intermediate", "estimatedHours": 3 }
+  ]
+}

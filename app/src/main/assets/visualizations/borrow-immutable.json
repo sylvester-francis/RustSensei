@@ -1,0 +1,43 @@
+{
+  "id": "borrow-immutable",
+  "title": "Immutable Borrow",
+  "description": "A reference borrows data without taking ownership. Multiple immutable borrows can coexist.",
+  "relatedChapter": "ch04-ownership",
+  "steps": [
+    {
+      "label": "Create owner",
+      "code": "let s1 = String::from(\"hello\");",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "s1 owns the String."
+    },
+    {
+      "label": "Borrow immutably",
+      "code": "let r1 = &s1;\nlet r2 = &s1;",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "BORROWED", "pointsTo": "heap1" },
+        { "name": "r1", "type": "&String", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "r2", "type": "&String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "Multiple immutable borrows are allowed. No data is copied — r1 and r2 point to the same data."
+    },
+    {
+      "label": "Borrows end",
+      "code": "// r1, r2 no longer used",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "When borrows end, s1 regains full ownership. It can be mutated or moved again."
+    }
+  ]
+}

@@ -47,6 +47,30 @@
             android:foregroundServiceType="specialUse"
             android:exported="false" />
 
+        <!-- Home Screen Widget -->
+        <receiver
+            android:name=".widget.RustSenseiWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
+        <!-- Disable default WorkManager initializer so Hilt can provide its own -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:authorities="${applicationId}"
+                tools:node="remove" />
+        </provider>
+
     </application>
 
 </manifest>

@@ -1,0 +1,43 @@
+{
+  "id": "move-basic",
+  "title": "Basic Move",
+  "description": "When you assign a heap-allocated value to another variable, ownership moves. The original variable becomes invalid.",
+  "relatedChapter": "ch04-ownership",
+  "steps": [
+    {
+      "label": "Create String",
+      "code": "let s1 = String::from(\"hello\");",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "s1 owns the String. It stores a pointer, length, and capacity on the stack, pointing to heap data."
+    },
+    {
+      "label": "Move to s2",
+      "code": "let s2 = s1;",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "MOVED", "pointsTo": null },
+        { "name": "s2", "type": "String", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "ALIVE" }
+      ],
+      "annotation": "Ownership moves from s1 to s2. s1 is now invalid — using it would cause error E0382."
+    },
+    {
+      "label": "s2 goes out of scope",
+      "code": "} // end of scope",
+      "stackVariables": [
+        { "name": "s1", "type": "String", "status": "MOVED", "pointsTo": null },
+        { "name": "s2", "type": "String", "status": "DROPPED", "pointsTo": null }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"hello\"", "type": "String data", "status": "FREED" }
+      ],
+      "annotation": "When s2 goes out of scope, drop() is called, freeing the heap memory. Only one drop — no double-free!"
+    }
+  ]
+}

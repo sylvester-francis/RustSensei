@@ -24,6 +24,9 @@ interface FlashCardDao {
     @Query("SELECT COUNT(*) FROM flash_cards WHERE nextReviewAt <= :now")
     fun getDueCardCount(now: Long = System.currentTimeMillis()): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM flash_cards WHERE nextReviewAt <= :now")
+    suspend fun getDueCardCountSync(now: Long): Int
+
     @Query("SELECT COUNT(*) FROM flash_cards")
     fun getTotalCardCount(): Flow<Int>
 

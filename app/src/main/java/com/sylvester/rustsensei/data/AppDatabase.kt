@@ -17,9 +17,12 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         FlashCard::class,
         PathProgress::class,
         QuizResult::class,
-        UserNote::class
+        UserNote::class,
+        DailyChallengeResult::class,
+        RefactoringResult::class,
+        ProjectProgress::class
     ],
-    version = 6,
+    version = 8,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,6 +33,54 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
+
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `project_progress` (
+                        `id` TEXT NOT NULL PRIMARY KEY,
+                        `projectId` TEXT NOT NULL,
+                        `stepId` TEXT NOT NULL,
+                        `isCompleted` INTEGER NOT NULL DEFAULT 0,
+                        `userCode` TEXT NOT NULL DEFAULT '',
+                        `completedAt` INTEGER
+                    )
+                """)
+                db.execSQL("""
+                    CREATE INDEX IF NOT EXISTS `index_project_progress_projectId`
+                    ON `project_progress` (`projectId`)
+                """)
+            }
+        }
+
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `daily_challenge_results` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `date` TEXT NOT NULL,
+                        `exerciseId` TEXT NOT NULL,
+                        `completedAt` INTEGER NOT NULL DEFAULT 0,
+                        `timeTakenSeconds` INTEGER NOT NULL DEFAULT 0,
+                        `score` INTEGER NOT NULL DEFAULT 0
+                    )
+                """)
+                db.execSQL("""
+                    CREATE UNIQUE INDEX IF NOT EXISTS `index_daily_challenge_results_date`
+                    ON `daily_challenge_results` (`date`)
+                """)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `refactoring_results` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `challengeId` TEXT NOT NULL,
+                        `userCode` TEXT NOT NULL DEFAULT '',
+                        `score` INTEGER NOT NULL DEFAULT 0,
+                        `feedback` TEXT NOT NULL DEFAULT '',
+                        `completedAt` INTEGER NOT NULL DEFAULT 0
+                    )
+                """)
+            }
+        }
 
         private val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
@@ -134,7 +185,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rustsensei_db"
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8)
                     // WARNING: Do NOT use fallbackToDestructiveMigration() here — it wipes
                     // all user data (chat history, progress, stats) on ANY missing migration.
                     // Only allow destructive migration on version downgrade (e.g. debug builds).

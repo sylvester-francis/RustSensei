@@ -1,0 +1,14 @@
+{
+  "id": "arc",
+  "typeName": "Arc<T>",
+  "module": "std::sync",
+  "signature": "pub struct Arc<T: ?Sized>",
+  "description": "Atomically reference-counted pointer. Thread-safe version of Rc. Shared ownership across threads. Python equivalent: shared objects with the GIL, but explicit and lock-free for reads.",
+  "methods": [
+    { "name": "new", "signature": "fn new(data: T) -> Arc<T>", "description": "Constructs a new Arc<T>.", "example": "let a = Arc::new(5);" },
+    { "name": "clone", "signature": "fn clone(&self) -> Arc<T>", "description": "Atomically increments the reference count.", "example": "let a = Arc::new(5);\nlet b = Arc::clone(&a);" },
+    { "name": "strong_count", "signature": "fn strong_count(this: &Arc<T>) -> usize", "description": "Returns the number of strong pointers.", "example": "let a = Arc::new(5);\nassert_eq!(Arc::strong_count(&a), 1);" },
+    { "name": "try_unwrap", "signature": "fn try_unwrap(this: Arc<T>) -> Result<T, Arc<T>>", "description": "Returns the inner value if there is exactly one strong reference.", "example": "let val = Arc::try_unwrap(a).unwrap();" },
+    { "name": "downgrade", "signature": "fn downgrade(this: &Arc<T>) -> Weak<T>", "description": "Creates a Weak pointer that does not prevent deallocation.", "example": "let weak = Arc::downgrade(&a);" }
+  ]
+}

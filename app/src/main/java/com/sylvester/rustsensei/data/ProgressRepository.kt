@@ -214,4 +214,31 @@ class ProgressRepository(private val progressDao: ProgressDao) {
 
     suspend fun getCompletedSectionsCountSync(): Int =
         progressDao.getCompletedSectionsCountSync()
+
+    // Study Reminder helpers
+    suspend fun calculateStreak(): Int {
+        val today = java.time.LocalDate.now()
+        var streak = 0
+        var checkDate = today
+        while (true) {
+            val dateStr = checkDate.toString() // yyyy-MM-dd format
+            val stats = progressDao.getLearningStats(dateStr)
+            if (stats != null && (stats.sectionsRead > 0 || stats.exercisesCompleted > 0 || stats.studyTimeSeconds > 30)) {
+                streak++
+                checkDate = checkDate.minusDays(1)
+            } else if (checkDate == today) {
+                // Today might not have activity yet, check yesterday
+                checkDate = checkDate.minusDays(1)
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
+    suspend fun hasStudiedToday(): Boolean {
+        val todayStr = java.time.LocalDate.now().toString()
+        val stats = progressDao.getLearningStats(todayStr)
+        return stats != null && (stats.sectionsRead > 0 || stats.exercisesCompleted > 0 || stats.studyTimeSeconds > 30)
+    }
 }

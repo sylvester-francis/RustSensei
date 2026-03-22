@@ -1,0 +1,14 @@
+{
+  "id": "result",
+  "typeName": "Result<T,E>",
+  "module": "std::result",
+  "signature": "pub enum Result<T, E> { Ok(T), Err(E) }",
+  "description": "A type for returning and propagating errors. Ok represents success, Err represents failure. Python equivalent: try/except, but as a return type.",
+  "methods": [
+    { "name": "unwrap", "signature": "fn unwrap(self) -> T", "description": "Returns the Ok value. Panics on Err.", "example": "let x: Result<i32, &str> = Ok(5);\nassert_eq!(x.unwrap(), 5);" },
+    { "name": "map", "signature": "fn map<U>(self, f: FnOnce(T) -> U) -> Result<U, E>", "description": "Maps a Result<T, E> to Result<U, E>.", "example": "let x: Result<i32, &str> = Ok(5);\nlet y = x.map(|v| v * 2); // Ok(10)" },
+    { "name": "map_err", "signature": "fn map_err<F>(self, f: FnOnce(E) -> F) -> Result<T, F>", "description": "Maps the error value.", "example": "let x: Result<i32, i32> = Err(1);\nlet y = x.map_err(|e| e + 1); // Err(2)" },
+    { "name": "is_ok", "signature": "fn is_ok(&self) -> bool", "description": "Returns true if Ok.", "example": "assert!(Ok::<i32, &str>(5).is_ok());" },
+    { "name": "unwrap_or", "signature": "fn unwrap_or(self, default: T) -> T", "description": "Returns Ok value or a default.", "example": "let x: Result<i32, &str> = Err(\"bad\");\nassert_eq!(x.unwrap_or(0), 0);" }
+  ]
+}

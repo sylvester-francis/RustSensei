@@ -45,12 +45,23 @@ Most programming tutors require a constant internet connection and send your dat
 
 - **On-Device AI Tutor** — fine-tuned 1B parameter LLM with GPU-accelerated streaming inference via LiteRT
 - **Context-Aware Help** — ask about a book section or get help with an exercise, and the AI has full context
+- **Socratic & Rubber Duck Modes** — AI asks guiding questions or lets you explain concepts back, with 3 switchable chat modes
+- **Rust Playground** — write Rust code and see simulated output via on-device AI execution tracing
+- **Explain This Error** — paste any compiler error and get a clear AI explanation enriched with 44 bundled error references
 - **19-Chapter Rust Book** — from Getting Started to Macros, with code examples and reading progress tracking
 - **97 Coding Exercises** — Rustlings-style challenges with syntax-highlighted editor, hints, and AI-powered code review
+- **Code Refactoring Challenges** — transform ugly-but-working Rust code into idiomatic style, scored by AI (0-100)
+- **Daily Challenges** — a new deterministic exercise every day with completion tracking and streak integration
+- **3 Guided Projects** — multi-step builds (CLI Todo, Word Counter, JSON Parser) tying chapters together
 - **5 Topic Quizzes** (32 questions) — multiple choice, true/false, and code completion with score rings and detailed feedback
 - **110+ Spaced Repetition Flashcards** — SM2-scheduled review system for long-term retention
 - **5 Guided Learning Paths** — structured step-by-step progression through Rust concepts
+- **Ownership Visualizer** — interactive step-by-step memory diagrams for moves, borrows, clones, drops, and Rc
+- **Offline Rust Docs** — bundled searchable stdlib reference for 10 core types (String, Vec, Option, Result, etc.)
 - **12 Reference Guides** — cheat sheets, compiler errors, language comparisons, design patterns, glossary
+- **Study Reminders** — push notifications for due flashcards and streak-at-risk via WorkManager
+- **Home Screen Widget** — glanceable Glance AppWidget showing streak count and due flashcards
+- **Dark/Light Theme** — system-aware theme toggle with full Material 3 light and dark color schemes
 - **Study Streaks** — animated flame, weekly activity dots, and daily goals for reading, exercises, and quizzes
 - **Achievement Badges** — unlock milestones for reading, coding, quizzes, and streaks
 - **Activity Heatmap** — GitHub-style weekly visualization of your learning activity
@@ -61,7 +72,6 @@ Most programming tutors require a constant internet connection and send your dat
 - **Haptic Feedback** — tactile response on send, answer selection, and flashcard rating
 - **First-Launch Onboarding** — guided "Start Chapter 1" card for new users
 - **Time Estimates** — "~48 min" reading time on each book chapter
-- **Dark Terminal Aesthetic** — blue-tinted near-black surfaces with Rust Orange accent, monospace headings, neon accents
 
 ## Install
 
@@ -119,9 +129,9 @@ Built on **Clean Architecture** with SOLID principles and Google's recommended A
 ```
 app/src/main/java/com/sylvester/rustsensei/
 ├── di/                      # Hilt DI modules (DataModule, InferenceModule)
-├── domain/                  # UseCases (SendChatMessage, ValidateExercise)
+├── domain/                  # UseCases (SendChatMessage, ValidateExercise, SimulateExecution, etc.)
 ├── data/                    # Room database, DAOs, repositories
-├── content/                 # Bundled JSON content + RAG retriever
+├── content/                 # Bundled JSON content + RAG retriever + docs + visualizations
 ├── llm/
 │   ├── InferenceEngine.kt   # Abstraction for LLM inference
 │   ├── LiteRtEngine.kt      # LiteRT GPU implementation
@@ -130,9 +140,11 @@ app/src/main/java/com/sylvester/rustsensei/
 │   └── ChatTemplateFormatter.kt  # ChatML formatting + sanitization
 ├── ui/
 │   ├── theme/               # Color, Type, Tokens (Spacing, Alpha, Dimens)
-│   ├── components/          # 20 reusable composables
-│   └── screens/             # 15 screen files (split for maintainability)
-└── viewmodel/               # 10 @HiltViewModel classes
+│   ├── components/          # 20+ reusable composables
+│   └── screens/             # 24 screen files (split for maintainability)
+├── viewmodel/               # 18 @HiltViewModel classes
+├── widget/                  # Glance home screen widget
+└── work/                    # WorkManager study reminder scheduler
 ```
 
 ## Tech Stack
@@ -145,7 +157,7 @@ app/src/main/java/com/sylvester/rustsensei/
 | DI | Hilt (`@HiltViewModel`, `@Binds`, `@Provides`) |
 | Architecture | MVVM + Clean Architecture (UseCases, Repository interfaces) |
 | AI Inference | LiteRT — GPU-accelerated via OpenCL with idle-unload lifecycle |
-| Database | Room (9 entities, 3 DAOs, 6 migrations) |
+| Database | Room (12 entities, 3 DAOs, 8 migrations) |
 | Navigation | Navigation Compose 2.8+ with type-safe `@Serializable` routes |
 | Async | Coroutines + Flow for streaming inference and reactive UI |
 | Serialization | Kotlin Serialization (navigation routes, future JSON parsing) |

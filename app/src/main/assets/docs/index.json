@@ -1,0 +1,14 @@
+{
+  "types": [
+    { "id": "string", "name": "String", "module": "std::string" },
+    { "id": "vec", "name": "Vec<T>", "module": "std::vec" },
+    { "id": "hashmap", "name": "HashMap<K,V>", "module": "std::collections" },
+    { "id": "option", "name": "Option<T>", "module": "std::option" },
+    { "id": "result", "name": "Result<T,E>", "module": "std::result" },
+    { "id": "iterator", "name": "Iterator", "module": "std::iter" },
+    { "id": "box", "name": "Box<T>", "module": "std::boxed" },
+    { "id": "rc", "name": "Rc<T>", "module": "std::rc" },
+    { "id": "arc", "name": "Arc<T>", "module": "std::sync" },
+    { "id": "mutex", "name": "Mutex<T>", "module": "std::sync" }
+  ]
+}

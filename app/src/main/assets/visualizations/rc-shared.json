@@ -1,0 +1,52 @@
+{
+  "id": "rc-shared",
+  "title": "Rc Shared Ownership",
+  "description": "Rc<T> (Reference Counted) allows multiple owners of the same data. The data is freed when the last Rc is dropped.",
+  "relatedChapter": "ch15-smart-pointers",
+  "steps": [
+    {
+      "label": "Create Rc",
+      "code": "let a = Rc::new(String::from(\"shared\"));",
+      "stackVariables": [
+        { "name": "a", "type": "Rc<String>", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"shared\" (refcount: 1)", "type": "Rc data", "status": "ALIVE" }
+      ],
+      "annotation": "a is an Rc pointing to heap data with reference count 1."
+    },
+    {
+      "label": "Clone Rc (cheap!)",
+      "code": "let b = Rc::clone(&a);\nlet c = Rc::clone(&a);",
+      "stackVariables": [
+        { "name": "a", "type": "Rc<String>", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "b", "type": "Rc<String>", "status": "ACTIVE", "pointsTo": "heap1" },
+        { "name": "c", "type": "Rc<String>", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"shared\" (refcount: 3)", "type": "Rc data", "status": "ALIVE" }
+      ],
+      "annotation": "Rc::clone doesn't copy the data — it only increments the reference count. All three point to the same heap data."
+    },
+    {
+      "label": "Drop b and c",
+      "code": "// b, c go out of scope",
+      "stackVariables": [
+        { "name": "a", "type": "Rc<String>", "status": "ACTIVE", "pointsTo": "heap1" }
+      ],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"shared\" (refcount: 1)", "type": "Rc data", "status": "ALIVE" }
+      ],
+      "annotation": "Each drop decrements the refcount. Data stays alive because a still holds a reference (count = 1)."
+    },
+    {
+      "label": "Drop a (last owner)",
+      "code": "// a goes out of scope",
+      "stackVariables": [],
+      "heapAllocations": [
+        { "id": "heap1", "value": "\"shared\"", "type": "Rc data", "status": "FREED" }
+      ],
+      "annotation": "The last Rc drops, refcount hits 0, and the heap data is finally freed. No garbage collector needed!"
+    }
+  ]
+}

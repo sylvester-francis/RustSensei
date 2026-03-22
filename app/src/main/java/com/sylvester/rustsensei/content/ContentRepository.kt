@@ -91,6 +91,10 @@ interface ContentProvider {
     suspend fun getLearningPath(pathId: String): LearningPath?
     suspend fun getQuizIndex(): List<com.sylvester.rustsensei.data.QuizIndexEntry>
     suspend fun getQuiz(quizId: String): com.sylvester.rustsensei.data.Quiz?
+    suspend fun getRefactoringChallenges(): List<RefactoringChallenge>
+    suspend fun getRefactoringChallenge(id: String): RefactoringChallenge?
+    suspend fun getDocIndex(): List<DocIndexEntry>
+    suspend fun getDoc(typeId: String): DocEntry?
 }
 
 class ContentRepository(private val context: Context) : ContentProvider {
@@ -341,6 +345,96 @@ class ContentRepository(private val context: Context) : ContentProvider {
             parseQuiz(json)
         } catch (e: Exception) {
             Log.e(TAG, "Error loading quiz $quizId: ${e.message}", e)
+            null
+        }
+    }
+
+    // Refactoring Challenges
+    override suspend fun getRefactoringChallenges(): List<RefactoringChallenge> {
+        return try {
+            val json = loadAssetJson("refactoring/index.json")
+            val arr = json.getJSONArray("challenges")
+            (0 until arr.length()).mapNotNull { i ->
+                val obj = arr.getJSONObject(i)
+                getRefactoringChallenge(obj.getString("id"))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading refactoring challenges: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun getRefactoringChallenge(id: String): RefactoringChallenge? {
+        return try {
+            val json = loadAssetJson("refactoring/$id.json")
+            RefactoringChallenge(
+                id = json.getString("id"),
+                title = json.getString("title"),
+                difficulty = json.getString("difficulty"),
+                description = json.getString("description"),
+                uglyCode = json.getString("uglyCode"),
+                hints = (0 until json.getJSONArray("hints").length()).map { json.getJSONArray("hints").getString(it) },
+                idiomaticSolution = json.getString("idiomaticSolution"),
+                scoringCriteria = json.getString("scoringCriteria")
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading refactoring challenge $id: ${e.message}", e)
+            null
+        }
+    }
+
+    // Docs Browser
+    private var docIndex: List<DocIndexEntry>? = null
+
+    override suspend fun getDocIndex(): List<DocIndexEntry> {
+        docIndex?.let { return it }
+
+        return try {
+            val json = loadAssetJson("docs/index.json")
+            val entries = mutableListOf<DocIndexEntry>()
+
+            val typesArray = json.getJSONArray("types")
+            for (i in 0 until typesArray.length()) {
+                val t = typesArray.getJSONObject(i)
+                entries.add(DocIndexEntry(
+                    id = t.getString("id"),
+                    name = t.getString("name"),
+                    module = t.getString("module")
+                ))
+            }
+
+            docIndex = entries
+            entries
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading doc index: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun getDoc(typeId: String): DocEntry? {
+        return try {
+            val json = loadAssetJson("docs/$typeId.json")
+            val methods = mutableListOf<DocMethod>()
+            val methodsArray = json.getJSONArray("methods")
+            for (i in 0 until methodsArray.length()) {
+                val m = methodsArray.getJSONObject(i)
+                methods.add(DocMethod(
+                    name = m.getString("name"),
+                    signature = m.getString("signature"),
+                    description = m.getString("description"),
+                    example = m.getString("example")
+                ))
+            }
+            DocEntry(
+                id = json.getString("id"),
+                typeName = json.getString("typeName"),
+                module = json.getString("module"),
+                signature = json.getString("signature"),
+                description = json.getString("description"),
+                methods = methods
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading doc $typeId: ${e.message}", e)
             null
         }
     }
