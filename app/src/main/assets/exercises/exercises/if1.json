@@ -13,5 +13,6 @@
   ],
   "solution": "pub fn bigger(a: i32, b: i32) -> i32 {\n    if a > b {\n        a\n    } else {\n        b\n    }\n}\n\nfn main() {\n    println!(\"{}\", bigger(10, 20));\n}",
   "explanation": "The `if` expression in Rust evaluates a boolean condition and executes the corresponding block. Unlike many languages, `if` in Rust is an expression, meaning it returns a value. Both branches must return the same type.",
-  "relatedBookSection": "ch03-05-control-flow"
+  "relatedBookSection": "ch03-05-control-flow",
+  "tests": "#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_bigger_returns_larger() {\n        assert_eq!(bigger(10, 20), 20);\n    }\n\n    #[test]\n    fn test_bigger_first_is_larger() {\n        assert_eq!(bigger(30, 5), 30);\n    }\n\n    #[test]\n    fn test_bigger_equal_values() {\n        let result = bigger(7, 7);\n        assert!(result == 7);\n    }\n}"
 }

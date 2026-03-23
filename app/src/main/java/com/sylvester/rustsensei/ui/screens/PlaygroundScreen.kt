@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -50,6 +51,7 @@ import com.sylvester.rustsensei.llm.ModelReadyState
 import com.sylvester.rustsensei.ui.theme.Alpha
 import com.sylvester.rustsensei.ui.theme.Dimens
 import com.sylvester.rustsensei.ui.theme.Spacing
+import com.sylvester.rustsensei.viewmodel.OutputSource
 import com.sylvester.rustsensei.viewmodel.PlaygroundViewModel
 import com.sylvester.rustsensei.ui.theme.AppColors
 
@@ -121,17 +123,19 @@ fun PlaygroundScreen(
 
             Spacer(modifier = Modifier.height(Spacing.LG))
 
-            // Run / Stop buttons row
+            // Run / Compile / Clear buttons row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // AI Run / Stop button
                 Button(
                     onClick = {
                         if (uiState.isRunning) viewModel.stop() else viewModel.run()
                     },
                     enabled = uiState.code.isNotBlank()
-                            && modelState == ModelReadyState.READY,
+                            && modelState == ModelReadyState.READY
+                            && !uiState.isCompiling,
                     modifier = Modifier
                         .weight(1f)
                         .height(Dimens.ButtonHeight),
@@ -174,6 +178,50 @@ fun PlaygroundScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.width(Spacing.SM))
+
+                // Compile button
+                Button(
+                    onClick = {
+                        if (uiState.isCompiling) viewModel.stopCompile() else viewModel.compile()
+                    },
+                    enabled = uiState.code.isNotBlank() && !uiState.isRunning,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(Dimens.ButtonHeight),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (uiState.isCompiling)
+                            MaterialTheme.colorScheme.error
+                        else
+                            MaterialTheme.colorScheme.tertiary
+                    ),
+                    shape = RoundedCornerShape(Dimens.CardRadius)
+                ) {
+                    if (uiState.isCompiling) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(Dimens.IconSM),
+                            color = MaterialTheme.colorScheme.onTertiary,
+                            strokeWidth = Spacing.XXS
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.SM))
+                        Text(
+                            text = stringResource(R.string.playground_stop),
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Build,
+                            contentDescription = null,
+                            modifier = Modifier.size(Dimens.IconSM)
+                        )
+                        Spacer(modifier = Modifier.width(Spacing.XS))
+                        Text(
+                            text = stringResource(R.string.playground_compile),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 // Clear button
                 if (uiState.output.isNotBlank() || uiState.errorMessage != null) {
                     Spacer(modifier = Modifier.width(Spacing.SM))
@@ -195,7 +243,7 @@ fun PlaygroundScreen(
                 }
             }
 
-            // Model not ready warning
+            // Model not ready warning (only for AI Run)
             if (modelState != ModelReadyState.READY) {
                 Spacer(modifier = Modifier.height(Spacing.SM))
                 Text(
@@ -224,7 +272,7 @@ fun PlaygroundScreen(
             }
 
             // Output console
-            if (uiState.output.isNotBlank() || uiState.isRunning) {
+            if (uiState.output.isNotBlank() || uiState.isRunning || uiState.isCompiling) {
                 Spacer(modifier = Modifier.height(Spacing.XL))
 
                 Text(
@@ -236,6 +284,19 @@ fun PlaygroundScreen(
                     modifier = Modifier.padding(bottom = Spacing.SM)
                 )
 
+                val outputColor = when {
+                    uiState.outputSource == OutputSource.COMPILATION &&
+                            uiState.compilationSuccess == false -> AppColors.current.error
+                    uiState.outputSource == OutputSource.COMPILATION -> AppColors.current.success
+                    else -> AppColors.current.success
+                }
+
+                val borderColor = when {
+                    uiState.outputSource == OutputSource.COMPILATION &&
+                            uiState.compilationSuccess == false -> AppColors.current.error
+                    else -> AppColors.current.accent
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(Dimens.CardRadius),
@@ -244,26 +305,29 @@ fun PlaygroundScreen(
                     ),
                     border = BorderStroke(
                         Dimens.Divider,
-                        AppColors.current.accent.copy(alpha = Alpha.BORDER)
+                        borderColor.copy(alpha = Alpha.BORDER)
                     )
                 ) {
                     Box(modifier = Modifier.padding(Dimens.CardPadding)) {
                         Text(
                             text = uiState.output.ifBlank {
-                                stringResource(R.string.playground_running)
+                                if (uiState.isCompiling)
+                                    stringResource(R.string.playground_compiling)
+                                else
+                                    stringResource(R.string.playground_running)
                             },
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontFamily = FontFamily.Monospace,
                                 fontSize = 13.sp,
                                 lineHeight = 20.sp
                             ),
-                            color = AppColors.current.success
+                            color = outputColor
                         )
                     }
                 }
 
                 // Elapsed time
-                if (uiState.elapsedMs > 0 && !uiState.isRunning) {
+                if (uiState.elapsedMs > 0 && !uiState.isRunning && !uiState.isCompiling) {
                     Spacer(modifier = Modifier.height(Spacing.XS))
                     Text(
                         text = "${uiState.elapsedMs}ms",
@@ -274,10 +338,13 @@ fun PlaygroundScreen(
                 }
             }
 
-            // Simulated output disclaimer
+            // Disclaimer based on output source
             Spacer(modifier = Modifier.height(Spacing.LG))
             Text(
-                text = stringResource(R.string.playground_simulated_disclaimer),
+                text = when (uiState.outputSource) {
+                    OutputSource.COMPILATION -> stringResource(R.string.playground_compiled_disclaimer)
+                    else -> stringResource(R.string.playground_simulated_disclaimer)
+                },
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = Alpha.HINT)
             )

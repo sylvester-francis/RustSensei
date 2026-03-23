@@ -9,6 +9,9 @@ import com.sylvester.rustsensei.content.ExerciseCategory
 import com.sylvester.rustsensei.content.ExerciseData
 import com.sylvester.rustsensei.data.ExerciseProgress
 import com.sylvester.rustsensei.data.ProgressRepository
+import com.sylvester.rustsensei.domain.RunExerciseTestsUseCase
+import com.sylvester.rustsensei.domain.RunTestsEvent
+import com.sylvester.rustsensei.domain.TestCaseResult
 import com.sylvester.rustsensei.domain.ValidateExerciseUseCase
 import com.sylvester.rustsensei.domain.ValidationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +28,14 @@ enum class ExerciseScreenMode {
 }
 
 @Immutable
+data class TestResultState(
+    val passed: Int,
+    val total: Int,
+    val results: List<TestCaseResult>,
+    val rawOutput: String
+)
+
+@Immutable
 data class ExerciseUiState(
     val mode: ExerciseScreenMode = ExerciseScreenMode.CATEGORIES,
     val categories: List<ExerciseCategory> = emptyList(),
@@ -39,6 +50,8 @@ data class ExerciseUiState(
     val lastIncompleteExerciseId: String? = null,
     val llmValidationResult: String = "",
     val isValidating: Boolean = false,
+    val isRunningTests: Boolean = false,
+    val testResults: TestResultState? = null,
     val errorMessage: String? = null
 )
 
@@ -46,7 +59,8 @@ data class ExerciseUiState(
 class ExerciseViewModel @Inject constructor(
     private val contentRepo: ContentRepository,
     private val progressRepo: ProgressRepository,
-    private val validateExercise: ValidateExerciseUseCase
+    private val validateExercise: ValidateExerciseUseCase,
+    private val runExerciseTests: RunExerciseTestsUseCase
 ) : ViewModel() {
 
     companion object {
@@ -54,6 +68,7 @@ class ExerciseViewModel @Inject constructor(
     }
 
     private var validationJob: Job? = null
+    private var testJob: Job? = null
     private val categoryObserverJobs = mutableMapOf<String, Job>()
 
     private val _uiState = MutableStateFlow(ExerciseUiState())
@@ -131,6 +146,7 @@ class ExerciseViewModel @Inject constructor(
                 val progress = progressRepo.getExerciseProgress(exerciseId)
                 if (exercise != null) {
                     validationJob?.cancel()
+                    testJob?.cancel()
                     _uiState.value = _uiState.value.copy(
                         mode = ExerciseScreenMode.DETAIL,
                         currentExercise = exercise,
@@ -140,7 +156,9 @@ class ExerciseViewModel @Inject constructor(
                         showSolution = false,
                         checkResult = null,
                         llmValidationResult = "",
-                        isValidating = false
+                        isValidating = false,
+                        isRunningTests = false,
+                        testResults = null
                     )
                 }
             } catch (e: Exception) {
@@ -155,6 +173,7 @@ class ExerciseViewModel @Inject constructor(
     fun navigateBack() {
         saveCurrentCode()
         validationJob?.cancel()
+        testJob?.cancel()
         _uiState.value = _uiState.value.copy(
             mode = ExerciseScreenMode.CATEGORIES,
             currentExercise = null,
@@ -162,7 +181,9 @@ class ExerciseViewModel @Inject constructor(
             checkResult = null,
             showSolution = false,
             llmValidationResult = "",
-            isValidating = false
+            isValidating = false,
+            isRunningTests = false,
+            testResults = null
         )
     }
 
@@ -289,15 +310,67 @@ class ExerciseViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isValidating = false)
     }
 
+    fun runTests() {
+        val exercise = _uiState.value.currentExercise ?: return
+        if (exercise.tests.isBlank()) return
+        if (_uiState.value.isRunningTests) return
+
+        testJob?.cancel()
+        _uiState.value = _uiState.value.copy(
+            isRunningTests = true,
+            testResults = null,
+            errorMessage = null
+        )
+
+        testJob = viewModelScope.launch {
+            runExerciseTests(_uiState.value.userCode.trim(), exercise.tests)
+                .collect { event ->
+                    when (event) {
+                        is RunTestsEvent.Running -> { /* already set */ }
+                        is RunTestsEvent.Completed -> {
+                            _uiState.value = _uiState.value.copy(
+                                isRunningTests = false,
+                                testResults = TestResultState(
+                                    passed = event.passed,
+                                    total = event.total,
+                                    results = event.testResults,
+                                    rawOutput = event.rawOutput
+                                )
+                            )
+                            if (event.passed == event.total && event.total > 0) {
+                                _uiState.value = _uiState.value.copy(checkResult = "correct")
+                                progressRepo.markExerciseComplete(exercise.id, exercise.category)
+                                refreshCurrentCategoryProgress()
+                            }
+                        }
+                        is RunTestsEvent.Error -> {
+                            _uiState.value = _uiState.value.copy(
+                                isRunningTests = false,
+                                errorMessage = event.message
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
+    fun stopTests() {
+        testJob?.cancel()
+        _uiState.value = _uiState.value.copy(isRunningTests = false)
+    }
+
     fun resetExercise() {
         val exercise = _uiState.value.currentExercise ?: return
         validationJob?.cancel()
+        testJob?.cancel()
         _uiState.value = _uiState.value.copy(
             userCode = exercise.starterCode,
             checkResult = null,
             showSolution = false,
             llmValidationResult = "",
-            isValidating = false
+            isValidating = false,
+            isRunningTests = false,
+            testResults = null
         )
     }
 

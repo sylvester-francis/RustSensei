@@ -51,12 +51,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sylvester.rustsensei.R
 import com.sylvester.rustsensei.ui.components.CodeBlock
 import com.sylvester.rustsensei.ui.components.CodeEditor
 import com.sylvester.rustsensei.ui.components.ConfettiOverlay
@@ -448,6 +450,114 @@ internal fun ExerciseDetailView(
                 Spacer(modifier = Modifier.height(Spacing.MD))
             }
 
+            // -- Test results section --
+            uiState.testResults?.let { results ->
+                val allPassed = results.passed == results.total && results.total > 0
+                val nonePassed = results.passed == 0
+                val summaryColor = when {
+                    allPassed -> AppColors.current.success
+                    nonePassed -> AppColors.current.error
+                    else -> AppColors.current.amber
+                }
+                val summaryBg = summaryColor.copy(alpha = 0.10f)
+                val summaryBorder = summaryColor.copy(alpha = Alpha.MUTED)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(Dimens.CardRadius))
+                        .border(Dimens.Divider, summaryBorder, RoundedCornerShape(Dimens.CardRadius))
+                        .background(summaryBg)
+                        .padding(Dimens.CardPadding)
+                ) {
+                    Column {
+                        // Summary line
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                if (allPassed) Icons.Default.CheckCircle else Icons.Default.Close,
+                                contentDescription = null,
+                                tint = summaryColor,
+                                modifier = Modifier.size(Dimens.IconSM)
+                            )
+                            Spacer(modifier = Modifier.width(Spacing.SM))
+                            Text(
+                                text = stringResource(
+                                    R.string.exercise_tests_passed,
+                                    results.passed,
+                                    results.total
+                                ),
+                                color = summaryColor,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // Per-test results
+                        if (results.results.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(Spacing.SM))
+                            results.results.forEach { testCase ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        if (testCase.passed) Icons.Default.CheckCircle else Icons.Default.Close,
+                                        contentDescription = null,
+                                        tint = if (testCase.passed) AppColors.current.success else AppColors.current.error,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(Spacing.SM))
+                                    Text(
+                                        text = testCase.name,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontFamily = FontFamily.Monospace,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        // Raw output (expandable)
+                        if (results.rawOutput.isNotBlank()) {
+                            var showRawOutput by remember { mutableStateOf(false) }
+                            Spacer(modifier = Modifier.height(Spacing.SM))
+                            TextButton(
+                                onClick = { showRawOutput = !showRawOutput },
+                                contentPadding = PaddingValues(horizontal = 0.dp, vertical = 0.dp)
+                            ) {
+                                Text(
+                                    text = if (showRawOutput) "Hide output" else "Show full output",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = AppColors.current.accent
+                                )
+                            }
+                            AnimatedVisibility(visible = showRawOutput) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(Dimens.CardRadius))
+                                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                                        .padding(Spacing.SM)
+                                ) {
+                                    Text(
+                                        text = results.rawOutput,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontFamily = FontFamily.Monospace,
+                                            fontSize = 11.sp,
+                                            lineHeight = 16.sp
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(Spacing.MD))
+            }
+
             // -- AI Validation section with primary left border --
             if (uiState.llmValidationResult.isNotEmpty() || uiState.isValidating) {
                 Row(
@@ -514,7 +624,8 @@ internal fun ExerciseDetailView(
                 Spacer(modifier = Modifier.height(Spacing.MD))
             }
 
-            // -- Action buttons: Check + Hint --
+            // -- Action buttons: Check + Run Tests (conditional) + Hint --
+            val hasTests = exercise.tests.isNotBlank()
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.MD)
@@ -541,6 +652,50 @@ internal fun ExerciseDetailView(
                         fontWeight = FontWeight.Bold
                     )
                 }
+
+                if (hasTests) {
+                    Button(
+                        onClick = {
+                            if (uiState.isRunningTests) viewModel.stopTests() else viewModel.runTests()
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(Dimens.CompactTopBarHeight),
+                        shape = MaterialTheme.shapes.medium,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (uiState.isRunningTests)
+                                MaterialTheme.colorScheme.error
+                            else
+                                MaterialTheme.colorScheme.tertiary
+                        )
+                    ) {
+                        if (uiState.isRunningTests) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = Spacing.XXS,
+                                color = MaterialTheme.colorScheme.onTertiary
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                stringResource(R.string.playground_stop),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = stringResource(R.string.exercise_run_tests),
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                stringResource(R.string.exercise_run_tests),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
                 OutlinedButton(
                     onClick = { viewModel.revealHint() },
                     modifier = Modifier

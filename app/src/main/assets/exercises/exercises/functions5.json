@@ -13,5 +13,6 @@
   ],
   "solution": "fn main() {\n    let answer = square(3);\n    println!(\"The answer is {answer}\");\n}\n\nfn square(num: i32) -> i32 {\n    num * num\n}",
   "explanation": "In Rust, statements perform actions but don't return values (like `let x = 5;`), while expressions evaluate to a value (like `5 + 3`). A block `{}` can contain statements and ends with an optional expression (without semicolon) which becomes the block's value. This is why `num * num` (no semicolon) at the end of a function returns that value.",
-  "relatedBookSection": "ch03-03-how-functions-work"
+  "relatedBookSection": "ch03-03-how-functions-work",
+  "tests": "#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_square_of_3() {\n        assert_eq!(square(3), 9);\n    }\n\n    #[test]\n    fn test_square_of_0() {\n        assert_eq!(square(0), 0);\n    }\n\n    #[test]\n    fn test_square_of_negative() {\n        assert_eq!(square(-4), 16);\n    }\n}"
 }

@@ -178,9 +178,19 @@
     <string name="playground_running">Running\u2026</string>
     <string name="playground_output">Output</string>
     <string name="playground_simulated_disclaimer">Simulated output \u2014 results are AI-generated approximations</string>
+    <string name="playground_compiled_disclaimer">Compiled with Rust Playground \u2014 real rustc output</string>
     <string name="playground_model_needed">AI model required to simulate execution</string>
+    <string name="playground_compile">Compile</string>
+    <string name="playground_compiling">Compiling\u2026</string>
+    <string name="playground_no_internet">Internet required to compile</string>
     <string name="playground_clear">Clear</string>
     <string name="playground_card_subtitle">Run Rust code</string>
+
+    <!-- Exercise Tests -->
+    <string name="exercise_run_tests">Run Tests</string>
+    <string name="exercise_running_tests">Running\u2026</string>
+    <string name="exercise_tests_passed">%1$d/%2$d tests passed</string>
+    <string name="exercise_no_internet">Internet required to run tests</string>
 
     <!-- Ownership Visualizer -->
     <string name="visualizer_title">Ownership Visualizer</string>

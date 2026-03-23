@@ -4,6 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sylvester.rustsensei.data.InferenceConfigProvider
+import com.sylvester.rustsensei.domain.CompileCodeEvent
+import com.sylvester.rustsensei.domain.CompileCodeUseCase
 import com.sylvester.rustsensei.domain.ExecutionEvent
 import com.sylvester.rustsensei.domain.SimulateExecutionUseCase
 import com.sylvester.rustsensei.llm.ModelLifecycle
@@ -16,13 +18,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+enum class OutputSource { NONE, AI_SIMULATION, COMPILATION }
+
 @Immutable
 data class PlaygroundUiState(
     val code: String = DEFAULT_CODE,
     val output: String = "",
     val isRunning: Boolean = false,
+    val isCompiling: Boolean = false,
     val elapsedMs: Long = 0,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val compilationSuccess: Boolean? = null,
+    val outputSource: OutputSource = OutputSource.NONE
 ) {
     companion object {
         const val DEFAULT_CODE = "fn main() {\n    println!(\"Hello, Rust!\");\n}"
@@ -32,6 +39,7 @@ data class PlaygroundUiState(
 @HiltViewModel
 class PlaygroundViewModel @Inject constructor(
     private val simulateExecution: SimulateExecutionUseCase,
+    private val compileCode: CompileCodeUseCase,
     private val configProvider: InferenceConfigProvider,
     private val modelLifecycle: ModelLifecycle
 ) : ViewModel() {
@@ -42,6 +50,7 @@ class PlaygroundViewModel @Inject constructor(
     val uiState: StateFlow<PlaygroundUiState> = _uiState.asStateFlow()
 
     private var runJob: Job? = null
+    private var compileJob: Job? = null
 
     fun updateCode(code: String) {
         _uiState.value = _uiState.value.copy(code = code)
@@ -55,7 +64,9 @@ class PlaygroundViewModel @Inject constructor(
             isRunning = true,
             output = "",
             errorMessage = null,
-            elapsedMs = 0
+            elapsedMs = 0,
+            compilationSuccess = null,
+            outputSource = OutputSource.AI_SIMULATION
         )
 
         val config = configProvider.loadInferenceConfig()
@@ -83,12 +94,71 @@ class PlaygroundViewModel @Inject constructor(
         }
     }
 
+    fun compile() {
+        val code = _uiState.value.code.trim()
+        if (code.isBlank()) return
+
+        _uiState.value = _uiState.value.copy(
+            isCompiling = true,
+            output = "",
+            errorMessage = null,
+            elapsedMs = 0,
+            compilationSuccess = null,
+            outputSource = OutputSource.COMPILATION
+        )
+
+        compileJob = viewModelScope.launch {
+            compileCode(code).collect { event ->
+                when (event) {
+                    is CompileCodeEvent.Compiling -> { /* already set isCompiling */ }
+                    is CompileCodeEvent.Completed -> {
+                        val output = buildString {
+                            if (event.stderr.isNotBlank()) {
+                                append(event.stderr)
+                                if (event.stdout.isNotBlank()) {
+                                    append("\n")
+                                    append(event.stdout)
+                                }
+                            } else {
+                                append(event.stdout)
+                            }
+                        }
+                        _uiState.value = _uiState.value.copy(
+                            isCompiling = false,
+                            output = output,
+                            compilationSuccess = event.success,
+                            elapsedMs = event.elapsedMs
+                        )
+                    }
+                    is CompileCodeEvent.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isCompiling = false,
+                            errorMessage = event.message
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun stop() {
         runJob?.cancel()
-        _uiState.value = _uiState.value.copy(isRunning = false)
+        compileJob?.cancel()
+        _uiState.value = _uiState.value.copy(isRunning = false, isCompiling = false)
+    }
+
+    fun stopCompile() {
+        compileJob?.cancel()
+        _uiState.value = _uiState.value.copy(isCompiling = false)
     }
 
     fun clearOutput() {
-        _uiState.value = _uiState.value.copy(output = "", errorMessage = null, elapsedMs = 0)
+        _uiState.value = _uiState.value.copy(
+            output = "",
+            errorMessage = null,
+            elapsedMs = 0,
+            compilationSuccess = null,
+            outputSource = OutputSource.NONE
+        )
     }
 }

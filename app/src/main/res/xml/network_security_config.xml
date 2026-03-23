@@ -14,4 +14,12 @@
             <certificates src="system" />
         </trust-anchors>
     </domain-config>
+
+    <!-- Rust Playground API for real compilation -->
+    <domain-config>
+        <domain includeSubdomains="true">play.rust-lang.org</domain>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
 </network-security-config>

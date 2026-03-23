@@ -51,7 +51,8 @@ data class ExerciseData(
     val hints: List<String>,
     val solution: String,
     val explanation: String,
-    val relatedBookSection: String
+    val relatedBookSection: String,
+    val tests: String = ""
 )
 
 // Reference content models
@@ -541,7 +542,8 @@ class ContentRepository(private val context: Context) : ContentProvider {
             hints = jsonArrayToStringList(json.getJSONArray("hints")),
             solution = json.getString("solution"),
             explanation = json.getString("explanation"),
-            relatedBookSection = json.optString("relatedBookSection", "")
+            relatedBookSection = json.optString("relatedBookSection", ""),
+            tests = json.optString("tests", "")
         )
     }
 

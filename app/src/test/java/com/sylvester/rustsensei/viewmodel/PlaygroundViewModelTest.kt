@@ -1,10 +1,13 @@
 package com.sylvester.rustsensei.viewmodel
 
 import com.sylvester.rustsensei.data.InferenceConfigProvider
+import com.sylvester.rustsensei.domain.CompileCodeUseCase
 import com.sylvester.rustsensei.domain.SimulateExecutionUseCase
 import com.sylvester.rustsensei.llm.InferenceConfig
+import com.sylvester.rustsensei.network.PlaygroundResponse
 import com.sylvester.rustsensei.testdoubles.FakeInferenceEngine
 import com.sylvester.rustsensei.testdoubles.FakeModelLifecycle
+import com.sylvester.rustsensei.testdoubles.FakePlaygroundService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,6 +23,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.net.UnknownHostException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlaygroundViewModelTest {
@@ -29,6 +33,7 @@ class PlaygroundViewModelTest {
     private lateinit var fakeEngine: FakeInferenceEngine
     private lateinit var fakeLifecycle: FakeModelLifecycle
     private lateinit var fakeConfigProvider: FakeInferenceConfigProvider
+    private lateinit var fakePlaygroundService: FakePlaygroundService
     private lateinit var viewModel: PlaygroundViewModel
 
     @Before
@@ -37,9 +42,11 @@ class PlaygroundViewModelTest {
         fakeEngine = FakeInferenceEngine()
         fakeLifecycle = FakeModelLifecycle()
         fakeConfigProvider = FakeInferenceConfigProvider()
+        fakePlaygroundService = FakePlaygroundService()
 
-        val useCase = SimulateExecutionUseCase(fakeEngine, fakeLifecycle)
-        viewModel = PlaygroundViewModel(useCase, fakeConfigProvider, fakeLifecycle)
+        val simulateUseCase = SimulateExecutionUseCase(fakeEngine, fakeLifecycle)
+        val compileUseCase = CompileCodeUseCase(fakePlaygroundService)
+        viewModel = PlaygroundViewModel(simulateUseCase, compileUseCase, fakeConfigProvider, fakeLifecycle)
     }
 
     @After
@@ -55,8 +62,11 @@ class PlaygroundViewModelTest {
         assertEquals(PlaygroundUiState.DEFAULT_CODE, state.code)
         assertEquals("", state.output)
         assertFalse(state.isRunning)
+        assertFalse(state.isCompiling)
         assertEquals(0L, state.elapsedMs)
         assertNull(state.errorMessage)
+        assertNull(state.compilationSuccess)
+        assertEquals(OutputSource.NONE, state.outputSource)
     }
 
     // --- updateCode ---
@@ -69,7 +79,7 @@ class PlaygroundViewModelTest {
         assertEquals("fn main() { let x = 42; }", viewModel.uiState.value.code)
     }
 
-    // --- run ---
+    // --- run (AI simulation) ---
 
     @Test
     fun `run sets isRunning to true`() = runTest {
@@ -77,8 +87,8 @@ class PlaygroundViewModelTest {
 
         viewModel.run()
 
-        // The run() method sets isRunning=true synchronously before launching the coroutine
         assertTrue(viewModel.uiState.value.isRunning)
+        assertEquals(OutputSource.AI_SIMULATION, viewModel.uiState.value.outputSource)
 
         advanceUntilIdle()
     }
@@ -90,7 +100,6 @@ class PlaygroundViewModelTest {
         viewModel.run()
         advanceUntilIdle()
 
-        // The use case concatenates tokens and strips think tags
         assertEquals("Hello, Rust!", viewModel.uiState.value.output)
     }
 
@@ -141,7 +150,6 @@ class PlaygroundViewModelTest {
         fakeEngine.tokensToEmit = listOf("partial", " output")
 
         viewModel.run()
-        // The run() method synchronously sets isRunning = true
         assertTrue(viewModel.uiState.value.isRunning)
 
         viewModel.stop()
@@ -159,7 +167,6 @@ class PlaygroundViewModelTest {
         viewModel.run()
         advanceUntilIdle()
 
-        // Verify there is output
         assertEquals("some output", viewModel.uiState.value.output)
         assertTrue(viewModel.uiState.value.elapsedMs >= 0)
 
@@ -170,6 +177,94 @@ class PlaygroundViewModelTest {
         assertEquals("", state.output)
         assertNull(state.errorMessage)
         assertEquals(0L, state.elapsedMs)
+        assertNull(state.compilationSuccess)
+        assertEquals(OutputSource.NONE, state.outputSource)
+    }
+
+    // --- compile ---
+
+    @Test
+    fun `compile sets isCompiling and outputSource to COMPILATION`() = runTest {
+        fakePlaygroundService.responseToReturn = PlaygroundResponse(true, "output", "")
+
+        viewModel.compile()
+
+        assertTrue(viewModel.uiState.value.isCompiling)
+        assertEquals(OutputSource.COMPILATION, viewModel.uiState.value.outputSource)
+
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun `compile successful shows stdout in output`() = runTest {
+        fakePlaygroundService.responseToReturn = PlaygroundResponse(
+            success = true,
+            stdout = "Hello, world!\n",
+            stderr = ""
+        )
+
+        viewModel.compile()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isCompiling)
+        assertEquals("Hello, world!\n", state.output)
+        assertTrue(state.compilationSuccess!!)
+        assertTrue(state.elapsedMs >= 0)
+        assertEquals(OutputSource.COMPILATION, state.outputSource)
+    }
+
+    @Test
+    fun `compile failure shows stderr in output`() = runTest {
+        fakePlaygroundService.responseToReturn = PlaygroundResponse(
+            success = false,
+            stdout = "",
+            stderr = "error[E0308]: mismatched types"
+        )
+
+        viewModel.compile()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isCompiling)
+        assertTrue(state.output.contains("E0308"))
+        assertFalse(state.compilationSuccess!!)
+    }
+
+    @Test
+    fun `compile with no internet shows error message`() = runTest {
+        fakePlaygroundService.shouldThrow = UnknownHostException("No host")
+
+        viewModel.compile()
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertFalse(state.isCompiling)
+        assertNotNull(state.errorMessage)
+        assertTrue(state.errorMessage!!.contains("No internet"))
+    }
+
+    @Test
+    fun `compile does nothing when code is blank`() = runTest {
+        viewModel.updateCode("   ")
+        viewModel.compile()
+        advanceUntilIdle()
+
+        assertEquals(0, fakePlaygroundService.executeCallCount)
+        assertFalse(viewModel.uiState.value.isCompiling)
+    }
+
+    @Test
+    fun `stopCompile cancels compile job`() = runTest {
+        fakePlaygroundService.responseToReturn = PlaygroundResponse(true, "output", "")
+
+        viewModel.compile()
+        assertTrue(viewModel.uiState.value.isCompiling)
+
+        viewModel.stopCompile()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isCompiling)
     }
 
     // --- Fakes ---

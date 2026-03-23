@@ -13,5 +13,6 @@
   ],
   "solution": "struct ColorClassicStruct {\n    red: i32,\n    green: i32,\n    blue: i32,\n}\n\nfn main() {\n    let green = ColorClassicStruct {\n        red: 0,\n        green: 255,\n        blue: 0,\n    };\n\n    assert_eq!(green.red, 0);\n    assert_eq!(green.green, 255);\n    assert_eq!(green.blue, 0);\n    println!(\"Green color created!\");\n}",
   "explanation": "Classic structs in Rust have named fields, each with a type. You create instances by specifying values for all fields using `StructName { field: value }` syntax. Fields are accessed with dot notation. Structs are the primary way to create custom data types in Rust.",
-  "relatedBookSection": "ch05-01-defining-structs"
+  "relatedBookSection": "ch05-01-defining-structs",
+  "tests": "#[cfg(test)]\nmod tests {\n    use super::*;\n\n    #[test]\n    fn test_green_color() {\n        let green = ColorClassicStruct { red: 0, green: 255, blue: 0 };\n        assert_eq!(green.red, 0);\n        assert_eq!(green.green, 255);\n        assert_eq!(green.blue, 0);\n    }\n\n    #[test]\n    fn test_white_color() {\n        let white = ColorClassicStruct { red: 255, green: 255, blue: 255 };\n        assert_eq!(white.red, 255);\n        assert_eq!(white.green, 255);\n        assert_eq!(white.blue, 255);\n    }\n}"
 }
